@@ -1,0 +1,28 @@
+{
+  "tools": [
+    {
+      "icon": "bi-braces",
+      "title": "JSON to CSV",
+      "description": "Convert arrays of JSON objects to CSV format.",
+      "url": "json2csv"
+    },
+    {
+      "icon": "bi-file-excel",
+      "title": "Excel to JSONL",
+      "description": "Convert Excel data to JSONL format.",
+      "url": "excel2jsonl"
+    },
+    {
+      "icon": "bi-newspaper",
+      "title": "Hacker News Extractor",
+      "description": "Extract Hacker News articles to Markdown format for NotebookLM.",
+      "url": "hackernewsmd"
+    },
+    {
+      "icon": "bi-geo-alt",
+      "title": "What's Near Me?",
+      "description": "Find nearby attractions and places of interest.",
+      "url": "whatsnear"
+    }
+  ]
+}
