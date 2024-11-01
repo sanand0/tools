@@ -23,6 +23,12 @@
       "title": "What's Near Me?",
       "description": "Find nearby attractions and places of interest.",
       "url": "whatsnear"
+    },
+    {
+      "icon": "bi-bounding-box",
+      "title": "LLM Bounding Boxes",
+      "description": "Check how well LLMs draw object bounding boxes in images.",
+      "url": "llmboundingbox"
     }
   ]
 }
