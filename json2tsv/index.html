@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Lines to TSV Converter</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    crossorigin="anonymous" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+    rel="stylesheet"
+    crossorigin="anonymous" />
+  <style>
+    textarea {
+      font-family: monospace !important;
+    }
+
+    #alerts {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container my-5" style="max-width: 800px">
+    <h1 class="mb-4">JSON Lines to TSV Converter</h1>
+
+    <div id="alerts"></div>
+
+    <div class="mb-4">
+      <label class="form-label">Paste JSON Lines (one JSON object per line):</label>
+      <textarea
+        id="input"
+        class="form-control mb-2"
+        rows="8"
+        placeholder='{"name": "John", "age": 30}
+{"name": "Jane", "age": 25, "city": "NY"}'></textarea>
+      <button id="convert" class="btn btn-primary">
+        <i class="bi bi-arrow-repeat"></i> Convert to TSV
+      </button>
+    </div>
+
+    <div>
+      <label class="form-label">TSV Output:</label>
+      <textarea id="output" class="form-control" rows="8" readonly=""></textarea>
+    </div>
+  </div>
+
+  <script type="module">
+    // Utility to show alerts
+    function showAlert(message, type = 'success') {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+      alertDiv.innerHTML = `
+              ${message}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          `;
+      document.getElementById('alerts').appendChild(alertDiv);
+      setTimeout(() => alertDiv.remove(), 3000);
+    }
+
+    // Flatten nested objects
+    function flattenObject(obj, prefix = '') {
+      return Object.keys(obj).reduce((acc, k) => {
+        const pre = prefix.length ? prefix + '.' : '';
+        if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
+          Object.assign(acc, flattenObject(obj[k], pre + k));
+        } else {
+          acc[pre + k] = obj[k];
+        }
+        return acc;
+      }, {});
+    }
+
+    // Convert value to string safely
+    function valueToString(value) {
+      if (value === null || value === undefined) return '';
+      if (Array.isArray(value)) return JSON.stringify(value);
+      return String(value).replace(/\t/g, ' ').replace(/\n/g, ' ');
+    }
+
+    // Convert JSON lines to TSV
+    function convertToTSV(input) {
+      const lines = input.trim().split('\n');
+      const allKeys = new Set();
+      const objects = [];
+
+      // Parse each line and collect all possible keys
+      for (const line of lines) {
+        try {
+          const trimmedLine = line.trim();
+          if (!trimmedLine) continue;
+
+          const obj = flattenObject(JSON.parse(trimmedLine));
+          objects.push(obj);
+          Object.keys(obj).forEach(key => allKeys.add(key));
+        } catch (e) {
+          throw new Error(`Failed to parse JSON line: ${line}\nError: ${e.message}`);
+        }
+      }
+
+      // Convert to array and sort for consistent order
+      const headers = Array.from(allKeys).sort();
+
+      // Create TSV content
+      const tsvLines = [
+        headers.join('\t'),
+        ...objects.map(obj =>
+          headers.map(header => valueToString(obj[header])).join('\t')
+        )
+      ];
+
+      return tsvLines.join('\n');
+    }
+
+    // Handle conversion
+    document.getElementById('convert').addEventListener('click', async () => {
+      const input = document.getElementById('input');
+      const output = document.getElementById('output');
+
+      try {
+        const tsv = convertToTSV(input.value);
+        output.value = tsv;
+
+        // Copy to clipboard
+        await navigator.clipboard.writeText(tsv);
+        showAlert('<i class="bi bi-clipboard-check"></i> TSV copied to clipboard!');
+      } catch (error) {
+        showAlert(`<i class="bi bi-exclamation-triangle"></i> ${error.message}`, 'danger');
+      }
+    });
+  </script>
+</body>
+
+</html>

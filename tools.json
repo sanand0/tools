@@ -7,6 +7,12 @@
       "url": "json2csv"
     },
     {
+      "icon": "bi-file-code",
+      "title": "JSON to TSV",
+      "description": "Convert arrays of JSON objects to TSV format.",
+      "url": "json2tsv"
+    },
+    {
       "icon": "bi-file-excel",
       "title": "Excel to JSONL",
       "description": "Convert Excel data to JSONL format.",
@@ -29,6 +35,12 @@
       "title": "LLM Bounding Boxes",
       "description": "Check how well LLMs draw object bounding boxes in images.",
       "url": "llmboundingbox"
+    },
+    {
+      "icon": "bi-github",
+      "title": "GitHub Users",
+      "description": "Get information about GitHub users.",
+      "url": "githubusers"
     }
   ]
 }
