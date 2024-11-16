@@ -22,26 +22,49 @@
         <button id="convertBtn" class="btn btn-primary">
           <i class="bi bi-arrow-down-up"></i> Convert
         </button>
+        <button id="downloadBtn" class="btn btn-success d-none">
+          <i class="bi bi-download"></i> Download CSV
+        </button>
+        <button id="copyBtn" class="btn btn-warning d-none">
+          <i class="bi bi-clipboard"></i> Copy to Excel
+        </button>
       </div>
     </div>
+
     <div id="output"></div>
-    <button id="downloadBtn" class="btn btn-success d-none">
-      <i class="bi bi-download"></i> Download CSV
-    </button>
+
+    <div
+      id="toast"
+      class="toast align-items-center text-white bg-primary border-0"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+      style="position: fixed; bottom: 20px; right: 20px">
+      <div class="d-flex">
+        <div class="toast-body"></div>
+        <button
+          type="button"
+          class="btn-close btn-close-white me-2 m-auto"
+          data-bs-dismiss="toast"
+          aria-label="Close"></button>
+      </div>
+    </div>
+
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   <script type="module">
-    import { csvFormat, csvParse } from 'https://cdn.jsdelivr.net/npm/d3-dsv/+esm';
+    import { csvFormat, csvParse, tsvFormat } from 'https://cdn.jsdelivr.net/npm/d3-dsv/+esm';
 
-    const elements = {
-      jsonInput: document.getElementById('jsonInput'),
-      convertBtn: document.getElementById('convertBtn'),
-      output: document.getElementById('output'),
-      downloadBtn: document.getElementById('downloadBtn')
-    };
+    const $jsonInput = document.getElementById('jsonInput');
+    const $convertBtn = document.getElementById('convertBtn');
+    const $output = document.getElementById('output');
+    const $downloadBtn = document.getElementById('downloadBtn');
+    const $copyBtn = document.getElementById('copyBtn');
+    const $toast = new bootstrap.Toast(document.getElementById('toast'));
 
     // Initialize with sample data
-    elements.jsonInput.value = JSON.stringify([
+    $jsonInput.value = JSON.stringify([
       { "name": "Bond, James", "age": 30, "place": { "city": "New York\nUSA" } },
       { "name": "Alice", "age": 25, "place": { "country": "Canada", "city": "Ottawa" } }
     ]);
@@ -58,23 +81,23 @@
       }, {});
     };
 
-    const jsonToCsv = (jsonData) => {
+    const jsonToCsv = (jsonData, format = csvFormat) => {
       const array = [].concat(typeof jsonData === 'object' ? jsonData : JSON.parse(jsonData));
       const flattenedArray = array.map(item => flattenObject(item));
       const headers = [...new Set(flattenedArray.flatMap(Object.keys))];
-      return csvFormat(flattenedArray, headers);
+      return format(flattenedArray, headers);
     };
 
     const displayCsvTable = (csv) => {
       const parsedData = csvParse(csv);
       const headers = parsedData.columns;
 
-      elements.output.innerHTML = `
+      $output.innerHTML = `
         <table class="table table-striped table-bordered">
           <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
           <tbody>${parsedData.map(row =>
-            `<tr>${headers.map(h => `<td>${row[h] || ''}</td>`).join('')}</tr>`
-          ).join('')}</tbody>
+        `<tr>${headers.map(h => `<td>${row[h] || ''}</td>`).join('')}</tr>`
+      ).join('')}</tbody>
         </table>
       `;
     };
@@ -87,21 +110,34 @@
       URL.revokeObjectURL(url);
     };
 
-    elements.convertBtn.addEventListener('click', () => {
+    function showToast(message, type = 'bg-primary') {
+      const toastElement = document.getElementById('toast');
+      toastElement.querySelector('.toast-body').textContent = message;
+      toastElement.className = `toast align-items-center text-white ${type} border-0`;
+      $toast.show();
+    }
+
+    $convertBtn.addEventListener('click', () => {
       try {
-        const jsonData = elements.jsonInput.value.trim();
+        const jsonData = $jsonInput.value.trim();
         if (!jsonData) throw new Error('Please enter some JSON data.');
 
         const csv = jsonToCsv(jsonData);
         displayCsvTable(csv);
-        elements.downloadBtn.classList.remove('d-none');
+        $downloadBtn.classList.remove('d-none');
+        $copyBtn.classList.remove('d-none');
       } catch (error) {
-        elements.output.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Error: ${error.message}</div>`;
-        elements.downloadBtn.classList.add('d-none');
+        $output.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Error: ${error.message}</div>`;
+        $downloadBtn.classList.add('d-none');
+        $copyBtn.classList.add('d-none');
       }
     });
 
-    elements.downloadBtn.addEventListener('click', () => downloadCsv(jsonToCsv(elements.jsonInput.value)));
+    $downloadBtn.addEventListener('click', () => downloadCsv(jsonToCsv($jsonInput.value)));
+    $copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(jsonToCsv($jsonInput.value, tsvFormat));
+      showToast('Copied to clipboard!');
+    });
   </script>
 </body>
 
