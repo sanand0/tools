@@ -95,7 +95,14 @@
       return input
         .split('\n')
         .filter(line => line.trim())
-        .map(line => JSON.parse(line));
+        .map((line, i) => {
+          try {
+            return JSON.parse(line);
+          } catch (e) {
+            console.error(`Error parsing JSON line ${i + 1}: ${line}`);
+            return null;
+          }
+        });
     };
 
     const jsonToCsv = (jsonData, format = csvFormat) => {
