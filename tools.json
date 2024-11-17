@@ -7,16 +7,16 @@
       "url": "json2csv"
     },
     {
-      "icon": "bi-file-code",
-      "title": "JSON to TSV",
-      "description": "Convert arrays of JSON objects to TSV format.",
-      "url": "json2tsv"
-    },
-    {
       "icon": "bi-file-excel",
       "title": "Excel to JSONL",
       "description": "Convert Excel data to JSONL format.",
       "url": "excel2jsonl"
+    },
+    {
+      "icon": "bi-markdown-fill",
+      "title": "Render Markdown",
+      "description": "Render Markdown to HTML using the GitHub Markdown API.",
+      "url": "https://tools.simonwillison.net/render-markdown"
     },
     {
       "icon": "bi-newspaper",
@@ -41,6 +41,12 @@
       "title": "GitHub Users",
       "description": "Get information about GitHub users.",
       "url": "githubusers"
+    },
+    {
+      "icon": "bi-youtube",
+      "title": "YouTube Thumbnails",
+      "description": "Get YouTube video thumbnails.",
+      "url": "https://tools.simonwillison.net/youtube-thumbnails"
     }
   ]
 }

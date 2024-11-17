@@ -19,6 +19,12 @@
           class="form-control json-input mb-3 font-monospace"
           rows="5"
           placeholder="Paste your JSON here..."></textarea>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="jsonLinesCheck">
+          <label class="form-check-label" for="jsonLinesCheck">
+            JSON Lines (each line is a separate JSON object)
+          </label>
+        </div>
         <button id="convertBtn" class="btn btn-primary">
           <i class="bi bi-arrow-down-up"></i> Convert
         </button>
@@ -62,6 +68,7 @@
     const $downloadBtn = document.getElementById('downloadBtn');
     const $copyBtn = document.getElementById('copyBtn');
     const $toast = new bootstrap.Toast(document.getElementById('toast'));
+    const $jsonLinesCheck = document.getElementById('jsonLinesCheck');
 
     // Initialize with sample data
     $jsonInput.value = JSON.stringify([
@@ -81,8 +88,22 @@
       }, {});
     };
 
+    const parseJsonInput = (input, isJsonLines) => {
+      if (!isJsonLines) {
+        return JSON.parse(input);
+      }
+      return input
+        .split('\n')
+        .filter(line => line.trim())
+        .map(line => JSON.parse(line));
+    };
+
     const jsonToCsv = (jsonData, format = csvFormat) => {
-      const array = [].concat(typeof jsonData === 'object' ? jsonData : JSON.parse(jsonData));
+      const array = [].concat(
+        typeof jsonData === 'object'
+          ? jsonData
+          : parseJsonInput(jsonData, $jsonLinesCheck.checked)
+      );
       const flattenedArray = array.map(item => flattenObject(item));
       const headers = [...new Set(flattenedArray.flatMap(Object.keys))];
       return format(flattenedArray, headers);
