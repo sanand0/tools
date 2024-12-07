@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON String Trimmer</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous" />
+  <style>
+    textarea {
+      font-family: monospace;
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container py-4">
+    <h1 class="text-center mb-4">JSON String Trimmer</h1>
+
+    <div id="error-container"></div>
+
+    <div class="row g-4">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="inputJson" class="form-label">Input JSON:</label>
+          <textarea
+            id="inputJson"
+            class="form-control"
+            rows="15"
+            placeholder="Paste your JSON here..."></textarea>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="outputJson" class="form-label">Trimmed JSON:</label>
+          <textarea id="outputJson" class="form-control" rows="15" readonly=""></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="col-md-6">
+        <div class="input-group mb-3">
+          <input
+            type="number"
+            id="maxLength"
+            class="form-control"
+            value="200"
+            min="1"
+            placeholder="Max characters per string" />
+          <button id="trimButton" class="btn btn-primary">
+            <i class="bi bi-scissors"></i> Trim Strings
+          </button>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <button id="copyButton" class="btn btn-primary" disabled="">
+          <i class="bi bi-clipboard"></i> Copy Result
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Get DOM elements
+    const inputJson = document.getElementById('inputJson');
+    const outputJson = document.getElementById('outputJson');
+    const maxLength = document.getElementById('maxLength');
+    const trimButton = document.getElementById('trimButton');
+    const copyButton = document.getElementById('copyButton');
+    const errorContainer = document.getElementById('error-container');
+
+    // Show error message
+    function showError(message) {
+      errorContainer.innerHTML = `
+              <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  <i class="bi bi-exclamation-triangle-fill"></i> ${message}
+                  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+              </div>
+          `;
+    }
+
+    // Clear error message
+    function clearError() {
+      errorContainer.innerHTML = '';
+    }
+
+    // Recursively trim strings in JSON
+    function trimStrings(obj, maxLen) {
+      if (typeof obj === 'string') {
+        return obj.slice(0, maxLen);
+      }
+      if (Array.isArray(obj)) {
+        return obj.map(item => trimStrings(item, maxLen));
+      }
+      if (typeof obj === 'object' && obj !== null) {
+        const result = {};
+        for (const [key, value] of Object.entries(obj)) {
+          result[key] = trimStrings(value, maxLen);
+        }
+        return result;
+      }
+      return obj;
+    }
+
+    // Process JSON
+    trimButton.addEventListener('click', () => {
+      clearError();
+      const max = parseInt(maxLength.value);
+
+      if (max < 1) {
+        showError('Maximum length must be at least 1');
+        return;
+      }
+
+      try {
+        const json = JSON.parse(inputJson.value);
+        const trimmed = trimStrings(json, max);
+        outputJson.value = JSON.stringify(trimmed, null, 2);
+        copyButton.disabled = false;
+      } catch (err) {
+        showError('Invalid JSON input');
+        outputJson.value = '';
+        copyButton.disabled = true;
+      }
+    });
+
+    // Copy to clipboard
+    copyButton.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(outputJson.value);
+        const originalText = copyButton.innerHTML;
+        copyButton.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+        setTimeout(() => {
+          copyButton.innerHTML = originalText;
+        }, 2000);
+      } catch (err) {
+        showError('Failed to copy to clipboard');
+      }
+    });
+
+    // Load saved JSON from localStorage
+    window.addEventListener('load', () => {
+      const savedJson = localStorage.getItem('jsonTrimmer.input');
+      if (savedJson) {
+        inputJson.value = savedJson;
+      }
+    });
+
+    // Save JSON to localStorage
+    inputJson.addEventListener('input', () => {
+      localStorage.setItem('jsonTrimmer.input', inputJson.value);
+    });
+  </script>
+</body>
+
+</html>

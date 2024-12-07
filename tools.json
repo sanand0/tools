@@ -13,6 +13,18 @@
       "url": "excel2jsonl"
     },
     {
+      "icon": "bi-image",
+      "title": "Image Compressor",
+      "description": "Compress images to WebP pasting them anywhere on the page.",
+      "url": "clipimg"
+    },
+    {
+      "icon": "bi-code-slash",
+      "title": "JSON Trimmer",
+      "description": "Trim JSON strings to a specified length.",
+      "url": "jsontrim"
+    },
+    {
       "icon": "bi-markdown-fill",
       "title": "Render Markdown",
       "description": "Render Markdown to HTML using the GitHub Markdown API.",
