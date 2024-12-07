@@ -25,6 +25,12 @@
       "url": "jsontrim"
     },
     {
+      "icon": "bi-bounding-box",
+      "title": "Unicode Characters",
+      "description": "Find non-ASCII Unicode characters in the clipboard",
+      "url": "unicode"
+    },
+    {
       "icon": "bi-markdown-fill",
       "title": "Render Markdown",
       "description": "Render Markdown to HTML using the GitHub Markdown API.",
