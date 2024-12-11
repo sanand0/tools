@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transcribe</title>
+  <link rel="icon" href="https://s-anand.net/favicon.ico">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    #chat-container {
+      max-width: 30rem;
+    }
+
+    .error {
+      color: var(--bs-danger);
+    }
+
+    .highlight {
+      color: var(--bs-primary);
+      padding: 0 2px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href=".">Transcribe</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="nav-item dropdown ms-auto" role="group" aria-label="Toggle dark mode" title="Toggle Dark Mode">
+          <button class="dark-theme-toggle btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Toggle theme (auto)">
+            <i class="bi bi-circle-half"></i> <span class="d-lg-none ms-2">Toggle theme</span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><button class="dropdown-item" data-bs-theme-value="light"><i class="me-2 bi bi-sun-fill"></i> Light</button></li>
+            <li><button class="dropdown-item" data-bs-theme-value="dark"><i class="me-2 bi bi-moon-stars-fill"></i> Dark</button></li>
+            <li><button class="dropdown-item" data-bs-theme-value="auto"><i class="me-2 bi bi-circle-half"></i> Auto</button></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <p id="login" class="text-center fw-bold d-none"><a class="btn btn-primary btn-lg" href="https://llmfoundry.straive.com/">Log into LLM Foundry first</a></p>
+    <div id="app" class="d-none">
+      <div id="controls" class="position-fixed top-0 start-0 end-0 bg-body-tertiary border-bottom p-3 shadow-sm">
+        <div class="container d-flex align-items-center justify-content-between">
+          <button class="mic btn btn-primary px-4" id="toggleMic">
+            <i class="bi bi-mic-fill"></i>
+            <span class="ms-2">Click to talk</span>
+          </button>
+          <div id="status" class="text-muted">Status: Ready</div>
+        </div>
+      </div>
+      <div class="mt-5 pt-5"><!-- Spacer for fixed header --></div>
+      <div id="transcript-container" class="bg-dark p-4 rounded overflow-auto" role="region" aria-label="Speech transcript">
+        <div id="transcript" class="display-4 text-white text-center"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" type="module" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@gramex/ui@0.3/dist/dark-theme.js" type="module" defer></script>
+  <script src="script.js" type="module"></script>
+</body>
+
+</html>

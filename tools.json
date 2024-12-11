@@ -31,6 +31,12 @@
       "url": "unicode"
     },
     {
+      "icon": "bi-mic",
+      "title": "Transcribe Audio",
+      "description": "Transcribe audio from the speakers and microphone.",
+      "url": "transcribe"
+    },
+    {
       "icon": "bi-markdown-fill",
       "title": "Render Markdown",
       "description": "Render Markdown to HTML using the GitHub Markdown API.",
