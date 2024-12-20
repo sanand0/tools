@@ -15,7 +15,7 @@ requires-python = ">=3.11"
 packages = ["spotifyplaylist"]
 
 [project.scripts]
-spotifyplaylist = "spotifyplaylist:main"
+spotifyplaylist = "spotifyplaylist"
 
 [project.optional-dependencies]
 spotifyplaylist = [
