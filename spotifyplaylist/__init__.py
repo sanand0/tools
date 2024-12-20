@@ -51,7 +51,7 @@ public_dir = os.path.join(os.path.dirname(__file__), "public")
 app.mount("/", StaticFiles(directory=public_dir, html=True), name="static")
 
 
-if __name__ == "__main__":
+def main():
     from argparse import ArgumentParser
     import uvicorn
     import webbrowser
@@ -64,3 +64,6 @@ if __name__ == "__main__":
     print(f"\nStarting server at {url}")
     webbrowser.open(url)
     uvicorn.run(app, host="0.0.0.0", port=port)
+
+if __name__ == "__main__":
+    main()
