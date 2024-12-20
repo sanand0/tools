@@ -2,10 +2,11 @@
 # Usage: uv run main.py
 # Authorize on Spotify. Paste the return URL in the console. Visit localhost:[port]
 
+import os
+import spotipy
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from spotipy.oauth2 import SpotifyOAuth
-import spotipy
 from fastapi.responses import RedirectResponse
 
 auth_manager = SpotifyOAuth(
@@ -46,7 +47,8 @@ async def create_playlist(data: dict) -> dict:
             return {"error": "Please login first", "login_url": "/login"}
         raise
 
-app.mount("/", StaticFiles(directory="public", html=True), name="static")
+public_dir = os.path.join(os.path.dirname(__file__), "public")
+app.mount("/", StaticFiles(directory=public_dir, html=True), name="static")
 
 
 if __name__ == "__main__":
