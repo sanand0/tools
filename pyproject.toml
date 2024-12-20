@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sanand0-tools"
+version = "0.1.0"
+description = "A collection of tools for Anand"
+authors = [{name = "S Anand", email = "root.node@gmail.com"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+  {include = "spotifyplaylist"}
+]
+
+[project.scripts]
+spotifyplaylist = "spotifyplaylist:main"
+
+[tool.hatch.envs.spotifyplaylist]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "spotipy"
+]
+
+[tool.hatch.metadata]
+dynamic = ["version"]
