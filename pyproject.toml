@@ -17,12 +17,9 @@ packages = ["spotifyplaylist"]
 [project.scripts]
 spotifyplaylist = "spotifyplaylist:main"
 
-[tool.hatch.envs.spotifyplaylist]
-dependencies = [
+[project.optional-dependencies]
+spotifyplaylist = [
     "fastapi",
     "uvicorn",
     "spotipy"
 ]
-
-[tool.hatch.metadata]
-dynamic = ["version"]
