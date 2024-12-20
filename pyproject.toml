@@ -24,5 +24,12 @@ spotifyplaylist = [
     "spotipy"
 ]
 
+[tool.hatch.envs.spotifyplaylist]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "spotipy"
+]
+
 [tool.hatch.metadata]
 dynamic = ["version"]
