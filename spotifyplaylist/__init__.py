@@ -1,5 +1,5 @@
 # Helper script to create a playlist on Spotify from a .m3u playlist
-# Usage: uv run main.py
+# Usage: uvx --from git+https://github.com/sanand0/tools@spotify[spotifyplaylist] spotifyplaylist
 # Authorize on Spotify. Paste the return URL in the console. Visit localhost:[port]
 
 import os
