@@ -2,14 +2,6 @@
 # Usage: uv run main.py
 # Authorize on Spotify. Paste the return URL in the console. Visit localhost:[port]
 
-# /// script
-# requires-python = ">=3.13"
-# dependencies = [
-#     "fastapi",
-#     "spotipy",
-#     "uvicorn",
-# ]
-# ///
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from spotipy.oauth2 import SpotifyOAuth
