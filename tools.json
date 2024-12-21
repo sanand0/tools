@@ -43,6 +43,12 @@
       "url": "https://tools.simonwillison.net/render-markdown"
     },
     {
+      "icon": "bi-markdown",
+      "title": "Page to Markdown",
+      "description": "Bookmarklet to copy a web page or selection as Markdown.",
+      "url": "page2md"
+    },
+    {
       "icon": "bi-newspaper",
       "title": "Hacker News Extractor",
       "description": "Extract Hacker News articles to Markdown format for NotebookLM.",
