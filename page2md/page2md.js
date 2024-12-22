@@ -1,6 +1,6 @@
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
-import { gfm, strikethrough, tables, taskListItems } from "turndown-plugin-gfm";
+import { gfm, strikethrough, tables, taskListItems } from "@joplin/turndown-plugin-gfm";
 
 /**
  * Converts current page or selected text to Markdown and copies to clipboard

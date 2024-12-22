@@ -6,6 +6,6 @@
   "dependencies": {
     "@mozilla/readability": "^0.5.0",
     "turndown": "^7.2.0",
-    "turndown-plugin-gfm": "^1.0.2"
+    "@joplin/turndown-plugin-gfm": "^1.0.60"
   }
 }
