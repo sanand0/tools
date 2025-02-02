@@ -1,0 +1,548 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title class="app-name">Priority Matrix</title>
+  <style>
+  /* Based on normalize.css */
+  html {
+    font-family: Helvetica, Arial, sans-serif;
+    -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+    /* Based on http://lea.verou.me/css3patterns/#shippo */
+    background-image: radial-gradient(closest-side, transparent 98%, rgba(0,0,0,.02) 99%),
+                      radial-gradient(closest-side, transparent 98%, rgba(0,0,0,.02) 99%);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+  }
+  body {
+    margin: 0 auto;
+    padding: 20px 0;
+    width: 920px;
+  }
+  *, *:before, *:after {
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
+  }
+  /* Based on Bootstrap 3 */
+  .pull-right {
+    float: right;
+  }
+  a {
+    color: #428bca;
+    text-decoration: none;
+  }
+  a:hover, a:focus {
+    color: #2a6496;
+    text-decoration: underline;
+  }
+  code, kbd {
+    font-family: Menlo,Monaco,Consolas,"Courier New",monospace;
+    font-size: 75%;
+    padding: 2px 4px;
+  }
+  code {
+    color: #c7254e;
+    background-color: #f9f2f4;
+    white-space: nowrap;
+    border-radius: 3px;
+  }
+  kbd {
+    color: #fff;
+    background-color: #333;
+    border-radius: 3px;
+    box-shadow: inset 0 -1px 0 rgba(0,0,0,.25);
+  }
+
+  h1, h2 {
+    font-family: Helvetica, Arial, sans-serif;
+    margin: .67em 0 .25em 0;
+    font-size: 2em;
+  }
+  h2 {
+    font-size: 1.5em;
+  }
+
+  /* This is the DOM structure we're using:
+        #container        Overall container
+          - svg.gridbase  Background grid
+          - div#items     Container for items
+              - div.item  Individual iteemes
+   */
+  #container { position: relative; }
+  #items { overflow: hidden; }
+
+  .item {
+    position: absolute;
+    max-width: 15em;
+    min-width: 5em;
+    padding: 0.15em 0.25em;
+    background-color: #fff;
+    border: 1px solid rgb(91, 155, 213);
+    opacity: 0.95;
+    border-radius: 5px;
+  }
+  /* http://stackoverflow.com/a/12968143/100904 */
+  .item:before {
+    width: 50%;
+    position: absolute;
+    top: -5px;
+    left: -1px;
+    content: '';
+    border-top-width: 5px;
+    border-top-style: solid;
+    border-top-color: inherit;
+    cursor: move;
+  }
+  .item:focus, .item:hover {
+    z-index: 1;
+    outline: none;
+  }
+  .item:hover:before, .item:focus:before {
+    top: -20px;
+    border-top-width: 20px;
+  }
+  .to-be-deleted {
+    opacity: 0.5;
+  }
+
+  /* Button styling */
+  .button {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 14px;
+    line-height: 20px;
+    height: 34px;
+    font-weight: normal;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #333;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+  }
+  .button:hover, .button:focus, .button:active {
+    color: #333;
+    text-decoration: none;
+    background-color: #ebebeb;
+    border-color: #adadad;
+  }
+
+  /* Grid styling */
+  #grid path {
+    stroke: #ccc;
+    fill: none;
+  }
+  .legend {
+    cursor: pointer;
+  }
+  .legend:hover {
+    fill: #ed7d31;
+  }
+
+  /* Indicate editable content subtly */
+  [contenteditable]:hover, [contenteditable]:focus {
+    cursor: pointer;
+    color: #ed7d31
+  }
+
+  .remote {
+    text-align: right;
+    font-size: 75%;
+    margin: 0.25em;
+    color: #888;
+  }
+  #publish-url:empty:after {
+    content: "any Firebase.com .json URL";
+  }
+
+  /* Body text (help, mainly) uses this style. Typography inspired by atlas.oreilly.com */
+  .copy {
+    max-width: 690px;
+    color: #333;
+    font-size: 18px;
+    line-height: 1.3em;
+    font-family: "Book Antiqua", Palatino, "Palatino Linotype", "Palatino LT STD", Georgia, serif;
+    -webkit-font-smoothing: subpixel-antialiased;
+    letter-spacing: .01em;
+  }
+  #notes {
+    margin-top: 1em;
+    margin-bottom: 3em;
+  }
+
+  @media print {
+    h1 { margin: 0; }
+    .no-print { display: none; }
+  }
+  </style>
+</head><body>
+
+<h1>
+  <span id="app-name" class="app-name" contentEditable>Priority Matrix</span>
+  <button id="add-item" class="button no-print">New item</button>
+  <div class="pull-right no-print">
+    <select class="button" id="app-list-select">
+      <optgroup label="Views" id="app-list"></optgroup>
+      <optgroup label="Edit">
+        <option id="_new_view">Add a new view</option>
+        <option id="_clear_view">Clear this view</option>
+      </optgroup>
+    </select>
+    <a href="https://github.com/sanand0/whatnext/issues/new" target="_blank" class="button">Report an issue</a>
+  </div>
+</h1>
+
+<div class="remote no-print"><a id="publish" href="#">Publish</a> or <a id="refresh-from" href="#">refresh from</a> <span id="publish-url"></span></div>
+
+<div id="container">
+  <svg id="gridbase" width="920" height="559" ondragover="return false"><!-- 920 / 559 ~ Golden ratio -->
+    <path d="M0,559 v-279.5 l460,279.5 z" fill="rgba(0,0,0,0)"/>
+    <path d="M0,279.5 v-279.5 l920,559 h-460 z" fill="rgba(0,0,0,.05)"/>
+    <path d="M0,0 h460 l460,279.5 v279.5 z" fill="rgba(0,0,0,.10)"/>
+    <path d="M460,0 h460 v279.5 z" fill="rgba(0,0,0,.15)"/>
+    <g id="grid"></g>
+    <text id="col:new" class="add-label legend no-print" x="920" y="559" dx="-1em" dy="-8">+</text>
+    <text id="row:new" class="add-label legend no-print" x="0" y="0" dx="8" dy="1em">+</text>
+  </svg>
+  <div id="items">
+    <div draggable="true" class="item" style="left:270px;top:110px" contentEditable>Items can now be deleted. Just delete the text</div>
+    <div draggable="true" class="item" style="left:360px;top:170px" contentEditable>Empty items will automatically vanish after 5 seconds</div>
+    <div draggable="true" class="item" style="left:100px;top:390px" contentEditable>But in those 5 seconds, you can go back and undo the change</div>
+    <div draggable="true" class="item" style="left:600px;top:390px" contentEditable>Drag this item's handle to move it to a different location</div>
+    <div draggable="true" class="item" style="left:45px;top:180px" contentEditable>The state of the page is automatically saved in the browser, and restored when you load the page back</div>
+  </div>
+</div>
+
+<div id="notes" class="copy" contentEditable>Your notes here</div>
+<div id="help" class="copy no-print">
+  <h2>Help</h2>
+  <p>Sometimes, it’s hard to figure out what to do next.</p>
+  <p>One classic approach is to list all your items, rate them on an urgency and importance scale, and pick those on the top right quadrant.
+     Stephen Covey explains this in his book <a href="http://en.wikipedia.org/wiki/First_Things_First_(book)" target="_blank">First Things First</a>.</p>
+  <p>This can be generalised. Almost anything can be prioritised on a grid.</p>
+  <p>This page is an <strong>offline single-page app</strong> that lets you add things and move them around. You can pick your axis scales.
+     Everything’s saved in your browser and available the next time you visit. (But it won’t be available in other browsers or for other people.)</p>
+
+  <h2>Usage</h2>
+  <ul>
+    <li><strong>Add an item</strong> by clicking on the “New item” button on top. You can edit and move the item around.</li>
+    <li><strong>Delete the item</strong> by delete the text in it. It will vanish in 5 seconds after it loses focus. (If you change your mind, click on the item and press <kbd>Ctrl-Z</kbd> to undo.)</li>
+    <li><strong>Edit labels</strong> by clicking on the labels at the left and bottom. To delete a label, edit it and make it blank. It will automatically be removed.</li>
+    <li><strong>Add labels</strong> by clicking on the “+” button at the top left or bottom right.</li>
+    <li><strong>Change label colour</strong> by pressing Ctrl-click. The item cycles through 5 different colours.</li>
+    <li>Your actions are automatically saved in your browser. Re-visit the page to continue from where you left off.</li>
+    <li><strong>Change views</strong> by selecting the dropdown at the top right. A view is like a new clean slate. You can add or delete views.</li>
+    <li><strong>Publish</strong> and <strong>refresh from</strong> across machines by creating a free
+        <a href="https://www.firebase.com/signup/" target="_blank">Firebase account</a> and entering a <code>.json</code> URL.
+        Or use this: <code>https://whatnextapp.firebaseio.com/your-name/sheet-name.json</code>.
+  </ul>
+</div>
+
+<script>
+// A crude version of event delegation
+// All live events are bound to the container.
+// on('click', 'item', handler) runs handler if a ".item" is clicked.
+var container = document.getElementById('container')
+function on(event, className, handler) {
+  container.addEventListener(event, function(e) {
+    // SVG .className is an object with .baseVal and .animVal. HTML .className is a string
+    var cls = (typeof e.target.className == 'object' ? e.target.className.baseVal : e.target.className).split(/\s+/)
+    for (var i=0, l=cls.length; i<l; i++)
+      if (cls[i] == className)
+        return handler(e)
+  }, false)
+}
+
+// Construct an SVG element. e.g. svg('path', {d: 'M10,10h100', stroke: '#000'})
+function svg(tag, attrs, text) {
+  var element = document.createElementNS('http://www.w3.org/2000/svg', tag)
+  for (var key in attrs)
+    element.setAttributeNS(null, key, attrs[key])
+  if (typeof text !== 'undefined')
+    element.appendChild(document.createTextNode(text))
+  return element
+}
+
+// Remove all child nodes of a node
+function clear(node) {
+  for (var children=node.childNodes, i=children.length - 1; i >= 0; i--)
+    node.removeChild(children[i])
+}
+
+// Replace multiple whitespaces with a single space, and remove leading + trailing space
+function strip(s) {
+  return s.replace(/\s+/g, ' ').replace(/^ /, '').replace(/ $/, '')
+}
+
+
+// Make items draggable
+var startX, startY
+on('dragstart', 'item', function(e) {
+  startX = e.screenX
+  startY = e.screenY
+  // Firefox won't trigger dragend without dataTransfer.setData().
+  // IE does not like 'text/plain' -- only 'text'. http://stackoverflow.com/a/26660055/100904
+  e.dataTransfer.setData('text', '')
+})
+on('dragend', 'item', function(e) {
+  // Firefox dragend sets clientX to 0. Using screenX instead
+  e.target.style.left = parseInt(e.target.style.left) + e.screenX - startX + 'px'
+  e.target.style.top = parseInt(e.target.style.top) + e.screenY - startY + 'px'
+  save()
+})
+
+
+// #add-item button adds a random item on the page
+var items = document.getElementById('items')
+
+function add_item(item_state) {
+  var item = document.createElement('div')
+  item.setAttribute('draggable', 'true')
+  item.setAttribute('class', 'item')
+  item.setAttribute('contentEditable', 'true')
+  item.style.left = item_state.x + 'px'
+  item.style.top = item_state.y + 'px'
+  item.innerHTML = item_state.t
+  item.style.borderColor = item_state.c
+  items.appendChild(item)
+  return item
+}
+
+document.getElementById('add-item').addEventListener('click', function(e) {
+  // Add the item just below the new item button, making it easier to drag it
+  add_item({
+    x: this.getBoundingClientRect().left - document.body.getBoundingClientRect().left,
+    y: -10,
+    t: 'New item'
+  }).focus()
+  save()
+})
+
+// Clicking on the #publish button confirms a Firebase URL to save at, and PUTs the state to that URL
+var publish_node = document.getElementById('publish-url')
+document.getElementById('publish').addEventListener('click', function(e) {
+  e.preventDefault()
+  var publish_url = prompt('Publish to Firebase URL:', publish_node.textContent)
+  if (publish_url !== null) {
+    publish_node.textContent = publish_url
+    save()
+    var xhr = new XMLHttpRequest()
+    xhr.open('PUT', publish_url, true)
+    xhr.send(JSON.stringify(state()))
+  }
+})
+
+// Clicking on #refresh-from button confirms a Firebase URL to load from, and GETs the state from that URL
+document.getElementById('refresh-from').addEventListener('click', function(e) {
+  e.preventDefault()
+  var publish_url = prompt('Load from Firebase URL, overwriting what you have?', publish_node.textContent)
+  if (publish_url !== null) {
+    publish_node.textContent = publish_url
+    var xhr = new XMLHttpRequest()
+    xhr.open('GET', publish_url, true)
+    xhr.onload = function(e) { load(JSON.parse(this.response)) }
+    xhr.send()
+  }
+})
+
+
+// If an item is left empty, schedule its deletion in a few seconds
+on('focusout', 'item', function(e) {
+  if (!e.target.textContent) {
+    if (e.target.timeout)
+      clearTimeout(e.target.timeout)
+    e.target.timeout = setTimeout(function() {
+      // Delete after a few seconds but only if it's still empty, and to be deleted
+      if (!e.target.textContent && e.target.classList.contains('to-be-deleted')) {
+        e.target.parentNode.removeChild(e.target)
+        save()
+      }
+      else
+        e.target.classList.remove('to-be-deleted')
+      delete e.target.timeout
+    }, 5000)
+    e.target.classList.add('to-be-deleted')
+  } else
+    save()
+})
+
+on('focusin', 'item', function(e) {
+  e.target.classList.remove('to-be-deleted')
+})
+
+// draw_grid() draws a background grid and label the grid
+var gridbase = document.getElementById('gridbase'),
+    grid = document.getElementById('grid'),
+    box = gridbase.getBBox(),
+    pad = 8
+function draw_grid() {
+  clear(grid)
+  // Draw the grid
+  for (var i=0, n=labels.col.length, w=box.width / n; i<n; i++) {
+    grid.appendChild(svg('path', {d: 'M' + i * w + ',0 v' + box.height}))
+    grid.appendChild(svg('text', {id: 'col:' + i, 'class': 'label legend', x: (i + .5) * w, y: box.height - pad, 'text-anchor': 'middle'}, labels.col[i]))
+  }
+  for (var i=0, n=labels.row.length, h=box.height / n; i<n; i++) {
+    y = (n - .5 - i) * h
+    grid.appendChild(svg('path', {d: 'M0,' + (y + h * .5) + ' h' + box.width}))
+    grid.appendChild(svg('text', {id: 'row:' + i, 'class': 'label legend', x: 0, y: y + pad, dy: '0.35em', 'text-anchor': 'middle', transform: 'rotate(-90,5,' + y + ')'}, labels.row[i]))
+  }
+  save()
+}
+
+// The data for the labels is here
+var labels = {
+  row: ['Urgent', 'Slightly urgent', 'Not urgent'],
+  col: ['Not important', 'Slightly important', 'Important']
+}
+
+// Clicking on any label lets you edit or delete it it
+on('click', 'label', function(e) {
+  var key = e.target.getAttributeNS(null, 'id').split(':'),
+      axis = key[0],
+      index = +key[1],
+      current_label = labels[axis][index],
+      new_label = prompt('Rename "' + current_label + '". (Or make it blank to delete)', current_label)
+  if (new_label !== null) {
+    new_label = strip(new_label)
+    if (new_label)
+      labels[axis][index] = new_label
+    else
+      labels[axis].splice(index, 1)
+    draw_grid()
+  }
+})
+
+// Clicking on the '+' icons lets you add a new row or column
+on('click', 'add-label', function(e) {
+  var key = e.target.getAttributeNS(null, 'id').split(':'),
+      axis = key[0],
+      new_label = prompt('Add ' + axis, 'Name')
+  if (new_label !== null) {
+    new_label = strip(new_label)
+    if (new_label) {
+      labels[axis].push(new_label)
+      draw_grid()
+    }
+  }
+})
+
+// Shift-click on an item to cycle through colors. Office 2013 palette in rgb() since that is what getComputedStyle returns
+var colors = ['rgb(91, 155, 213)', 'rgb(237, 125, 49)', 'rgb(165, 165, 165)', 'rgb(255, 192, 0)', 'rgb(112, 173, 71)']
+on('click', 'item', function(e) {
+  if (e.ctrlKey) {
+    var index = colors.indexOf(getComputedStyle(e.target)['border-top-color'])
+    e.target.style.borderColor = colors[index < 0 ? 1 : (index + 1) % colors.length]
+    save()
+  }
+})
+
+// When heading changes, apply the heading everywhere (h1 and title) and save it
+var app_name_heading = document.getElementById('app-name')
+app_name_heading.addEventListener('focusout', function(e) {
+  set_heading(e.target.textContent)
+  save()
+}, false)
+
+// Set the heading everywhere to name
+function set_heading(name) {
+  for (var i=0, nodes=document.querySelectorAll('.app-name'), node; node=nodes[i]; i++)
+    node.textContent = name
+}
+
+// Whenever notes change, save it
+var notes = document.getElementById('notes')
+notes.addEventListener('focusout', save, false)
+
+// The state of the application is a JSON object
+function state() {
+  var items = []
+  for (var i=0, nodes=document.querySelectorAll('.item'), node; node=nodes[i]; i++)
+    items.push({
+      x: parseInt(node.style.left),
+      y: parseInt(node.style.top),
+      t: node.innerHTML,
+      c: getComputedStyle(node)['border-top-color']
+    })
+  return {
+    item: items,
+    row: labels.row,
+    col: labels.col,
+    name: app_name_heading.textContent,
+    notes: notes.innerHTML,
+    publish_url: publish_node.textContent
+  }
+}
+
+// Save the state in localStorage
+function save() {
+  var app_id = 'priority' + window.location.hash.replace(/^#/, '')
+  localStorage[app_id] = JSON.stringify(state())
+}
+
+// Load the state from localStorage based on the URL hash
+function load(state) {
+  set_heading(state.name || 'Priority matrix')
+  publish_node.textContent = state.publish_url || ''
+  labels.row = state.row
+  labels.col = state.col
+  notes.innerHTML = state.notes || 'Your notes here'
+  clear(items)
+  for (var i=0, item_state; item_state=state.item[i]; i++) {
+    add_item(item_state)
+  }
+  draw_grid()
+}
+
+var app_list_select = document.getElementById('app-list-select')
+var app_list = document.getElementById('app-list')
+function show_states() {
+  clear(app_list)
+  var current_hash = window.location.hash.replace(/^#/, '')
+  for (var app_id in localStorage)
+    if (app_id.match(/^priority/)) {
+      var state = JSON.parse(localStorage[app_id]),
+          option = document.createElement('option'),
+          hash = app_id.replace(/^priority/, '')
+      option.setAttribute('id', hash)
+      if (current_hash == hash) {
+        option.setAttribute('selected', 'selected')
+        option.setAttribute('class', 'app-name')
+      }
+      option.appendChild(document.createTextNode(state.name))
+      app_list.appendChild(option)
+    }
+}
+app_list_select.addEventListener('change', function(e) {
+  var hash = app_list_select[app_list_select.selectedIndex].id
+  if (hash == '_new_view') {
+    window.location.hash = Math.round(Math.random() * 1000)
+    set_heading('New view')
+    clear(items)
+    publish_node.textContent = ''
+  } else if (hash == '_clear_view') {
+    if (confirm('Delete this view without undo?')) {
+      delete localStorage['priority' + window.location.hash.replace(/^#/, '')]
+      window.location.hash = ''
+    }
+  } else
+    window.location.hash = hash
+})
+
+// When the URL hash changes, switch to a different view
+function hashchange() {
+  var app_id = 'priority' + window.location.hash.replace(/^#/, '')
+  if (app_id in localStorage)
+    load(JSON.parse(localStorage[app_id]))
+  else
+    draw_grid()
+  show_states()
+}
+window.addEventListener('hashchange', hashchange, false)
+hashchange()
+</script>
+</body></html>

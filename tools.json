@@ -61,6 +61,24 @@
       "url": "whatsnear"
     },
     {
+      "icon": "bi-check-circle",
+      "title": "What Next?",
+      "description": "Prioritization matrix helping you pick what to do next",
+      "url": "whatnext"
+    },
+    {
+      "icon": "bi-whatsapp",
+      "title": "WhatsApp",
+      "description": "Enter a mobile number and open a WhatsApp chat to them",
+      "url": "whatsapp"
+    },
+    {
+      "icon": "bi-bicycle",
+      "title": "SG Bike Park",
+      "description": "Find out where to park your bicycle nearby in Singapore",
+      "url": "sgbikepark"
+    },
+    {
       "icon": "bi-bounding-box",
       "title": "LLM Bounding Boxes",
       "description": "Check how well LLMs draw object bounding boxes in images.",

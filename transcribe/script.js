@@ -5,8 +5,6 @@ const $app = document.querySelector("#app");
 const $toggleMic = document.querySelector("#toggleMic");
 const $status = document.querySelector("#status");
 
-let lastCommandTime;
-
 /**
  * Real-time speech transcription script
  * @returns {void}
@@ -14,6 +12,7 @@ let lastCommandTime;
 async function initTranscription() {
   const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
   let isListening = false;
+  let transcriptHistory = "";
 
   // Configure recognition
   recognition.lang = "en-US";
@@ -36,7 +35,13 @@ async function initTranscription() {
     $toggleMic.classList.toggle("btn-danger", isListening);
     $toggleMic.classList.toggle("btn-primary", !isListening);
     $toggleMic.querySelector("span").textContent = isListening ? "Listening..." : "Click to talk";
-    isListening ? recognition.start() : recognition.stop();
+
+    if (isListening) {
+      recognition.start();
+    } else {
+      recognition.stop();
+      transcriptHistory = $transcript.textContent;
+    }
   });
 
   // Add status logging
@@ -60,7 +65,7 @@ async function initTranscription() {
   recognition.addEventListener("result", (event) => {
     const results = Array.from(event.results);
     const text = results.map((result) => result[0].transcript).join("");
-    render(text, $transcript);
+    render(`${transcriptHistory} ${text}`, $transcript);
     $transcript.scrollIntoView({ behavior: "smooth", block: "end" });
   });
 
