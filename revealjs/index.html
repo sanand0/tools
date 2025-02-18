@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown to RevealJS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous">
+  <style>
+    .textarea-code {
+      font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      min-height: 300px;
+      resize: vertical;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow">
+          <div class="card-header">
+            <h4 class="mb-0">
+              <i class="bi bi-markdown-fill me-2"></i>
+              Markdown to Presentation
+            </h4>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">
+              <i class="bi bi-info-circle me-2"></i>
+              Paste your Markdown content below. Use # and ## headers to separate slides.
+            </p>
+            <textarea
+              rows="20"
+              id="markdown-input"
+              class="form-control textarea-code mb-3"
+              placeholder="# Your Title
+
+Your content...
+
+## Next Slide
+
+More content..."></textarea>
+            <button id="generate-btn" class="btn btn-primary">
+              <i class="bi bi-play-fill me-2"></i>
+              Generate Presentation
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { Marked } from 'https://cdn.jsdelivr.net/npm/marked@13/+esm';
+    const marked = new Marked();
+
+    const textarea = document.getElementById('markdown-input');
+    const generateBtn = document.getElementById('generate-btn');
+
+    // Load saved content
+    textarea.value = localStorage.getItem('revealjs-markdown-content') || '';
+
+    // Save content on change
+    textarea.addEventListener('input', () => {
+      localStorage.setItem('revealjs-markdown-content', textarea.value);
+    });
+
+    function createPresentationHTML(markdown) {
+      const slides = markdown.split(/(?=^#{1,2} )/m);
+      const slideHTML = slides.map(slide =>
+        `<section>${marked.parse(slide.trim())}</section>`
+      ).join('\n');
+
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reset.css">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css">
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/white.css">
+        </head>
+        <body>
+          <div class="reveal">
+            <div class="slides">
+              ${slideHTML}
+            </div>
+          </div>
+          <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"><\/script>
+          <script>
+            Reveal.initialize({
+              width: 1280,     // Base slide width
+              height: 700,     // Base slide height
+              margin: 0.1,     // 10% margin around content
+              minScale: 0.2,   // Don’t scale below 20% of the original size
+              maxScale: 1.0,   // Never scale above the original size
+              hash: true,
+              transition: 'slide'
+            });
+          <\/script>
+        </body>
+        </html>
+      `;
+    }
+
+    generateBtn.addEventListener('click', () => {
+      try {
+        const markdown = textarea.value.trim();
+        if (!markdown) {
+          throw new Error('Please enter some Markdown content');
+        }
+
+        const presentationHTML = createPresentationHTML(markdown);
+        const presentationWindow = window.open();
+        presentationWindow.document.write(presentationHTML);
+        presentationWindow.document.close();
+      } catch (error) {
+        alert(`Error: ${error.message}`);
+      }
+    });
+  </script>
+</body>
+
+</html>

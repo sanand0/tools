@@ -49,6 +49,12 @@
       "url": "page2md"
     },
     {
+      "icon": "bi-file-slides-fill",
+      "title": "RevealJS Slides",
+      "description": "Convert Markdown to RevealJS HTML",
+      "url": "revealjs"
+    },
+    {
       "icon": "bi-newspaper",
       "title": "Hacker News Extractor",
       "description": "Extract Hacker News articles to Markdown format for NotebookLM.",
