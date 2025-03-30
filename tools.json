@@ -103,6 +103,7 @@
       "url": "https://tools.simonwillison.net/youtube-thumbnails"
     },
     {
+      "icon": "bi-quote",
       "title": "Quotes arena",
       "description": "Evaluate quotes from different models and see which one wins",
       "url": "quotesarena"
