@@ -97,6 +97,12 @@
       "url": "githubusers"
     },
     {
+      "icon": "bi-person-walking",
+      "title": "Google Fit",
+      "description": "Upload Google Fit activity data and see a summary of the activity data by date.",
+      "url": "googlefit"
+    },
+    {
       "icon": "bi-youtube",
       "title": "YouTube Thumbnails",
       "description": "Get YouTube video thumbnails.",
