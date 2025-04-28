@@ -97,6 +97,12 @@
       "url": "githubusers"
     },
     {
+      "icon": "bi-code",
+      "title": "GitHub Stars",
+      "description": "Replaces GitHub links in Markdown with the repo name, stars, and last pushed date.",
+      "url": "githubstars"
+    },
+    {
       "icon": "bi-person-walking",
       "title": "Google Fit",
       "description": "Upload Google Fit activity data and see a summary of the activity data by date.",
