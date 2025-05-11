@@ -13,6 +13,12 @@
       "url": "whatsappscraper"
     },
     {
+      "icon": "bi-whatsapp",
+      "title": "WhatsApp Thread Viewer",
+      "description": "View WhatsApp chat messages in a threaded discussion",
+      "url": "whatsappview"
+    },
+    {
       "icon": "bi-file-excel",
       "title": "Excel to JSONL",
       "description": "Convert Excel data to JSONL format.",
