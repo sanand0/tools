@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "npx -y esbuild whatsappscraper.js --bundle --minify --format=iife --global-name=whatsappscraper --outfile=whatsappscraper.min.js"
+  }
+}

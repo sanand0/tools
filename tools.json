@@ -7,6 +7,12 @@
       "url": "json2csv"
     },
     {
+      "icon": "bi-whatsapp",
+      "title": "WhatsApp Scraper",
+      "description": "Scrape WhatsApp chat messages into JSON",
+      "url": "whatsappscraper"
+    },
+    {
       "icon": "bi-file-excel",
       "title": "Excel to JSONL",
       "description": "Convert Excel data to JSONL format.",
