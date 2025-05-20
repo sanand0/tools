@@ -43,6 +43,12 @@
       "url": "jsontrim"
     },
     {
+      "icon": "bi-code",
+      "title": "Unicoder",
+      "description": "Convert Markdown to text to unicode equivalent with formatting.",
+      "url": "unicoder"
+    },
+    {
       "icon": "bi-bounding-box",
       "title": "Unicode Characters",
       "description": "Find non-ASCII Unicode characters in the clipboard",
