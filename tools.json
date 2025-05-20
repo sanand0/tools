@@ -19,6 +19,12 @@
       "url": "whatsappview"
     },
     {
+      "icon": "bi-mic",
+      "title": "Podcast Generator",
+      "description": "Generate podcasts from text using LLMs",
+      "url": "podcast"
+    },
+    {
       "icon": "bi-file-excel",
       "title": "Excel to JSONL",
       "description": "Convert Excel data to JSONL format.",
