@@ -123,11 +123,36 @@
           </div>
         </div>
 
+        <!-- Base URL Setting -->
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#baseUrlCollapse" aria-expanded="false" aria-controls="baseUrlCollapse">
+              <i class="bi bi-key me-2"></i>Base URL
+            </button>
+          </h2>
+          <div id="baseUrlCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
+            <div class="accordion-body">
+              <div class="mb-3">
+                <label for="baseUrlInput" class="form-label">Enter your OpenAI API Base URL:</label>
+                <input type="text" class="form-control" id="baseUrlInput" value="https://api.openai.com/v1" list="baseUrlList">
+                <datalist id="baseUrlList">
+                  <option value="https://api.openai.com/v1"></option>
+                  <option value="https://llmfoundry.straive.com/openai/v1"></option>
+                  <option value="https://llmfoundry.straivedemo.com/openai/v1"></option>
+                  <option value="https://openrouter.ai/api/v1" disabled></option>
+                  <option value="https://aipipe.org/openai/v1" disabled></option>
+                </datalist>
+                <div class="form-text">Your API key is stored locally in your browser and never sent to our servers.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- System Prompt Setting -->
         <div class="accordion-item">
           <h2 class="accordion-header">
             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#systemPromptCollapse" aria-expanded="false" aria-controls="systemPromptCollapse">
-              <i class="bi bi-chat-square-text me-2"></i>System Prompt
+              <i class="bi bi-chat-square-text me-2"></i>System Prompt &amp; Model
             </button>
           </h2>
           <div id="systemPromptCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
@@ -135,6 +160,17 @@
               <div class="mb-3">
                 <label for="systemPromptInput" class="form-label">Customize the system prompt:</label>
                 <textarea class="form-control" id="systemPromptInput" rows="10"></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="model" class="form-label">Choose the model:</label>
+                <input type="text" class="form-control" id="model" value="gpt-4.1-mini" list="modelList">
+                <datalist id="modelList">
+                  <option value="gpt-4.1-nano"></option>
+                  <option value="gpt-4.1-mini"></option>
+                  <option value="gpt-4.1"></option>
+                  <option value="gpt-4o"></option>
+                  <option value="o4-mini"></option>
+                </datalist>
               </div>
             </div>
           </div>
@@ -218,13 +254,15 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
+  <script type="module">
     document.addEventListener('DOMContentLoaded', () => {
       // Default values
       const DEFAULT_SYSTEM_PROMPT = `You are a professional podcast script editor. Write this content as an engaging, lay-friendly conversation between two enthusiastic experts, \${voice1.name} and \${voice2.name}.
+
 1. **Show Opener**. \${voice1.name} and \${voice2.name} greet listeners together. Example:
-   \${voice1.name}: "Hello and welcome to (PODCAST NAME) for the week of $WEEK!"
+   \${voice1.name}: "Hello and welcome to this episode of the (PODCAST NAME) podcast!"
    \${voice2.name}: "We're \${voice1.name} and \${voice2.name}, and today we'll walk you through ..."
+
 2. **Content**. Cover EVERY important point in the content.
    Discuss with curious banter in alternate short lines (≤20 words).
    Occasionally ask each other curious, leading questions.
@@ -232,11 +270,14 @@
    Explain in lay language.
    Share NON-OBVIOUS insights.
    Treat the audience as smart and aim to help them learn further.
+
 3. **Tone & Style**:
    Warm, conversational, and enthusiastic.
    Active voice, simple words, short sentences.
    No music cues, jingles, or sponsor breaks.
+
 4. **Wrap-Up**. Each voice shares an important, practical takeaway.
+
 5. **Output format**: Plain text with speaker labels:
 \${voice1.name}: …
 \${voice2.name}: …`;
@@ -255,7 +296,9 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
 
       // DOM Elements
       const apiKeyInput = document.getElementById('apiKeyInput');
+      const baseUrlInput = document.getElementById('baseUrlInput');
       const systemPromptInput = document.getElementById('systemPromptInput');
+      const modelInput = document.getElementById('model');
       const voice1NameInput = document.getElementById('voice1Name');
       const voice1TypeSelect = document.getElementById('voice1Type');
       const voice1InstructionsInput = document.getElementById('voice1Instructions');
@@ -275,7 +318,9 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
 
       // Initialize form with defaults and localStorage values
       systemPromptInput.value = localStorage.getItem('systemPrompt') || DEFAULT_SYSTEM_PROMPT;
+      modelInput.value = localStorage.getItem('model') || 'gpt-4.1-mini';
       apiKeyInput.value = localStorage.getItem('openaiApiKey') || '';
+      baseUrlInput.value = localStorage.getItem('baseUrl') || 'https://api.openai.com/v1';
       voice1InstructionsInput.value = localStorage.getItem('voice1Instructions') || DEFAULT_VOICE1_INSTRUCTIONS;
       voice2InstructionsInput.value = localStorage.getItem('voice2Instructions') || DEFAULT_VOICE2_INSTRUCTIONS;
 
@@ -286,6 +331,8 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
 
       // Save settings to localStorage when changed
       apiKeyInput.addEventListener('change', () => localStorage.setItem('openaiApiKey', apiKeyInput.value));
+      baseUrlInput.addEventListener('change', () => localStorage.setItem('baseUrl', baseUrlInput.value));
+      modelInput.addEventListener('change', () => localStorage.setItem('model', modelInput.value));
       systemPromptInput.addEventListener('change', () => localStorage.setItem('systemPrompt', systemPromptInput.value));
       voice1NameInput.addEventListener('change', () => localStorage.setItem('voice1Name', voice1NameInput.value));
       voice1TypeSelect.addEventListener('change', () => localStorage.setItem('voice1Type', voice1TypeSelect.value));
@@ -346,16 +393,11 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
       generateScriptBtn.addEventListener('click', async () => {
         const content = contentInput.value.trim();
         const apiKey = apiKeyInput.value.trim();
+        const baseUrl = baseUrlInput.value.trim();
+        const model = modelInput.value.trim();
 
-        if (!content) {
-          showAlert('Please enter some content to convert to a podcast.');
-          return;
-        }
-
-        if (!apiKey) {
-          showAlert('Please enter your OpenAI API key in the Advanced Settings.');
-          return;
-        }
+        if (!content) return showAlert('Please enter some content to convert to a podcast.');
+        if (!apiKey) return showAlert('Please enter your OpenAI API key in the Advanced Settings.');
 
         try {
           // Reset UI
@@ -371,19 +413,16 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
           const { asyncLLM } = await import("https://cdn.jsdelivr.net/npm/asyncllm@2");
 
           // Stream the response
-          for await (const { content: responseContent } of asyncLLM("https://api.openai.com/v1/chat/completions", {
+          for await (const { content: responseContent } of asyncLLM(`${baseUrl}/chat/completions`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${apiKey}`
             },
             body: JSON.stringify({
-              model: "gpt-4.1-nano",
+              model,
               stream: true,
-              messages: [
-                { role: "system", content: prompt },
-                { role: "user", content }
-              ],
+              messages: [{ role: "system", content: prompt }, { role: "user", content }],
             }),
           })) {
             podcastScriptTextarea.value = responseContent;
@@ -405,16 +444,10 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
       generateAudioBtn.addEventListener('click', async () => {
         const script = podcastScriptTextarea.value.trim();
         const apiKey = apiKeyInput.value.trim();
+        const baseUrl = baseUrlInput.value.trim();
 
-        if (!script) {
-          showAlert('Please generate a podcast script first.');
-          return;
-        }
-
-        if (!apiKey) {
-          showAlert('Please enter your OpenAI API key in the Advanced Settings.');
-          return;
-        }
+        if (!script) return showAlert('Please generate a podcast script first.');
+        if (!apiKey) return showAlert('Please enter your OpenAI API key in the Advanced Settings.');
 
         try {
           generateAudioBtn.disabled = true;
@@ -450,7 +483,7 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
             updateProgress(Math.round((i / lines.length) * 100), `Generating audio: ${i + 1}/${lines.length}`);
 
             // Generate audio for this line
-            const response = await fetch('https://api.openai.com/v1/audio/speech', {
+            const response = await fetch(`${baseUrl}/audio/speech`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

@@ -10,7 +10,7 @@
 > - [Claude 3.7 Sonnet](claude.html): Works great and looks greater!
 > - Windsurf timed out
 >
-> I picked the Claude version as the default. Here's the full prompt:
+> I picked the Claude version as the default (and added to it later). Here's the full prompt:
 
 Create a single-page web-app with vanilla JS and Bootstrap 5.3.0 to generate podcasts using LLMs.
 
