@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Activity Summarizer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20fill%3D%22%23000000%22%20viewBox%3D%220%200%2024%2024%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20%20fill%3D%22%230d6efd%22%20d%3D%22M12%2C2.2467A10.00042%2C10.00042%2C0%2C0%2C0%2C8.83752%2C21.73419c.5.08752.6875-.21247.6875-.475%2C0-.23749-.01251-1.025-.01251-1.86249C7%2C19.85919%2C6.35%2C18.78423%2C6.15%2C18.22173A3.636%2C3.636%2C0%2C0%2C0%2C5.125%2C16.8092c-.35-.1875-.85-.65-.01251-.66248A2.00117%2C2.00117%2C0%2C0%2C1%2C6.65%2C17.17169a2.13742%2C2.13742%2C0%2C0%2C0%2C2.91248.825A2.10376%2C2.10376%2C0%2C0%2C1%2C10.2%2C16.65923c-2.225-.25-4.55-1.11254-4.55-4.9375a3.89187%2C3.89187%2C0%2C0%2C1%2C1.025-2.6875%2C3.59373%2C3.59373%2C0%2C0%2C1%2C.1-2.65s.83747-.26251%2C2.75%2C1.025a9.42747%2C9.42747%2C0%2C0%2C1%2C5%2C0c1.91248-1.3%2C2.75-1.025%2C2.75-1.025a3.59323%2C3.59323%2C0%2C0%2C1%2C.1%2C2.65%2C3.869%2C3.869%2C0%2C0%2C1%2C1.025%2C2.6875c0%2C3.83747-2.33752%2C4.6875-4.5625%2C4.9375a2.36814%2C2.36814%2C0%2C0%2C1%2C.675%2C1.85c0%2C1.33752-.01251%2C2.41248-.01251%2C2.75%2C0%2C.26251.1875.575.6875.475A10.0053%2C10.0053%2C0%2C0%2C0%2C12%2C2.2467Z%22%2F%3E%3C%2Fsvg%3E">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.2/marked.min.js"></script>
+</head>
+
+<body class="bg-light">
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="card shadow">
+          <div class="card-header bg-primary text-white">
+            <h1 class="card-title mb-0">GitHub Activity Summarizer</h1>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-info" role="alert">
+              <h5 class="alert-heading">How to Use This App</h5>
+              <p class="mb-2">This tool analyzes your GitHub activity within a date range and generates an AI-powered summary blog post. Here's what you need:</p>
+              <ul class="mb-2">
+                <li><strong>GitHub Username:</strong> The user whose activity you want to analyze</li>
+                <li><strong>Date Range:</strong> Start and end dates for the analysis period</li>
+                <li><strong>GitHub API Token:</strong> Personal access token for API access (required for higher rate limits)</li>
+                <li><strong>OpenAI API Key:</strong> Your OpenAI API key for generating the summary</li>
+                <li><strong>API Base URL:</strong> OpenAI API endpoint (defaults to official API)</li>
+              </ul>
+              <p class="mb-0">The app will fetch your GitHub events, repository details, and commit information, then use AI to create a structured blog post summary.</p>
+            </div>
+
+            <form id="github-form" class="needs-validation" novalidate>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="username" class="form-label">GitHub Username</label>
+                  <input type="text" class="form-control" id="username" required>
+                  <div class="invalid-feedback">Please provide a GitHub username.</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="github-token" class="form-label">GitHub API Token</label>
+                  <input type="password" class="form-control" id="github-token" required>
+                  <div class="invalid-feedback">Please provide a GitHub API token.</div>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="since" class="form-label">Start Date</label>
+                  <input type="date" class="form-control" id="since" required>
+                  <div class="invalid-feedback">Please provide a start date.</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="until" class="form-label">End Date</label>
+                  <input type="date" class="form-control" id="until" required>
+                  <div class="invalid-feedback">Please provide an end date.</div>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="openai-key" class="form-label">OpenAI API Key</label>
+                  <input type="password" class="form-control" id="openai-key" required>
+                  <div class="invalid-feedback">Please provide an OpenAI API key.</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="openai-base-url" class="form-label">OpenAI API Base URL</label>
+                  <input type="url" class="form-control" id="openai-base-url" value="https://api.openai.com/v1" list="openai-base-url-list">
+                  <datalist id="openai-base-url-list">
+                    <option value="https://api.openai.com/v1"></option>
+                    <option value="https://openrouter.ai/api/v1"></option>
+                    <option value="https://aipipe.org/openai/v1"></option>
+                    <option value="https://llmfoundry.straive.com/openai/v1"></option>
+                  </datalist>
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="model" class="form-label">Model</label>
+                  <input type="text" class="form-control" id="model" value="gpt-4.1-nano" list="model-list" required>
+                  <datalist id="model-list">
+                    <option value="gpt-4.1-nano"></option>
+                    <option value="gpt-4.1-mini"></option>
+                    <option value="gpt-4.1"></option>
+                  </datalist>
+                  <div class="invalid-feedback">Please provide a model.</div>
+                </div>
+                <div class="col-md-6">
+                  <label for="clear-cache" class="form-label">Clear URL Cache</label>
+                  <select class="form-select" id="clear-cache">
+                    <option value="">No</option>
+                    <option value="yes">Yes</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="system-prompt" class="form-label">System Prompt</label>
+                <textarea class="form-control" id="system-prompt" rows="8">You are a personal technical-blog assistant. Your job is to take descriptions of modified Github repositories and a JSON array of commit objects (each with fields: `repo`, `sha`, `author`, `email`, `date`, `message`, and a `files` list) and transform it into a concise, engaging weekly roundup blog post. Follow these rules:
+1. **Structure & Organization**
+   - **Title & Intro:** Start with a `##` heading (no document title) that summarizes the week in one sentence, followed by a two-sentence intro.
+   - **Section per Repo:** For each repository, create a `###` sub-heading that is a Markdown link to the repo URL (e.g. `### [repo](https://github.com/$USER/repo)`).
+   - **Overview:** Begin each repo section with one italicized sentence summarizing the changes in the repo in practical terms for someone using the repo.
+   - **Bulleted Highlights:** Under each repo, list 3-5 bullets. Each bullet:
+     1. Begins with a **bold summary** (one short phrase).
+     2. Follows with a concise sentence describing what changed, and how it might be useful to the user. Include inline Markdown links to each relevant commit (e.g. `[75d212c](https://github.com/$USER/repo/commit/75d212c)`), file, or external resource.
+     3. If multiple commits relate to the same theme, combine them in one bullet with multiple links.
+2. **Tone & Style**
+   - Explain the changes to a layman who might not know what the repo does. Focus on how the change helps practically.
+   - Write in short, punchy sentences (≤20 words).
+   - Use active voice and simple words (8th-grade level).
+   - Inject one light, wry aside per section (e.g., "Yes, you really needed another Fish abbr.").
+   - Don't mention any personal names or assume prior knowledge of the author.
+3. **Formatting & Links**
+   - Use Markdown for all headings, links, and bullets.
+   - Dates in bullets should be "DD Mon YYYY" format.
+   - Link headings to the repo homepages.
+   - Link commit SHAs to their GitHub commit pages.
+   - If it adds value, link to external docs, issue pages, or related files.
+When you receive the JSON, produce the full blog post accordingly.</textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg w-100">Generate Summary</button>
+            </form>
+
+            <div id="progress-section" class="mt-4" style="display: none;">
+              <h5>Progress</h5>
+              <div id="progress-container"></div>
+              <div id="current-url" class="mt-2 text-muted small"></div>
+            </div>
+
+            <div id="error-section" class="mt-4" style="display: none;">
+              <div class="alert alert-danger" role="alert">
+                <h5 class="alert-heading">Error</h5>
+                <p id="error-message" class="mb-0"></p>
+              </div>
+            </div>
+
+            <div id="results-section" class="mt-4" style="display: none;">
+              <h5>Summary</h5>
+              <div id="results-content" class="border rounded p-3 bg-white"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
+    import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+
+    // GitHub API field mappings
+    const GITHUB_FIELDS = {
+      ForkEvent: ["type", "repo.name", "payload.forkee.full_name", "created_at"],
+      IssueCommentEvent: ["type", "payload.action", "repo.name", "payload.comment.body", "created_at"],
+      IssuesEvent: ["type", "payload.action", "repo.name", "payload.issue.title", "payload.issue.body", "created_at"],
+      PullRequestEvent: ["type", "payload.action", "repo.name", "payload.pull_request.title", "created_at"],
+      PullRequestReviewEvent: ["type", "payload.review.state", "repo.name", "payload.pull_request.title", "created_at"],
+      PullRequestReviewCommentEvent: ["type", "repo.name", "payload.comment.body", "created_at"],
+      PushEvent: ["type", "repo.name", "payload.ref", "payload.commits[*].message", "created_at"],
+      ReleaseEvent: ["type", "payload.action", "repo.name", "payload.release.tag_name", "short_description_html", "created_at"],
+      CreateEvent: ["type", "payload.ref_type", "repo.name", "payload.ref", "created_at"],
+      DeleteEvent: ["type", "payload.ref_type", "repo.name", "payload.ref", "created_at"],
+      WatchEvent: ["type", "payload.action", "repo.name", "created_at"]
+    };
+
+    // IndexedDB cache management
+    const DB_NAME = 'github-cache';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'urls';
+    const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+
+    let db = null;
+
+    async function initDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          db = request.result;
+          resolve(db);
+        };
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          const store = db.createObjectStore(STORE_NAME, { keyPath: 'url' });
+          store.createIndex('timestamp', 'timestamp');
+        };
+      });
+    }
+
+    async function clearCache() {
+      if (!db) await initDB();
+      const transaction = db.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      await store.clear();
+    }
+
+    async function getCached(url) {
+      if (!db) await initDB();
+      const transaction = db.transaction([STORE_NAME], 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get(url);
+      return new Promise((resolve) => {
+        request.onsuccess = () => {
+          const result = request.result;
+          if (result && Date.now() - result.timestamp < CACHE_TTL) {
+            resolve(result.data);
+          } else {
+            resolve(null);
+          }
+        };
+        request.onerror = () => resolve(null);
+      });
+    }
+
+    async function setCached(url, data) {
+      if (!db) await initDB();
+      const transaction = db.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      await store.put({ url, data, timestamp: Date.now() });
+    }
+
+    // Fetch with caching
+    async function fetchWithCache(url, options = {}) {
+      const cached = await getCached(url);
+      if (cached) return cached;
+
+      const response = await fetch(url, options);
+      if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+      const data = await response.json();
+      await setCached(url, data);
+      return data;
+    }
+
+    // Progress tracking
+    function createProgressBar(id, label) {
+      const container = document.getElementById('progress-container');
+      const html = `
+                <div class="mb-3">
+                    <label class="form-label">${label}</label>
+                    <div class="progress">
+                        <div id="${id}" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
+                    </div>
+                </div>
+            `;
+      container.insertAdjacentHTML('beforeend', html);
+    }
+
+    function updateProgress(id, current, total) {
+      const progressBar = document.getElementById(id);
+      const percent = Math.round((current / total) * 100);
+      progressBar.style.width = `${percent}%`;
+      progressBar.textContent = `${percent}%`;
+    }
+
+    function showCurrentUrl(url) {
+      document.getElementById('current-url').textContent = `Fetching: ${url}`;
+    }
+
+    function showError(message) {
+      document.getElementById('error-section').style.display = 'block';
+      document.getElementById('error-message').textContent = message;
+    }
+
+    // JMESPath-like object navigation
+    function getNestedValue(obj, path) {
+      const parts = path.split('.');
+      let current = obj;
+
+      for (const part of parts) {
+        if (part.includes('[*]')) {
+          const [key, rest] = part.split('[*]');
+          current = current[key];
+          if (Array.isArray(current)) {
+            return current.map(item => rest ? getNestedValue(item, rest.slice(1)) : item).flat();
+          }
+          return [];
+        } else if (part.includes('[') && part.includes(']')) {
+          const [key, index] = part.split('[');
+          const idx = parseInt(index.replace(']', ''));
+          current = current[key][idx];
+        } else {
+          current = current?.[part];
+        }
+
+        if (current === undefined) return null;
+      }
+
+      return current;
+    }
+
+    // Fetch GitHub events
+    async function fetchEvents(user, headers, since) {
+      let url = `https://api.github.com/users/${user}/events/public`;
+      const events = [];
+
+      createProgressBar('events-progress', 'Fetching GitHub Events');
+      let pageCount = 0;
+
+      while (url) {
+        showCurrentUrl(url);
+        pageCount++;
+        updateProgress('events-progress', pageCount, pageCount + 1);
+
+        const page = await fetchWithCache(url, { headers });
+        events.push(...page);
+
+        // Stop if all events on this page are before our start date
+        const sinceDate = new Date(since);
+        if (page.every(ev => new Date(ev.created_at) < sinceDate)) break;
+
+        // Get next page URL from Link header (simplified)
+        url = null; // GitHub API doesn't provide easy pagination in JSON response
+        if (page.length === 30) { // Standard page size
+          const lastEvent = page[page.length - 1];
+          url = `https://api.github.com/users/${user}/events/public?page=${pageCount + 1}`;
+        }
+      }
+
+      updateProgress('events-progress', 1, 1);
+      return events;
+    }
+
+    // Fetch repository details
+    async function fetchRepoDetails(repos, headers) {
+      const details = {};
+      const repoList = [...new Set(repos)];
+
+      createProgressBar('repos-progress', 'Fetching Repository Details');
+
+      for (let i = 0; i < repoList.length; i++) {
+        const repo = repoList[i];
+        updateProgress('repos-progress', i, repoList.length);
+
+        try {
+          showCurrentUrl(`https://api.github.com/repos/${repo}`);
+          const info = await fetchWithCache(`https://api.github.com/repos/${repo}`, { headers });
+
+          showCurrentUrl(`https://api.github.com/repos/${repo}/readme`);
+          let readme = '';
+          try {
+            const readmeResp = await fetchWithCache(`https://api.github.com/repos/${repo}/readme`, { headers });
+            readme = atob(readmeResp.content || '');
+          } catch (e) {
+            // README might not exist
+          }
+
+          details[repo] = {
+            description: info.description || '',
+            topics: info.topics || [],
+            readme
+          };
+        } catch (e) {
+          console.warn(`Error fetching ${repo}:`, e);
+        }
+      }
+
+      updateProgress('repos-progress', repoList.length, repoList.length);
+      return details;
+    }
+
+    // Fetch GitHub activity
+    async function fetchGitHubActivity(user, since, until, headers) {
+      const events = await fetchEvents(user, headers, since);
+      const activity = [];
+      const repos = new Set();
+
+      createProgressBar('activity-progress', 'Processing Events');
+
+      const sinceDate = new Date(since);
+      const untilDate = new Date(until);
+
+      for (let i = 0; i < events.length; i++) {
+        const ev = events[i];
+        updateProgress('activity-progress', i, events.length);
+
+        const ts = new Date(ev.created_at);
+        if (!(sinceDate <= ts && ts < untilDate)) continue;
+
+        const repo = ev.repo.name;
+        repos.add(repo);
+
+        if (GITHUB_FIELDS[ev.type]) {
+          const info = {};
+          for (const path of GITHUB_FIELDS[ev.type]) {
+            const val = getNestedValue(ev, path);
+            info[path] = Array.isArray(val) ? val.join(', ') : val;
+          }
+          activity.push(info);
+        }
+
+        // Handle push events specially
+        if (ev.type === 'PushEvent') {
+          for (const commit of ev.payload.commits || []) {
+            try {
+              const url = `https://api.github.com/repos/${repo}/commits/${commit.sha}`;
+              showCurrentUrl(url);
+              const commitData = await fetchWithCache(url, { headers });
+
+              activity.push({
+                type: 'commit',
+                'repo.name': repo,
+                created_at: commitData.commit.author.date,
+                sha: commit.sha,
+                message: commitData.commit.message,
+                files: (commitData.files || []).map(f => ({
+                  filename: f.filename,
+                  additions: f.additions,
+                  deletions: f.deletions,
+                  changes: f.changes,
+                  patch: f.patch || ''
+                }))
+              });
+            } catch (e) {
+              console.warn(`Error fetching commit ${commit.sha}:`, e);
+            }
+          }
+        }
+      }
+
+      updateProgress('activity-progress', events.length, events.length);
+      return { activity, repos: [...repos] };
+    }
+
+    // Generate summary using OpenAI
+    async function generateSummary(context, systemPrompt, openaiKey, baseUrl) {
+      const resultsDiv = document.getElementById('results-content');
+      const model = document.getElementById('model').value;
+      resultsDiv.innerHTML = '';
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        {
+          role: 'user',
+          content: `Repository Context:\n${JSON.stringify(context.context)}\n\nCommits:\n${JSON.stringify(context.activity)}`
+        }
+      ];
+
+      try {
+        for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${openaiKey}` },
+          body: JSON.stringify({ model, stream: true, messages })
+        })) {
+          const html = marked.parse(content);
+          resultsDiv.innerHTML = html;
+        }
+      } catch (error) {
+        throw new Error(`OpenAI API error: ${error.message}`);
+      }
+    }
+
+    // Main form handler
+    document.getElementById('github-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Clear previous results
+      document.getElementById('progress-section').style.display = 'none';
+      document.getElementById('error-section').style.display = 'none';
+      document.getElementById('results-section').style.display = 'none';
+      document.getElementById('progress-container').innerHTML = '';
+
+      // Validate form
+      const form = e.target;
+      if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+      }
+
+      // Get form values
+      const formData = new FormData(form);
+      const config = {
+        username: document.getElementById('username').value,
+        githubToken: document.getElementById('github-token').value,
+        since: document.getElementById('since').value,
+        until: document.getElementById('until').value,
+        openaiKey: document.getElementById('openai-key').value,
+        baseUrl: document.getElementById('openai-base-url').value,
+        systemPrompt: document.getElementById('system-prompt').value
+      };
+
+      // Show progress section
+      document.getElementById('progress-section').style.display = 'block';
+
+      try {
+        // Clear cache if required
+        if (document.getElementById('clear-cache').value) await clearCache();
+
+        // Fetch GitHub data
+        const headers = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${config.githubToken}`
+        };
+
+        const { activity, repos } = await fetchGitHubActivity(
+          config.username,
+          config.since,
+          config.until,
+          headers
+        );
+
+        const context = await fetchRepoDetails(repos, headers);
+
+        // Show results section
+        document.getElementById('results-section').style.display = 'block';
+
+        // Generate summary
+        await generateSummary(
+          { activity, repos, context },
+          config.systemPrompt,
+          config.openaiKey,
+          config.baseUrl
+        );
+
+      } catch (error) {
+        showError(error.message);
+      }
+    });
+
+    // Initialize saveform and set default dates
+    document.addEventListener('DOMContentLoaded', () => {
+      saveform('#github-form', { exclude: '[type="file"]' });
+
+      // Set default dates (last week)
+      const today = new Date();
+      const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      document.getElementById('until').value = today.toISOString().split('T')[0];
+      document.getElementById('since').value = lastWeek.toISOString().split('T')[0];
+    });
+  </script>
+</body>
+
+</html>

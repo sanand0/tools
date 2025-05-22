@@ -25,6 +25,12 @@
       "url": "podcast"
     },
     {
+      "icon": "bi-github",
+      "title": "GitHub Summary",
+      "description": "Summarize all activity by a user over a time period",
+      "url": "githubsummary"
+    },
+    {
       "icon": "bi-file-excel",
       "title": "Excel to JSONL",
       "description": "Convert Excel data to JSONL format.",
