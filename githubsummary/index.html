@@ -7,6 +7,7 @@
   <title>GitHub Activity Summarizer</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20fill%3D%22%23000000%22%20viewBox%3D%220%200%2024%2024%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20%20fill%3D%22%230d6efd%22%20d%3D%22M12%2C2.2467A10.00042%2C10.00042%2C0%2C0%2C0%2C8.83752%2C21.73419c.5.08752.6875-.21247.6875-.475%2C0-.23749-.01251-1.025-.01251-1.86249C7%2C19.85919%2C6.35%2C18.78423%2C6.15%2C18.22173A3.636%2C3.636%2C0%2C0%2C0%2C5.125%2C16.8092c-.35-.1875-.85-.65-.01251-.66248A2.00117%2C2.00117%2C0%2C0%2C1%2C6.65%2C17.17169a2.13742%2C2.13742%2C0%2C0%2C0%2C2.91248.825A2.10376%2C2.10376%2C0%2C0%2C1%2C10.2%2C16.65923c-2.225-.25-4.55-1.11254-4.55-4.9375a3.89187%2C3.89187%2C0%2C0%2C1%2C1.025-2.6875%2C3.59373%2C3.59373%2C0%2C0%2C1%2C.1-2.65s.83747-.26251%2C2.75%2C1.025a9.42747%2C9.42747%2C0%2C0%2C1%2C5%2C0c1.91248-1.3%2C2.75-1.025%2C2.75-1.025a3.59323%2C3.59323%2C0%2C0%2C1%2C.1%2C2.65%2C3.869%2C3.869%2C0%2C0%2C1%2C1.025%2C2.6875c0%2C3.83747-2.33752%2C4.6875-4.5625%2C4.9375a2.36814%2C2.36814%2C0%2C0%2C1%2C.675%2C1.85c0%2C1.33752-.01251%2C2.41248-.01251%2C2.75%2C0%2C.26251.1875.575.6875.475A10.0053%2C10.0053%2C0%2C0%2C0%2C12%2C2.2467Z%22%2F%3E%3C%2Fsvg%3E">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@9.1.2/marked.min.js"></script>
 </head>
 
@@ -14,7 +15,7 @@
   <div class="container my-5">
     <div class="row justify-content-center">
       <div class="col-lg-10">
-        <div class="card shadow">
+        <div class="card shadow" style="margin-bottom: 25vh;">
           <div class="card-header bg-primary text-white">
             <h1 class="card-title mb-0">GitHub Activity Summarizer</h1>
           </div>
@@ -98,22 +99,37 @@
               </div>
 
               <div class="mb-3">
-                <label for="system-prompt" class="form-label">System Prompt</label>
-                <textarea class="form-control" id="system-prompt" rows="8">You are a personal technical-blog assistant. Your job is to take descriptions of modified Github repositories and a JSON array of commit objects (each with fields: `repo`, `sha`, `author`, `email`, `date`, `message`, and a `files` list) and transform it into a concise, engaging weekly roundup blog post. Follow these rules:
+                <ul class="nav nav-tabs" id="system-prompt-tabs" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="readme-tab" data-bs-toggle="tab" data-bs-target="#readme-content" type="button" role="tab" aria-controls="readme-content" aria-selected="true">README</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="technical-tab" data-bs-toggle="tab" data-bs-target="#technical-content" type="button" role="tab" aria-controls="technical-content" aria-selected="false">Technical</button>
+                  </li>
+                  <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="podcast-tab" data-bs-toggle="tab" data-bs-target="#podcast-content" type="button" role="tab" aria-controls="podcast-content" aria-selected="false">Podcast</button>
+                  </li>
+                </ul>
+                <div class="tab-content pt-3" id="system-prompt-tab-content">
+                  <div class="tab-pane fade show active" id="readme-content" role="tabpanel" aria-labelledby="readme-tab">
+                    <textarea class="form-control" id="readme-prompt" rows="8">You are a personal technical-blog assistant. Your job is to transform descriptions of recently updated Github repositories and activities and into a concise, engaging README. Follow these rules:
+
 1. **Structure & Organization**
-   - **Title & Intro:** Start with a `##` heading (no document title) that summarizes the week in one sentence, followed by a two-sentence intro.
+   - **Title & Intro:** Start with a `##` heading (no document title) that summarizes the changes in one sentence, followed by a two-sentence intro.
    - **Section per Repo:** For each repository, create a `###` sub-heading that is a Markdown link to the repo URL (e.g. `### [repo](https://github.com/$USER/repo)`).
    - **Overview:** Begin each repo section with one italicized sentence summarizing the changes in the repo in practical terms for someone using the repo.
    - **Bulleted Highlights:** Under each repo, list 3-5 bullets. Each bullet:
-     1. Begins with a **bold summary** (one short phrase).
-     2. Follows with a concise sentence describing what changed, and how it might be useful to the user. Include inline Markdown links to each relevant commit (e.g. `[75d212c](https://github.com/$USER/repo/commit/75d212c)`), file, or external resource.
-     3. If multiple commits relate to the same theme, combine them in one bullet with multiple links.
+      1. Begins with a **bold summary** (one short phrase).
+      2. Follows with a concise sentence describing what changed, and how it might be useful to the user. Include inline Markdown links to each relevant commit (e.g. `[75d212c](https://github.com/$USER/repo/commit/75d212c)`), file, or external resource.
+      3. If multiple commits relate to the same theme, combine them in one bullet with multiple links.
+
 2. **Tone & Style**
    - Explain the changes to a layman who might not know what the repo does. Focus on how the change helps practically.
    - Write in short, punchy sentences (≤20 words).
    - Use active voice and simple words (8th-grade level).
    - Inject one light, wry aside per section (e.g., "Yes, you really needed another Fish abbr.").
    - Don't mention any personal names or assume prior knowledge of the author.
+
 3. **Formatting & Links**
    - Use Markdown for all headings, links, and bullets.
    - Dates in bullets should be "DD Mon YYYY" format.
@@ -121,6 +137,34 @@
    - Link commit SHAs to their GitHub commit pages.
    - If it adds value, link to external docs, issue pages, or related files.
 When you receive the JSON, produce the full blog post accordingly.</textarea>
+                  </div>
+                  <div class="tab-pane fade" id="technical-content" role="tabpanel" aria-labelledby="technical-tab">
+                    <textarea class="form-control" id="technical-prompt" rows="8">You are a technical documentation specialist. Your task is to analyze GitHub repository changes and create a detailed, technically precise summary. Each commit object contains repository name, SHA identifier, author details, timestamp, commit message, and modified files list.
+
+Your output should begin with a concise heading summarizing the key technical achievements, followed by a brief technical context introduction. For each repository, create a dedicated section with a heading linked to the repository URL.
+
+Start each repository section with a concise technical overview focusing on practical implementation details and architectural changes. List 3-5 key technical highlights using the following structure: begin with a concise technical descriptor, follow with a detailed explanation of the implementation change, including technical rationale and potential usage patterns.
+
+When describing multiple related commits, consolidate them under a single technical theme. Maintain technical accuracy while explaining changes in implementation terms that would be valuable to developers working with the codebase. Use precise, technical language throughout without assuming prior knowledge of the specific implementation.
+
+This is for an audio narration. No Markdown formatting, lists, links, IDs, etc. Just conversational English. Convert near-English user or repository names into English (e.g. write "apiagent" as "API agent repo"). Say dates as "May 23rd, 2025", not numerically.
+
+Upon receiving the JSON data, generate a comprehensive technical summary suitable for a development team's review.</textarea>
+                  </div>
+                  <div class="tab-pane fade" id="podcast-content" role="tabpanel" aria-labelledby="podcast-tab">
+                    <textarea class="form-control" id="podcast-prompt" rows="8">You're creating a tech podcast script about GitHub activity. I'll give you a the repository changes and activities.
+
+Start with an exciting headline that captures the biggest achievement. Then give listeners a quick two-sentence introduction to set the stage.
+
+For each project, introduce it clearly by name. Begin with a simple explanation of what changed in practical terms for someone who might use this project. Then highlight 3 to 5 important updates. For each highlight, start with a catchy phrase, then explain what changed and why it matters to users. If several changes relate to the same feature, group them together.
+
+Keep everything conversational and enthusiastic! Explain technical concepts as if you're talking to a smart friend who isn't a programmer. Use short, clear sentences with simple words. Add one light-hearted comment per section to keep things fun. Don't mention specific people's names or assume listeners know who made the changes.
+
+This is for an audio narration. No Markdown formatting, lists, links, IDs, etc. Just conversational English. Convert near-English user or repository names into English (e.g. write "apiagent" as "API agent repo"). Say dates as "May 23rd, 2025", not numerically.
+
+Make it engaging and easy to follow just by listening.</textarea>
+                  </div>
+                </div>
               </div>
 
               <button type="submit" class="btn btn-primary btn-lg w-100">Generate Summary</button>
@@ -431,7 +475,7 @@ When you receive the JSON, produce the full blog post accordingly.</textarea>
     async function generateSummary(context, systemPrompt, openaiKey, baseUrl) {
       const resultsDiv = document.getElementById('results-content');
       const model = document.getElementById('model').value;
-      resultsDiv.innerHTML = '';
+      resultsDiv.innerHTML = 'Generating summary...';
 
       const messages = [
         { role: 'system', content: systemPrompt },
@@ -467,10 +511,7 @@ When you receive the JSON, produce the full blog post accordingly.</textarea>
 
       // Validate form
       const form = e.target;
-      if (!form.checkValidity()) {
-        form.classList.add('was-validated');
-        return;
-      }
+      if (!form.checkValidity()) return form.classList.add('was-validated');
 
       // Get form values
       const formData = new FormData(form);
@@ -481,7 +522,7 @@ When you receive the JSON, produce the full blog post accordingly.</textarea>
         until: document.getElementById('until').value,
         openaiKey: document.getElementById('openai-key').value,
         baseUrl: document.getElementById('openai-base-url').value,
-        systemPrompt: document.getElementById('system-prompt').value
+        systemPrompt: document.querySelector('#system-prompt-tab-content .active textarea').value
       };
 
       // Show progress section
@@ -510,12 +551,7 @@ When you receive the JSON, produce the full blog post accordingly.</textarea>
         document.getElementById('results-section').style.display = 'block';
 
         // Generate summary
-        await generateSummary(
-          { activity, repos, context },
-          config.systemPrompt,
-          config.openaiKey,
-          config.baseUrl
-        );
+        await generateSummary({ activity, repos, context }, config.systemPrompt, config.openaiKey, config.baseUrl);
 
       } catch (error) {
         showError(error.message);
