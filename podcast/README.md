@@ -12,7 +12,7 @@
 >
 > I picked the Claude version as the default (and added to it later). Here's the full prompt:
 
-Create a single-page web-app with vanilla JS and Bootstrap 5.3.0 to generate podcasts using LLMs.
+Create a single-page web-app with vanilla JS and Bootstrap 5.3.6 to generate podcasts using LLMs.
 
 The page should briefly explain what the app does, how it works, and sample use cases.
 
