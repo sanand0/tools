@@ -37,7 +37,14 @@
               <div class="row mb-3">
                 <div class="col-md-6">
                   <label for="username" class="form-label">GitHub Username</label>
-                  <input type="text" class="form-control" id="username" required>
+                  <input type="text" class="form-control" id="username" required list="github-users">
+                  <datalist id="github-users">
+                    <option value="sanand0">Anand S, LLM Psychologist</option>
+                    <option value="simonw">Simon Willison: llm, datasette, sqlite-utils</option>
+                    <option value="lukeed">Luke Edwards: Fast JS libraries (oxc, clsx, pola)</option>
+                    <option value="tiangolo">Sebastián Ramírez: FastAPI, Typer, SQLModel</option>
+                    <option value="sindresorhus">Sindre Sorhus: JavaScript microlibraries</option>
+                  </datalist>
                   <div class="invalid-feedback">Please provide a GitHub username.</div>
                 </div>
                 <div class="col-md-6">
@@ -127,7 +134,7 @@
    - Explain the changes to a layman who might not know what the repo does. Focus on how the change helps practically.
    - Write in short, punchy sentences (≤20 words).
    - Use active voice and simple words (8th-grade level).
-   - Inject one light, wry aside per section (e.g., "Yes, you really needed another Fish abbr.").
+   - Inject one light, wry aside per section
    - Don't mention any personal names or assume prior knowledge of the author.
 
 3. **Formatting & Links**
@@ -136,6 +143,7 @@
    - Link headings to the repo homepages.
    - Link commit SHAs to their GitHub commit pages.
    - If it adds value, link to external docs, issue pages, or related files.
+
 When you receive the JSON, produce the full blog post accordingly.</textarea>
                   </div>
                   <div class="tab-pane fade" id="technical-content" role="tabpanel" aria-labelledby="technical-tab">
