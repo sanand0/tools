@@ -36,8 +36,8 @@
             <form id="github-form" class="needs-validation" novalidate>
               <div class="row mb-3">
                 <div class="col-md-6">
-                  <label for="username" class="form-label">GitHub Username</label>
-                  <input type="text" class="form-control" id="username" required list="github-users">
+                  <label for="username" class="form-label">GitHub Search Query</label>
+                  <input type="text" class="form-control" id="username" required list="github-users" placeholder="e.g., user:torvalds, org:google, language:javascript stars:>1000">
                   <datalist id="github-users">
                     <option value="sanand0">Anand S, LLM Psychologist</option>
                     <option value="simonw">Simon Willison: llm, datasette, sqlite-utils</option>
@@ -45,7 +45,7 @@
                     <option value="tiangolo">Sebastián Ramírez: FastAPI, Typer, SQLModel</option>
                     <option value="sindresorhus">Sindre Sorhus: JavaScript microlibraries</option>
                   </datalist>
-                  <div class="invalid-feedback">Please provide a GitHub username.</div>
+                  <div class="invalid-feedback">Please provide a GitHub search query.</div>
                 </div>
                 <div class="col-md-6">
                   <label for="github-token" class="form-label">GitHub API Token</label>
@@ -346,36 +346,38 @@ Make it engaging and easy to follow just by listening.</textarea>
       return current;
     }
 
-    // Fetch GitHub events
-    async function fetchEvents(user, headers, since) {
-      let url = `https://api.github.com/users/${user}/events/public`;
-      const events = [];
+    // Fetch GitHub repositories from search
+    async function fetchRepositoriesFromSearch(query, headers) {
+      let url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=updated&order=desc`;
+      const repositories = [];
+      const MAX_REPOS_TO_PROCESS = 30;
 
-      createProgressBar('events-progress', 'Fetching GitHub Events');
+      createProgressBar('events-progress', 'Searching Repositories');
       let pageCount = 0;
 
-      while (url) {
+      while (url && repositories.length < MAX_REPOS_TO_PROCESS) {
         showCurrentUrl(url);
         pageCount++;
-        updateProgress('events-progress', pageCount, pageCount + 1);
+        updateProgress('events-progress', pageCount, pageCount + 1); // Show incremental progress
 
-        const page = await fetchWithCache(url, { headers });
-        events.push(...page);
+        const pageData = await fetchWithCache(url, { headers });
+        if (pageData && pageData.items) {
+          repositories.push(...pageData.items);
+        }
 
-        // Stop if all events on this page are before our start date
-        const sinceDate = new Date(since);
-        if (page.every(ev => new Date(ev.created_at) < sinceDate)) break;
-
-        // Get next page URL from Link header (simplified)
-        url = null; // GitHub API doesn't provide easy pagination in JSON response
-        if (page.length === 30) { // Standard page size
-          const lastEvent = page[page.length - 1];
-          url = `https://api.github.com/users/${user}/events/public?page=${pageCount + 1}`;
+        // Simplified pagination: Fetch next page if current page had items and we're under the limit
+        // Note: GitHub Search API uses Link header for pagination, but this is a simplified approach.
+        if (pageData && pageData.items && pageData.items.length > 0 && repositories.length < MAX_REPOS_TO_PROCESS) {
+          // Construct next page URL. Assumes default per_page is 30.
+          // A more robust solution would parse the Link header.
+          url = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=updated&order=desc&page=${pageCount + 1}`;
+        } else {
+          url = null; // Stop if no items or if API indicates no more pages (implicitly)
         }
       }
 
-      updateProgress('events-progress', 1, 1);
-      return events;
+      updateProgress('events-progress', 1, 1); // Signify completion
+      return repositories.slice(0, MAX_REPOS_TO_PROCESS);
     }
 
     // Fetch repository details
@@ -417,66 +419,81 @@ Make it engaging and easy to follow just by listening.</textarea>
     }
 
     // Fetch GitHub activity
-    async function fetchGitHubActivity(user, since, until, headers) {
-      const events = await fetchEvents(user, headers, since);
+    async function fetchGitHubActivity(query, since, until, headers) {
+      // 1. Fetch repositories based on the search query
+      const foundRepositories = await fetchRepositoriesFromSearch(query, headers);
       const activity = [];
-      const repos = new Set();
+      const reposToProcess = new Set();
 
-      createProgressBar('activity-progress', 'Processing Events');
+      // Extract repo names from the search results to be processed further
+      // The structure of items in foundRepositories is directly from GitHub API: { name: "...", full_name: "owner/repo", ... }
+      // We need full_name for other API calls.
+      foundRepositories.forEach(repo => reposToProcess.add(repo.full_name));
+      
+      createProgressBar('activity-progress', 'Processing Repository Activity');
+      const repoList = [...reposToProcess];
+      let currentRepoIndex = 0;
 
       const sinceDate = new Date(since);
       const untilDate = new Date(until);
 
-      for (let i = 0; i < events.length; i++) {
-        const ev = events[i];
-        updateProgress('activity-progress', i, events.length);
+      for (const repoFullName of repoList) {
+        currentRepoIndex++;
+        updateProgress('activity-progress', currentRepoIndex, repoList.length);
+        
+        // Fetch events for each repository (simplified: focusing on commits for now)
+        // This part would ideally fetch events or commits for EACH repo.
+        // For simplicity, let's assume we're primarily interested in recent commits.
+        // This section needs to be adapted if we want to pull detailed events like the old fetchEvents did.
+        // For now, let's fetch commits for each repo.
+        try {
+            // Construct URL for fetching commits for the repository
+            // Add since and until parameters to filter commits by date
+            let commits_url = `https://api.github.com/repos/${repoFullName}/commits?since=${sinceDate.toISOString()}&until=${untilDate.toISOString()}`;
+            showCurrentUrl(commits_url);
+            const commitsData = await fetchWithCache(commits_url, { headers });
 
-        const ts = new Date(ev.created_at);
-        if (!(sinceDate <= ts && ts < untilDate)) continue;
+            for (const commit of commitsData) {
+                // Ensure commit details exist
+                if (!commit || !commit.sha || !commit.commit || !commit.commit.author || !commit.commit.message) {
+                    console.warn(`Skipping commit with missing data in ${repoFullName}:`, commit);
+                    continue;
+                }
+                // Further fetch detailed commit info if necessary (as before)
+                const detailedCommitUrl = `https://api.github.com/repos/${repoFullName}/commits/${commit.sha}`;
+                showCurrentUrl(detailedCommitUrl);
+                const detailedCommitData = await fetchWithCache(detailedCommitUrl, { headers });
 
-        const repo = ev.repo.name;
-        repos.add(repo);
-
-        if (GITHUB_FIELDS[ev.type]) {
-          const info = {};
-          for (const path of GITHUB_FIELDS[ev.type]) {
-            const val = getNestedValue(ev, path);
-            info[path] = Array.isArray(val) ? val.join(', ') : val;
-          }
-          activity.push(info);
-        }
-
-        // Handle push events specially
-        if (ev.type === 'PushEvent') {
-          for (const commit of ev.payload.commits || []) {
-            try {
-              const url = `https://api.github.com/repos/${repo}/commits/${commit.sha}`;
-              showCurrentUrl(url);
-              const commitData = await fetchWithCache(url, { headers });
-
-              activity.push({
-                type: 'commit',
-                'repo.name': repo,
-                created_at: commitData.commit.author.date,
-                sha: commit.sha,
-                message: commitData.commit.message,
-                files: (commitData.files || []).map(f => ({
-                  filename: f.filename,
-                  additions: f.additions,
-                  deletions: f.deletions,
-                  changes: f.changes,
-                  patch: f.patch || ''
-                }))
-              });
-            } catch (e) {
-              console.warn(`Error fetching commit ${commit.sha}:`, e);
+                activity.push({
+                    type: 'commit',
+                    'repo.name': repoFullName, // Use full_name
+                    created_at: detailedCommitData.commit.author.date,
+                    sha: detailedCommitData.sha,
+                    message: detailedCommitData.commit.message,
+                    files: (detailedCommitData.files || []).map(f => ({
+                        filename: f.filename,
+                        additions: f.additions,
+                        deletions: f.deletions,
+                        changes: f.changes,
+                        patch: f.patch || ''
+                    }))
+                });
             }
-          }
+        } catch (e) {
+            console.warn(`Error fetching commits for ${repoFullName}:`, e);
+            // Optionally, add some representation of this error or repo to the activity log
+            activity.push({
+                type: 'error',
+                'repo.name': repoFullName,
+                message: `Failed to fetch commits: ${e.message}`,
+                created_at: new Date().toISOString()
+            });
         }
       }
-
-      updateProgress('activity-progress', events.length, events.length);
-      return { activity, repos: [...repos] };
+      
+      updateProgress('activity-progress', repoList.length, repoList.length);
+      // Return collected activity and the set of repository names (full_name) that were processed
+      return { activity, repos: [...reposToProcess] };
     }
 
     // Generate summary using OpenAI
@@ -547,7 +564,7 @@ Make it engaging and easy to follow just by listening.</textarea>
         };
 
         const { activity, repos } = await fetchGitHubActivity(
-          config.username,
+          config.username, // This is now the search query
           config.since,
           config.until,
           headers
