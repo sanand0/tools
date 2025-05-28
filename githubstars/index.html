@@ -26,8 +26,12 @@
     <p>This tool updates all GitHub repo Markdown links in this format.</p>
     <form id="repoForm" class="mb-4">
       <div class="mb-3">
-        <label for="inputText" class="form-label">Paste Markdown containing GitHub repository links</label>
-        <textarea class="form-control" id="inputText" rows="5" required></textarea>
+        <label for="inputText" class="form-label">Paste Markdown containing GitHub repository links and click "Analyze" to replace the link text</label>
+        <textarea class="form-control" id="inputText" rows="5" required>Here is the kind of text you can convert:
+- [ElasticSearch](https://github.com/elastic/elasticsearch)
+- [repo link text will be replaced](https://github.com/meilisearch/meilisearch)
+- [typesense 22K ⭐ in Apr '25](https://github.com/typesense/typesense)
+</textarea>
       </div>
       <div class="mb-3">
         <label for="token" class="form-label">GitHub API Token (optional)</label>
