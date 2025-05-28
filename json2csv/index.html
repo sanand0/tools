@@ -19,11 +19,6 @@
           class="form-control json-input mb-3 font-monospace"
           rows="5"
           placeholder="Paste your JSON here..."></textarea>
-        <select class="form-select mb-3" id="format">
-          <option value="json">JSON array of objects</option>
-          <option value="jsonlines">JSON lines</option>
-          <option value="array">Array of arrays</option>
-        </select>
         <button id="convertBtn" class="btn btn-primary">
           <i class="bi bi-arrow-down-up"></i> Convert
         </button>
@@ -67,7 +62,6 @@
     const $downloadBtn = document.getElementById('downloadBtn');
     const $copyBtn = document.getElementById('copyBtn');
     const $toast = new bootstrap.Toast(document.getElementById('toast'));
-    const $format = document.getElementById('format');
 
     // Initialize with sample data
     $jsonInput.value = JSON.stringify([
@@ -87,31 +81,49 @@
       }, {});
     };
 
-    const parseJsonInput = (input, format) => {
-      if (format === 'json') {
-        return JSON.parse(input);
-      } else if (format === 'jsonlines') {
-        return input
-          .split('\n')
-          .filter(line => line.trim())
-          .map((line, i) => {
-            try {
-              return JSON.parse(line);
-            } catch (e) {
-              console.error(`Error parsing JSON line ${i + 1}: ${line}`);
-              return null;
-            }
-          });
-      } else if (format === 'array') {
-        return JSON.parse(input).map(row => Object.assign({}, row));
+    const parseJsonInput = (input) => {
+      try {
+        const parsed = JSON.parse(input);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        } else if (typeof parsed === 'object' && parsed !== null) {
+          // It's a single object, wrap it in an array
+          return [parsed];
+        }
+      } catch (e) {
+        // Initial parse failed, or it was a primitive/null which we don't want as a single object.
+        // We'll fall through to the error if it's not a valid single object either.
       }
+      // If the first try didn't return an array, try parsing as a single object again (or for the first time if initial parse failed)
+      // This path is mostly for the case where JSON.parse(input) results in a non-array (e.g. a single object)
+      try {
+        const parsedObject = JSON.parse(input);
+        if (typeof parsedObject === 'object' && parsedObject !== null && !Array.isArray(parsedObject)) {
+          return [parsedObject];
+        }
+      } catch (e) {
+        // This catch is for when the input is truly not JSON or not the object/array structure we expect
+        throw new Error("Invalid JSON input. Expected an array or an object.");
+      }
+      // If it parsed but wasn't an array or a standalone object that we could wrap
+      throw new Error("Invalid JSON input. Expected an array or an object.");
     };
 
-    const jsonToCsv = (jsonData, format = csvFormat) => {
-      const array = [].concat(typeof jsonData === 'object' ? jsonData : parseJsonInput(jsonData, $format.value));
-      const flattenedArray = array.map(item => flattenObject(item));
-      const headers = [...new Set(flattenedArray.flatMap(Object.keys))];
-      return format(flattenedArray, headers);
+    const jsonToCsv = (jsonStringInput, d3FormatFunction = csvFormat) => {
+      const dataArray = parseJsonInput(jsonStringInput); // Call new parseJsonInput
+
+      const orderedHeaders = [];
+      const flattenedArray = dataArray.map(item => {
+        const flatItem = flattenObject(item);
+        Object.keys(flatItem).forEach(key => {
+          if (!orderedHeaders.includes(key)) {
+            orderedHeaders.push(key);
+          }
+        });
+        return flatItem;
+      });
+      
+      return d3FormatFunction(flattenedArray, orderedHeaders);
     };
 
     const displayCsvTable = (csv) => {
@@ -145,10 +157,10 @@
 
     $convertBtn.addEventListener('click', () => {
       try {
-        const jsonData = $jsonInput.value.trim();
-        if (!jsonData) throw new Error('Please enter some JSON data.');
+        const jsonStringInput = $jsonInput.value.trim();
+        if (!jsonStringInput) throw new Error('Please enter some JSON data.');
 
-        const csv = jsonToCsv(jsonData);
+        const csv = jsonToCsv(jsonStringInput, csvFormat);
         displayCsvTable(csv);
         $downloadBtn.classList.remove('d-none');
         $copyBtn.classList.remove('d-none');
@@ -159,9 +171,9 @@
       }
     });
 
-    $downloadBtn.addEventListener('click', () => downloadCsv(jsonToCsv($jsonInput.value)));
+    $downloadBtn.addEventListener('click', () => downloadCsv(jsonToCsv($jsonInput.value.trim(), csvFormat)));
     $copyBtn.addEventListener('click', () => {
-      navigator.clipboard.writeText(jsonToCsv($jsonInput.value, tsvFormat));
+      navigator.clipboard.writeText(jsonToCsv($jsonInput.value.trim(), tsvFormat));
       showToast('Copied to clipboard!');
     });
   </script>
