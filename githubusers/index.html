@@ -19,19 +19,34 @@
   <div class="container py-4">
     <h1 class="mb-4"><i class="bi bi-github"></i> Github User Data Extractor</h1>
 
+    <p class="lead">
+      This tool extracts publicly available information about GitHub users.
+      Enter a GitHub personal access token (PAT) with appropriate permissions,
+      then provide a list of GitHub usernames or URLs (one per line).
+      The tool will fetch details like name, bio, followers, etc., and display them in a table.
+      You can then download the data as a CSV file or copy it to Excel.
+    </p>
+
     <form id="urlForm" class="mb-4">
       <div class="mb-3">
         <label for="token" class="form-label">Enter GitHub Token</label>
         <input type="text" class="form-control" id="token" placeholder="GitHub Token" />
       </div>
       <div class="mb-3">
-        <label for="urls" class="form-label">Enter GitHub URLs (one per line)</label>
+        <label for="urls" class="form-label">Enter GitHub Usernames or URLs (one per line)</label>
         <textarea class="form-control" id="urls" rows="5" placeholder="e.g.:
+username
 https://github.com/username
 https://username.github.io/"></textarea>
       </div>
       <button type="submit" class="btn btn-primary">
         <i class="bi bi-search"></i> Extract User Data
+      </button>
+      <button type="button" id="downloadCsvBtn" class="btn btn-success ms-2">
+        <i class="bi bi-download"></i> Download CSV
+      </button>
+      <button type="button" id="copyToExcelBtn" class="btn btn-info ms-2">
+        <i class="bi bi-clipboard"></i> Copy to Excel
       </button>
     </form>
 
