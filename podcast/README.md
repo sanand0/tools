@@ -1,128 +1,123 @@
-# Podcast Generator
+# AI-Powered Podcast Generator
 
-> I used this prompt for a podcast generator using 3 LLMs:
->
-> - [ChatGPT: o4-mini-high](openai.html): Functional, but has 3 major problems
->   - No visible error on missing API key
->   - No visible audio generation progress
->   - Both default voices are ash, not ash and nova
-> - [Gemini 2.5 Pro](gemini.html): Works and looks great!
-> - [Claude 3.7 Sonnet](claude.html): Works great and looks greater!
-> - Windsurf timed out
->
-> I picked the Claude version as the default (and added to it later). Here's the full prompt:
+This tool automates the creation of a two-person podcast episode, from script generation to audio synthesis, using Large Language Models (LLMs).
 
-Create a single-page web-app with vanilla JS and Bootstrap 5.3.6 to generate podcasts using LLMs.
+## What it does
 
-The page should briefly explain what the app does, how it works, and sample use cases.
+The AI Podcast Generator takes user-provided text as a starting point and transforms it into a fully scripted and audible podcast conversation. Key features include:
 
-Then, allow the user to paste text as reference. Click on a button to generate the podcast script.
+1.  **AI Script Generation:**
+    *   Utilizes an LLM (e.g., GPT-4 models) to convert input text into an engaging, conversational script between two AI personalities.
+    *   Users can customize the system prompt that guides the LLM in script creation.
+    *   The names, voice characteristics (e.g., energetic, warm), and specific speaking instructions for each of the two AI voices are configurable.
 
-Include an "Advanced Settings" section that lets the user adjust the following:
+2.  **Editable Script:**
+    *   The generated script is displayed in a text area, allowing users to review and make manual edits or refinements.
 
-1. System prompt to generate the podcast.
-2. Voice 1
-3. Voice 2
-4. OpenAI API key (hidden, like a password, cached in localStorage)
+3.  **AI Audio Synthesis:**
+    *   Employs OpenAI's Text-to-Speech (TTS) technology to convert each line of the edited script into audio.
+    *   Supports various voices (e.g., ash, nova, alloy) and applies specific instructions for tone and delivery for each speaker.
+    *   Generates audio in Opus format, which is then concatenated.
 
-The (editable) system prompt defaults to:
+4.  **Playback and Download:**
+    *   An integrated HTML5 audio player allows users to listen to the complete generated podcast.
+    *   A download button enables saving the final audio as an `.ogg` file.
 
-<PROMPT>
-You are a professional podcast script editor. Write this content as an engaging, lay-friendly conversation between two enthusiastic experts, ${voice1.name} and ${voice2.name}.
+## Use Cases
 
-1. **Show Opener**. ${voice1.name} and ${voice2.name} greet listeners together. Example:
-   ${voice1.name}: “Hello and welcome to (PODCAST NAME) for the week of $WEEK!”
-   ${voice2.name}: “We’re ${voice1.name} and ${voice2.name}, and today we’ll walk you through ...”
+-   **Content Creators:** Quickly generate draft podcast episodes from articles, blog posts, or notes, saving significant time in scriptwriting and initial voiceover.
+-   **Prototyping & Experimentation:** Experiment with different AI voices, script styles, and content formats for podcasts.
+-   **Accessibility:** Convert written content into an audio format for broader accessibility.
+-   **Educational Purposes:** Create engaging audio dialogues from educational materials.
+-   **Personal Projects:** Individuals can bring their written ideas to life in an audio format without needing recording equipment or voice talent.
 
-2. **Content**. Cover EVERY important point in the content.
-   Discuss with curious banter in alternate short lines (≤20 words).
-   Occasionally ask each other curious, leading questions.
-   Stay practical.
-   Explain in lay language.
-   Share NON-OBVIOUS insights.
-   Treat the audience as smart and aim to help them learn further.
+## How It Works
 
-3. **Tone & Style**:
-   Warm, conversational, and enthusiastic.
-   Active voice, simple words, short sentences.
-   No music cues, jingles, or sponsor breaks.
+1.  **Input Text:** The user pastes the source text they want to base the podcast on into the designated area.
+2.  **Configure Settings (Optional):**
+    *   Under "Advanced Settings," the user can:
+        *   Modify the system prompt used for script generation by the LLM.
+        *   Customize Voice 1 and Voice 2:
+            *   **Name:** (e.g., Alex, Maya)
+            *   **Voice Model:** Select from available OpenAI TTS voices (ash, nova, alloy, echo, fable, onyx, shimmer).
+            *   **Instructions:** Provide specific directions for the voice's tone, style, and delivery.
+        *   Enter their OpenAI API key (this is stored in `localStorage` and is required for LLM and TTS calls).
+3.  **Generate Script:**
+    *   The user clicks "Generate Script."
+    *   The tool sends the input text and the (customized or default) system prompt to an LLM (e.g., `gpt-4.1-nano`).
+    *   The LLM streams the generated script back, which appears in real-time in an editable textarea.
+4.  **Edit Script (Optional):** The user can modify the generated script directly in the textarea.
+5.  **Generate Audio:**
+    *   The user clicks "Generate Audio."
+    *   The script is processed line by line:
+        *   The speaker for each line is identified (e.g., "Alex:", "Maya:").
+        *   For each line, a request is made to the OpenAI TTS API (`gpt-4o-mini-tts` model) with the text, chosen voice model, and specific instructions for that speaker. Audio is returned in Opus format.
+    *   Progress is displayed as each line's audio is fetched.
+    *   The individual Opus audio segments are collected and combined into a single audio blob.
+6.  **Playback and Download:**
+    *   The combined audio is made available for playback via an `<audio>` HTML element.
+    *   The user can click "Download Audio" to save the podcast as an `.ogg` file.
 
-4. **Wrap-Up**. Each voice shares an important, practical takeaway.
+Error messages are displayed as Bootstrap alerts if issues occur during API calls. The tool relies on the `asyncLLM` library for streaming LLM responses.
 
-5. **Output format**: Plain text with speaker labels:
+# Prompt
 
-${voice1.name}: …
-${voice2.name}: …
-</PROMPT>
+This tool automates the creation of a two-person podcast episode, from script generation to audio synthesis, using Large Language Models (LLMs).
 
-Voice 1 has a configurable name (default: Alex), voice (default: ash), and instructions (default below:)
-<INSTRUCTIONS>
-Voice: Energetic, curious, and upbeat—always ready with a question.
-Tone: Playful and exploratory, sparking curiosity.
-Dialect: Neutral and conversational, like chatting with a friend.
-Pronunciation: Crisp and dynamic, with a slight upward inflection on questions.
-Features: Loves asking “What do you think…?” and using bright, relatable metaphors.
-</INSTRUCTIONS>
+## What it does
 
-Voice 2 has a configurable name (default: Maya), voice (default: nova), and instructions (default below):
-<INSTRUCTIONS>
-Voice: Warm, clear, and insightful—grounded in practical wisdom.
-Tone: Reassuring and explanatory, turning questions into teachable moments.
-Dialect: Neutral professional, yet friendly and approachable.
-Pronunciation: Steady and articulate, with calm emphasis on key points.
-Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to queries.
-</INSTRUCTIONS>
+The AI Podcast Generator takes user-provided text as a starting point and transforms it into a fully scripted and audible podcast conversation. Key features include:
 
-Voices can be ash|nova|alloy|echo|fable|onyx|shimmer.
+1.  **AI Script Generation:**
+    *   Utilizes an LLM (e.g., GPT-4 models) to convert input text into an engaging, conversational script between two AI personalities.
+    *   Users can customize the system prompt that guides the LLM in script creation.
+    *   The names, voice characteristics (e.g., energetic, warm), and specific speaking instructions for each of the two AI voices are configurable.
 
-When the user clicks "Generate Script", the app should use asyncLLM to stream the podcast generation as follows:
+2.  **Editable Script:**
+    *   The generated script is displayed in a text area, allowing users to review and make manual edits or refinements.
 
-```js
-import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
+3.  **AI Audio Synthesis:**
+    *   Employs OpenAI's Text-to-Speech (TTS) technology to convert each line of the edited script into audio.
+    *   Supports various voices (e.g., ash, nova, alloy) and applies specific instructions for tone and delivery for each speaker.
+    *   Generates audio in Opus format, which is then concatenated.
 
-for await (const { content } of asyncLLM("https://api.openai.com/v1/chat/completions", {
-  method: "POST",
-  headers: { "Content-Type": "application/json", Authorization: `Bearer ${OPENAI_API_KEY}` },
-  body: JSON.stringify({
-    model: "gpt-4.1-nano",
-    stream: true,
-    messages: [{ role: "system", content: systemPrompt(voice1, voice2) }, { role: "user", content }],
-  }),
-})) {
-  // Update the podcast script text area in real-time
-  // Note: content has the FULL response so far, not the delta
-}
-```
+4.  **Playback and Download:**
+    *   An integrated HTML5 audio player allows users to listen to the complete generated podcast.
+    *   A download button enables saving the final audio as an `.ogg` file.
 
-Render this into a text box that the user can edit after it's generated.
+## Use Cases
 
-Then, show a "Generate Audio" button that uses the podcast script to generate an audio file.
+-   **Content Creators:** Quickly generate draft podcast episodes from articles, blog posts, or notes, saving significant time in scriptwriting and initial voiceover.
+-   **Prototyping & Experimentation:** Experiment with different AI voices, script styles, and content formats for podcasts.
+-   **Accessibility:** Convert written content into an audio format for broader accessibility.
+-   **Educational Purposes:** Create engaging audio dialogues from educational materials.
+-   **Personal Projects:** Individuals can bring their written ideas to life in an audio format without needing recording equipment or voice talent.
 
-This should split the script into lines, drop empty lines, identify the voice based on the first word before the colon (:), and generate the audio via POST https://api.openai.com/v1/audio/speech with this JSON body (include the OPENAI_API_KEY):
+## How It Works
 
-```json
-{
-  "model": "gpt-4o-mini-tts",
-  "input": speakerLine,
-  "voice": voice.voice,
-  "instructions": voice.instructions,
-  "response_format": "opus",
-}
-```
+1.  **Input Text:** The user pastes the source text they want to base the podcast on into the designated area.
+2.  **Configure Settings (Optional):**
+    *   Under "Advanced Settings," the user can:
+        *   Modify the system prompt used for script generation by the LLM.
+        *   Customize Voice 1 and Voice 2:
+            *   **Name:** (e.g., Alex, Maya)
+            *   **Voice Model:** Select from available OpenAI TTS voices (ash, nova, alloy, echo, fable, onyx, shimmer).
+            *   **Instructions:** Provide specific directions for the voice's tone, style, and delivery.
+        *   Enter their OpenAI API key (this is stored in `localStorage` and is required for LLM and TTS calls).
+3.  **Generate Script:**
+    *   The user clicks "Generate Script."
+    *   The tool sends the input text and the (customized or default) system prompt to an LLM (e.g., `gpt-4.1-nano`).
+    *   The LLM streams the generated script back, which appears in real-time in an editable textarea.
+4.  **Edit Script (Optional):** The user can modify the generated script directly in the textarea.
+5.  **Generate Audio:**
+    *   The user clicks "Generate Audio."
+    *   The script is processed line by line:
+        *   The speaker for each line is identified (e.g., "Alex:", "Maya:").
+        *   For each line, a request is made to the OpenAI TTS API (`gpt-4o-mini-tts` model) with the text, chosen voice model, and specific instructions for that speaker. Audio is returned in Opus format.
+    *   Progress is displayed as each line's audio is fetched.
+    *   The individual Opus audio segments are collected and combined into a single audio blob.
+6.  **Playback and Download:**
+    *   The combined audio is made available for playback via an `<audio>` HTML element.
+    *   The user can click "Download Audio" to save the podcast as an `.ogg` file.
 
-Show progress CLEARLY as each line is generated.
-
-Concatenate the opus response.arrayBuffer() into a single blob and display an <audio> element that allows the user to play the generated audio roughly like this:
-
-```js
-const blob = new Blob(buffers, { type: 'audio/ogg; codecs=opus' }); // Blob() concatenates parts :contentReference[oaicite:1]{index=1}
-document.querySelector(the audio element).src = URL.createObjectURL(blob);
-```
-
-Finally, add a "Download Audio" button that downloads the generated audio file as a .ogg file.
-
-In case of any fetch errors, show the response as a clear Bootstrap alert with full information.
-Minimize try-catch blocks. Prefer one or a few at a high-level.
-Design this BEAUTIFULLY!
-Avoid styles, use only Bootstrap classes.
-Write CONCISE, MINIMAL, elegant, readable code.
+Error messages are displayed as Bootstrap alerts if issues occur during API calls. The tool relies on the `asyncLLM` library for streaming LLM responses.
