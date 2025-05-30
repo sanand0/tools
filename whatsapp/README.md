@@ -1,35 +1,27 @@
-# WhatsApp
+# WhatsApp Direct Message Link Generator
 
-Sends a user to the WhatsApp API endpoint to send a message to a telephone number.
+This tool generates a direct WhatsApp API link (`wa.me`) to start a chat with a given phone number. This allows users to send a WhatsApp message to a number without first needing to save it to their contacts list.
 
-(This is particularly useful when on a mobile device and you don't want to add the user to your contacts.)
+## What it does
 
-## Prompt
+The application provides a simple interface where a user can input a telephone number. Upon submission, the tool constructs a specific URL using WhatsApp's "click to chat" feature (`https://wa.me/phonenumber`) and redirects the user to this URL. This action typically opens the WhatsApp application (if installed) or WhatsApp Web, pre-filled with a chat window for the specified number.
 
-System prompt:
+## Use Cases
 
-```
-You, the assistant, are an expert programmer. Write a single page web app based on the user's description.
-First, write a "Requirements" section with the specs rewriten with enough clear detail for a programmer. Keep features simple.
-Then, write the implementation steps. (Evaluate alternatives where appropriate.)
-Lastly, write the app as a COMPACT HTML file with inline ESM + CSS in a Markdown code block.
-ALWAYS catch errors and notify user with CLEAR error messages.
-Target modern browsers. Avoid libraries (e.g. React) unless EXPLICITLY requested.
-ONLY if needed, use:
-  - D3 for charts: import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm".
-  - pdfjs for PDFs
-  - mammoth for DOCX
-  - mermaid for diagrams
-  - https://placehold.co/[width]x[height] for placeholders
-  - https://maxm-imggenurl.web.val.run/description-of-your-image for AI-generated images
-Don't write anything after the code.
-```
+-   **Quickly Message New Contacts:** Ideal for sending a one-time message to a new acquaintance or service provider without cluttering your phone's contact list.
+-   **Business Communication:** Useful for businesses to initiate conversations with customers via WhatsApp without needing to store every customer's number, especially for temporary interactions.
+-   **Mobile Efficiency:** Particularly handy on mobile devices where adding a contact can be a multi-step process. This tool streamlines sending a message to a new number.
+-   **Event & Community Management:** Easily message attendees or group members whose numbers you have but haven't saved.
 
-User prompt:
+## How It Works
 
-```
-Write an app that lets me paste a telephone number into an input.
-On submit, it should take me to the WhatsApp API endpoint that will open WhatsApp to send a message to them
-```
+1.  **Input Phone Number:** The user enters a telephone number into an input field on the web page. The number should typically include the country code, without any leading `+`, zeros, or special characters (though the tool might handle some basic cleanup depending on its exact implementation).
+2.  **Generate Link:** When the user submits the number (e.g., by clicking a button):
+    *   The tool takes the entered phone number.
+    *   It constructs a URL in the format `https://wa.me/<phonenumber>`.
+3.  **Redirect to WhatsApp:**
+    *   The browser is redirected to this newly constructed `wa.me` URL.
+    *   If WhatsApp is installed on the device (desktop or mobile), it will open and start a chat with the specified phone number.
+    *   If WhatsApp is not installed or on a desktop without the app, it may redirect to WhatsApp Web.
 
-Model: OpenAI GPT 4o Mini
+The tool is a simple web application that relies on the standard functionality of WhatsApp's `wa.me` links. It does not require any special permissions or access to the user's WhatsApp account beyond what the `wa.me` link itself initiates.
