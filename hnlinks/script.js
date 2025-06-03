@@ -50,14 +50,16 @@ document.addEventListener('DOMContentLoaded', () => {
           if (href && !title.startsWith('Ask HN:') && !title.startsWith('Show HN:') && !href.startsWith('from?site=')) {
             // Check if it's an internal HN link like item?id=
             // These are kept as they are discussion links for self-posts
-             if (href.startsWith('item?id=')) {
-               extractedLinks.push(getAbsoluteUrl('https://news.ycombinator.com/', href));
-             } else if (href.startsWith('http://') || href.startsWith('https://')) {
-               extractedLinks.push(href);
-             } else {
-               // Relative path, likely an internal page not caught, but attempt to make absolute
-               extractedLinks.push(getAbsoluteUrl(siteOrigin, href));
-             }
+            let absoluteUrl;
+            if (href.startsWith('item?id=')) {
+              absoluteUrl = getAbsoluteUrl('https://news.ycombinator.com/', href);
+            } else if (href.startsWith('http://') || href.startsWith('https://')) {
+              absoluteUrl = href;
+            } else {
+              // Relative path, likely an internal page not caught, but attempt to make absolute
+              absoluteUrl = getAbsoluteUrl(siteOrigin, href);
+            }
+            extractedLinks.push({ text: title, href: absoluteUrl });
           }
         });
       } else if (selectedUrl.includes('hntoplinks.com')) {
@@ -82,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
           if (href.includes('news.ycombinator.com/item?id=')) return; // These are comment links on hntoplinks
           if (href.startsWith('/subscribers') || href.startsWith('/stories/') || href.startsWith('/about')) return;
           if (href.startsWith('/today?page=') || href.startsWith('/week?page=') || href.startsWith('/month?page=')) return;
-          if (text.match(/^\d{4}$/) || ['Today', 'This Week', 'This Month', 'This Year', 'All', 'Subscribe', 'Next »', 'About'].includes(text)) return;
           if (text.startsWith('Ask HN:') || text.startsWith('Show HN:')) return;
 
           // Ensure the link is not part of the site's own chrome/navigation
@@ -102,14 +103,28 @@ document.addEventListener('DOMContentLoaded', () => {
           if(isNav) return;
 
           // If it's a relative link, make it absolute from hntoplinks.com
-          extractedLinks.push(getAbsoluteUrl(siteOrigin, href));
+          extractedLinks.push({ text: text, href: getAbsoluteUrl(siteOrigin, href) });
         });
       }
 
-      // Remove duplicates and display
-      const uniqueLinks = [...new Set(extractedLinks)];
-      linksTextArea.value = uniqueLinks.join('\n');
-      if (uniqueLinks.length === 0) {
+      // Filter for unique links based on href
+      const uniqueLinkObjects = [];
+      const seenHrefs = new Set();
+      for (const linkObj of extractedLinks) {
+        if (linkObj.href && !seenHrefs.has(linkObj.href)) {
+          uniqueLinkObjects.push(linkObj);
+          seenHrefs.add(linkObj.href);
+        }
+      }
+
+      if (uniqueLinkObjects.length > 0) {
+        const markdownLinks = uniqueLinkObjects.map(linkObj => {
+          // Basic Markdown sanitization for text: escape square brackets
+          const sanitizedText = linkObj.text.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
+          return `[${sanitizedText}](${linkObj.href})`;
+        });
+        linksTextArea.value = markdownLinks.join('\n\n'); // Separate Markdown links by two newlines for better readability
+      } else {
         linksTextArea.value = 'No article links found matching the criteria.';
       }
 
