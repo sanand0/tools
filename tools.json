@@ -25,6 +25,12 @@
       "url": "podcast"
     },
     {
+      "icon": "bi-mic-fill",
+      "title": "SpeakMD",
+      "description": "Convert Markdown text into a conversational podcast script using LLMs.",
+      "url": "speakmd/index.html"
+    },
+    {
       "icon": "bi-github",
       "title": "GitHub Summary",
       "description": "Summarize all activity by a user over a time period",

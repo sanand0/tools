@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeakMD - Markdown to Podcast Converter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 70px; /* Ensure content is not hidden by fixed-top navbar */
+      }
+      #output-area {
+        background-color: #f8f9fa; /* Light background for the output area */
+        border: 1px solid #ced4da;
+        padding: 0.75rem;
+        min-height: 200px; /* Give it a decent minimum height */
+        white-space: pre-wrap; /* Preserve line breaks and spaces from LLM output */
+        overflow-wrap: break-word; /* Ensure long words don't overflow */
+      }
+      .action-btns .btn {
+        margin-left: 5px; /* Add a small margin between action buttons */
+      }
+      /* Optional: Improve spacing for smaller screens if needed */
+      @media (max-width: 768px) {
+        .container {
+          padding-top: 60px; /* Adjust padding for smaller navbars if applicable */
+        }
+      }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-mic-fill me-2"></i>SpeakMD - Markdown to Podcast Converter
+            </span>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="mb-3">
+            <label for="markdown-input" class="form-label">Paste your Markdown here:</label>
+            <textarea id="markdown-input" class="form-control" rows="10"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="model-select" class="form-label">Select Model:</label>
+            <select id="model-select" class="form-select">
+                <option value="openai/gpt-4.1-nano">openai/gpt-4.1-nano</option>
+                <option value="openai/gpt-4.1-mini">openai/gpt-4.1-mini</option>
+                <option value="openai/gpt-4.1">openai/gpt-4.1</option>
+                <option value="google/gemini-2.5-flash-preview-05-20">google/gemini-2.5-flash-preview-05-20</option>
+                <option value="anthropic/claude-sonnet-4">anthropic/claude-sonnet-4</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="openai-base-url" class="form-label">OpenAI Base URL:</label>
+            <input type="text" id="openai-base-url" class="form-control" value="https://api.openai.com/v1">
+        </div>
+        <div class="mb-3">
+            <label for="openai-api-key" class="form-label">OpenAI API Key:</label>
+            <input type="password" id="openai-api-key" class="form-control">
+        </div>
+        <div class="mb-3">
+            <button id="convert-btn" class="btn btn-primary w-100">Convert</button>
+        </div>
+
+        <h5>Generated Podcast Script:</h5>
+        <div id="output-container" class="mb-3 position-relative">
+            <div id="output-area" class="form-control bg-light"></div>
+            <div class="action-btns" style="position: absolute; top: 10px; right: 10px;">
+                <button id="copy-btn" class="btn btn-sm btn-secondary me-2" title="Copy to Clipboard">
+                    <i class="bi bi-clipboard"></i>
+                </button>
+                <button id="read-aloud-btn" class="btn btn-sm btn-info" title="Read Aloud">
+                    <i class="bi bi-volume-up"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
+        import { marked } from "https://cdn.jsdelivr.net/npm/marked@9.1.2/lib/marked.esm.js";
+
+        const markdownInput = document.getElementById('markdown-input');
+        const modelSelect = document.getElementById('model-select');
+        const openaiBaseUrlInput = document.getElementById('openai-base-url');
+        const openaiApiKeyInput = document.getElementById('openai-api-key');
+        const convertBtn = document.getElementById('convert-btn');
+        const outputArea = document.getElementById('output-area');
+        const copyBtn = document.getElementById('copy-btn');
+        const readAloudBtn = document.getElementById('read-aloud-btn');
+
+        convertBtn.addEventListener('click', async () => {
+            const markdown = markdownInput.value.trim();
+            let modelName = modelSelect.value;
+            const baseUrl = openaiBaseUrlInput.value.trim();
+            const apiKey = openaiApiKeyInput.value.trim();
+
+            if (!markdown || !baseUrl || !apiKey) {
+                alert("Please fill in Markdown, OpenAI Base URL, and API Key.");
+                return;
+            }
+
+            if (modelName.startsWith("openai/") && baseUrl.includes("api.openai.com")) {
+              modelName = modelName.replace("openai/", "");
+            }
+
+            const systemPrompt = `You are an expert scriptwriter. Your task is to convert the provided Markdown text into a conversational podcast script.
+            Follow these instructions carefully:
+            1.  **Faithful Reproduction:** The script must faithfully reproduce the original content's meaning and information.
+            2.  **Conversational Tone:** Rewrite the text in a natural, engaging, and conversational style suitable for audio narration. Use simpler sentences and direct address where appropriate.
+            3.  **Remove Citations/References:** Eliminate academic-style reference links (e.g., [1], [^2]), footnotes, and similar citations.
+            4.  **Handle Links:**
+                *   If a link provides essential information (e.g., a project name or a key resource), replace it with its text. For example, "Markdown: \`[Visit Google](https://google.com)\`" should become something like "You can visit Google." or "Check out Google."
+                *   If a link is for further reading or is a non-essential source, you can omit it or briefly mention the source if critical.
+            5.  **Handle Images:**
+                *   If an image has descriptive alt text, use it to describe the image: "Markdown: \`![A cute black kitten playing with a red ball](kitten.jpg)\`" could become "Imagine a cute black kitten playing with a red ball."
+                *   If alt text is missing or generic (e.g., "image", "logo"), either drop the image reference or use context to provide a brief, generic description if essential.
+            6.  **Narrate Tables:**
+                *   First, introduce the table and state its column headers. For example: "Alright, there's a table here with the following columns: Product, Price, and Availability."
+                *   Then, read each row, cell by cell. For each cell, state the shortened column name followed by the cell's value. For example: "Row 1: Product is 'SuperWidget', Price is '$10', Availability is 'In Stock'."
+                *   Make it sound natural, not like a robot reading data.
+            7.  **Structure:** Use paragraphs and natural breaks to make the script easy to read and follow. Avoid overly technical jargon unless the source markdown is highly technical and it's unavoidable.
+            8.  **Examples for clarity:**
+                *   **Markdown Link:** \`For more info, see [Example Site](https://example.com).\`
+                    **Podcast Script:** "For more information, you can check out Example Site."
+                *   **Markdown Image:** \`![Diagram of a process](process.png)\`
+                    **Podcast Script:** "Next, there's a diagram showing a process." (If alt text is good) or "The document includes a visual diagram here." (If alt text is unhelpful but the image existence is notable).
+                *   **Markdown Table:**
+                    \`\`\`
+                    | Name   | Age | City    |
+                    |--------|-----|---------|
+                    | Alice  | 30  | New York|
+                    | Bob    | 24  | London  |
+                    \`\`\`
+                    **Podcast Script:** "Okay, I see a table with details for Name, Age, and City. First up, Name: Alice, Age: 30, City: New York. Next, Name: Bob, Age: 24, City: London."
+
+            Produce only the conversational script based on the markdown provided by the user.
+            `;
+
+            outputArea.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div> Generating...';
+            const messages = [{ role: "system", content: systemPrompt }, { role: "user", content: markdown }];
+
+            try {
+                let fullContent = "";
+                for await (const { content } of asyncLLM(`${baseUrl}/chat/completions`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+                  body: JSON.stringify({ model: modelName, stream: true, temperature: 0.7, messages }),
+                })) {
+                  if (content) {
+                    fullContent = content;
+                    outputArea.innerHTML = marked.parse(fullContent);
+                  }
+                }
+                // Final render after stream
+                outputArea.innerHTML = marked.parse(fullContent);
+            } catch (error) {
+                outputArea.innerHTML = \`<div class="alert alert-danger" role="alert">Error: ${error.message}</div>\`;
+                console.error("LLM Error:", error);
+            }
+        });
+
+        copyBtn.addEventListener('click', () => {
+            const textToCopy = outputArea.innerText;
+            if (navigator.clipboard && textToCopy) {
+                navigator.clipboard.writeText(textToCopy)
+                    .then(() => alert("Copied to clipboard!"))
+                    .catch(err => alert("Failed to copy: " + err));
+            } else if (textToCopy) {
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    alert('Copied to clipboard (fallback)!');
+                } catch (err) {
+                    alert('Failed to copy (fallback): ' + err);
+                }
+                document.body.removeChild(textArea);
+            }
+        });
+
+        readAloudBtn.addEventListener('click', () => {
+            const textToRead = outputArea.innerText;
+            if ('speechSynthesis' in window && textToRead) {
+                const utterance = new SpeechSynthesisUtterance(textToRead);
+                window.speechSynthesis.cancel(); // Cancel any previous speech
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('Sorry, your browser does not support text-to-speech, or there is no text to read.');
+            }
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+</body>
+</html>
