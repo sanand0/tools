@@ -1,0 +1,16 @@
+{
+  "name": "googlesuggest-tool",
+  "version": "1.0.0",
+  "description": "Google Suggest Explorer tool with Vitest tests.",
+  "main": "script.js",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vitest": "^1.3.1",
+    "happydom": "^13.0.1",
+    "msw": "^2.2.1"
+  },
+  "type": "module"
+}

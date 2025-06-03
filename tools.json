@@ -97,6 +97,12 @@
       "url": "hnlinks"
     },
     {
+      "icon": "bi-search-heart",
+      "title": "Google Suggest Explorer",
+      "description": "Explore Google Search suggestions from different countries and get AI-powered humorous explanations.",
+      "url": "googlesuggest"
+    },
+    {
       "icon": "bi-geo-alt",
       "title": "What's Near Me?",
       "description": "Find nearby attractions and places of interest.",
