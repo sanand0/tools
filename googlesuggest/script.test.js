@@ -216,7 +216,10 @@ describe('Google Suggest Explorer', () => {
       await window.happyDOM.whenAsyncComplete();
 
 
+      document.getElementById('openaiBaseUrl').value = 'https://api.openai.com/v1'; // Test with OpenAI direct
       document.getElementById('openaiApiKey').value = 'test-key';
+      document.getElementById('llmModel').value = 'openai/gpt-4.1'; // Use a model that gets stripped for this part
+
       mockAsyncLLM.mockImplementation(async function*() {
         yield { content: 'Humorous ' };
         yield { content: 'Humorous explanation.' };
@@ -225,14 +228,47 @@ describe('Google Suggest Explorer', () => {
       document.getElementById('explainButton').click();
       await window.happyDOM.whenAsyncComplete();
 
-      expect(mockAsyncLLM).toHaveBeenCalled();
-      expect(mockAsyncLLM.mock.calls[0][0]).toContain('/chat/completions'); // Check endpoint
-      const requestBody = JSON.parse(mockAsyncLLM.mock.calls[0][1].body);
-      expect(requestBody.messages[0].content).toContain('llm test');
-      expect(requestBody.messages[0].content).toContain('outliers with unique or unusual perspectives');
+      expect(mockAsyncLLM).toHaveBeenCalledTimes(1);
+      const firstCallArgs = mockAsyncLLM.mock.calls[0];
+      expect(firstCallArgs[0]).toBe('https://api.openai.com/v1/chat/completions');
+      const firstRequestBody = JSON.parse(firstCallArgs[1].body);
+      expect(firstRequestBody.messages[0].content).toContain('llm test');
+      expect(firstRequestBody.messages[0].content).toContain('outliers with unique or unusual perspectives');
+      expect(firstRequestBody.model).toBe('gpt-4.1'); // Check that 'openai/' prefix is stripped for api.openai.com
       expect(mockMarkedParse).toHaveBeenCalledWith('Humorous explanation.');
       expect(document.getElementById('llmResponse').textContent).toContain('Humorous explanation.');
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(expect.stringContaining('llmExplanation_v1.1_llm test'), '"Humorous explanation."');
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(expect.stringContaining('llmExplanation_v1.1_llm test'), expect.stringContaining('"Humorous explanation."'));
+
+      // Scenario 2: Test with a proxy URL and a model that should not be stripped
+      mockAsyncLLM.mockClear();
+      mockMarkedParse.mockClear();
+      localStorageMock.setItem.mockClear(); // Clear mock call history for setItem
+      // Note: localStorage content itself is not cleared here, only mock call history for setItem. Cache for LLM is query+model+hash specific.
+
+      document.getElementById('openaiBaseUrl').value = 'https://myproxy.com/api';
+      document.getElementById('llmModel').value = 'anthropic/claude-sonnet-4'; // A model that shouldn't be stripped
+      document.getElementById('openaiApiKey').value = 'proxy-key';
+
+      // Ensure currentSuggestions and currentQuery are still set from the first part of the test
+      // or re-fetch/re-set them if necessary. For this test, assume they persist or explainButton wouldn't be clickable.
+
+      mockAsyncLLM.mockImplementation(async function*() { // New mock for the second call
+        yield { content: 'Proxy ' };
+        yield { content: 'Proxy explanation.' };
+      });
+
+      document.getElementById('explainButton').click();
+      await window.happyDOM.whenAsyncComplete();
+
+      expect(mockAsyncLLM).toHaveBeenCalledTimes(1);
+      const secondCallArgs = mockAsyncLLM.mock.calls[0];
+      expect(secondCallArgs[0]).toBe('https://myproxy.com/api/chat/completions');
+      const secondRequestBody = JSON.parse(secondCallArgs[1].body);
+      expect(secondRequestBody.messages[0].content).toContain('llm test'); // Query should still be the same
+      expect(secondRequestBody.model).toBe('anthropic/claude-sonnet-4'); // Model should NOT be stripped
+      expect(mockMarkedParse).toHaveBeenCalledWith('Proxy explanation.');
+      expect(document.getElementById('llmResponse').textContent).toContain('Proxy explanation.');
+      expect(localStorageMock.setItem).toHaveBeenCalledWith(expect.stringContaining('llmExplanation_v1.1_llm test'), expect.stringContaining('"Proxy explanation."'));
     });
   });
 
