@@ -68,10 +68,40 @@ function addToSearchHistory(query) {
 
 function renderSearchHistory() {
   const history = getSearchHistory();
-  const historyButtons = history.map(query =>
-    html`<button type="button" class="btn btn-sm btn-outline-info history-item me-1 mb-1" @click=${() => performSearchFromHistory(query)}>${query}</button>`
-  );
-  render(html`${historyButtons}`, searchHistoryDiv);
+  const historyElements = history.map(query => {
+    const termButton = document.createElement('button');
+    termButton.type = 'button';
+    termButton.className = 'btn btn-sm btn-outline-info history-term-button';
+    termButton.textContent = query;
+    termButton.addEventListener('click', () => performSearchFromHistory(query));
+
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.className = 'btn btn-sm btn-outline-danger delete-history-item';
+    deleteButton.innerHTML = '<i class="bi bi-x-lg"></i>'; // Using Bootstrap Icon
+    deleteButton.title = `Remove "${query}" from history`;
+    deleteButton.addEventListener('click', (event) => {
+      event.stopPropagation(); // Prevent triggering search on the term button
+      removeSearchHistoryItem(query);
+    });
+
+    const group = document.createElement('div');
+    group.className = 'history-item-group';
+    group.appendChild(termButton);
+    group.appendChild(deleteButton);
+
+    return group;
+  });
+
+  searchHistoryDiv.innerHTML = ''; // Clear existing
+  historyElements.forEach(el => searchHistoryDiv.appendChild(el));
+}
+
+function removeSearchHistoryItem(queryToRemove) {
+  let history = getSearchHistory();
+  history = history.filter(query => query !== queryToRemove);
+  setToCache(SEARCH_HISTORY_KEY, history);
+  renderSearchHistory();
 }
 
 function performSearchFromHistory(query) {
@@ -217,7 +247,7 @@ function renderSuggestions(suggestionsByCountry, query) {
 // --- LLM Interaction ---
 openaiBaseUrlInput.value = localStorage.getItem("openai_base_url") || "https://api.openai.com/v1";
 openaiApiKeyInput.value = localStorage.getItem("openai_api_key") || "";
-llmModelSelect.value = localStorage.getItem("llm_model") || "openai/gpt-4.1";
+llmModelSelect.value = localStorage.getItem("llm_model") || "openai/gpt-4.1-mini";
 
 openaiBaseUrlInput.addEventListener("change", (e) => localStorage.setItem("openai_base_url", e.target.value));
 openaiApiKeyInput.addEventListener("change", (e) => localStorage.setItem("openai_api_key", e.target.value));

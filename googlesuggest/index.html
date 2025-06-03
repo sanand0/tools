@@ -5,8 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Google Suggest Explorer</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iY3VycmVudENvbG9yIj48cGF0aCBkPSJNMTUuNSAxNGgtLjc5bC0uMjgtLjI3QTE0LjQ4IDE0LjQ4IDAgMCAwIDE2LjQgOWgtMi40Yy0xLjE3IDAtMi4xOC42My0yLjY4IDEuNThMMTAuMiAxM0gxMGwtMS4xMy0yLjQyYy0uNS0uOTUtMS41MS0xLjU4LTIuNjgtMS41OEg0Yy0xLjM4IDAtMi41IDEuMTItMi41IDIuNVMxLjYyIDE0IDIuNSAxNGg0LjVjLjcyIDAgMS4zOC0uMzggMS43NS0xLjAzbDEuMDMtMi4xN0wxMCAxM2gxLjZsMS4zOC0zLjA0QzEzLjM0IDEwLjUgMTQuMzQgMTAgMTUuNSA5YzEuMzggMCAyLjUgMS4xMiAyLjUgMi41cy0xLjEyIDIuNS0yLjUgMi41ek0xMCAxOGMtMi43NiAwLTUgMi4yNC01IDVzMi4yNCA1IDUgNSA1LTIuMjQgNS01LTItNS01LTZabTAtOGMyLjc2IDAgNS0yLjI0IDUtNVMxMi43NiAwIDEwIDAgNSA1LjI0IDUgMyAyLjI0IDMgNSAzem0xMCA1YzIuNzYgMCA1LTIuMjQgNS01cy0yLjI0LTUtNS01LTUgMi4yNC01IDUgMi4yNCA1IDUgNXoiLz48L3N2Zz4=">
   <style>
+    body {
+      background-color: #f8f9fa; /* Bootstrap's light background */
+    }
+    .container { /* Assuming main content is wrapped in .container */
+      background-color: #ffffff; /* White background for the main content area */
+      border-radius: 0.5rem;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Subtle shadow */
+      padding-top: 2rem !important;
+      padding-bottom: 2rem !important;
+    }
+    header.border-bottom {
+      border-bottom-color: #dee2e6 !important; /* Ensure visibility on light bg */
+    }
+
     .country-results-container { margin-bottom: 1rem; }
     .country-name { font-weight: bold; margin-bottom: 0.5rem; display: block; }
     .suggestions-list { list-style-type: none; padding-left: 0; margin-bottom: 0; }
@@ -14,23 +29,47 @@
       display: block;
       padding: 0.2rem 0.25rem;
       text-decoration: none;
-      color: #0d6efd; /* Bootstrap primary blue */
+      color: #0d6efd;
       border-radius: 0.25rem;
     }
     .suggestions-list li a:hover {
-      background-color: #e9ecef; /* Light grey background on hover */
-      color: #0a58ca; /* Darker blue on hover */
+      background-color: #e9ecef;
+      color: #0a58ca;
     }
     .history-item { cursor: pointer; }
     #llmResponse :is(h1,h2,h3,h4,h5,h6) { font-size: revert; font-weight: revert; }
-    .search-history-section { margin-bottom: 1.5rem; }
-    .suggestions-grid .card { height: 100%; } /* Make cards in a row same height */
-    .suggestions-grid .card-body { overflow-y: auto; max-height: 300px; } /* Scroll long lists */
+    .suggestions-grid .card { height: 100%; }
+    .suggestions-grid .card-body { overflow-y: auto; max-height: 300px; }
+
+    .history-item-group {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 0.25rem;
+      margin-bottom: 0.25rem;
+      border-radius: 0.25rem;
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+    }
+    .history-item-group .history-term-button {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      border-right: none;
+    }
+    .history-item-group .delete-history-item {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      padding: 0.25rem 0.5rem;
+      line-height: 1;
+    }
+    .delete-history-item .bi-x-lg {
+        font-size: 0.8em;
+        vertical-align: middle;
+    }
   </style>
 </head>
 <body>
-  <div class="container py-4">
-    <header class="pb-3 mb-4 border-bottom">
+  <div class="container py-4"> <!-- py-4 will be overridden by !important but kept for fallback -->
+    <header class="pb-3 py-3 mb-4 border-bottom"> <!-- Added py-3 -->
       <a href="#" class="d-flex align-items-center text-dark text-decoration-none">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-lightbulb me-2" viewBox="0 0 16 16">
           <path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1z"/>
@@ -39,7 +78,7 @@
       </a>
     </header>
 
-    <p class="lead">Enter a search term to see Google Search suggestions from different English-speaking countries. You can also get an AI-powered humorous explanation of the results.</p>
+    <p class="lead mb-4">Enter a search term to see Google Search suggestions from different English-speaking countries. You can also get an AI-powered humorous explanation of the results.</p> <!-- Added mb-4 -->
 
     <div class="row align-items-end mb-3">
       <div class="col-md">
@@ -55,49 +94,54 @@
       <span class="visually-hidden">Loading...</span>
     </div>
 
-    <div class="search-history-section">
-      <p class="mb-1">
-        Start your exploration with keywords like:
-        <span id="initialKeywords" class="ms-1">
+    <div class="search-history-section mb-4"> <!-- Changed to mb-4 for consistency -->
+      <div class="d-flex align-items-center flex-wrap">
+        <p class="mb-1 me-2">Suggestions & History:</p>
+        <div id="initialKeywords" class="me-2 mb-1">
           <button type="button" class="btn btn-sm btn-outline-secondary history-item">how to</button>
           <button type="button" class="btn btn-sm btn-outline-secondary history-item ms-1">best way to</button>
           <button type="button" class="btn btn-sm btn-outline-secondary history-item ms-1">why is</button>
           <button type="button" class="btn btn-sm btn-outline-secondary history-item ms-1">can I</button>
-        </span>
-      </p>
-      <div class="d-flex align-items-center flex-wrap">
-        <h5 class="mb-0 me-2">Search History:</h5>
-        <div id="searchHistory" class="d-flex flex-wrap">
-          <!-- Search history items will be injected here -->
+        </div>
+        <div id="searchHistory" class="d-flex flex-wrap align-items-center mb-1">
+          <!-- User's search history items will be injected here -->
         </div>
       </div>
     </div>
 
-    <div id="results" class="container-fluid mb-4">
+    <div id="results" class="container-fluid mb-4 text-center">
+      <p id="resultsPlaceholder" class="text-muted pt-4 pb-4"><em>Search suggestions will appear here.</em></p>
       <!-- Google Suggest results will be injected here (in a row/column grid) -->
     </div>
 
-    <div class="row g-3 align-items-end mb-3">
-      <div class="col-lg-3 col-md-6">
-        <label for="llmModel" class="form-label">LLM Model:</label>
-        <select class="form-select" id="llmModel">
-          <option value="openai/gpt-4.1-nano">OpenAI GPT-4.1 Nano</option>
-          <option value="openai/gpt-4.1-mini">OpenAI GPT-4.1 Mini</option>
-          <option value="openai/gpt-4.1" selected>OpenAI GPT-4.1</option>
-          <option value="google/gemini-2.5-flash-preview-05-20">Google Gemini 2.5 Flash Preview</option>
-          <option value="anthropic/claude-sonnet-4">Anthropic Claude Sonnet 4</option>
-        </select>
+    <div class="card mb-4">
+      <div class="card-header">
+        AI Configuration
       </div>
-      <div class="col-lg-3 col-md-6">
-        <label for="openaiBaseUrl" class="form-label">OpenAI Base URL:</label>
-        <input type="text" class="form-control" id="openaiBaseUrl" value="https://api.openai.com/v1">
-      </div>
-      <div class="col-lg-4 col-md-8">
-        <label for="openaiApiKey" class="form-label">OpenAI API Key:</label>
-        <input type="password" class="form-control" id="openaiApiKey" placeholder="sk-...">
-      </div>
-      <div class="col-lg-2 col-md-4">
-        <button type="button" class="btn btn-success w-100" id="explainButton" disabled>Explain This</button>
+      <div class="card-body pb-2">
+        <div class="row g-3 align-items-end">
+          <div class="col-lg-3 col-md-6 mb-2">
+            <label for="llmModel" class="form-label">LLM Model:</label>
+            <select class="form-select form-select-sm" id="llmModel">
+              <option value="openai/gpt-4.1-nano">OpenAI GPT-4.1 Nano</option>
+              <option value="openai/gpt-4.1-mini" selected>OpenAI GPT-4.1 Mini</option>
+              <option value="openai/gpt-4.1">OpenAI GPT-4.1</option>
+              <option value="google/gemini-2.5-flash-preview-05-20">Google Gemini 2.5 Flash Preview</option>
+              <option value="anthropic/claude-sonnet-4">Anthropic Claude Sonnet 4</option>
+            </select>
+          </div>
+          <div class="col-lg-3 col-md-6 mb-2">
+            <label for="openaiBaseUrl" class="form-label">Base URL:</label>
+            <input type="text" class="form-control form-control-sm" id="openaiBaseUrl" value="https://api.openai.com/v1">
+          </div>
+          <div class="col-lg-4 col-md-8 mb-2">
+            <label for="openaiApiKey" class="form-label">API Key:</label>
+            <input type="password" class="form-control form-control-sm" id="openaiApiKey" placeholder="sk-...">
+          </div>
+          <div class="col-lg-2 col-md-4 mb-2">
+            <button type="button" class="btn btn-success btn-sm w-100" id="explainButton" disabled>Explain This</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -105,7 +149,7 @@
         <span class="visually-hidden">Generating explanation...</span>
     </div>
 
-    <div id="llmResponseCard" class="card mt-0 d-none"> <!-- mt-0 as loading indicator has mb-3 -->
+    <div id="llmResponseCard" class="card mt-0 d-none">
       <div class="card-header">
         AI Explanation
       </div>
