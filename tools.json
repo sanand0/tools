@@ -91,6 +91,12 @@
       "url": "hackernewsmd"
     },
     {
+      "icon": "bi-newspaper",
+      "title": "Hacker News Links Extractor",
+      "description": "Scrape main article links from Hacker News or HN Top Links.",
+      "url": "hnlinks"
+    },
+    {
       "icon": "bi-geo-alt",
       "title": "What's Near Me?",
       "description": "Find nearby attractions and places of interest.",
