@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const doc = await fetchAndParse(selectedUrl);
       let extractedLinks = [];
+      let linkText = {};
       const siteOrigin = new URL(selectedUrl).origin;
 
       if (selectedUrl.includes('news.ycombinator.com')) {
@@ -47,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         links.forEach(link => {
           const title = link.textContent.trim();
           const href = link.getAttribute('href');
+          linkText[href] = title;
           if (href && !title.startsWith('Ask HN:') && !title.startsWith('Show HN:') && !href.startsWith('from?site=')) {
             // Check if it's an internal HN link like item?id=
             // These are kept as they are discussion links for self-posts
@@ -74,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allLinks.forEach(link => {
           const href = link.getAttribute('href');
           const text = link.textContent.trim();
+          linkText[href] = text;
 
           if (!href || href === '#' || href.startsWith('javascript:')) return;
 
@@ -108,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Remove duplicates and display
       const uniqueLinks = [...new Set(extractedLinks)];
-      linksTextArea.value = uniqueLinks.join('\n');
+      linksTextArea.value = uniqueLinks.map(link => `[${linkText[link]}](${link})`).join('\n');
       if (uniqueLinks.length === 0) {
         linksTextArea.value = 'No article links found matching the criteria.';
       }
