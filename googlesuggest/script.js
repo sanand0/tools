@@ -1,6 +1,6 @@
 import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
-import { marked } from "https://cdn.jsdelivr.net/npm/marked@12";
+import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 
 const COUNTRIES = {
   US: "United States", GB: "United Kingdom", CA: "Canada", AU: "Australia", NZ: "New Zealand",
@@ -181,26 +181,37 @@ async function fetchGoogleSuggestions(query) {
 }
 
 function renderSuggestions(suggestionsByCountry, query) {
-  const queryHeader = html`<h3>Suggestions for "<em>${query}</em>"</h3>`;
-  const templates = Object.entries(suggestionsByCountry).map(([code, data]) => {
+  const queryHeader = html`<h3 class="mb-3">Suggestions for "<em>${query}</em>"</h3>`;
+
+  const countryCards = Object.entries(suggestionsByCountry).map(([code, data]) => {
+    const countryName = data.country || COUNTRIES[code] || code; // Fallback for name
+    let content;
+
     if (data.error) {
-      return html`
-        <div class="country-results card mb-3">
-          <div class="card-header country-name">${data.country} (${code}) - <span class="text-danger">Error</span></div>
-          <div class="card-body"><p class="text-danger">${data.error}</p></div>
-        </div>`;
+      content = html`<p class="text-danger m-0">${data.error}</p>`;
+    } else if (data.suggestions && data.suggestions.length > 0) {
+      content = html`
+        <ul class="suggestions-list">
+          ${data.suggestions.map((s) => html`<li><a href="https://www.google.com/search?q=${encodeURIComponent(s)}" target="_blank" rel="noopener noreferrer">${s}</a></li>`)}
+        </ul>`;
+    } else {
+      content = html`<p class="m-0"><em>No suggestions found.</em></p>`;
     }
+
     return html`
-      <div class="country-results card mb-3">
-        <div class="card-header country-name">${data.country} (${code})</div>
-        <div class="card-body">
-          ${data.suggestions && data.suggestions.length > 0
-            ? html`<ul class="suggestions-list">${data.suggestions.map((s) => html`<li>${s}</li>`)}</ul>`
-            : html`<p><em>No suggestions found.</em></p>`}
+      <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 mb-4 d-flex align-items-stretch">
+        <div class="card country-results-container w-100">
+          <div class="card-header country-name">${countryName} (${code})</div>
+          <div class="card-body">
+            ${content}
+          </div>
         </div>
-      </div>`;
+      </div>
+    `;
   });
-  render(html`${queryHeader}${templates}`, resultsDiv);
+
+  // Wrap countryCards in a row
+  render(html`${queryHeader}<div class="row suggestions-grid">${countryCards}</div>`, resultsDiv);
 }
 
 // --- LLM Interaction ---
@@ -258,8 +269,9 @@ async function fetchLLMExplanation(suggestions, query) {
   const promptContent = `You are a witty and insightful cultural commentator.
 Based on the following Google Search suggestion data for the keyword "${query}", analyze how people in different English-speaking countries might be searching for this term.
 Provide a humorous interpretation of the differences or similarities you observe.
+Specifically highlight any countries that seem to be outliers with unique or unusual perspectives on the search term, alongside common themes or questions.
 Format your response using Markdown with emphasis (bold, italics) for easy visual scanning.
-Keep your analysis concise and engaging. Max 200 words.
+Keep your analysis concise (around 200-250 words) and engaging.
 
 ${suggestionsText}`;
 

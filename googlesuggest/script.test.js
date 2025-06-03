@@ -135,11 +135,32 @@ describe('Google Suggest Explorer', () => {
       await window.happyDOM.whenAsyncComplete(); // extra safety for chained promises
 
       const resultsDiv = document.getElementById('results');
-      expect(resultsDiv.textContent).toContain('Suggestions for "test query"');
-      expect(resultsDiv.textContent).toContain('United States');
-      expect(resultsDiv.textContent).toContain('suggestion1');
-      expect(resultsDiv.textContent).toContain('United Kingdom');
-      expect(resultsDiv.textContent).toContain('suggestion3');
+      expect(resultsDiv.querySelector('h3').textContent).toContain('Suggestions for "test query"');
+
+      const countryCards = resultsDiv.querySelectorAll('.card');
+      // Assuming 10 countries are mocked in total (2 specific, 8 dummy)
+      expect(countryCards.length).toBe(10);
+
+      // Check first mocked country (US)
+      const usCard = Array.from(countryCards).find(card => card.querySelector('.card-header.country-name').textContent.includes('United States'));
+      expect(usCard).not.toBeNull();
+      expect(usCard.querySelector('.card-header.country-name').textContent).toContain('United States (US)');
+      const usSuggestionLinks = usCard.querySelectorAll('.suggestions-list li a');
+      expect(usSuggestionLinks.length).toBe(2);
+      expect(usSuggestionLinks[0].textContent).toBe('suggestion1');
+      expect(usSuggestionLinks[0].href).toBe('https://www.google.com/search?q=suggestion1');
+      expect(usSuggestionLinks[1].textContent).toBe('suggestion2');
+      expect(usSuggestionLinks[1].href).toBe('https://www.google.com/search?q=suggestion2');
+
+      // Check second mocked country (GB)
+      const gbCard = Array.from(countryCards).find(card => card.querySelector('.card-header.country-name').textContent.includes('United Kingdom'));
+      expect(gbCard).not.toBeNull();
+      expect(gbCard.querySelector('.card-header.country-name').textContent).toContain('United Kingdom (GB)');
+      const gbSuggestionLinks = gbCard.querySelectorAll('.suggestions-list li a');
+      expect(gbSuggestionLinks.length).toBe(1);
+      expect(gbSuggestionLinks[0].textContent).toBe('suggestion3');
+      expect(gbSuggestionLinks[0].href).toBe('https://www.google.com/search?q=suggestion3');
+
       expect(localStorageMock.setItem).toHaveBeenCalledWith(expect.stringContaining('googleSuggest_v1.1_test query'), expect.any(String));
     });
 
@@ -164,11 +185,16 @@ describe('Google Suggest Explorer', () => {
         await window.happyDOM.whenAsyncComplete(); // For promises to settle
 
         const resultsDiv = document.getElementById('results');
-        expect(resultsDiv.textContent).toContain('United States');
-        expect(resultsDiv.textContent).toContain('Error');
-        expect(resultsDiv.textContent).toContain('Failed to load'); // Or "Timeout" depending on mock
-        expect(resultsDiv.textContent).toContain('United Kingdom');
-        expect(resultsDiv.textContent).toContain('suggestionGB');
+        const countryCards = resultsDiv.querySelectorAll('.card');
+
+        const usCard = Array.from(countryCards).find(card => card.querySelector('.card-header.country-name').textContent.includes('United States'));
+        expect(usCard).not.toBeNull();
+        expect(usCard.querySelector('.card-header.country-name').textContent).toContain('Error');
+        expect(usCard.querySelector('.card-body').textContent).toContain('Failed to load');
+
+        const gbCard = Array.from(countryCards).find(card => card.querySelector('.card-header.country-name').textContent.includes('United Kingdom'));
+        expect(gbCard).not.toBeNull();
+        expect(gbCard.querySelector('.card-body').textContent).toContain('suggestionGB');
     });
   });
 
@@ -195,7 +221,9 @@ describe('Google Suggest Explorer', () => {
 
       expect(mockAsyncLLM).toHaveBeenCalled();
       expect(mockAsyncLLM.mock.calls[0][0]).toContain('/chat/completions'); // Check endpoint
-      expect(JSON.parse(mockAsyncLLM.mock.calls[0][1].body).messages[0].content).toContain('llm test');
+      const requestBody = JSON.parse(mockAsyncLLM.mock.calls[0][1].body);
+      expect(requestBody.messages[0].content).toContain('llm test');
+      expect(requestBody.messages[0].content).toContain('outliers with unique or unusual perspectives');
       expect(mockMarkedParse).toHaveBeenCalledWith('Humorous explanation.');
       expect(document.getElementById('llmResponse').textContent).toContain('Humorous explanation.');
       expect(localStorageMock.setItem).toHaveBeenCalledWith(expect.stringContaining('llmExplanation_v1.1_llm test'), '"Humorous explanation."');
