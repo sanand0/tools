@@ -3,8 +3,18 @@ import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 
 const COUNTRIES = {
-  US: "United States", GB: "United Kingdom", CA: "Canada", AU: "Australia", NZ: "New Zealand",
-  IE: "Ireland", ZA: "South Africa", IN: "India", SG: "Singapore", PH: "Philippines",
+  US: "United States",
+  GB: "United Kingdom",
+  CA: "Canada",
+  AU: "Australia",
+  NZ: "New Zealand",
+  IE: "Ireland",
+  ZA: "South Africa",
+  IN: "India",
+  SG: "Singapore",
+  PH: "Philippines",
+  PK: "Pakistan",
+  NG: "Nigeria",
 };
 
 // --- DOM Elements ---
@@ -13,7 +23,6 @@ const fetchSuggestionsButton = document.getElementById("fetchSuggestions");
 const resultsDiv = document.getElementById("results");
 const loadingIndicator = document.getElementById("loadingIndicator");
 const explainButton = document.getElementById("explainButton");
-const initialKeywordsContainer = document.getElementById("initialKeywords");
 const searchHistoryDiv = document.getElementById("searchHistory");
 const llmModelSelect = document.getElementById("llmModel");
 const openaiBaseUrlInput = document.getElementById("openaiBaseUrl");
@@ -34,28 +43,25 @@ const SEARCH_HISTORY_KEY = `searchHistory_${CACHE_VERSION}`;
 
 // --- UI Helper Functions ---
 function setLoadingState(type, isLoading) {
-    if (type === 'suggestions') {
-        loadingIndicator.classList.toggle('d-none', !isLoading);
-        fetchSuggestionsButton.disabled = isLoading;
-        if (isLoading) {
-            explainButton.disabled = true;
-            explainButton.textContent = "Explain This";
-        }
-    } else if (type === 'llm') {
-        llmLoadingIndicator.classList.toggle('d-none', !isLoading);
-        explainButton.disabled = isLoading;
-        explainButton.textContent = isLoading ? "Generating..." : "Explain This";
+  if (type === "suggestions") {
+    loadingIndicator.classList.toggle("d-none", !isLoading);
+    fetchSuggestionsButton.disabled = isLoading;
+    if (isLoading) {
+      explainButton.disabled = true;
+      explainButton.textContent = "Explain This";
     }
+  } else if (type === "llm") {
+    llmLoadingIndicator.classList.toggle("d-none", !isLoading);
+    explainButton.disabled = isLoading;
+    explainButton.textContent = isLoading ? "Generating..." : "Explain This";
+  }
 }
 
-function resetUIElements(areas = ['suggestions', 'llm']) {
-    if (areas.includes('suggestions')) {
-        resultsDiv.innerHTML = '<p id="resultsPlaceholder" class="text-muted pt-4 pb-4"><em>Search suggestions will appear here.</em></p>';
-    }
-    if (areas.includes('llm')) {
-        llmResponseCard.classList.add("d-none");
-        llmResponseDiv.innerHTML = "";
-    }
+function resetUIElements(areas = ["suggestions", "llm"]) {
+  if (areas.includes("llm")) {
+    llmResponseCard.classList.add("d-none");
+    llmResponseDiv.innerHTML = "";
+  }
 }
 
 // --- Caching Functions ---
@@ -85,7 +91,7 @@ function getSearchHistory() {
 function addToSearchHistory(query) {
   if (!query || !query.trim()) return;
   let history = getSearchHistory();
-  history = history.filter(item => item !== query);
+  history = history.filter((item) => item !== query);
   history.unshift(query);
   if (history.length > 20) history.pop();
   setToCache(SEARCH_HISTORY_KEY, history);
@@ -94,38 +100,41 @@ function addToSearchHistory(query) {
 
 function renderSearchHistory() {
   const history = getSearchHistory();
-  const historyElements = history.map(query => {
-    const termButton = document.createElement('button');
-    termButton.type = 'button';
-    termButton.className = 'btn btn-sm btn-outline-info history-term-button';
+  const historyElements = history.map((query) => {
+    const termButton = document.createElement("button");
+    termButton.type = "button";
+    termButton.className = "btn btn-sm btn-outline-primary history-term-button";
     termButton.textContent = query;
-    termButton.addEventListener('click', () => performSearchFromHistory(query));
+    termButton.addEventListener("click", () => performSearchFromHistory(query));
 
-    const deleteButton = document.createElement('button');
-    deleteButton.type = 'button';
-    deleteButton.className = 'btn btn-sm btn-outline-danger delete-history-item';
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "btn btn-sm btn-outline-danger delete-history-item";
     deleteButton.innerHTML = '<i class="bi bi-x-lg"></i>';
     deleteButton.title = `Remove "${query}" from history`;
-    deleteButton.addEventListener('click', (event) => {
+    deleteButton.addEventListener("click", (event) => {
       event.stopPropagation();
       removeSearchHistoryItem(query);
     });
 
-    const group = document.createElement('div');
-    group.className = 'history-item-group';
+    const group = document.createElement("div");
+    group.className = "btn-group history-item-group me-2";
     group.appendChild(termButton);
     group.appendChild(deleteButton);
     return group;
   });
 
-  searchHistoryDiv.innerHTML = '';
-  historyElements.forEach(el => searchHistoryDiv.appendChild(el));
+  searchHistoryDiv.innerHTML = "";
+  historyElements.forEach((el) => searchHistoryDiv.appendChild(el));
 }
 
 function removeSearchHistoryItem(queryToRemove) {
   let history = getSearchHistory();
-  history = history.filter(query => query !== queryToRemove);
+  history = history.filter((query) => query !== queryToRemove);
   setToCache(SEARCH_HISTORY_KEY, history);
+  localStorage.removeItem(GOOGLE_SUGGEST_CACHE_PREFIX + queryToRemove.toLowerCase());
+  localStorage.removeItem(LLM_EXPLANATION_CACHE_PREFIX + queryToRemove.toLowerCase());
+  console.log("Removed from history:", queryToRemove.toLowerCase());
   renderSearchHistory();
 }
 
@@ -135,51 +144,52 @@ function performSearchFromHistory(query) {
 }
 
 // --- Google Suggest ---
-window.handleSuggestResponse = (data) => { // Global for JSONP
+window.handleSuggestResponse = (data) => {
+  // Global for JSONP
   window.currentGoogleSuggestData = data[1];
 };
 
 function fetchJsonp(url, timeout = 5000) {
-    return new Promise((resolve) => {
-        const script = document.createElement("script");
-        let timerId;
-        let completed = false; // Flag to prevent double resolve
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    let timerId;
+    let completed = false; // Flag to prevent double resolve
 
-        const cleanup = () => {
-            if (completed) return;
-            completed = true;
-            clearTimeout(timerId);
-            if (script.parentNode) {
-                script.parentNode.removeChild(script);
-            }
-            delete window.currentGoogleSuggestData;
-        };
+    const cleanup = () => {
+      if (completed) return;
+      completed = true;
+      clearTimeout(timerId);
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+      delete window.currentGoogleSuggestData;
+    };
 
-        script.src = url;
-        window.currentGoogleSuggestData = null; // Reset before call
+    script.src = url;
+    window.currentGoogleSuggestData = null; // Reset before call
 
-        script.onerror = () => {
-            console.error(`Error loading script: ${url}`);
-            cleanup();
-            resolve({ error: "Failed to load script" });
-        };
+    script.onerror = () => {
+      console.error(`Error loading script: ${url}`);
+      cleanup();
+      resolve({ error: "Failed to load script" });
+    };
 
-        script.onload = () => {
-            const data = window.currentGoogleSuggestData;
-            cleanup();
-            resolve({ data: data || [], error: data ? null : "No data returned" });
-        };
+    script.onload = () => {
+      const data = window.currentGoogleSuggestData;
+      cleanup();
+      resolve({ data: data || [], error: data ? null : "No data returned" });
+    };
 
-        timerId = setTimeout(() => {
-            if (!completed) {
-                console.warn(`Timeout fetching: ${url}`);
-                cleanup();
-                resolve({ error: "Timeout" });
-            }
-        }, timeout);
+    timerId = setTimeout(() => {
+      if (!completed) {
+        console.warn(`Timeout fetching: ${url}`);
+        cleanup();
+        resolve({ error: "Timeout" });
+      }
+    }, timeout);
 
-        document.head.appendChild(script);
-    });
+    document.head.appendChild(script);
+  });
 }
 
 async function fetchGoogleSuggestions(query) {
@@ -197,25 +207,38 @@ async function fetchGoogleSuggestions(query) {
     currentSuggestions = cachedSuggestions;
     renderSuggestions(cachedSuggestions, query);
     explainButton.disabled = false;
-    resetUIElements(['llm']);
+    resetUIElements(["llm"]);
     addToSearchHistory(query);
     return cachedSuggestions;
   }
 
-  setLoadingState('suggestions', true);
-  resetUIElements(['suggestions', 'llm']);
+  setLoadingState("suggestions", true);
+  resetUIElements(["suggestions", "llm"]);
 
   const suggestionsByCountry = {};
   const promises = Object.entries(COUNTRIES).map(async ([code, countryName]) => {
-    const apiUrl = `https://suggestqueries.google.com/complete/search?client=firefox&hl=en&gl=${code}&q=${encodeURIComponent(query)}&callback=handleSuggestResponse`;
+    const params = new URLSearchParams({
+      client: "chrome", // for JS response
+      callback: "handleSuggestResponse", // for JSONP
+      hl: "en",
+      gl: code,
+      pws: 0, // personal-ised web search = off
+      q: query,
+    });
+    const apiUrl = `https://suggestqueries.google.com/complete/search?${params}`;
     const response = await fetchJsonp(apiUrl);
-    suggestionsByCountry[code] = { country: countryName, code, suggestions: response.data || [], error: response.error };
+    suggestionsByCountry[code] = {
+      country: countryName,
+      code,
+      suggestions: response.data || [],
+      error: response.error,
+    };
   });
 
   await Promise.all(promises);
-  setLoadingState('suggestions', false);
+  setLoadingState("suggestions", false);
 
-  if (Object.values(suggestionsByCountry).some(s => s.suggestions.length > 0 && !s.error)) {
+  if (Object.values(suggestionsByCountry).some((s) => s.suggestions.length > 0 && !s.error)) {
     currentSuggestions = suggestionsByCountry;
     setToCache(cacheKey, suggestionsByCountry);
     renderSuggestions(suggestionsByCountry, query);
@@ -237,55 +260,67 @@ function renderSuggestions(suggestionsByCountry, query) {
     if (data.error) {
       content = html`<p class="text-danger m-0">${data.error}</p>`;
     } else if (data.suggestions && data.suggestions.length > 0) {
-      content = html`
-        <ul class="suggestions-list">
-          ${data.suggestions.map((s) => html`<li><a href="https://www.google.com/search?q=${encodeURIComponent(s)}" target="_blank" rel="noopener noreferrer">${s}</a></li>`)}
-        </ul>`;
+      content = html` <ul class="suggestions-list">
+        ${data.suggestions.map(
+          (s) =>
+            html`<li>
+              <a
+                href="https://www.google.com/search?q=${encodeURIComponent(s)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                >${s}</a
+              >
+            </li>`
+        )}
+      </ul>`;
     } else {
       content = html`<p class="m-0"><em>No suggestions found.</em></p>`;
     }
-    return html`
-      <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 mb-4 d-flex align-items-stretch">
-        <div class="card country-results-container w-100">
-          <div class="card-header country-name">${countryName} (${code})</div>
-          <div class="card-body">${content}</div>
-        </div>
-      </div>`;
+    return html` <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 mb-4 d-flex align-items-stretch">
+      <div class="card country-results-container w-100">
+        <div class="card-header country-name">${countryName} (${code})</div>
+        <div class="card-body py-0">${content}</div>
+      </div>
+    </div>`;
   });
-  render(html`${queryHeader}<div class="row suggestions-grid">${countryCards}</div>`, resultsDiv);
+  render(
+    html`${queryHeader}
+      <div class="row suggestions-grid">${countryCards}</div>`,
+    resultsDiv
+  );
 }
 
 // --- LLM Interaction ---
 const llmSettingInputs = {
-    llm_model: { element: llmModelSelect, defaultValue: "openai/gpt-4.1-mini" },
-    openai_base_url: { element: openaiBaseUrlInput, defaultValue: "https://api.openai.com/v1" },
-    openai_api_key: { element: openaiApiKeyInput, defaultValue: "" }
+  llm_model: { element: llmModelSelect, defaultValue: "openai/gpt-4.1-mini" },
+  openai_base_url: { element: openaiBaseUrlInput, defaultValue: "https://api.openai.com/v1" },
+  openai_api_key: { element: openaiApiKeyInput, defaultValue: "" },
 };
 
 function loadLlmSettings() {
-    for (const key in llmSettingInputs) {
-        const setting = llmSettingInputs[key];
-        setting.element.value = localStorage.getItem(key) || setting.defaultValue;
-    }
+  for (const key in llmSettingInputs) {
+    const setting = llmSettingInputs[key];
+    setting.element.value = localStorage.getItem(key) || setting.defaultValue;
+  }
 }
 
 function formatSuggestionsForLLMPrompt(suggestions, query) {
-    let suggestionsText = `Google Search Suggestions for "${query}":\n\n`;
-    for (const code in suggestions) {
-        const countryData = suggestions[code];
-        suggestionsText += `Country: ${countryData.country} (${code})\n`;
-        if (countryData.error) {
-            suggestionsText += `  Error: ${countryData.error}\n`;
-        } else if (countryData.suggestions && countryData.suggestions.length > 0) {
-            countryData.suggestions.forEach(sugg => {
-                suggestionsText += `  - ${sugg}\n`;
-            });
-        } else {
-            suggestionsText += `  No suggestions found.\n`;
-        }
-        suggestionsText += "\n";
+  let suggestionsText = `Google Search Suggestions for "${query}":\n\n`;
+  for (const code in suggestions) {
+    const countryData = suggestions[code];
+    suggestionsText += `Country: ${countryData.country} (${code})\n`;
+    if (countryData.error) {
+      suggestionsText += `  Error: ${countryData.error}\n`;
+    } else if (countryData.suggestions && countryData.suggestions.length > 0) {
+      countryData.suggestions.forEach((sugg) => {
+        suggestionsText += `  - ${sugg}\n`;
+      });
+    } else {
+      suggestionsText += `  No suggestions found.\n`;
     }
-    return suggestionsText;
+    suggestionsText += "\n";
+  }
+  return suggestionsText;
 }
 
 async function fetchLLMExplanation(suggestions, query) {
@@ -293,35 +328,41 @@ async function fetchLLMExplanation(suggestions, query) {
   let baseUrl = openaiBaseUrlInput.value.trim();
   const apiKey = openaiApiKeyInput.value.trim();
 
-  if (!apiKey) { alert("Please enter your OpenAI API Key."); return; }
-  if (!baseUrl) { alert("Please enter the OpenAI Base URL."); return; }
+  if (!apiKey) {
+    alert("Please enter your OpenAI API Key.");
+    return;
+  }
+  if (!baseUrl) {
+    alert("Please enter the OpenAI Base URL.");
+    return;
+  }
 
-  const suggestionsHash = JSON.stringify(suggestions).split("").reduce((a,b)=>{a=((a<<5)-a)+b.charCodeAt(0);return a&a},0).toString(16);
-  const cacheKey = `${LLM_EXPLANATION_CACHE_PREFIX}${query.toLowerCase()}_${model}_${suggestionsHash}`;
+  const cacheKey = `${LLM_EXPLANATION_CACHE_PREFIX}${query.toLowerCase()}`;
   const cachedExplanation = getFromCache(cacheKey);
 
   if (cachedExplanation) {
     console.log("Serving LLM explanation from cache for:", query, model);
     llmResponseCard.classList.remove("d-none");
     llmResponseDiv.innerHTML = marked.parse(cachedExplanation);
-    setLoadingState('llm', false); // Ensure button is reset
+    setLoadingState("llm", false); // Ensure button is reset
     return;
   }
 
-  resetUIElements(['llm']); // Clear previous LLM response before new fetch
-  setLoadingState('llm', true);
+  resetUIElements(["llm"]); // Clear previous LLM response before new fetch
+  setLoadingState("llm", true);
   llmResponseCard.classList.remove("d-none"); // Show card for loading indicator
 
-  let effectiveModel = model.startsWith("openai/") && baseUrl.includes("api.openai.com") ? model.replace("openai/", "") : model;
+  let effectiveModel =
+    model.startsWith("openai/") && baseUrl.includes("api.openai.com") ? model.replace("openai/", "") : model;
   if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
 
   const suggestionsText = formatSuggestionsForLLMPrompt(suggestions, query);
-  const promptContent = `You are a witty and insightful cultural commentator.
+  const promptContent = `You are a humorous cultural commentator.
 Based on the following Google Search suggestion data for the keyword "${query}", analyze how people in different English-speaking countries might be searching for this term.
-Provide a humorous interpretation of the differences or similarities you observe.
-Specifically highlight any countries that seem to be outliers with unique or unusual perspectives on the search term, alongside common themes or questions.
-Format your response using Markdown with emphasis (bold, italics) for easy visual scanning.
+Provide a humorous interpretation of common themes, outliers (suggestions from a single country), and countries with unique or unusual perspectives on the search term.
+Begin paragraphs with a **bold** summary of the paragraph for easy visual scanning.
 Keep your analysis concise (around 200-250 words) and engaging.
+Use simple language.
 
 ${suggestionsText}`;
 
@@ -333,7 +374,12 @@ ${suggestionsText}`;
     for await (const { content } of asyncLLM(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: effectiveModel, stream: true, temperature: 0.7, messages: [{ role: "user", content: promptContent }]}),
+      body: JSON.stringify({
+        model: effectiveModel,
+        stream: true,
+        temperature: 0.7,
+        messages: [{ role: "user", content: promptContent }],
+      }),
     })) {
       if (content) {
         fullContent = content;
@@ -342,24 +388,23 @@ ${suggestionsText}`;
     }
     if (fullContent) setToCache(cacheKey, fullContent);
     else llmResponseDiv.innerHTML = marked.parse("No response from LLM.");
-
   } catch (error) {
     console.error("LLM API Error:", error);
     llmResponseDiv.innerHTML = `<p class="text-danger">Error fetching explanation: ${error.message}. Check console.</p>`;
   } finally {
-    setLoadingState('llm', false);
+    setLoadingState("llm", false);
   }
 }
 
 // --- Event Listeners ---
 function handleFetchAction() {
-    const query = searchTermInput.value;
-    fetchGoogleSuggestions(query);
+  const query = searchTermInput.value;
+  fetchGoogleSuggestions(query);
 }
 
 fetchSuggestionsButton.addEventListener("click", handleFetchAction);
 searchTermInput.addEventListener("keypress", (event) => {
-    if (event.key === "Enter") handleFetchAction();
+  if (event.key === "Enter") handleFetchAction();
 });
 
 explainButton.addEventListener("click", () => {
@@ -370,12 +415,12 @@ explainButton.addEventListener("click", () => {
   }
 });
 
-Object.keys(llmSettingInputs).forEach(key => {
-    const setting = llmSettingInputs[key];
-    setting.element.addEventListener("change", (e) => localStorage.setItem(key, e.target.value));
+Object.keys(llmSettingInputs).forEach((key) => {
+  const setting = llmSettingInputs[key];
+  setting.element.addEventListener("change", (e) => localStorage.setItem(key, e.target.value));
 });
 
-document.querySelectorAll("#initialKeywords .history-item").forEach(button => {
+document.querySelectorAll("#initialKeywords .history-item").forEach((button) => {
   button.addEventListener("click", () => {
     searchTermInput.value = button.textContent;
     handleFetchAction();
@@ -386,7 +431,7 @@ document.querySelectorAll("#initialKeywords .history-item").forEach(button => {
 function init() {
   loadLlmSettings();
   renderSearchHistory();
-  resetUIElements(['suggestions', 'llm']); // Set initial placeholder for suggestions
+  resetUIElements(["suggestions", "llm"]); // Set initial placeholder for suggestions
   console.log("Google Suggest Explorer Initialized with Caching and History.");
 }
 

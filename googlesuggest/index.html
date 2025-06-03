@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,22 +10,42 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iY3VycmVudENvbG9yIj48cGF0aCBkPSJNMTUuNSAxNGgtLjc5bC0uMjgtLjI3QTE0LjQ4IDE0LjQ4IDAgMCAwIDE2LjQgOWgtMi40Yy0xLjE3IDAtMi4xOC42My0yLjY4IDEuNThMMTAuMiAxM0gxMGwtMS4xMy0yLjQyYy0uNS0uOTUtMS41MS0xLjU4LTIuNjgtMS41OEg0Yy0xLjM4IDAtMi41IDEuMTItMi41IDIuNVMxLjYyIDE0IDIuNSAxNGg0LjVjLjcyIDAgMS4zOC0uMzggMS43NS0xLjAzbDEuMDMtMi4xN0wxMCAxM2gxLjZsMS4zOC0zLjA0QzEzLjM0IDEwLjUgMTQuMzQgMTAgMTUuNSA5YzEuMzggMCAyLjUgMS4xMiAyLjUgMi41cy0xLjEyIDIuNS0yLjUgMi41ek0xMCAxOGMtMi43NiAwLTUgMi4yNC01IDVzMi4yNCA1IDUgNSA1LTIuMjQgNS01LTItNS01LTZabTAtOGMyLjc2IDAgNS0yLjI0IDUtNVMxMi43NiAwIDEwIDAgNSA1LjI0IDUgMyAyLjI0IDMgNSAzem0xMCA1YzIuNzYgMCA1LTIuMjQgNS01cy0yLjI0LTUtNS01LTUgMi4yNC01IDUgMi4yNCA1IDUgNXoiLz48L3N2Zz4=">
   <style>
     body {
-      background-color: #f8f9fa; /* Bootstrap's light background */
+      background-color: #f8f9fa;
+      /* Bootstrap's light background */
     }
-    .container { /* Assuming main content is wrapped in .container */
-      background-color: #ffffff; /* White background for the main content area */
+
+    .container {
+      /* Assuming main content is wrapped in .container */
+      background-color: #ffffff;
+      /* White background for the main content area */
       border-radius: 0.5rem;
-      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Subtle shadow */
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      /* Subtle shadow */
       padding-top: 2rem !important;
       padding-bottom: 2rem !important;
     }
+
     header.border-bottom {
-      border-bottom-color: #dee2e6 !important; /* Ensure visibility on light bg */
+      border-bottom-color: #dee2e6 !important;
+      /* Ensure visibility on light bg */
     }
 
-    .country-results-container { margin-bottom: 1rem; }
-    .country-name { font-weight: bold; margin-bottom: 0.5rem; display: block; }
-    .suggestions-list { list-style-type: none; padding-left: 0; margin-bottom: 0; }
+    .country-results-container {
+      margin-bottom: 1rem;
+    }
+
+    .country-name {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .suggestions-list {
+      list-style-type: none;
+      padding-left: 0;
+      margin-bottom: 0;
+    }
+
     .suggestions-list li a {
       display: block;
       padding: 0.2rem 0.25rem;
@@ -32,53 +53,69 @@
       color: #0d6efd;
       border-radius: 0.25rem;
     }
+
     .suggestions-list li a:hover {
       background-color: #e9ecef;
       color: #0a58ca;
     }
-    .history-item { cursor: pointer; }
-    #llmResponse :is(h1,h2,h3,h4,h5,h6) { font-size: revert; font-weight: revert; }
-    .suggestions-grid .card { height: 100%; }
-    .suggestions-grid .card-body { overflow-y: auto; max-height: 300px; }
+
+    .history-item {
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+    }
+
+    #llmResponse :is(h1, h2, h3, h4, h5, h6) {
+      font-size: revert;
+      font-weight: revert;
+    }
+
+    .suggestions-grid .card {
+      height: 100%;
+    }
+
+    .suggestions-grid .card-body {
+      overflow-y: auto;
+      max-height: 300px;
+    }
 
     .history-item-group {
       display: inline-flex;
       align-items: center;
-      margin-right: 0.25rem;
-      margin-bottom: 0.25rem;
       border-radius: 0.25rem;
       background-color: #f8f9fa;
       border: 1px solid #dee2e6;
     }
+
     .history-item-group .history-term-button {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
       border-right: none;
     }
+
     .history-item-group .delete-history-item {
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
-      padding: 0.25rem 0.5rem;
-      line-height: 1;
     }
+
     .delete-history-item .bi-x-lg {
-        font-size: 0.8em;
-        vertical-align: middle;
+      font-size: 0.8em;
+      vertical-align: middle;
     }
   </style>
 </head>
+
 <body>
-  <div class="container py-4"> <!-- py-4 will be overridden by !important but kept for fallback -->
-    <header class="pb-3 py-3 mb-4 border-bottom"> <!-- Added py-3 -->
+  <div class="container py-4 my-5">
+    <header class="pb-3 py-3 mb-4 border-bottom">
       <a href="#" class="d-flex align-items-center text-dark text-decoration-none">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-lightbulb me-2" viewBox="0 0 16 16">
-          <path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1z"/>
+          <path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1z" />
         </svg>
         <span class="fs-4">Google Suggest Explorer</span>
       </a>
     </header>
 
-    <p class="lead mb-4">Enter a search term to see Google Search suggestions from different English-speaking countries. You can also get an AI-powered humorous explanation of the results.</p> <!-- Added mb-4 -->
+    <p class="lead mb-4">Enter a search term to see how Google auto-completes it across English-speaking countries (though your IP address location <em>does</em> influence this). You can also get an AI-powered humorous explanation of the results.</p>
 
     <div class="row align-items-end mb-3">
       <div class="col-md">
@@ -96,24 +133,36 @@
 
     <div class="search-history-section mb-4"> <!-- Changed to mb-4 for consistency -->
       <div class="d-flex align-items-center flex-wrap">
-        <p class="mb-1 me-2">Suggestions & History:</p>
-        <div id="initialKeywords" class="me-2 mb-1">
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item">how to</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item ms-1">best way to</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item ms-1">why is</button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item ms-1">can I</button>
+        <div id="initialKeywords" class="me-2">
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how to </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how do I </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">best way to </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">why is </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">can I </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how can I </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">what </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">where </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">when </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">why </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">unable to </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how do I convert to </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">best  </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">worst </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">first </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">last </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">I like </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">I hate </button>
         </div>
-        <div id="searchHistory" class="d-flex flex-wrap align-items-center mb-1">
+        <div id="searchHistory" class="d-flex flex-wrap align-items-center">
           <!-- User's search history items will be injected here -->
         </div>
       </div>
     </div>
+  </div>
 
-    <div id="results" class="container-fluid mb-4 text-center">
-      <p id="resultsPlaceholder" class="text-muted pt-4 pb-4"><em>Search suggestions will appear here.</em></p>
-      <!-- Google Suggest results will be injected here (in a row/column grid) -->
-    </div>
+  <div id="results" class="container-fluid my-4"></div>
 
+  <div class="container">
     <div class="card mb-4">
       <div class="card-header">
         AI Configuration
@@ -146,7 +195,7 @@
     </div>
 
     <div id="llmLoadingIndicator" class="spinner-border spinner-border-sm text-primary d-none mb-3" role="status">
-        <span class="visually-hidden">Generating explanation...</span>
+      <span class="visually-hidden">Generating explanation...</span>
     </div>
 
     <div id="llmResponseCard" class="card mt-0 d-none">
@@ -165,4 +214,5 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
   <script type="module" src="script.js"></script>
 </body>
+
 </html>
