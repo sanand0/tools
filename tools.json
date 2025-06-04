@@ -25,6 +25,12 @@
       "url": "podcast"
     },
     {
+      "icon": "bi-headset",
+      "title": "SpeakMD",
+      "description": "Turn Markdown into conversational text",
+      "url": "speakmd"
+    },
+    {
       "icon": "bi-github",
       "title": "GitHub Summary",
       "description": "Summarize all activity by a user over a time period",
