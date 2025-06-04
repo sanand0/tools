@@ -1,0 +1,16 @@
+{
+  "name": "hnlinks",
+  "version": "1.0.0",
+  "description": "",
+  "main": "script.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "happy-dom": "^17.6.3",
+    "vitest": "^3.2.1"
+  }
+}
