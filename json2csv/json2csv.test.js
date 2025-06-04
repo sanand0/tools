@@ -14,49 +14,52 @@ describe("JSON to CSV tests", async () => {
   });
 
   it("should convert simple JSON to CSV correctly", async () => {
-    const json = [{ "name": "John", "age": 30 }, { "name": "Jane", "age": 25 }];
+    const json = [
+      { name: "John", age: 30 },
+      { name: "Jane", age: 25 },
+    ];
     jsonInput.value = JSON.stringify(json);
     convertBtn.click();
     await page.waitUntilComplete();
 
     const table = output.querySelector("table");
     expect(table).not.toBeNull();
-    const headers = Array.from(table.querySelectorAll("th")).map(th => th.textContent);
+    const headers = Array.from(table.querySelectorAll("th")).map((th) => th.textContent);
     expect(headers).toEqual(["name", "age"]);
     const rows = Array.from(table.querySelectorAll("tbody tr"));
     expect(rows.length).toBe(2);
-    const firstRowCells = Array.from(rows[0].querySelectorAll("td")).map(td => td.textContent);
+    const firstRowCells = Array.from(rows[0].querySelectorAll("td")).map((td) => td.textContent);
     expect(firstRowCells).toEqual(["John", "30"]);
-    const secondRowCells = Array.from(rows[1].querySelectorAll("td")).map(td => td.textContent);
+    const secondRowCells = Array.from(rows[1].querySelectorAll("td")).map((td) => td.textContent);
     expect(secondRowCells).toEqual(["Jane", "25"]);
     expect(downloadBtn.classList.contains("d-none")).toBe(false);
     expect(copyBtn.classList.contains("d-none")).toBe(false);
   });
 
   it("should handle nested JSON and flatten it", async () => {
-    const json = [{ "name": "Peter", "details": { "age": 40, "city": "New York" } }];
+    const json = [{ name: "Peter", details: { age: 40, city: "New York" } }];
     jsonInput.value = JSON.stringify(json);
     convertBtn.click();
     await page.waitUntilComplete();
 
     const table = output.querySelector("table");
     expect(table).not.toBeNull();
-    const headers = Array.from(table.querySelectorAll("th")).map(th => th.textContent);
+    const headers = Array.from(table.querySelectorAll("th")).map((th) => th.textContent);
     expect(headers).toEqual(["name", "details.age", "details.city"]);
     const rows = Array.from(table.querySelectorAll("tbody tr"));
     expect(rows.length).toBe(1);
-    const cells = Array.from(rows[0].querySelectorAll("td")).map(td => td.textContent);
+    const cells = Array.from(rows[0].querySelectorAll("td")).map((td) => td.textContent);
     expect(cells).toEqual(["Peter", "40", "New York"]);
   });
 
   it("should handle JSON object as input", async () => {
-    const json = { "name": "Alice", "age": 25, "place": { "country": "Canada", "city": "Ottawa" } };
+    const json = { name: "Alice", age: 25, place: { country: "Canada", city: "Ottawa" } };
     jsonInput.value = JSON.stringify(json);
     convertBtn.click();
     await page.waitUntilComplete();
     const table = output.querySelector("table");
     expect(table).not.toBeNull();
-    const headers = Array.from(table.querySelectorAll("th")).map(th => th.textContent);
+    const headers = Array.from(table.querySelectorAll("th")).map((th) => th.textContent);
     expect(headers).toEqual(["name", "age", "place.country", "place.city"]);
   });
 
@@ -85,13 +88,12 @@ describe("JSON to CSV tests", async () => {
   });
 
   it("should copy CSV to clipboard (as TSV)", async () => {
-    const json = [{ "name": "Copy Test", "value": 123 }];
+    const json = [{ name: "Copy Test", value: 123 }];
     jsonInput.value = JSON.stringify(json);
     convertBtn.click();
     await page.waitUntilComplete();
 
     copyBtn.click();
-    // await page.waitUntilComplete(); // Wait for clipboard operation
 
     const clipboardText = await window.navigator.clipboard.readText();
     expect(clipboardText).toBe("name	value\nCopy Test	123");
@@ -105,7 +107,7 @@ describe("JSON to CSV tests", async () => {
   // Note: Actual download functionality is hard to test in JSDOM.
   // We'll check if the download button is enabled and triggers a download attribute.
   it("should prepare for download", async () => {
-    const json = [{ "name": "Download Test", "value": 456 }];
+    const json = [{ name: "Download Test", value: 456 }];
     jsonInput.value = JSON.stringify(json);
     convertBtn.click();
     await page.waitUntilComplete();

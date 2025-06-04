@@ -18,18 +18,18 @@ describe("Unicode Character Extractor tests", async () => {
       // If happy-dom doesn't provide a clipboard object by default,
       // we might need to define it, but this is less likely.
       // More likely, it's defined but read-only.
-      Object.defineProperty(window.navigator, 'clipboard', {
+      Object.defineProperty(window.navigator, "clipboard", {
         value: {
           readText: vi.fn(async () => ""),
           writeText: vi.fn(async () => Promise.resolve()),
         },
         configurable: true, // Allow spies to modify it
-        writable: true // Allow spies to modify it (though spyOn is better)
+        writable: true, // Allow spies to modify it (though spyOn is better)
       });
     }
     // Set up default spies for tests that don't need specific mock implementations
-    vi.spyOn(window.navigator.clipboard, 'readText').mockImplementation(async () => "");
-    vi.spyOn(window.navigator.clipboard, 'writeText').mockImplementation(async () => Promise.resolve());
+    vi.spyOn(window.navigator.clipboard, "readText").mockImplementation(async () => "");
+    vi.spyOn(window.navigator.clipboard, "writeText").mockImplementation(async () => Promise.resolve());
   });
 
   it("should extract non-ASCII characters from text input", async () => {
@@ -39,7 +39,7 @@ describe("Unicode Character Extractor tests", async () => {
 
     const buttons = charContainer.querySelectorAll(".char-btn");
     expect(buttons.length).toBe(4); // 😊, α, β, γ
-    const chars = Array.from(buttons).map(btn => btn.querySelector(".char-display").textContent);
+    const chars = Array.from(buttons).map((btn) => btn.querySelector(".char-display").textContent);
     expect(chars).toEqual(["😊", "α", "β", "γ"]);
   });
 
@@ -54,31 +54,31 @@ describe("Unicode Character Extractor tests", async () => {
   it("should extract non-ASCII characters from clipboard", async () => {
     const clipboardText = "Clipboard test: 😊 Σ Ω";
     // Override the default spy for this specific test
-    vi.spyOn(window.navigator.clipboard, 'readText').mockImplementation(async () => {
-      await new Promise(resolve => setTimeout(resolve, 50));
+    vi.spyOn(window.navigator.clipboard, "readText").mockImplementation(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
       return clipboardText;
     });
 
     readClipboardBtn.click();
 
     // Wait for spinner to disappear and clipboard read to complete
-    await new Promise(resolve => setTimeout(resolve, 100)); // Adjust if needed
+    await new Promise((resolve) => setTimeout(resolve, 100)); // Adjust if needed
 
     expect(spinner.classList.contains("d-none")).toBe(true);
     expect(readClipboardBtn.disabled).toBe(false);
 
     const buttons = charContainer.querySelectorAll(".char-btn");
     expect(buttons.length).toBe(3); // 😊, Σ, Ω
-    const chars = Array.from(buttons).map(btn => btn.querySelector(".char-display").textContent);
+    const chars = Array.from(buttons).map((btn) => btn.querySelector(".char-display").textContent);
     expect(chars).toEqual(["😊", "Σ", "Ω"]);
   });
 
   it("should show error toast if clipboard read fails", async () => {
     // Override the default spy for this specific test
-    vi.spyOn(window.navigator.clipboard, 'readText').mockRejectedValue(new Error("Clipboard read failed"));
+    vi.spyOn(window.navigator.clipboard, "readText").mockRejectedValue(new Error("Clipboard read failed"));
 
     readClipboardBtn.click();
-    await new Promise(resolve => setTimeout(resolve, 100)); // Wait for async operations
+    await new Promise((resolve) => setTimeout(resolve, 100)); // Wait for async operations
 
     const errorToastElement = document.getElementById("errorToast");
     const errorToastBody = errorToastElement.querySelector(".toast-body");
@@ -102,7 +102,7 @@ describe("Unicode Character Extractor tests", async () => {
     const charButton = charContainer.querySelector(".char-btn");
     expect(charButton).not.toBeNull();
 
-    const writeTextSpy = vi.spyOn(window.navigator.clipboard, 'writeText');
+    const writeTextSpy = vi.spyOn(window.navigator.clipboard, "writeText");
     // Override the default spy for this specific test for capturing
     let capturedCopiedText = "";
     writeTextSpy.mockImplementation(async (text) => {
@@ -111,14 +111,14 @@ describe("Unicode Character Extractor tests", async () => {
     });
 
     charButton.click();
-    await new Promise(resolve => setTimeout(resolve, 50)); // For async clipboard op and UI update
+    await new Promise((resolve) => setTimeout(resolve, 50)); // For async clipboard op and UI update
 
     expect(writeTextSpy).toHaveBeenCalledWith("α");
     expect(capturedCopiedText).toBe("α");
     expect(charButton.classList.contains("btn-success")).toBe(true);
 
     // Wait for the success class to be removed
-    await new Promise(resolve => setTimeout(resolve, 550)); // script uses 500ms timeout
+    await new Promise((resolve) => setTimeout(resolve, 550)); // script uses 500ms timeout
     expect(charButton.classList.contains("btn-success")).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 import { Browser } from "happy-dom";
 
-export function newBrowser ({ directory, ...settings }) {
+export function newBrowser({ directory, ...settings }) {
   return new Browser({
     // console,
     settings: { ...settings, fetch: { virtualServers: [{ url: "https://test/", directory }] } },

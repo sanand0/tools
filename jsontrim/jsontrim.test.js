@@ -15,13 +15,13 @@ describe("JSON Trim tests", async () => {
   });
 
   it("should trim strings in JSON to the specified maxLength", async () => {
-    const json = { "name": "John Doe", "description": "A long description that needs trimming." };
+    const json = { name: "John Doe", description: "A long description that needs trimming." };
     inputJson.value = JSON.stringify(json);
     maxLength.value = "10";
     trimButton.click();
     // No need for waitUntilComplete as operations are synchronous
 
-    const expectedOutput = { "name": "John Doe", "description": "A long des" };
+    const expectedOutput = { name: "John Doe", description: "A long des" };
     expect(JSON.parse(outputJson.value)).toEqual(expectedOutput);
     expect(copyButton.disabled).toBe(false);
     expect(errorContainer.innerHTML).toBe("");
@@ -29,22 +29,22 @@ describe("JSON Trim tests", async () => {
 
   it("should handle nested objects and arrays", async () => {
     const json = {
-      "user": { "name": "Jane Smith", "bio": "Loves coding and long walks" },
-      "tags": ["developer", "javascript", "web enthusiast"]
+      user: { name: "Jane Smith", bio: "Loves coding and long walks" },
+      tags: ["developer", "javascript", "web enthusiast"],
     };
     inputJson.value = JSON.stringify(json);
     maxLength.value = "8";
     trimButton.click();
 
     const expectedOutput = {
-      "user": { "name": "Jane Smi", "bio": "Loves co" },
-      "tags": ["develope", "javascri", "web enth"]
+      user: { name: "Jane Smi", bio: "Loves co" },
+      tags: ["develope", "javascri", "web enth"],
     };
     expect(JSON.parse(outputJson.value)).toEqual(expectedOutput);
   });
 
   it("should not trim numbers or booleans", async () => {
-    const json = { "id": 1234567890, "active": true, "value": 123.456789 };
+    const json = { id: 1234567890, active: true, value: 123.456789 };
     inputJson.value = JSON.stringify(json);
     maxLength.value = "5";
     trimButton.click();
@@ -52,7 +52,6 @@ describe("JSON Trim tests", async () => {
     // Numbers and booleans should remain unchanged
     expect(JSON.parse(outputJson.value)).toEqual(json);
   });
-
 
   it("should show an error for invalid JSON input", async () => {
     inputJson.value = "invalid json";
@@ -66,7 +65,7 @@ describe("JSON Trim tests", async () => {
   });
 
   it("should show an error if maxLength is less than 1", async () => {
-    const json = { "name": "Test" };
+    const json = { name: "Test" };
     inputJson.value = JSON.stringify(json);
     maxLength.value = "0";
     trimButton.click();
@@ -78,7 +77,7 @@ describe("JSON Trim tests", async () => {
   });
 
   it("should copy trimmed JSON to clipboard", async () => {
-    const json = { "message": "Hello World, this is a test for copy." };
+    const json = { message: "Hello World, this is a test for copy." };
     inputJson.value = JSON.stringify(json);
     maxLength.value = "15";
     trimButton.click();
@@ -92,9 +91,9 @@ describe("JSON Trim tests", async () => {
     };
 
     copyButton.click();
-    await new Promise(resolve => setTimeout(resolve, 0)); // Allow microtasks to process
+    await new Promise((resolve) => setTimeout(resolve, 0)); // Allow microtasks to process
 
-    expect(JSON.parse(clipboardContent)).toEqual({ "message": "Hello World, th" });
+    expect(JSON.parse(clipboardContent)).toEqual({ message: "Hello World, th" });
 
     // Restore original clipboard.writeText
     window.navigator.clipboard.writeText = originalWriteText;
@@ -102,7 +101,7 @@ describe("JSON Trim tests", async () => {
     // Check for copy confirmation message (optional, based on UI)
     expect(copyButton.innerHTML).toContain("Copied!");
     // Wait for button text to revert
-    await new Promise(resolve => setTimeout(resolve, 2100));
+    await new Promise((resolve) => setTimeout(resolve, 2100));
     expect(copyButton.innerHTML).not.toContain("Copied!");
   });
 
