@@ -31,7 +31,7 @@ function showAlert(message, type = "info", autoClose = false) {
     /* html */ `
         <div class="alert alert-${type} alert-dismissible fade show">
           ${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>`
+        </div>`,
   );
   const alert = alertsDiv.lastElementChild;
   if (autoClose) setTimeout(() => alert.remove(), 3000);
@@ -71,11 +71,13 @@ function convertToTSV(data) {
   const headers = SELECTED_FIELDS; // Use SELECTED_FIELDS for consistent header order
   const rows = [
     headers.join("\t"),
-    ...data.map((user) => 
-      headers.map((header) => {
-        const value = user[header] === null || user[header] === undefined ? "" : user[header];
-        return escapeCell(value); // escapeCell will handle string conversion
-      }).join("\t")
+    ...data.map((user) =>
+      headers
+        .map((header) => {
+          const value = user[header] === null || user[header] === undefined ? "" : user[header];
+          return escapeCell(value); // escapeCell will handle string conversion
+        })
+        .join("\t"),
     ),
   ];
   return rows.join("\n");
@@ -102,7 +104,7 @@ form.addEventListener("submit", async (e) => {
 
   const progressAlert = showAlert(
     `<i class="bi bi-arrow-repeat"></i> Fetching data for ${input.length} users...`,
-    "info"
+    "info",
   );
 
   let fetchedDataArray = []; // Temporary array for raw fetched data
@@ -112,7 +114,7 @@ form.addEventListener("submit", async (e) => {
       /* html */ `
           <div class="progress mb-3">
             <div class="progress-bar" role="progressbar"></div>
-          </div>`
+          </div>`,
     );
     const progressBarInner = alertsDiv.lastElementChild.firstElementChild;
 
@@ -120,31 +122,38 @@ form.addEventListener("submit", async (e) => {
       try {
         const rawData = await fetchUserData(username, token);
         const processedUser = { source };
-        SELECTED_FIELDS.slice(1).forEach(field => { // slice(1) to skip 'source'
+        SELECTED_FIELDS.slice(1).forEach((field) => {
+          // slice(1) to skip 'source'
           let value = rawData[field] === null || rawData[field] === undefined ? "" : rawData[field];
-          
+
           // Date Formatting for userDataStorage
           if (["created_at", "updated_at"].includes(field) && value) {
             try {
-              value = new Date(value).toLocaleDateString('en-US', { 
-                weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' 
+              value = new Date(value).toLocaleDateString("en-US", {
+                weekday: "short",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
               });
             } catch (dateError) {
               console.error(`Error formatting date for ${field}: ${value}`, dateError);
               // Keep original value (or empty string) if formatting fails
               value = rawData[field] === null || rawData[field] === undefined ? "" : rawData[field]; // Revert to original if error
             }
-          } 
+          }
           // Number Formatting for userDataStorage
-          else if (["public_repos", "public_gists", "followers", "following"].includes(field) && typeof value === 'number') {
-            value = value.toLocaleString('en-US');
+          else if (
+            ["public_repos", "public_gists", "followers", "following"].includes(field) &&
+            typeof value === "number"
+          ) {
+            value = value.toLocaleString("en-US");
           }
           // For other fields (html_url, blog, email, twitter_username, avatar_url, etc.),
           // store the raw value in userDataStorage.
           processedUser[field] = value;
         });
         fetchedDataArray.push(processedUser);
-        
+
         const progressPercent = (fetchedDataArray.length / input.length) * 100;
         progressBarInner.style.width = `${progressPercent}%`;
         progressBarInner.textContent = `${fetchedDataArray.length}/${input.length}`;
@@ -171,7 +180,7 @@ form.addEventListener("submit", async (e) => {
                       displayHtml = `<a href="${cellData}" target="_blank">${cellData}</a>`;
                     } else if (field === "blog" && cellData) {
                       let blogUrl = cellData;
-                      if (!blogUrl.startsWith('http://') && !blogUrl.startsWith('https://')) {
+                      if (!blogUrl.startsWith("http://") && !blogUrl.startsWith("https://")) {
                         blogUrl = `http://${blogUrl}`;
                       }
                       displayHtml = `<a href="${blogUrl}" target="_blank">${cellData}</a>`;
@@ -180,7 +189,7 @@ form.addEventListener("submit", async (e) => {
                     } else if (field === "twitter_username" && cellData) {
                       displayHtml = `<a href="https://twitter.com/${cellData}" target="_blank">@${cellData}</a>`;
                     } else if (field === "avatar_url" && cellData) {
-                      displayHtml = `<img src="${cellData}" alt="${user.name || 'Avatar'}" width="50" height="50" style="border-radius: 50%;">`;
+                      displayHtml = `<img src="${cellData}" alt="${user.name || "Avatar"}" width="50" height="50" style="border-radius: 50%;">`;
                     }
                     return `<td>${displayHtml}</td>`;
                   }).join("");
@@ -189,15 +198,13 @@ form.addEventListener("submit", async (e) => {
                 .join("")}
             </tbody>
           </table>`;
-      
+
       progressAlert.remove();
-      showAlert(
-        "Data fetched successfully! Click 'Copy to Excel' or 'Download CSV'.",
-        "success"
-      );
+      showAlert("Data fetched successfully! Click 'Copy to Excel' or 'Download CSV'.", "success");
     } else {
       progressAlert.remove();
-      if (alertsDiv.children.length === 0) { // Only show if no other errors
+      if (alertsDiv.children.length === 0) {
+        // Only show if no other errors
         showAlert("No user data processed. Check inputs or token.", "warning");
       }
     }
@@ -251,7 +258,7 @@ function convertToCSV(data) {
     ...data.map((user) =>
       headers
         .map((header) => escapeCellCSV(user[header] === null || user[header] === undefined ? "" : user[header]))
-        .join(",")
+        .join(","),
     ),
   ];
   return rows.join("\n");

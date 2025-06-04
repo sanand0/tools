@@ -26,7 +26,7 @@ async function initTranscription() {
         <div id="transcript" class="teleprompter-text display-4 text-white text-center"></div>
       </div>
     `,
-    $app
+    $app,
   );
 
   // Toggle listening

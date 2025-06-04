@@ -78,7 +78,7 @@ function cleanUp(container) {
 
     // Parse code blocks. Hoist any `pre code` under the pre and drop the rest.
     container.querySelectorAll("pre").forEach((pre) => {
-      const codeBlock = pre.querySelector('code');
+      const codeBlock = pre.querySelector("code");
       if (codeBlock) {
         const newPre = document.createElement("pre");
         newPre.appendChild(codeBlock.cloneNode(true));

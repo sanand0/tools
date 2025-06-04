@@ -1,151 +1,77 @@
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hacker News Extractor for NotebookLM</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hacker News Extractor for NotebookLM</title>
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
-    rel="stylesheet"
-    crossorigin="anonymous" />
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
-    rel="stylesheet"
-    crossorigin="anonymous" />
-  <script type="module">
-    const extractButton = document.getElementById('extractButton');
-    const copyButton = document.getElementById('copyButton');
-    const progressBar = document.getElementById('progressBar');
-    const outputTextarea = document.getElementById('outputTextarea');
-    const errorContainer = document.getElementById('errorContainer');
-    const storyTypeSelect = document.getElementById('storyTypeSelect');
-
-    async function fetchJson(url) {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      return await response.json();
-    }
-
-    async function fetchMarkdown(url) {
-      const response = await fetch(`https://llmfoundry.straive.com/-/markdown?n=0&url=${encodeURIComponent(url)}`);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      return await response.text();
-    }
-
-    function updateProgress(current, total) {
-      const percentage = (current / total) * 100;
-      progressBar.style.width = `${percentage}%`;
-      progressBar.setAttribute('aria-valuenow', percentage);
-      progressBar.textContent = `${Math.round(percentage)}%`;
-    }
-
-    function displayError(message) {
-      const alertDiv = document.createElement('div');
-      alertDiv.className = 'alert alert-danger alert-dismissible fade show';
-      alertDiv.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              `;
-      errorContainer.appendChild(alertDiv);
-    }
-
-    async function extractNews() {
-      extractButton.disabled = true;
-      outputTextarea.value = '';
-      errorContainer.innerHTML = '';
-      progressBar.style.width = '0%';
-      progressBar.setAttribute('aria-valuenow', 0);
-      progressBar.textContent = '0%';
-
-      const storyType = storyTypeSelect.value;
-      const url = `https://hacker-news.firebaseio.com/v0/${storyType}.json`;
-
-      try {
-        const ids = await fetchJson(url);
-        const topIds = ids.slice(0, 10);
-
-        for (let i = 0; i < topIds.length; i++) {
-          try {
-            const item = await fetchJson(`https://hacker-news.firebaseio.com/v0/item/${topIds[i]}.json`);
-            const markdown = await fetchMarkdown(item.url);
-            const content = `---
-      time: ${item.time}
-      title: ${item.title}
-      url: ${item.url}
-      ---
-
-      ${markdown}
-
-      `;
-            outputTextarea.value += content;
-          } catch (error) {
-            displayError(`Error processing item ${topIds[i]}: ${error.message}`);
-          }
-          updateProgress(i + 1, topIds.length);
-        }
-      } catch (error) {
-        displayError(`Failed to fetch ${storyType}: ${error.message}`);
-      } finally {
-        extractButton.disabled = false;
-      }
-    }
-
-    function copyOutput() {
-      outputTextarea.select();
-      document.execCommand('copy');
-    }
-
-    extractButton.addEventListener('click', extractNews);
-    copyButton.addEventListener('click', copyOutput);
-  </script>
-</head>
-
-<body>
-  <div class="container mt-5">
-    <h1 class="mb-4"><i class="bi bi-newspaper"></i> Hacker News Extractor for NotebookLM</h1>
-    <div class="row mb-3 align-items-end">
-      <div class="col-md-4 mb-2 mb-md-0">
-        <label for="storyTypeSelect" class="form-label">Select Story Type</label>
-        <select id="storyTypeSelect" class="form-select">
-          <option value="topstories">Top Stories</option>
-          <option value="beststories">Best Stories</option>
-        </select>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4">
+        <i class="bi bi-newspaper"></i> Hacker News Extractor for NotebookLM
+      </h1>
+      <div class="row mb-3 align-items-end">
+        <div class="col-md-4 mb-2 mb-md-0">
+          <label for="storyTypeSelect" class="form-label"
+            >Select Story Type</label
+          >
+          <select id="storyTypeSelect" class="form-select">
+            <option value="topstories">Top Stories</option>
+            <option value="beststories">Best Stories</option>
+          </select>
+        </div>
+        <div class="col-md-8">
+          <button id="extractButton" class="btn btn-primary">
+            <i class="bi bi-download"></i> Extract News
+          </button>
+          <button id="copyButton" class="btn btn-secondary ms-2">
+            <i class="bi bi-clipboard"></i> Copy Output
+          </button>
+        </div>
       </div>
-      <div class="col-md-8">
-        <button id="extractButton" class="btn btn-primary">
-          <i class="bi bi-download"></i> Extract News
-        </button>
-        <button id="copyButton" class="btn btn-secondary ms-2">
-          <i class="bi bi-clipboard"></i> Copy Output
-        </button>
-      </div>
-    </div>
-    <div class="card mb-3">
-      <div class="card-body">
-        <h5 class="card-title">Progress</h5>
-        <div class="progress">
-          <div
-            id="progressBar"
-            class="progress-bar"
-            role="progressbar"
-            style="width: 0%"
-            aria-valuenow="0"
-            aria-valuemin="0"
-            aria-valuemax="100">
-            0%
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Progress</h5>
+          <div class="progress">
+            <div
+              id="progressBar"
+              class="progress-bar"
+              role="progressbar"
+              style="width: 0%"
+              aria-valuenow="0"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              0%
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div id="errorContainer"></div>
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Output</h5>
-        <textarea id="outputTextarea" class="form-control" rows="15" readonly=""></textarea>
+      <div id="errorContainer"></div>
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Output</h5>
+          <textarea
+            id="outputTextarea"
+            class="form-control"
+            rows="15"
+            readonly=""
+          ></textarea>
+        </div>
       </div>
     </div>
-  </div>
-</body>
 
+    <script type="module" src="script.js"></script>
+  </body>
 </html>

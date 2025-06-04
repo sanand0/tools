@@ -270,7 +270,7 @@ function renderSuggestions(suggestionsByCountry, query) {
                 rel="noopener noreferrer"
                 >${s}</a
               >
-            </li>`
+            </li>`,
         )}
       </ul>`;
     } else {
@@ -286,7 +286,7 @@ function renderSuggestions(suggestionsByCountry, query) {
   render(
     html`${queryHeader}
       <div class="row suggestions-grid">${countryCards}</div>`,
-    resultsDiv
+    resultsDiv,
   );
 }
 

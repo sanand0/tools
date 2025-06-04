@@ -47,7 +47,7 @@ const repoTemplate = (repos) => html`
             <td class="text-end">${repo.forks_count ? formatters.number.format(repo.forks_count) : "-"}</td>
             <td class="text-end">${repo.pushed_at ? formatters.fullDate.format(new Date(repo.pushed_at)) : "-"}</td>
           </tr>
-        `
+        `,
       )}
     </tbody>
   </table>
@@ -57,9 +57,9 @@ const replaceText = (text, repoData) =>
   repoData.reduce((text, repo) => {
     if (!repo.error) {
       const pattern = new RegExp(`\\[([^\\]]*?)\\]\\(https:\\/\\/github\\.com\\/${repo.full_name}\\)`, "g");
-      const replacement = `[${repo.name} ${formatters.number.format(repo.stargazers_count)} ⭐ ${
-        formatters.monthYear.format(new Date(repo.pushed_at))
-      }](https://github.com/${repo.full_name})`;
+      const replacement = `[${repo.name} ${formatters.number.format(repo.stargazers_count)} ⭐ ${formatters.monthYear.format(
+        new Date(repo.pushed_at),
+      )}](https://github.com/${repo.full_name})`;
       return text.replace(pattern, replacement);
     }
     return text;
@@ -90,14 +90,14 @@ document.getElementById("repoForm").addEventListener("submit", async (e) => {
         } catch (error) {
           return { ...repo, error: error.message };
         }
-      })
+      }),
     );
 
     render(repoTemplate(repoData), resultsDiv);
     resultsDiv.classList.remove("d-none");
     textarea.value = replaceText(
       text,
-      repoData.filter((repo) => !repo.error)
+      repoData.filter((repo) => !repo.error),
     );
   } catch (error) {
     alert(`Error: ${error.message}`);
