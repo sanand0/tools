@@ -4,43 +4,50 @@
       "icon": "bi-braces",
       "title": "JSON to CSV",
       "description": "Convert arrays of JSON objects to CSV format.",
-      "url": "json2csv"
+      "url": "json2csv",
+      "created": "2024-11-01T20:02:17+08:00"
     },
     {
       "icon": "bi-whatsapp",
       "title": "WhatsApp Scraper",
       "description": "Scrape WhatsApp chat messages into JSON",
-      "url": "whatsappscraper"
+      "url": "whatsappscraper",
+      "created": "2025-05-11T15:46:35+05:30"
     },
     {
       "icon": "bi-whatsapp",
       "title": "WhatsApp Thread Viewer",
       "description": "View WhatsApp chat messages in a threaded discussion",
-      "url": "whatsappview"
+      "url": "whatsappview",
+      "created": "2025-05-11T16:15:54+05:30"
     },
     {
       "icon": "bi-mic",
       "title": "Podcast Generator",
       "description": "Generate podcasts from text using LLMs",
-      "url": "podcast"
+      "url": "podcast",
+      "created": "2025-05-20T11:08:17+08:00"
     },
     {
       "icon": "bi-headset",
       "title": "SpeakMD",
       "description": "Turn Markdown into conversational text",
-      "url": "speakmd"
+      "url": "speakmd",
+      "created": "2025-06-04T11:25:48+08:00"
     },
     {
       "icon": "bi-github",
       "title": "GitHub Summary",
       "description": "Summarize all activity by a user over a time period",
-      "url": "githubsummary"
+      "url": "githubsummary",
+      "created": "2025-05-22T15:28:43+08:00"
     },
     {
       "icon": "bi-file-excel",
       "title": "Excel to JSONL",
       "description": "Convert Excel data to JSONL format.",
-      "url": "excel2jsonl"
+      "url": "excel2jsonl",
+      "created": "2024-11-01T20:02:17+08:00"
     },
     {
       "icon": "bi-image",
@@ -52,25 +59,29 @@
       "icon": "bi-code-slash",
       "title": "JSON Trimmer",
       "description": "Trim JSON strings to a specified length.",
-      "url": "jsontrim"
+      "url": "jsontrim",
+      "created": "2024-12-07T07:40:42+05:30"
     },
     {
       "icon": "bi-code",
       "title": "Unicoder",
       "description": "Convert Markdown to text to unicode equivalent with formatting.",
-      "url": "unicoder"
+      "url": "unicoder",
+      "created": "2025-05-20T18:56:01+08:00"
     },
     {
       "icon": "bi-bounding-box",
       "title": "Unicode Characters",
       "description": "Find non-ASCII Unicode characters in the clipboard",
-      "url": "unicode"
+      "url": "unicode",
+      "created": "2024-12-07T08:55:00+05:30"
     },
     {
       "icon": "bi-mic",
       "title": "Transcribe Audio",
       "description": "Transcribe audio from the speakers and microphone.",
-      "url": "transcribe"
+      "url": "transcribe",
+      "created": "2024-12-11T11:16:08+05:30"
     },
     {
       "icon": "bi-markdown-fill",
@@ -82,79 +93,92 @@
       "icon": "bi-markdown",
       "title": "Page to Markdown",
       "description": "Bookmarklet to copy a web page or selection as Markdown.",
-      "url": "page2md"
+      "url": "page2md",
+      "created": "2024-12-21T17:15:17+08:00"
     },
     {
       "icon": "bi-file-slides-fill",
       "title": "RevealJS Slides",
       "description": "Convert Markdown to RevealJS HTML",
-      "url": "revealjs"
+      "url": "revealjs",
+      "created": "2025-02-18T17:18:18-05:00"
     },
     {
       "icon": "bi-newspaper",
       "title": "Hacker News Extractor",
       "description": "Extract Hacker News articles to Markdown format for NotebookLM.",
-      "url": "hackernewsmd"
+      "url": "hackernewsmd",
+      "created": "2024-11-01T20:02:17+08:00"
     },
     {
       "icon": "bi-newspaper",
       "title": "Hacker News Links Extractor",
       "description": "Scrape main article links from Hacker News or HN Top Links.",
-      "url": "hnlinks"
+      "url": "hnlinks",
+      "created": "2025-06-03T08:43:21+00:00"
     },
     {
       "icon": "bi-search-heart",
       "title": "Google Suggest Explorer",
       "description": "Explore Google Search suggestions from different countries and get AI-powered humorous explanations.",
-      "url": "googlesuggest"
+      "url": "googlesuggest",
+      "created": "2025-06-03T22:05:52+08:00"
     },
     {
       "icon": "bi-geo-alt",
       "title": "What's Near Me?",
       "description": "Find nearby attractions and places of interest.",
-      "url": "whatsnear"
+      "url": "whatsnear",
+      "created": "2024-11-01T20:02:17+08:00"
     },
     {
       "icon": "bi-check-circle",
       "title": "What Next?",
       "description": "Prioritization matrix helping you pick what to do next",
-      "url": "whatnext"
+      "url": "whatnext",
+      "created": "2025-02-02T21:32:15+05:30"
     },
     {
       "icon": "bi-whatsapp",
       "title": "WhatsApp",
       "description": "Enter a mobile number and open a WhatsApp chat to them",
-      "url": "whatsapp"
+      "url": "whatsapp",
+      "created": "2025-02-02T21:32:15+05:30"
     },
     {
       "icon": "bi-bicycle",
       "title": "SG Bike Park",
       "description": "Find out where to park your bicycle nearby in Singapore",
-      "url": "sgbikepark"
+      "url": "sgbikepark",
+      "created": "2025-02-02T21:32:15+05:30"
     },
     {
       "icon": "bi-bounding-box",
       "title": "LLM Bounding Boxes",
       "description": "Check how well LLMs draw object bounding boxes in images.",
-      "url": "llmboundingbox"
+      "url": "llmboundingbox",
+      "created": "2024-11-02T00:01:59+08:00"
     },
     {
       "icon": "bi-github",
       "title": "GitHub Users",
       "description": "Get information about GitHub users.",
-      "url": "githubusers"
+      "url": "githubusers",
+      "created": "2024-11-07T23:22:11+08:00"
     },
     {
       "icon": "bi-code",
       "title": "GitHub Stars",
       "description": "Replaces GitHub links in Markdown with the repo name, stars, and last pushed date.",
-      "url": "githubstars"
+      "url": "githubstars",
+      "created": "2025-04-28T11:32:38+08:00"
     },
     {
       "icon": "bi-person-walking",
       "title": "Google Fit",
       "description": "Upload Google Fit activity data and see a summary of the activity data by date.",
-      "url": "googlefit"
+      "url": "googlefit",
+      "created": "2025-04-01T11:09:14+08:00"
     },
     {
       "icon": "bi-youtube",
@@ -166,7 +190,8 @@
       "icon": "bi-quote",
       "title": "Quotes arena",
       "description": "Evaluate quotes from different models and see which one wins",
-      "url": "quotesarena"
+      "url": "quotesarena",
+      "created": "2025-03-30T09:18:58+08:00"
     }
   ]
 }
