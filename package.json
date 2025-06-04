@@ -1,5 +1,11 @@
 {
   "scripts": {
-    "lint": "npx -y prettier@3.5 --print-width 120 --write '**/*.js' '!***/*.min.js'"
+    "lint": "npx -y prettier@3.5 --print-width 120 --write '**/*.js' '!***/*.min.js'",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "happy-dom": "^17.6.3",
+    "vitest": "^3.2.1"
   }
 }
