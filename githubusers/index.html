@@ -29,8 +29,12 @@
 
     <form id="urlForm" class="mb-4">
       <div class="mb-3">
-        <label for="token" class="form-label">Enter GitHub Token</label>
-        <input type="text" class="form-control" id="token" placeholder="GitHub Token" />
+        <label for="openai_api_key" class="form-label">Enter GitHub Token</label>
+        <input type="password" class="form-control" id="openai_api_key" name="openai_api_key" placeholder="GitHub Token" />
+      </div>
+      <div class="mb-3">
+        <label for="openai_base_url" class="form-label">OpenAI Base URL (optional, not directly used by this tool but for consistency)</label>
+        <input type="url" class="form-control" id="openai_base_url" name="openai_base_url" placeholder="Enter OpenAI base URL">
       </div>
       <div class="mb-3">
         <label for="urls" class="form-label">Enter GitHub Usernames or URLs (one per line)</label>
@@ -50,11 +54,10 @@ https://username.github.io/"></textarea>
       </button>
     </form>
 
-    <div id="alerts" class="mb-4"></div>
-
     <div class="table-responsive" id="results"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
   <script type="module" src="script.js"></script>
 </body>
 

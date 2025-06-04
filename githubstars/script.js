@@ -1,5 +1,8 @@
 import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
+import { showToast } from '../../common/ui.js';
+import { API_KEY_FIELD_ID, BASE_URL_FIELD_ID } from '../../common/api_fields.js';
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const formatters = {
   number: new Intl.NumberFormat("en"),
@@ -65,14 +68,14 @@ const replaceText = (text, repoData) =>
     return text;
   }, text);
 
-const tokenInput = document.getElementById("token");
-tokenInput.value = localStorage.getItem("github_token") || "";
+const tokenInput = document.getElementById(API_KEY_FIELD_ID);
+// tokenInput.value = localStorage.getItem("github_token") || ""; // Handled by saveform
 
 document.getElementById("repoForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = document.getElementById("inputText").value;
   const token = tokenInput.value.trim();
-  if (token) localStorage.setItem("github_token", token);
+  // if (token) localStorage.setItem("github_token", token); // Handled by saveform
 
   const loading = document.getElementById("loading");
   const resultsDiv = document.getElementById("resultsTable");
@@ -100,8 +103,9 @@ document.getElementById("repoForm").addEventListener("submit", async (e) => {
       repoData.filter((repo) => !repo.error)
     );
   } catch (error) {
-    alert(`Error: ${error.message}`);
+    showToast(`Error: ${error.message}`, 'bg-danger');
   } finally {
     loading.classList.add("d-none");
   }
 });
+saveform("#repoForm", { exclude: '[type="file"]' });

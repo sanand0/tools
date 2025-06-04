@@ -17,6 +17,10 @@ const COUNTRIES = {
   NG: "Nigeria",
 };
 
+import { showToast } from '../../common/ui.js';
+import { API_KEY_FIELD_ID, BASE_URL_FIELD_ID } from '../../common/api_fields.js';
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+
 // --- DOM Elements ---
 const searchTermInput = document.getElementById("searchTerm");
 const fetchSuggestionsButton = document.getElementById("fetchSuggestions");
@@ -25,8 +29,8 @@ const loadingIndicator = document.getElementById("loadingIndicator");
 const explainButton = document.getElementById("explainButton");
 const searchHistoryDiv = document.getElementById("searchHistory");
 const llmModelSelect = document.getElementById("llmModel");
-const openaiBaseUrlInput = document.getElementById("openaiBaseUrl");
-const openaiApiKeyInput = document.getElementById("openaiApiKey");
+const openaiBaseUrlInput = document.getElementById(BASE_URL_FIELD_ID);
+const openaiApiKeyInput = document.getElementById(API_KEY_FIELD_ID);
 const llmResponseDiv = document.getElementById("llmResponse");
 const llmResponseCard = document.getElementById("llmResponseCard");
 const llmLoadingIndicator = document.getElementById("llmLoadingIndicator");
@@ -195,7 +199,7 @@ function fetchJsonp(url, timeout = 5000) {
 async function fetchGoogleSuggestions(query) {
   currentQuery = query;
   if (!query.trim()) {
-    alert("Please enter a search term.");
+    showToast("Please enter a search term.", 'bg-warning');
     return null;
   }
 
@@ -291,18 +295,18 @@ function renderSuggestions(suggestionsByCountry, query) {
 }
 
 // --- LLM Interaction ---
-const llmSettingInputs = {
-  llm_model: { element: llmModelSelect, defaultValue: "openai/gpt-4.1-mini" },
-  openai_base_url: { element: openaiBaseUrlInput, defaultValue: "https://api.openai.com/v1" },
-  openai_api_key: { element: openaiApiKeyInput, defaultValue: "" },
-};
+// const llmSettingInputs = { // Replaced by saveform for openai_base_url and openai_api_key
+//   llm_model: { element: llmModelSelect, defaultValue: "openai/gpt-4.1-mini" },
+//   openai_base_url: { element: openaiBaseUrlInput, defaultValue: "https://api.openai.com/v1" },
+//   openai_api_key: { element: openaiApiKeyInput, defaultValue: "" },
+// };
 
-function loadLlmSettings() {
-  for (const key in llmSettingInputs) {
-    const setting = llmSettingInputs[key];
-    setting.element.value = localStorage.getItem(key) || setting.defaultValue;
-  }
-}
+// function loadLlmSettings() { // Replaced by saveform
+//   for (const key in llmSettingInputs) {
+//     const setting = llmSettingInputs[key];
+//     setting.element.value = localStorage.getItem(key) || setting.defaultValue;
+//   }
+// }
 
 function formatSuggestionsForLLMPrompt(suggestions, query) {
   let suggestionsText = `Google Search Suggestions for "${query}":\n\n`;
@@ -329,11 +333,11 @@ async function fetchLLMExplanation(suggestions, query) {
   const apiKey = openaiApiKeyInput.value.trim();
 
   if (!apiKey) {
-    alert("Please enter your OpenAI API Key.");
+    showToast("Please enter your OpenAI API Key.", 'bg-warning');
     return;
   }
   if (!baseUrl) {
-    alert("Please enter the OpenAI Base URL.");
+    showToast("Please enter the OpenAI Base URL.", 'bg-warning');
     return;
   }
 
@@ -411,14 +415,14 @@ explainButton.addEventListener("click", () => {
   if (currentSuggestions && Object.keys(currentSuggestions).length > 0 && currentQuery) {
     fetchLLMExplanation(currentSuggestions, currentQuery);
   } else {
-    alert("Please fetch some suggestions first for a valid query.");
+    showToast("Please fetch some suggestions first for a valid query.", 'bg-warning');
   }
 });
 
-Object.keys(llmSettingInputs).forEach((key) => {
-  const setting = llmSettingInputs[key];
-  setting.element.addEventListener("change", (e) => localStorage.setItem(key, e.target.value));
-});
+// Object.keys(llmSettingInputs).forEach((key) => { // Replaced by saveform
+//   const setting = llmSettingInputs[key];
+//   setting.element.addEventListener("change", (e) => localStorage.setItem(key, e.target.value));
+// });
 
 document.querySelectorAll("#initialKeywords .history-item").forEach((button) => {
   button.addEventListener("click", () => {
@@ -429,7 +433,8 @@ document.querySelectorAll("#initialKeywords .history-item").forEach((button) => 
 
 // --- Initial Load ---
 function init() {
-  loadLlmSettings();
+  // loadLlmSettings(); // Replaced by saveform
+  saveform("#llmConfigForm");
   renderSearchHistory();
   resetUIElements(["suggestions", "llm"]); // Set initial placeholder for suggestions
   console.log("Google Suggest Explorer Initialized with Caching and History.");

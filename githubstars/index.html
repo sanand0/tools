@@ -34,8 +34,12 @@
 </textarea>
       </div>
       <div class="mb-3">
-        <label for="token" class="form-label">GitHub API Token (optional)</label>
-        <input type="password" class="form-control" id="token" placeholder="ghp_...">
+        <label for="openai_api_key" class="form-label">GitHub API Token (optional)</label>
+        <input type="password" class="form-control" id="openai_api_key" name="openai_api_key" placeholder="ghp_...">
+      </div>
+      <div class="mb-3">
+        <label for="openai_base_url" class="form-label">OpenAI Base URL (optional)</label>
+        <input type="url" class="form-control" id="openai_base_url" name="openai_base_url" placeholder="Enter OpenAI base URL (e.g., https://api.openai.com/v1)">
       </div>
       <button type="submit" class="btn btn-primary">Analyze</button>
     </form>
@@ -49,5 +53,6 @@
     <div id="resultsTable" class="d-none"></div>
   </div>
   <script type="module" src="script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>
 </html>

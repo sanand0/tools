@@ -1,5 +1,9 @@
+import { showToast } from '../../common/ui.js';
+import { API_KEY_FIELD_ID } from '../../common/api_fields.js';
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+
 const form = document.getElementById("urlForm");
-const alertsDiv = document.getElementById("alerts");
+// const alertsDiv = document.getElementById("alerts"); // Replaced by showToast
 const results = document.getElementById("results");
 
 let userDataStorage = []; // To store fetched and processed user data
@@ -25,18 +29,29 @@ const SELECTED_FIELDS = [
   "updated_at",
 ];
 
-function showAlert(message, type = "info", autoClose = false) {
-  alertsDiv.insertAdjacentHTML(
-    "beforeend",
-    /* html */ `
-        <div class="alert alert-${type} alert-dismissible fade show">
-          ${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>`
-  );
-  const alert = alertsDiv.lastElementChild;
-  if (autoClose) setTimeout(() => alert.remove(), 3000);
-  return alert;
+function bootstrapBgColor(alertType) {
+  const mapping = {
+    'info': 'bg-info',
+    'warning': 'bg-warning',
+    'danger': 'bg-danger',
+    'success': 'bg-success',
+    'primary': 'bg-primary',
+  };
+  return mapping[alertType] || 'bg-secondary'; // Default to secondary if type unknown
 }
+
+// function showAlert(message, type = "info", autoClose = false) { // Replaced by showToast
+//   alertsDiv.insertAdjacentHTML(
+//     "beforeend",
+//     /* html */ `
+//         <div class="alert alert-${type} alert-dismissible fade show">
+//           ${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+//         </div>`
+//   );
+//   const alert = alertsDiv.lastElementChild;
+//   if (autoClose) setTimeout(() => alert.remove(), 3000);
+//   return alert;
+// }
 
 const githubComRegex = /github\.com\/([a-zA-Z0-9_-]+)/i;
 const githubIoRegex = /([a-zA-Z0-9_-]+)\.github\.io/i;
@@ -87,34 +102,36 @@ async function copyToClipboard(text) {
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  alertsDiv.innerHTML = "";
+  // alertsDiv.innerHTML = ""; // Replaced by showToast
   results.innerHTML = "";
   userDataStorage = []; // Clear previous results
 
-  const token = document.getElementById("token").value.trim();
+  const token = document.getElementById(API_KEY_FIELD_ID).value.trim();
   const text = document.getElementById("urls").value;
 
   const input = text
     .split("\n")
     .map((d) => ({ source: d.trim(), username: extractUser(d) }))
     .filter((d) => d.source && d.username);
-  if (input.length === 0) return showAlert("No valid GitHub URLs found!", "warning");
+  if (input.length === 0) return showToast("No valid GitHub URLs found!", bootstrapBgColor("warning"));
 
-  const progressAlert = showAlert(
+  showToast(
     `<i class="bi bi-arrow-repeat"></i> Fetching data for ${input.length} users...`,
-    "info"
+    bootstrapBgColor("info")
   );
 
   let fetchedDataArray = []; // Temporary array for raw fetched data
   try {
-    alertsDiv.insertAdjacentHTML(
-      "beforeend",
-      /* html */ `
-          <div class="progress mb-3">
-            <div class="progress-bar" role="progressbar"></div>
-          </div>`
-    );
-    const progressBarInner = alertsDiv.lastElementChild.firstElementChild;
+    // It's tricky to show progress with toasts, so we'll skip direct replacement of progress bar for now
+    // Consider a more dedicated progress display if needed, separate from toasts.
+    // alertsDiv.insertAdjacentHTML(
+    //   "beforeend",
+    //   /* html */ `
+    //       <div class="progress mb-3">
+    //         <div class="progress-bar" role="progressbar"></div>
+    //       </div>`
+    // );
+    // const progressBarInner = alertsDiv.lastElementChild.firstElementChild;
 
     for (const { source, username } of input) {
       try {
@@ -146,10 +163,10 @@ form.addEventListener("submit", async (e) => {
         fetchedDataArray.push(processedUser);
         
         const progressPercent = (fetchedDataArray.length / input.length) * 100;
-        progressBarInner.style.width = `${progressPercent}%`;
-        progressBarInner.textContent = `${fetchedDataArray.length}/${input.length}`;
+        // progressBarInner.style.width = `${progressPercent}%`; // Progress bar display change needed
+        // progressBarInner.textContent = `${fetchedDataArray.length}/${input.length}`;
       } catch (error) {
-        showAlert(error.message, "danger");
+        showToast(error.message, bootstrapBgColor("danger"));
       }
     }
     userDataStorage = fetchedDataArray; // Store processed data
@@ -190,20 +207,21 @@ form.addEventListener("submit", async (e) => {
             </tbody>
           </table>`;
       
-      progressAlert.remove();
-      showAlert(
+      // progressAlert.remove(); // Toast used instead
+      showToast(
         "Data fetched successfully! Click 'Copy to Excel' or 'Download CSV'.",
-        "success"
+        bootstrapBgColor("success")
       );
     } else {
-      progressAlert.remove();
-      if (alertsDiv.children.length === 0) { // Only show if no other errors
-        showAlert("No user data processed. Check inputs or token.", "warning");
-      }
+      // progressAlert.remove(); // Toast used instead
+      // Check if any other error toasts were shown. If not, show this warning.
+      // This logic might need refinement if multiple toasts can appear and we only want one summary.
+      // For now, we'll show it regardless if no data.
+      showToast("No user data processed. Check inputs or token.", bootstrapBgColor("warning"));
     }
   } catch (error) {
-    showAlert(`Unexpected error: ${error.message}`, "danger");
-    if (progressAlert) progressAlert.remove();
+    showToast(`Unexpected error: ${error.message}`, bootstrapBgColor("danger"));
+    // if (progressAlert) progressAlert.remove(); // Toast used instead
   }
 });
 
@@ -211,7 +229,7 @@ form.addEventListener("submit", async (e) => {
 const downloadCsvBtn = document.getElementById("downloadCsvBtn");
 downloadCsvBtn.addEventListener("click", () => {
   if (userDataStorage.length === 0) {
-    showAlert("No data to download.", "warning", true);
+    showToast("No data to download.", bootstrapBgColor("warning"));
     return;
   }
   const csv = convertToCSV(userDataStorage);
@@ -224,22 +242,22 @@ downloadCsvBtn.addEventListener("click", () => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  showAlert("CSV downloaded.", "success", true);
+  showToast("CSV downloaded.", bootstrapBgColor("success"));
 });
 
 // Event listener for Copy to Excel button
 const copyToExcelBtn = document.getElementById("copyToExcelBtn");
 copyToExcelBtn.addEventListener("click", async () => {
   if (userDataStorage.length === 0) {
-    showAlert("No data to copy.", "warning", true);
+    showToast("No data to copy.", bootstrapBgColor("warning"));
     return;
   }
   try {
     const tsv = convertToTSV(userDataStorage);
     await copyToClipboard(tsv);
-    showAlert("Results copied to clipboard! You can paste into Excel.", "success", true);
+    showToast("Results copied to clipboard! You can paste into Excel.", bootstrapBgColor("success"));
   } catch (error) {
-    showAlert(`Error copying to clipboard: ${error.message}`, "danger");
+    showToast(`Error copying to clipboard: ${error.message}`, bootstrapBgColor("danger"));
   }
 });
 
@@ -265,3 +283,4 @@ function escapeCellCSV(value) {
   }
   return stringValue;
 }
+saveform("#urlForm");
