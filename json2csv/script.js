@@ -7,6 +7,12 @@ const $downloadBtn = document.getElementById("downloadBtn");
 const $copyBtn = document.getElementById("copyBtn");
 const $toast = new bootstrap.Toast(document.getElementById("toast"));
 
+const escapeHtml = (str) => {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+};
+
 // Initialize with sample data
 $jsonInput.value = JSON.stringify([
   { name: "Bond, James", age: 30, place: { city: "New York\nUSA" } },
@@ -78,7 +84,7 @@ const displayCsvTable = (csv) => {
         <table class="table table-striped table-bordered">
           <thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>
           <tbody>${parsedData
-            .map((row) => `<tr>${headers.map((h) => `<td>${row[h] || ""}</td>`).join("")}</tr>`)
+            .map((row) => `<tr>${headers.map((h) => `<td>${escapeHtml(row[h] || "")}</td>`).join("")}</tr>`)
             .join("")}</tbody>
         </table>
       `;
@@ -112,7 +118,7 @@ $convertBtn.addEventListener("click", () => {
     $downloadBtn.classList.remove("d-none");
     $copyBtn.classList.remove("d-none");
   } catch (error) {
-    $output.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Error: ${error.message}</div>`;
+    $output.innerHTML = DOMPurify.sanitize(`<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Error: ${error.message}</div>`);
     $downloadBtn.classList.add("d-none");
     $copyBtn.classList.add("d-none");
   }

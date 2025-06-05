@@ -14,7 +14,9 @@ textarea.addEventListener("input", () => {
 
 function createPresentationHTML(markdown) {
   const slides = markdown.split(/(?=^#{1,2} )/m);
-  const slideHTML = slides.map((slide) => `<section>${marked.parse(slide.trim())}</section>`).join("\n");
+  const slideHTML = slides
+    .map((slide) => `<section>${DOMPurify.sanitize(marked.parse(slide.trim()))}</section>`)
+    .join("\n");
 
   return `
         <!DOCTYPE html>

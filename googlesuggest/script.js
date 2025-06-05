@@ -245,7 +245,7 @@ async function fetchGoogleSuggestions(query) {
     explainButton.disabled = false;
     addToSearchHistory(query);
   } else {
-    resultsDiv.innerHTML = `<p class="text-danger">Could not fetch any valid suggestions for "${query}". Please check your internet connection or try a different query.</p>`;
+    resultsDiv.innerHTML = DOMPurify.sanitize(`<p class="text-danger">Could not fetch any valid suggestions for "${query}". Please check your internet connection or try a different query.</p>`);
     currentSuggestions = null;
     explainButton.disabled = true;
   }
@@ -343,7 +343,7 @@ async function fetchLLMExplanation(suggestions, query) {
   if (cachedExplanation) {
     console.log("Serving LLM explanation from cache for:", query, model);
     llmResponseCard.classList.remove("d-none");
-    llmResponseDiv.innerHTML = marked.parse(cachedExplanation);
+    llmResponseDiv.innerHTML = DOMPurify.sanitize(marked.parse(cachedExplanation));
     setLoadingState("llm", false); // Ensure button is reset
     return;
   }
@@ -383,14 +383,14 @@ ${suggestionsText}`;
     })) {
       if (content) {
         fullContent = content;
-        llmResponseDiv.innerHTML = marked.parse(fullContent);
+        llmResponseDiv.innerHTML = DOMPurify.sanitize(marked.parse(fullContent));
       }
     }
     if (fullContent) setToCache(cacheKey, fullContent);
-    else llmResponseDiv.innerHTML = marked.parse("No response from LLM.");
+    else llmResponseDiv.innerHTML = DOMPurify.sanitize(marked.parse("No response from LLM."));
   } catch (error) {
     console.error("LLM API Error:", error);
-    llmResponseDiv.innerHTML = `<p class="text-danger">Error fetching explanation: ${error.message}. Check console.</p>`;
+    llmResponseDiv.innerHTML = DOMPurify.sanitize(`<p class="text-danger">Error fetching explanation: ${error.message}. Check console.</p>`);
   } finally {
     setLoadingState("llm", false);
   }

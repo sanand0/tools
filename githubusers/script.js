@@ -28,10 +28,10 @@ const SELECTED_FIELDS = [
 function showAlert(message, type = "info", autoClose = false) {
   alertsDiv.insertAdjacentHTML(
     "beforeend",
-    /* html */ `
+    DOMPurify.sanitize(`
         <div class="alert alert-${type} alert-dismissible fade show">
           ${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>`,
+        </div>`),
   );
   const alert = alertsDiv.lastElementChild;
   if (autoClose) setTimeout(() => alert.remove(), 3000);
@@ -165,7 +165,7 @@ form.addEventListener("submit", async (e) => {
 
     if (userDataStorage.length > 0) {
       // Display results in table
-      results.innerHTML = /* html */ `<table class="table table-striped">
+      results.innerHTML = DOMPurify.sanitize(`<table class="table table-striped">
             <thead><tr>${SELECTED_FIELDS.map((header) => `<th>${header}</th>`).join("")}</tr></thead>
             <tbody>
               ${userDataStorage
@@ -197,7 +197,7 @@ form.addEventListener("submit", async (e) => {
                 })
                 .join("")}
             </tbody>
-          </table>`;
+          </table>`);
 
       progressAlert.remove();
       showAlert("Data fetched successfully! Click 'Copy to Excel' or 'Download CSV'.", "success");

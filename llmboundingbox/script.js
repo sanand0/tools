@@ -4,6 +4,12 @@ import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3/+esm";
 
 const openai = (d) => d;
 
+const escapeHtml = (str) => {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+};
+
 const MODELS = [
   {
     adapter: gemini,
@@ -257,8 +263,8 @@ function drawBoundingBoxes(ctx, objects, model) {
       "beforeend",
       `
           <tr>
-            <td>${label}</td>
-            <td>${color}</td>
+            <td>${escapeHtml(label)}</td>
+            <td>${escapeHtml(color)}</td>
             <td>${x1},${y1},${x2},${y2}</td>
           </tr>
         `,

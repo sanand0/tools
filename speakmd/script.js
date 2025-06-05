@@ -48,7 +48,7 @@ form.addEventListener("submit", async (e) => {
         ],
       }),
     })) {
-      htmlOutput.innerHTML = marked.parse(full ?? "");
+      htmlOutput.innerHTML = DOMPurify.sanitize(marked.parse(full ?? ""));
       htmlOutput.scrollTop = htmlOutput.scrollHeight;
     }
   } catch (err) {

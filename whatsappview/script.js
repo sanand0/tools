@@ -1,8 +1,20 @@
 const $form = document.querySelector("#form");
 
+const escapeHtml = (str) => {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+};
+
 $form.addEventListener("submit", (e) => {
   e.preventDefault();
-  const messages = JSON.parse(document.querySelector("#json").value);
+  let messages;
+  try {
+    messages = JSON.parse(document.querySelector("#json").value);
+  } catch {
+    document.querySelector("#threadContainer").textContent = "Invalid JSON";
+    return;
+  }
   const threads = threadMessages(messages);
   document.querySelector("#threadContainer").innerHTML = renderThreads(threads);
 });
@@ -51,8 +63,8 @@ function renderThreads(threads) {
           <div class="thread mb-3">
             <div class="d-flex justify-content-between align-items-start">
               <div class="message-content d-flex">
-                <strong class="author">${thread.author}</strong>
-                <span class="message-text ms-2">${thread.text}</span>
+                <strong class="author">${escapeHtml(thread.author)}</strong>
+                <span class="message-text ms-2">${escapeHtml(thread.text)}</span>
               </div>
               <div class="message-meta text-end text-muted small text-nowrap">
                 ${showDate ? `${date}` : ""} ${time}
@@ -87,8 +99,8 @@ function renderThreads(threads) {
             return `
               <div class="reply d-flex justify-content-between align-items-start mb-2">
                 <div class="message-content">
-                  <strong class="author">${reply.author}</strong>
-                  <span class="message-text ms-2">${reply.text}</span>
+                  <strong class="author">${escapeHtml(reply.author)}</strong>
+                  <span class="message-text ms-2">${escapeHtml(reply.text)}</span>
                 </div>
                 <div class="message-meta text-end text-muted small text-nowrap">
                   ${showReplyDate ? `${replyDate}` : ""} ${replyTime}
