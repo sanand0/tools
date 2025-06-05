@@ -178,7 +178,7 @@ const updateOutput = () => {
     .getElementById("output")
     .insertAdjacentHTML(
       "beforeend",
-      `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${output}</div>`,
+      `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${DOMPurify.sanitize(output)}</div>`,
     );
 };
 
