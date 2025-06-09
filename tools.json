@@ -192,6 +192,13 @@
       "description": "Evaluate quotes from different models and see which one wins",
       "url": "quotesarena",
       "created": "2025-03-30T09:18:58+08:00"
+    },
+    {
+      "icon": "bi-pencil-square",
+      "title": "LLM Fill",
+      "description": "Blank out words and let an LLM fill them in.",
+      "url": "llmfill",
+      "created": "2025-06-10T00:00:00+00:00"
     }
   ]
 }
