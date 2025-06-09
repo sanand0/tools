@@ -22,6 +22,13 @@
       "created": "2025-05-11T16:15:54+05:30"
     },
     {
+      "icon": "bi-pencil-square",
+      "title": "LLM Fill-in-the-Blank",
+      "description": "Blank any word in a sentence and see what an LLM predicts",
+      "url": "llmfill",
+      "created": "2025-06-09T00:00:00+08:00"
+    },
+    {
       "icon": "bi-mic",
       "title": "Podcast Generator",
       "description": "Generate podcasts from text using LLMs",
