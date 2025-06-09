@@ -308,7 +308,7 @@ async function generateSummary(context, systemPrompt, openaiKey, baseUrl) {
       },
       body: JSON.stringify({ model, stream: true, messages }),
     })) {
-      const html = marked.parse(content);
+      const html = DOMPurify.sanitize(marked.parse(content));
       resultsDiv.innerHTML = html;
     }
   } catch (error) {

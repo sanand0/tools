@@ -97,7 +97,7 @@ async function displayAttractions(attractions) {
     card.innerHTML = `
                   <div class="card-body">
                       <h5 class="card-title">${attraction.tags.name || "Unnamed Attraction"}</h5>
-                      <p class="card-text">${marked.parse(description)}</p>
+                      <p class="card-text">${DOMPurify.sanitize(marked.parse(description))}</p>
                       <button class="btn btn-sm btn-outline-secondary read-aloud-btn">
                           <i class="bi bi-volume-up"></i> Read Aloud
                       </button>
@@ -165,8 +165,9 @@ function showError(message) {
                   <strong class="me-auto">Error</strong>
                   <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
               </div>
-              <div class="toast-body">${message}</div>
+              <div class="toast-body"></div>
           `;
+  toastElement.querySelector(".toast-body").textContent = message;
   toastContainer.appendChild(toastElement);
   const toast = new bootstrap.Toast(toastElement);
   toast.show();
