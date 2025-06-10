@@ -1,4 +1,4 @@
-import { csvFormat, csvParse, tsvFormat } from "https://cdn.jsdelivr.net/npm/d3-dsv@3.0.1/+esm";
+import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv, copyText } from "../common/csv.js";
 
 const $jsonInput = document.getElementById("jsonInput");
 const $convertBtn = document.getElementById("convertBtn");
@@ -12,18 +12,6 @@ $jsonInput.value = JSON.stringify([
   { name: "Bond, James", age: 30, place: { city: "New York\nUSA" } },
   { name: "Alice", age: 25, place: { country: "Canada", city: "Ottawa" } },
 ]);
-
-const flattenObject = (obj, prefix = "") => {
-  return Object.entries(obj).reduce((acc, [key, value]) => {
-    const newKey = prefix ? `${prefix}.${key}` : key;
-    if (value && typeof value === "object" && !Array.isArray(value)) {
-      Object.assign(acc, flattenObject(value, newKey));
-    } else {
-      acc[newKey] = value;
-    }
-    return acc;
-  }, {});
-};
 
 const parseJsonInput = (input) => {
   try {
@@ -53,47 +41,12 @@ const parseJsonInput = (input) => {
   throw new Error("Invalid JSON input. Expected an array or an object.");
 };
 
-const jsonToCsv = (jsonStringInput, d3FormatFunction = csvFormat) => {
-  const dataArray = parseJsonInput(jsonStringInput); // Call new parseJsonInput
-
-  const orderedHeaders = [];
-  const flattenedArray = dataArray.map((item) => {
-    const flatItem = flattenObject(item);
-    Object.keys(flatItem).forEach((key) => {
-      if (!orderedHeaders.includes(key)) {
-        orderedHeaders.push(key);
-      }
-    });
-    return flatItem;
-  });
-
-  return d3FormatFunction(flattenedArray, orderedHeaders);
+const jsonToCsv = (jsonStringInput, toTsv = false) => {
+  const dataArray = parseJsonInput(jsonStringInput);
+  return toTsv ? objectsToTsv(dataArray) : objectsToCsv(dataArray);
 };
 
-const displayCsvTable = (csv) => {
-  const parsedData = csvParse(csv);
-  const headers = parsedData.columns;
-
-  $output.innerHTML = /* html */ `
-        <table class="table table-striped table-bordered">
-          <thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>
-          <tbody>${parsedData
-            .map((row) => `<tr>${headers.map((h) => `<td>${row[h] || ""}</td>`).join("")}</tr>`)
-            .join("")}</tbody>
-        </table>
-      `;
-};
-
-const downloadCsv = (csv) => {
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  if (navigator.msSaveBlob) return navigator.msSaveBlob(blob, "data.csv");
-  const url = URL.createObjectURL(blob);
-  Object.assign(document.createElement("a"), {
-    href: url,
-    download: "data.csv",
-  }).click();
-  URL.revokeObjectURL(url);
-};
+const displayCsvTable = (csv) => csvToTable($output, csv);
 
 function showToast(message, type = "bg-primary") {
   const toastElement = document.getElementById("toast");
@@ -107,7 +60,7 @@ $convertBtn.addEventListener("click", () => {
     const jsonStringInput = $jsonInput.value.trim();
     if (!jsonStringInput) throw new Error("Please enter some JSON data.");
 
-    const csv = jsonToCsv(jsonStringInput, csvFormat);
+    const csv = jsonToCsv(jsonStringInput);
     displayCsvTable(csv);
     $downloadBtn.classList.remove("d-none");
     $copyBtn.classList.remove("d-none");
@@ -118,8 +71,8 @@ $convertBtn.addEventListener("click", () => {
   }
 });
 
-$downloadBtn.addEventListener("click", () => downloadCsv(jsonToCsv($jsonInput.value.trim(), csvFormat)));
-$copyBtn.addEventListener("click", () => {
-  navigator.clipboard.writeText(jsonToCsv($jsonInput.value.trim(), tsvFormat));
+$downloadBtn.addEventListener("click", () => downloadCsv(jsonToCsv($jsonInput.value.trim())));
+$copyBtn.addEventListener("click", async () => {
+  await copyText(jsonToCsv($jsonInput.value.trim(), true));
   showToast("Copied to clipboard!");
 });

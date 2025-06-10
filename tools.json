@@ -192,6 +192,12 @@
       "description": "Evaluate quotes from different models and see which one wins",
       "url": "quotesarena",
       "created": "2025-03-30T09:18:58+08:00"
+    },
+    {
+      "icon": "bi-check2-square",
+      "title": "Google Tasks",
+      "description": "Download your Google Tasks as CSV and delete completed tasks",
+      "url": "googletasks"
     }
   ]
 }
