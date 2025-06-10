@@ -16,7 +16,7 @@ const plain = (tokens = []) => {
     .map((t) => {
       if (t.type === "link") return plain(t.tokens);
       if (t.type === "image") return "";
-      if (t.type === "html" && t.text == "<br>") return "";
+      if (t.type === "html" && (t.text === "<br>" || t.text.startsWith("<svg"))) return "";
       return t.tokens ? plain(t.tokens) : t.text || "";
     })
     .join("");
