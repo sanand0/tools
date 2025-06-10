@@ -23,14 +23,17 @@ export function objectsToCsv(data, format = csvFormat) {
 
 export const objectsToTsv = (data) => objectsToCsv(data, tsvFormat);
 
-export function csvToTable(element, csv, columns) {
+export function csvToTable(element, csv, columns, rowClassFn) {
   const parsed = csvParse(csv);
   const headers = columns && columns.length ? columns : parsed.columns;
   element.innerHTML = /* html */ `
     <table class="table table-striped table-bordered">
       <thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>
       <tbody>${parsed
-        .map((row) => `<tr>${headers.map((h) => `<td>${row[h] || ""}</td>`).join("")}</tr>`)
+        .map((row) => {
+          const cls = rowClassFn ? rowClassFn(row) : "";
+          return `<tr${cls ? ` class="${cls}"` : ""}>${headers.map((h) => `<td>${row[h] || ""}</td>`).join("")}</tr>`;
+        })
         .join("")}</tbody>
     </table>`;
 }

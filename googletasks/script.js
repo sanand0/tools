@@ -5,6 +5,22 @@ const clientId = "872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleuserc
 let tokenClient;
 let tasks = [];
 
+const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const fmtDate = (d) => {
+  if (!d) return "";
+  d = new Date(d);
+  return `${days[d.getUTCDay()]}, ${d.getUTCDate()} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+};
+
+const sortTasks = (arr) =>
+  arr.sort((a, b) => {
+    const ac = a.completed ? 1 : 0;
+    const bc = b.completed ? 1 : 0;
+    if (ac !== bc) return ac - bc;
+    return new Date(b.updated) - new Date(a.updated);
+  });
+
 const alerts = document.getElementById("alertContainer");
 const tokenInput = document.getElementById("token");
 const output = document.getElementById("output");
@@ -14,6 +30,7 @@ const fetchBtn = document.getElementById("fetchBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const copyBtn = document.getElementById("copyBtn");
 const deleteBtn = document.getElementById("deleteBtn");
+const mdBtn = document.getElementById("mdBtn");
 
 saveform("#tasks-form");
 
@@ -45,12 +62,15 @@ fetchBtn.addEventListener("click", async () => {
   try {
     tasks = await fetchTasks(token);
     if (!tasks.length) return showAlert("No tasks found", "warning", true);
-    const csv = objectsToCsv(tasks);
+    sortTasks(tasks);
+    const display = tasks.map((t) => ({
+      ...t,
+      updated: fmtDate(t.updated),
+      due: fmtDate(t.due),
+    }));
     const cols = ["list", "title", "notes", "links", "updated", "due", "parent", "id"];
-    csvToTable(output, csv, cols);
-    downloadBtn.classList.remove("d-none");
-    copyBtn.classList.remove("d-none");
-    deleteBtn.classList.remove("d-none");
+    csvToTable(output, objectsToCsv(display), cols, (r) => (r.status === "completed" ? "text-muted" : ""));
+    [downloadBtn, copyBtn, mdBtn, deleteBtn].forEach((b) => b.classList.remove("d-none"));
     status.textContent = `Fetched ${tasks.length} tasks`;
   } catch (e) {
     showAlert(e.message, "danger");
@@ -63,6 +83,23 @@ downloadBtn.addEventListener("click", () => downloadCsv(objectsToCsv(tasks), "ta
 copyBtn.addEventListener("click", async () => {
   await copyText(objectsToTsv(tasks));
   showAlert("Copied to clipboard", "success", true);
+});
+
+mdBtn.addEventListener("click", async () => {
+  const lines = tasks
+    .filter((t) => t.status !== "completed")
+    .map((t) => {
+      const base = `- **${t.title}** #${t.list} (${fmtDate(t.updated)})`;
+      const notes = (t.notes || "").replace(/\n+/g, " ").trim();
+      const links = (t.links || "").trim();
+      const extras = [];
+      if (notes) extras.push(`  - ${notes}`);
+      if (links) extras.push(`  - ${links}`);
+      return [base, ...extras].join("\n");
+    })
+    .join("\n");
+  await copyText(lines);
+  showAlert("Markdown copied", "success", true);
 });
 
 deleteBtn.addEventListener("click", async () => {
@@ -114,11 +151,24 @@ async function deleteCompleted(token) {
   const listRes = await fetch("https://tasks.googleapis.com/tasks/v1/users/@me/lists", { headers });
   const lists = (await listRes.json()).items || [];
   for (const list of lists) {
-    status.textContent = `Clearing ${list.title}`;
-    await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${list.id}/clear`, {
-      method: "POST",
-      headers,
-    });
+    status.textContent = `Deleting from ${list.title}`;
+    let pageToken;
+    do {
+      const url = new URL(`https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks`);
+      url.searchParams.set("showCompleted", "true");
+      url.searchParams.set("showHidden", "true");
+      if (pageToken) url.searchParams.set("pageToken", pageToken);
+      const res = await fetch(url, { headers });
+      const data = await res.json();
+      for (const t of data.items || []) {
+        if (t.status === "completed")
+          await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks/${t.id}`, {
+            method: "DELETE",
+            headers,
+          });
+      }
+      pageToken = data.nextPageToken;
+    } while (pageToken);
   }
   status.textContent = "";
 }
