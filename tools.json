@@ -198,6 +198,13 @@
       "title": "Google Tasks",
       "description": "Download your Google Tasks as CSV and delete completed tasks",
       "url": "googletasks"
+    },
+    {
+      "icon": "bi-table",
+      "title": "Markdown to CSV",
+      "description": "Extract the first Markdown table and download it as CSV",
+      "url": "md2csv",
+      "created": "2025-06-10T09:30:00+00:00"
     }
   ]
 }
