@@ -11,14 +11,16 @@ const toast = new bootstrap.Toast(document.getElementById("toast"));
 let data = [];
 let csv = "";
 
-const plain = (tokens = []) =>
-  tokens
+const plain = (tokens = []) => {
+  return tokens
     .map((t) => {
       if (t.type === "link") return plain(t.tokens);
       if (t.type === "image") return "";
+      if (t.type === "html" && t.text == "<br>") return "";
       return t.tokens ? plain(t.tokens) : t.text || "";
     })
     .join("");
+};
 
 function parseTable(md) {
   const table = marked.lexer(md).find((t) => t.type === "table");
