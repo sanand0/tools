@@ -1,6 +1,11 @@
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
-import { gfm, strikethrough, tables, taskListItems } from "@joplin/turndown-plugin-gfm";
+import {
+  gfm,
+  strikethrough,
+  tables,
+  taskListItems,
+} from "@joplin/turndown-plugin-gfm";
 
 /**
  * Converts current page or selected text to Markdown and copies to clipboard
@@ -38,6 +43,10 @@ export async function convert() {
     turndownService.use(strikethrough);
     turndownService.use(tables);
     turndownService.use(taskListItems);
+    turndownService.addRule("svg", {
+      filter: (n) => n.nodeName.toLowerCase() === "svg",
+      replacement: (c, n) => n.outerHTML,
+    });
 
     const markdown = turndownService.turndown(content);
 
