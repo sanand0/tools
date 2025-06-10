@@ -15,7 +15,7 @@ const plain = (tokens = []) =>
   tokens
     .map((t) => {
       if (t.type === "link") return plain(t.tokens);
-      if (t.type === "image") return t.text;
+      if (t.type === "image") return "";
       return t.tokens ? plain(t.tokens) : t.text || "";
     })
     .join("");
