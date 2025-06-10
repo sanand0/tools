@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Join CSV Tables</title>
+    <link rel="icon" href="https://s-anand.net/favicon.ico" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -35,8 +36,8 @@
       <button id="copyBtn" class="btn btn-warning mb-3 d-none"><i class="bi bi-clipboard"></i> Copy to Excel</button>
       <textarea id="output" class="form-control font-monospace" rows="8" readonly></textarea>
       <p class="mt-3 text-muted">
-        Paste multiple tables above separated by two blank lines, choose a separator and click Join. Missing values will
-        be blank.
+        Paste tables separated by two blank lines, pick the separator and click Join. Duplicate columns overwrite
+        earlier values. Missing cells become blank.
       </p>
     </div>
     <script type="module" src="script.js"></script>
