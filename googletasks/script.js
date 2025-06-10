@@ -8,6 +8,7 @@ let tasks = [];
 const alerts = document.getElementById("alertContainer");
 const tokenInput = document.getElementById("token");
 const output = document.getElementById("output");
+const status = document.getElementById("status");
 const signinBtn = document.getElementById("signinBtn");
 const fetchBtn = document.getElementById("fetchBtn");
 const downloadBtn = document.getElementById("downloadBtn");
@@ -38,18 +39,22 @@ signinBtn.addEventListener("click", () => tokenClient.requestAccessToken());
 
 fetchBtn.addEventListener("click", async () => {
   output.innerHTML = "";
+  status.textContent = "";
   const token = tokenInput.value.trim();
   if (!token) return showAlert("Please sign in first", "warning", true);
   try {
     tasks = await fetchTasks(token);
     if (!tasks.length) return showAlert("No tasks found", "warning", true);
     const csv = objectsToCsv(tasks);
-    csvToTable(output, csv);
+    const cols = ["list", "title", "notes", "links", "updated", "due", "parent", "id"];
+    csvToTable(output, csv, cols);
     downloadBtn.classList.remove("d-none");
     copyBtn.classList.remove("d-none");
     deleteBtn.classList.remove("d-none");
+    status.textContent = `Fetched ${tasks.length} tasks`;
   } catch (e) {
     showAlert(e.message, "danger");
+    status.textContent = "";
   }
 });
 
@@ -64,10 +69,13 @@ deleteBtn.addEventListener("click", async () => {
   const token = tokenInput.value.trim();
   if (!token) return showAlert("Please sign in first", "warning", true);
   try {
+    status.textContent = "Deleting completed tasks";
     await deleteCompleted(token);
+    status.textContent = "";
     showAlert("Completed tasks deleted", "success", true);
   } catch (e) {
     showAlert(e.message, "danger");
+    status.textContent = "";
   }
 });
 
@@ -78,16 +86,24 @@ async function fetchTasks(token) {
   const lists = (await listRes.json()).items || [];
   const all = [];
   for (const list of lists) {
+    status.textContent = `Fetching ${list.title}`;
     let pageToken;
+    let page = 1;
     do {
+      status.textContent = `Fetching ${list.title}: page ${page}`;
       const url = new URL(`https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks`);
       url.searchParams.set("showCompleted", "true");
+      url.searchParams.set("showHidden", "true");
       if (pageToken) url.searchParams.set("pageToken", pageToken);
       const res = await fetch(url, { headers });
       if (!res.ok) throw new Error(`Failed to fetch tasks for ${list.title}`);
       const data = await res.json();
-      (data.items || []).forEach((t) => all.push({ list: list.title, ...t }));
+      (data.items || []).forEach((t) => {
+        const links = (t.links || []).map((l) => l.link).join(" ");
+        all.push({ list: list.title, ...t, links });
+      });
       pageToken = data.nextPageToken;
+      page += 1;
     } while (pageToken);
   }
   return all;
@@ -98,22 +114,11 @@ async function deleteCompleted(token) {
   const listRes = await fetch("https://tasks.googleapis.com/tasks/v1/users/@me/lists", { headers });
   const lists = (await listRes.json()).items || [];
   for (const list of lists) {
-    let pageToken;
-    do {
-      const url = new URL(`https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks`);
-      url.searchParams.set("showCompleted", "true");
-      if (pageToken) url.searchParams.set("pageToken", pageToken);
-      const res = await fetch(url, { headers });
-      const data = await res.json();
-      for (const task of data.items || []) {
-        if (task.status === "completed") {
-          await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${list.id}/tasks/${task.id}`, {
-            method: "DELETE",
-            headers,
-          });
-        }
-      }
-      pageToken = data.nextPageToken;
-    } while (pageToken);
+    status.textContent = `Clearing ${list.title}`;
+    await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${list.id}/clear`, {
+      method: "POST",
+      headers,
+    });
   }
+  status.textContent = "";
 }

@@ -23,9 +23,9 @@ export function objectsToCsv(data, format = csvFormat) {
 
 export const objectsToTsv = (data) => objectsToCsv(data, tsvFormat);
 
-export function csvToTable(element, csv) {
+export function csvToTable(element, csv, columns) {
   const parsed = csvParse(csv);
-  const headers = parsed.columns;
+  const headers = columns && columns.length ? columns : parsed.columns;
   element.innerHTML = /* html */ `
     <table class="table table-striped table-bordered">
       <thead><tr>${headers.map((h) => `<th>${h}</th>`).join("")}</tr></thead>
@@ -39,7 +39,10 @@ export function downloadCsv(csv, filename = "data.csv") {
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   if (navigator.msSaveBlob) return navigator.msSaveBlob(blob, filename);
   const url = URL.createObjectURL(blob);
-  Object.assign(document.createElement("a"), { href: url, download: filename }).click();
+  Object.assign(document.createElement("a"), {
+    href: url,
+    download: filename,
+  }).click();
   URL.revokeObjectURL(url);
 }
 

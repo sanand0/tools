@@ -28,11 +28,22 @@
       <form id="tasks-form" class="mb-3">
         <div class="mb-3">
           <label for="token" class="form-label">Access Token</label>
-          <input type="password" id="token" class="form-control" placeholder="Click Sign in to get token" />
+          <input
+            type="password"
+            id="token"
+            class="form-control"
+            placeholder="Click Sign in to get token"
+          />
         </div>
-        <button type="button" id="signinBtn" class="btn btn-primary me-2"><i class="bi bi-google"></i> Sign in</button>
-        <button type="button" id="fetchBtn" class="btn btn-primary me-2">Fetch Tasks</button>
-        <button type="button" id="deleteBtn" class="btn btn-danger me-2 d-none">Delete Completed</button>
+        <button type="button" id="signinBtn" class="btn btn-primary me-2">
+          <i class="bi bi-google"></i> Sign in
+        </button>
+        <button type="button" id="fetchBtn" class="btn btn-primary me-2">
+          Fetch Tasks
+        </button>
+        <button type="button" id="deleteBtn" class="btn btn-danger me-2 d-none">
+          Delete Completed
+        </button>
         <button type="button" id="downloadBtn" class="btn btn-success d-none">
           <i class="bi bi-download"></i> Download CSV
         </button>
@@ -40,6 +51,7 @@
           <i class="bi bi-clipboard"></i> Copy to Excel
         </button>
       </form>
+      <div id="status" class="text-muted mb-2"></div>
       <div id="output"></div>
     </div>
     <script
