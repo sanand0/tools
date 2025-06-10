@@ -1,6 +1,8 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv, copyText } from "../common/csv.js";
 
+// root.node@gmail.com | Project: Personal mail etc. OAuth Client: Web apps
+// https://console.cloud.google.com/auth/clients/872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com?inv=1&invt=AbzTOQ&project=encoded-ensign-221
 const clientId = "872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com";
 let tokenClient;
 let tasks = [];
@@ -32,7 +34,7 @@ const copyBtn = document.getElementById("copyBtn");
 const deleteBtn = document.getElementById("deleteBtn");
 const mdBtn = document.getElementById("mdBtn");
 
-saveform("#tasks-form");
+saveform("#googletasks-form", { exclude: '[type="file"], [type="button"]' });
 
 function showAlert(message, type = "info", autoClose = false) {
   alerts.insertAdjacentHTML(
@@ -48,7 +50,10 @@ window.onload = () => {
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: clientId,
     scope: "https://www.googleapis.com/auth/tasks",
-    callback: (resp) => (tokenInput.value = resp.access_token),
+    callback: (resp) => {
+      tokenInput.value = resp.access_token;
+      tokenInput.dispatchEvent(new Event("change", { bubbles: true }));
+    },
   });
 };
 
@@ -68,7 +73,7 @@ fetchBtn.addEventListener("click", async () => {
       updated: fmtDate(t.updated),
       due: fmtDate(t.due),
     }));
-    const cols = ["list", "title", "notes", "links", "updated", "due", "parent", "id"];
+    const cols = ["list", "title", "notes", "updated", "due", "parent", "id"];
     csvToTable(output, objectsToCsv(display), cols, (r) => (r.status === "completed" ? "text-muted" : ""));
     [downloadBtn, copyBtn, mdBtn, deleteBtn].forEach((b) => b.classList.remove("d-none"));
     status.textContent = `Fetched ${tasks.length} tasks`;
