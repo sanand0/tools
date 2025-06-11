@@ -196,7 +196,7 @@ function fetchJsonp(url, timeout = 5000) {
 async function fetchGoogleSuggestions(query) {
   currentQuery = query;
   if (!query.trim()) {
-    showToast({ title: "Error", body: "Please enter a search term.", color: "bg-danger" });
+    showToast({ title: "Input needed", body: "Please enter a search term.", color: "bg-danger" });
     return null;
   }
 
@@ -330,11 +330,11 @@ async function fetchLLMExplanation(suggestions, query) {
   const apiKey = openaiApiKeyInput.value.trim();
 
   if (!apiKey) {
-    showToast({ title: "Error", body: "Please enter your OpenAI API Key.", color: "bg-danger" });
+    showToast({ title: "Missing key", body: "Please enter your OpenAI API Key.", color: "bg-danger" });
     return;
   }
   if (!baseUrl) {
-    showToast({ title: "Error", body: "Please enter the OpenAI Base URL.", color: "bg-danger" });
+    showToast({ title: "Missing base URL", body: "Please enter the OpenAI Base URL.", color: "bg-danger" });
     return;
   }
 
@@ -412,7 +412,7 @@ explainButton.addEventListener("click", () => {
   if (currentSuggestions && Object.keys(currentSuggestions).length > 0 && currentQuery) {
     fetchLLMExplanation(currentSuggestions, currentQuery);
   } else {
-    showToast({ title: "Error", body: "Please fetch some suggestions first for a valid query.", color: "bg-danger" });
+    showToast({ title: "No suggestions", body: "Please fetch some suggestions first for a valid query.", color: "bg-danger" });
   }
 });
 

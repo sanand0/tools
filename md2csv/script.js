@@ -34,7 +34,8 @@ function showToast(msg, color = "bg-primary") {
 }
 
 function showError(msg) {
-  output.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-2"></i>${msg}</div>`;
+  output.textContent = "";
+  showToast(msg, "bg-danger");
   downloadBtn.classList.add("d-none");
   copyBtn.classList.add("d-none");
 }

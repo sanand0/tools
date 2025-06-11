@@ -6,7 +6,7 @@ const readTextBtn = document.getElementById("readText");
 const textInput = document.getElementById("textInput");
 
 function showError(message) {
-  updateLatestToast({ title: "Error", body: message, color: "bg-danger" });
+  updateLatestToast({ title: "Input error", body: message, color: "bg-danger" });
 }
 
 function getNonAsciiChars(text) {

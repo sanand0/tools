@@ -6,6 +6,6 @@ document.getElementById("sendButton").addEventListener("click", () => {
     const whatsappUrl = `https://wa.me/${phoneNumber}`;
     window.open(whatsappUrl, "_blank");
   } else {
-    showToast({ title: "Error", body: "Please enter a valid phone number.", color: "bg-danger" });
+    showToast({ title: "Invalid number", body: "Please enter a valid phone number.", color: "bg-danger" });
   }
 });

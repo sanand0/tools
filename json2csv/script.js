@@ -62,7 +62,8 @@ $convertBtn.addEventListener("click", () => {
     $downloadBtn.classList.remove("d-none");
     $copyBtn.classList.remove("d-none");
   } catch (error) {
-    $output.innerHTML = `<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Error: ${error.message}</div>`;
+    $output.textContent = "";
+    showToast(`Error: ${error.message}`, "bg-danger");
     $downloadBtn.classList.add("d-none");
     $copyBtn.classList.add("d-none");
   }
