@@ -1,296 +1,190 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Podcast Generator</title>
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%230d6efd%22%20class%3D%22bi%20bi-mic-fill%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M5%203a3%203%200%200%201%206%200v5a3%203%200%200%201-6%200z%22%2F%3E%3Cpath%20d%3D%22M3.5%206.5A.5.5%200%200%201%204%207v1a4%204%200%200%200%208%200V7a.5.5%200%200%201%201%200v1a5%205%200%200%201-4.5%204.975V15h3a.5.5%200%200%201%200%201h-7a.5.5%200%200%201%200-1h3v-2.025A5%205%200%200%201%203%208V7a.5.5%200%200%201%20.5-.5%22%2F%3E%3C%2Fsvg%3E"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
-    />
-  </head>
 
-  <body class="bg-light">
-    <div class="container py-4">
-      <!-- Header -->
-      <header class="pb-3 mb-4 border-bottom">
-        <div class="d-flex align-items-center">
-          <i class="bi bi-mic-fill fs-1 me-3 text-primary"></i>
-          <h1 class="display-5 fw-bold">AI Podcast Generator</h1>
-        </div>
-      </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Podcast Generator</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%230d6efd%22%20class%3D%22bi%20bi-mic-fill%22%20viewBox%3D%220%200%2016%2016%22%3E%3Cpath%20d%3D%22M5%203a3%203%200%200%201%206%200v5a3%203%200%200%201-6%200z%22%2F%3E%3Cpath%20d%3D%22M3.5%206.5A.5.5%200%200%201%204%207v1a4%204%200%200%200%208%200V7a.5.5%200%200%201%201%200v1a5%205%200%200%201-4.5%204.975V15h3a.5.5%200%200%201%200%201h-7a.5.5%200%200%201%200-1h3v-2.025A5%205%200%200%201%203%208V7a.5.5%200%200%201%20.5-.5%22%2F%3E%3C%2Fsvg%3E" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+</head>
 
-      <!-- Introduction -->
-      <div class="p-4 mb-4 bg-white rounded-3 shadow-sm">
-        <div class="container-fluid">
-          <h2 class="fs-4">
-            Turn any text into an engaging podcast conversation
-          </h2>
-          <p>
-            This tool uses AI to transform your content into a natural-sounding
-            podcast between two hosts. Simply paste your text, click generate,
-            and get both a script and audio file.
-          </p>
+<body class="bg-light">
+  <div class="container py-4">
+    <!-- Header -->
+    <header class="pb-3 mb-4 border-bottom">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-mic-fill fs-1 me-3 text-primary"></i>
+        <h1 class="display-5 fw-bold">AI Podcast Generator</h1>
+      </div>
+    </header>
 
-          <div class="row mt-4">
-            <div class="col-md-4 mb-3">
-              <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                  <i class="bi bi-file-text fs-1 text-primary mb-3"></i>
-                  <h5 class="card-title">Paste Your Content</h5>
-                  <p class="card-text">
-                    Add any article, research, or text that you'd like
-                    transformed into a podcast.
-                  </p>
-                </div>
+    <!-- Introduction -->
+    <div class="p-4 mb-4 bg-white rounded-3 shadow-sm">
+      <div class="container-fluid">
+        <h2 class="fs-4">
+          Turn any text into an engaging podcast conversation
+        </h2>
+        <p>
+          This tool uses AI to transform your content into a natural-sounding
+          podcast between two hosts. Simply paste your text, click generate,
+          and get both a script and audio file.
+        </p>
+
+        <div class="row mt-4">
+          <div class="col-md-4 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+              <div class="card-body text-center">
+                <i class="bi bi-file-text fs-1 text-primary mb-3"></i>
+                <h5 class="card-title">Paste Your Content</h5>
+                <p class="card-text">
+                  Add any article, research, or text that you'd like
+                  transformed into a podcast.
+                </p>
               </div>
             </div>
-            <div class="col-md-4 mb-3">
-              <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                  <i class="bi bi-journals fs-1 text-primary mb-3"></i>
-                  <h5 class="card-title">Generate Script</h5>
-                  <p class="card-text">
-                    Our AI transforms your content into an engaging conversation
-                    between two hosts.
-                  </p>
-                </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+              <div class="card-body text-center">
+                <i class="bi bi-journals fs-1 text-primary mb-3"></i>
+                <h5 class="card-title">Generate Script</h5>
+                <p class="card-text">
+                  Our AI transforms your content into an engaging conversation
+                  between two hosts.
+                </p>
               </div>
             </div>
-            <div class="col-md-4 mb-3">
-              <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body text-center">
-                  <i class="bi bi-soundwave fs-1 text-primary mb-3"></i>
-                  <h5 class="card-title">Create Audio</h5>
-                  <p class="card-text">
-                    Turn the script into a professional-sounding podcast with AI
-                    voices.
-                  </p>
-                </div>
+          </div>
+          <div class="col-md-4 mb-3">
+            <div class="card h-100 border-0 shadow-sm">
+              <div class="card-body text-center">
+                <i class="bi bi-soundwave fs-1 text-primary mb-3"></i>
+                <h5 class="card-title">Create Audio</h5>
+                <p class="card-text">
+                  Turn the script into a professional-sounding podcast with AI
+                  voices.
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <form id="podcast-form">
-        <!-- Main Content Area -->
-        <div class="row g-4">
-          <!-- Left Panel - Input -->
-          <div class="col-md-6">
-            <div class="p-4 bg-white rounded-3 shadow-sm h-100">
-              <h3 class="mb-3">Input Content</h3>
-              <div class="mb-3">
-                <label for="contentInput" class="form-label"
-                  >Paste your content here:</label
-                >
-                <textarea
-                  class="form-control"
-                  id="contentInput"
-                  rows="10"
-                  placeholder="Paste your article, research, or any content you want to convert to a podcast..."
-                ></textarea>
-              </div>
-              <div class="d-grid">
-                <button
-                  id="generateScriptBtn"
-                  class="btn btn-primary"
-                  type="button"
-                >
-                  <i class="bi bi-magic me-2"></i>Generate Script
-                </button>
-              </div>
+    <form id="podcast-form">
+      <!-- Main Content Area -->
+      <div class="row g-4">
+        <!-- Left Panel - Input -->
+        <div class="col-md-6">
+          <div class="p-4 bg-white rounded-3 shadow-sm h-100">
+            <h3 class="mb-3">Input Content</h3>
+            <div class="mb-3">
+              <label for="contentInput" class="form-label">Paste your content here:</label>
+              <textarea class="form-control" id="contentInput" rows="10" placeholder="Paste your article, research, or any content you want to convert to a podcast..."></textarea>
             </div>
-          </div>
-
-          <!-- Right Panel - Output -->
-          <div class="col-md-6">
-            <div class="p-4 bg-white rounded-3 shadow-sm h-100">
-              <h3 class="mb-3">Podcast Script</h3>
-              <div id="scriptOutput" class="mb-3">
-                <label for="podcastScript" class="form-label"
-                  >Or type/edit your script:</label
-                >
-                <textarea
-                  class="form-control"
-                  id="podcastScript"
-                  rows="10"
-                  placeholder="Your generated podcast script will appear here..."
-                ></textarea>
-              </div>
-              <div class="progress mb-3 d-none" id="progressContainer">
-                <div
-                  id="progressBar"
-                  class="progress-bar progress-bar-striped progress-bar-animated"
-                  role="progressbar"
-                  aria-valuenow="0"
-                  aria-valuemin="0"
-                  aria-valuemax="100"
-                ></div>
-              </div>
-              <div id="audioContainer" class="d-none mb-3">
-                <audio id="podcastAudio" controls class="w-100"></audio>
-              </div>
-              <div class="d-grid gap-2">
-                <button
-                  id="generateAudioBtn"
-                  class="btn btn-success"
-                  type="button"
-                >
-                  <i class="bi bi-file-earmark-music me-2"></i>Generate Audio
-                </button>
-                <button
-                  id="downloadAudioBtn"
-                  class="btn btn-outline-primary d-none"
-                  type="button"
-                >
-                  <i class="bi bi-download me-2"></i>Download Audio
-                </button>
-              </div>
-              <div id="alertContainer" class="mt-3"></div>
+            <div class="d-grid">
+              <button id="generateScriptBtn" class="btn btn-primary" type="button">
+                <i class="bi bi-magic me-2"></i>Generate Script
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- Advanced Settings Accordion -->
-        <div class="mt-4 p-4 bg-white rounded-3 shadow-sm">
-          <h3 class="mb-3">Advanced Settings</h3>
-          <div class="accordion" id="advancedSettings">
-            <!-- API Key Setting -->
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#apiKeyCollapse"
-                  aria-expanded="false"
-                  aria-controls="apiKeyCollapse"
-                >
-                  <i class="bi bi-key me-2"></i>OpenAI API Key
-                </button>
-              </h2>
-              <div
-                id="apiKeyCollapse"
-                class="accordion-collapse collapse"
-                data-bs-parent="#advancedSettings"
-              >
-                <div class="accordion-body">
-                  <div class="mb-3">
-                    <label for="apiKeyInput" class="form-label"
-                      >Enter your OpenAI API Key:</label
-                    >
-                    <input
-                      type="password"
-                      class="form-control"
-                      id="apiKeyInput"
-                      placeholder="sk-..."
-                    />
-                    <div class="form-text">
-                      Your API key is stored locally in your browser and never
-                      sent to our servers.
-                    </div>
+        <!-- Right Panel - Output -->
+        <div class="col-md-6">
+          <div class="p-4 bg-white rounded-3 shadow-sm h-100">
+            <h3 class="mb-3">Podcast Script</h3>
+            <div id="scriptOutput" class="mb-3">
+              <label for="podcastScript" class="form-label">Or type/edit your script:</label>
+              <textarea class="form-control" id="podcastScript" rows="10" placeholder="Your generated podcast script will appear here..."></textarea>
+            </div>
+            <div class="progress mb-3 d-none" id="progressContainer">
+              <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div id="audioContainer" class="d-none mb-3">
+              <audio id="podcastAudio" controls class="w-100"></audio>
+            </div>
+            <div class="d-grid gap-2">
+              <button id="generateAudioBtn" class="btn btn-success" type="button">
+                <i class="bi bi-file-earmark-music me-2"></i>Generate Audio
+              </button>
+              <button id="downloadAudioBtn" class="btn btn-outline-primary d-none" type="button">
+                <i class="bi bi-download me-2"></i>Download Audio
+              </button>
+            </div>
+            <div id="alertContainer" class="mt-3"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced Settings Accordion -->
+      <div class="mt-4 p-4 bg-white rounded-3 shadow-sm">
+        <h3 class="mb-3">Advanced Settings</h3>
+        <div class="accordion" id="advancedSettings">
+          <!-- API Key Setting -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#apiKeyCollapse" aria-expanded="false" aria-controls="apiKeyCollapse">
+                <i class="bi bi-key me-2"></i>OpenAI API Key
+              </button>
+            </h2>
+            <div id="apiKeyCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
+              <div class="accordion-body">
+                <div class="mb-3">
+                  <label for="apiKeyInput" class="form-label">Enter your OpenAI API Key:</label>
+                  <input type="password" class="form-control" id="apiKeyInput" placeholder="sk-..." />
+                  <div class="form-text">
+                    Your API key is stored locally in your browser and never
+                    sent to our servers.
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Base URL Setting -->
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#baseUrlCollapse"
-                  aria-expanded="false"
-                  aria-controls="baseUrlCollapse"
-                >
-                  <i class="bi bi-key me-2"></i>Base URL
-                </button>
-              </h2>
-              <div
-                id="baseUrlCollapse"
-                class="accordion-collapse collapse"
-                data-bs-parent="#advancedSettings"
-              >
-                <div class="accordion-body">
-                  <div class="mb-3">
-                    <label for="baseUrlInput" class="form-label"
-                      >Enter your OpenAI API Base URL:</label
-                    >
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="baseUrlInput"
-                      value="https://api.openai.com/v1"
-                      list="baseUrlList"
-                    />
-                    <datalist id="baseUrlList">
-                      <option value="https://api.openai.com/v1"></option>
-                      <option
-                        value="https://llmfoundry.straive.com/openai/v1"
-                      ></option>
-                      <option
-                        value="https://llmfoundry.straivedemo.com/openai/v1"
-                      ></option>
-                      <option
-                        value="https://openrouter.ai/api/v1"
-                        disabled
-                      ></option>
-                      <option
-                        value="https://aipipe.org/openai/v1"
-                        disabled
-                      ></option>
-                    </datalist>
-                    <div class="form-text">
-                      Your API key is stored locally in your browser and never
-                      sent to our servers.
-                    </div>
+          <!-- Base URL Setting -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#baseUrlCollapse" aria-expanded="false" aria-controls="baseUrlCollapse">
+                <i class="bi bi-key me-2"></i>Base URL
+              </button>
+            </h2>
+            <div id="baseUrlCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
+              <div class="accordion-body">
+                <div class="mb-3">
+                  <label for="baseUrlInput" class="form-label">Enter your OpenAI API Base URL:</label>
+                  <input type="text" class="form-control" id="baseUrlInput" value="https://api.openai.com/v1" list="baseUrlList" />
+                  <datalist id="baseUrlList">
+                    <option value="https://api.openai.com/v1"></option>
+                    <option value="https://llmfoundry.straive.com/openai/v1"></option>
+                    <option value="https://llmfoundry.straivedemo.com/openai/v1"></option>
+                    <option value="https://openrouter.ai/api/v1" disabled></option>
+                    <option value="https://aipipe.org/openai/v1" disabled></option>
+                  </datalist>
+                  <div class="form-text">
+                    Your API key is stored locally in your browser and never
+                    sent to our servers.
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- System Prompt Setting -->
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#systemPromptCollapse"
-                  aria-expanded="false"
-                  aria-controls="systemPromptCollapse"
-                >
-                  <i class="bi bi-chat-square-text me-2"></i>System Prompt &amp;
-                  Model
-                </button>
-              </h2>
-              <div
-                id="systemPromptCollapse"
-                class="accordion-collapse collapse"
-                data-bs-parent="#advancedSettings"
-              >
-                <div class="accordion-body">
-                  <div class="mb-3">
-                    <label for="systemPromptInput" class="form-label"
-                      >Customize the system prompt:</label
-                    >
-                    <textarea
-                      class="form-control"
-                      id="systemPromptInput"
-                      rows="10"
-                    >
+          <!-- System Prompt Setting -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#systemPromptCollapse" aria-expanded="false" aria-controls="systemPromptCollapse">
+                <i class="bi bi-chat-square-text me-2"></i>System Prompt &amp;
+                Model
+              </button>
+            </h2>
+            <div id="systemPromptCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
+              <div class="accordion-body">
+                <div class="mb-3">
+                  <label for="systemPromptInput" class="form-label">Customize the system prompt:</label>
+                  <textarea class="form-control" id="systemPromptInput" rows="10">
 You are a professional podcast script editor. Write this content as an engaging, lay-friendly conversation between two enthusiastic experts, ${voice1.name} and ${voice2.name}.
 
   1. **Show Opener**. ${voice1.name} and ${voice2.name} greet listeners together. Example:
@@ -314,170 +208,119 @@ You are a professional podcast script editor. Write this content as an engaging,
 
   5. **Output format**: Plain text with speaker labels:
   ${voice1.name}: …
-  ${voice2.name}: …</textarea
-                    >
-                  </div>
-                  <div class="mb-3">
-                    <label for="model" class="form-label"
-                      >Choose the model:</label
-                    >
-                    <input
-                      type="text"
-                      class="form-control"
-                      id="model"
-                      value="gpt-4.1-mini"
-                      list="modelList"
-                    />
-                    <datalist id="modelList">
-                      <option value="gpt-4.1-nano"></option>
-                      <option value="gpt-4.1-mini"></option>
-                      <option value="gpt-4.1"></option>
-                      <option value="gpt-4o"></option>
-                      <option value="o4-mini"></option>
-                    </datalist>
-                  </div>
+  ${voice2.name}: …</textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="model" class="form-label">Choose the model:</label>
+                  <input type="text" class="form-control" id="model" value="gpt-4.1-mini" list="modelList" />
+                  <datalist id="modelList">
+                    <option value="gpt-4.1-nano"></option>
+                    <option value="gpt-4.1-mini"></option>
+                    <option value="gpt-4.1"></option>
+                    <option value="gpt-4o"></option>
+                    <option value="o4-mini"></option>
+                  </datalist>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Voice Settings -->
-            <div class="accordion-item">
-              <h2 class="accordion-header">
-                <button
-                  class="accordion-button collapsed"
-                  type="button"
-                  data-bs-toggle="collapse"
-                  data-bs-target="#voiceSettingsCollapse"
-                  aria-expanded="false"
-                  aria-controls="voiceSettingsCollapse"
-                >
-                  <i class="bi bi-volume-up me-2"></i>Voice Settings
-                </button>
-              </h2>
-              <div
-                id="voiceSettingsCollapse"
-                class="accordion-collapse collapse"
-                data-bs-parent="#advancedSettings"
-              >
-                <div class="accordion-body">
-                  <!-- Voice 1 Settings -->
-                  <div class="card mb-3">
-                    <div class="card-header bg-light">Voice 1 Settings</div>
-                    <div class="card-body">
-                      <div class="mb-3">
-                        <label for="voice1Name" class="form-label">Name:</label>
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="voice1Name"
-                          value="Alex"
-                        />
-                      </div>
-                      <div class="mb-3">
-                        <label for="voice1Type" class="form-label"
-                          >Voice:</label
-                        >
-                        <select class="form-select" id="voice1Type">
-                          <option value="ash" selected>ash</option>
-                          <option value="nova">nova</option>
-                          <option value="alloy">alloy</option>
-                          <option value="echo">echo</option>
-                          <option value="fable">fable</option>
-                          <option value="onyx">onyx</option>
-                          <option value="shimmer">shimmer</option>
-                        </select>
-                      </div>
-                      <div class="mb-3">
-                        <label for="voice1Instructions" class="form-label"
-                          >Instructions:</label
-                        >
-                        <textarea
-                          class="form-control"
-                          id="voice1Instructions"
-                          rows="5"
-                        >
+          <!-- Voice Settings -->
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#voiceSettingsCollapse" aria-expanded="false" aria-controls="voiceSettingsCollapse">
+                <i class="bi bi-volume-up me-2"></i>Voice Settings
+              </button>
+            </h2>
+            <div id="voiceSettingsCollapse" class="accordion-collapse collapse" data-bs-parent="#advancedSettings">
+              <div class="accordion-body">
+                <!-- Voice 1 Settings -->
+                <div class="card mb-3">
+                  <div class="card-header bg-light">Voice 1 Settings</div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label for="voice1Name" class="form-label">Name:</label>
+                      <input type="text" class="form-control" id="voice1Name" value="Alex" />
+                    </div>
+                    <div class="mb-3">
+                      <label for="voice1Type" class="form-label">Voice:</label>
+                      <select class="form-select" id="voice1Type">
+                        <option value="ash" selected>ash</option>
+                        <option value="nova">nova</option>
+                        <option value="alloy">alloy</option>
+                        <option value="echo">echo</option>
+                        <option value="fable">fable</option>
+                        <option value="onyx">onyx</option>
+                        <option value="shimmer">shimmer</option>
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label for="voice1Instructions" class="form-label">Instructions:</label>
+                      <textarea class="form-control" id="voice1Instructions" rows="5">
 Voice: Energetic, curious, and upbeat—always ready with a question.
 Tone: Playful and exploratory, sparking curiosity.
 Dialect: Neutral and conversational, like chatting with a friend.
 Pronunciation: Crisp and dynamic, with a slight upward inflection on questions.
-Features: Loves asking "What do you think…?" and using bright, relatable metaphors.</textarea
-                        >
-                      </div>
+Features: Loves asking "What do you think…?" and using bright, relatable metaphors.</textarea>
                     </div>
                   </div>
+                </div>
 
-                  <!-- Voice 2 Settings -->
-                  <div class="card">
-                    <div class="card-header bg-light">Voice 2 Settings</div>
-                    <div class="card-body">
-                      <div class="mb-3">
-                        <label for="voice2Name" class="form-label">Name:</label>
-                        <input
-                          type="text"
-                          class="form-control"
-                          id="voice2Name"
-                          value="Maya"
-                        />
-                      </div>
-                      <div class="mb-3">
-                        <label for="voice2Type" class="form-label"
-                          >Voice:</label
-                        >
-                        <select class="form-select" id="voice2Type">
-                          <option value="ash">ash</option>
-                          <option value="nova" selected>nova</option>
-                          <option value="alloy">alloy</option>
-                          <option value="echo">echo</option>
-                          <option value="fable">fable</option>
-                          <option value="onyx">onyx</option>
-                          <option value="shimmer">shimmer</option>
-                        </select>
-                      </div>
-                      <div class="mb-3">
-                        <label for="voice2Instructions" class="form-label"
-                          >Instructions:</label
-                        >
-                        <textarea
-                          class="form-control"
-                          id="voice2Instructions"
-                          rows="5"
-                        >
+                <!-- Voice 2 Settings -->
+                <div class="card">
+                  <div class="card-header bg-light">Voice 2 Settings</div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label for="voice2Name" class="form-label">Name:</label>
+                      <input type="text" class="form-control" id="voice2Name" value="Maya" />
+                    </div>
+                    <div class="mb-3">
+                      <label for="voice2Type" class="form-label">Voice:</label>
+                      <select class="form-select" id="voice2Type">
+                        <option value="ash">ash</option>
+                        <option value="nova" selected>nova</option>
+                        <option value="alloy">alloy</option>
+                        <option value="echo">echo</option>
+                        <option value="fable">fable</option>
+                        <option value="onyx">onyx</option>
+                        <option value="shimmer">shimmer</option>
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label for="voice2Instructions" class="form-label">Instructions:</label>
+                      <textarea class="form-control" id="voice2Instructions" rows="5">
 Voice: Warm, clear, and insightful—grounded in practical wisdom.
 Tone: Reassuring and explanatory, turning questions into teachable moments.
 Dialect: Neutral professional, yet friendly and approachable.
 Pronunciation: Steady and articulate, with calm emphasis on key points.
-Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to queries.</textarea
-                        >
-                      </div>
+Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to queries.</textarea>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div class="text-end">
-              <button
-                type="button"
-                class="btn btn-outline-danger btn-sm mt-3"
-                id="resetSettingsBtn"
-              >
-                Clear all
-              </button>
-            </div>
+          <div class="text-end">
+            <button type="button" class="btn btn-outline-danger btn-sm mt-3" id="resetSettingsBtn">
+              Clear all
+            </button>
           </div>
         </div>
-      </form>
+      </div>
+    </form>
 
-      <!-- Footer -->
-      <footer class="pt-3 mt-4 text-muted border-top">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>AI Podcast Generator &copy; 2025</div>
-          <div class="text-end">Powered by OpenAI API</div>
-        </div>
-      </footer>
-    </div>
+    <!-- Footer -->
+    <footer class="pt-3 mt-4 text-muted border-top">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>AI Podcast Generator &copy; 2025</div>
+        <div class="text-end">Powered by OpenAI API</div>
+      </div>
+    </footer>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="script.js"></script>
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
 </html>

@@ -5,6 +5,7 @@ This tool fetches top or best stories from Hacker News, converts their linked co
 ## What it does
 
 The tool retrieves a list of either "Top Stories" or "Best Stories" from Hacker News via the official Firebase API. For the first 10 stories in the selected list, it:
+
 1.  Fetches metadata for the Hacker News item (title, URL, submission time).
 2.  Accesses the content at the story's URL.
 3.  Converts that external content into Markdown format using an external conversion service.
@@ -22,12 +23,12 @@ The tool retrieves a list of either "Top Stories" or "Best Stories" from Hacker 
 
 1.  **Select Story Type:** The user chooses whether to fetch "Top Stories" or "Best Stories" from a dropdown menu.
 2.  **Extract News:** Upon clicking "Extract News":
-    *   The tool calls the Hacker News Firebase API to get the IDs of the selected stories.
-    *   It processes the top 10 story IDs. For each ID:
-        *   It fetches the item details (title, URL, time) from the Hacker News API.
-        *   It sends the item's URL to an external service (`llmfoundry.straive.com/-/markdown`) to get the Markdown representation of the page content.
-    *   The tool formats the output with YAML frontmatter containing `time`, `title`, and `url` from Hacker News, followed by the Markdown content of the linked page.
+    - The tool calls the Hacker News Firebase API to get the IDs of the selected stories.
+    - It processes the top 10 story IDs. For each ID:
+      - It fetches the item details (title, URL, time) from the Hacker News API.
+      - It sends the item's URL to an external service (`llmfoundry.straive.com/-/markdown`) to get the Markdown representation of the page content.
+    - The tool formats the output with YAML frontmatter containing `time`, `title`, and `url` from Hacker News, followed by the Markdown content of the linked page.
 3.  **View and Copy Output:** The Markdown content for all processed stories is displayed in a textarea. The user can then click "Copy Output" to copy the entire text to their clipboard.
-    *   Progress and any errors encountered during the process are displayed to the user.
+    - Progress and any errors encountered during the process are displayed to the user.
 
 **Note:** This tool relies on an external service (`llmfoundry.straive.com`) for the HTML-to-Markdown conversion. Its availability may affect the tool's functionality.

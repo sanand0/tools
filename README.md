@@ -2,7 +2,6 @@
 
 A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-anand.net](./https://tools.s-anand.net).
 
-
 ## Tools
 
 ## Available Tools
@@ -98,7 +97,8 @@ The site is automatically deployed to GitHub Pages when changes are pushed to th
 
 Linting:
 
-- `npx prettier@3.5 --print-width=120`
+- `npx -y prettier@3.5 --write --print-width=120 '**/*.js' '**/!(*.min).js' '**/*.md'`
+- `npx -y js-beautify@1 '**/*.html' --type html --replace --indent-size 2 --max-preserve-newlines 1`
 
 ## License
 

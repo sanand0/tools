@@ -41,23 +41,24 @@ This tool provides a digital canvas where you can:
 ## Technical tutorial
 
 **Core Functionality:**
--   **Interactive Grid:**
-    -   Items are placed on an SVG grid. Default axes are "Urgency" and "Importance."
-    -   **Customizable Labels:** Click on axis labels (left/bottom) to edit them. Blank labels are removed, changing grid dimensions. Add new labels via "+" icons.
--   **Item Management:**
-    -   **Add Items:** Click "New item" to add a task/note. It appears on the grid, ready to be dragged.
-    -   **Edit Items:** Click an item to edit its text directly.
-    -   **Move Items:** Drag items to different positions on the grid to change their priority.
-    -   **Delete Items:** Clear the text within an item. It will be marked for deletion and disappear after 5 seconds if it remains empty and loses focus. (You can undo by quickly re-focusing and using Ctrl+Z).
-    -   **Color Coding:** Ctrl-click an item to cycle through five preset border colors for visual differentiation.
--   **Offline Storage (Default):**
-    -   All your items, axis labels, notes, and view configurations are automatically saved in your web browser's `localStorage`.
-    -   The application loads your data when you revisit the page in the same browser. No internet connection is required for core functionality.
--   **Multiple Views:**
-    -   Organize different projects or contexts into separate "views."
-    -   Switch between views using the dropdown menu at the top right. Each view is a distinct matrix with its own items and labels, identified by a URL hash (e.g., `index.html#myproject`).
-    -   Create new views or clear existing ones from this menu.
--   **Notes Area:** An editable section below the grid for any additional notes related to the current view.
+
+- **Interactive Grid:**
+  - Items are placed on an SVG grid. Default axes are "Urgency" and "Importance."
+  - **Customizable Labels:** Click on axis labels (left/bottom) to edit them. Blank labels are removed, changing grid dimensions. Add new labels via "+" icons.
+- **Item Management:**
+  - **Add Items:** Click "New item" to add a task/note. It appears on the grid, ready to be dragged.
+  - **Edit Items:** Click an item to edit its text directly.
+  - **Move Items:** Drag items to different positions on the grid to change their priority.
+  - **Delete Items:** Clear the text within an item. It will be marked for deletion and disappear after 5 seconds if it remains empty and loses focus. (You can undo by quickly re-focusing and using Ctrl+Z).
+  - **Color Coding:** Ctrl-click an item to cycle through five preset border colors for visual differentiation.
+- **Offline Storage (Default):**
+  - All your items, axis labels, notes, and view configurations are automatically saved in your web browser's `localStorage`.
+  - The application loads your data when you revisit the page in the same browser. No internet connection is required for core functionality.
+- **Multiple Views:**
+  - Organize different projects or contexts into separate "views."
+  - Switch between views using the dropdown menu at the top right. Each view is a distinct matrix with its own items and labels, identified by a URL hash (e.g., `index.html#myproject`).
+  - Create new views or clear existing ones from this menu.
+- **Notes Area:** An editable section below the grid for any additional notes related to the current view.
 
 ## How It Works
 

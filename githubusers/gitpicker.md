@@ -2,7 +2,7 @@
 
 A possible next iteration of this tool.
 
-----
+---
 
 I am building GitPicker, a front-end only lit-html (no React) web app that:
 
