@@ -94,11 +94,7 @@ The site is automatically deployed to GitHub Pages when changes are pushed to th
 - Use [asyncllm](./https://www.npmjs.com/package/asyncllm) to stream LLM calls
 - Import common code from common/ and keep JSON/CSV conversions, error reporting, LLM calls, etc. in common/
 - When in doubt, check other tools and follow the same style
-
-Linting:
-
-- `npx -y prettier@3.5 --write --print-width=120 '**/*.js' '**/!(*.min).js' '**/*.md'`
-- `npx -y js-beautify@1 '**/*.html' --type html --replace --indent-size 2 --max-preserve-newlines 1`
+- Lint using `npm run lint`
 
 ## License
 
