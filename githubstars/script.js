@@ -1,5 +1,6 @@
 import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
+import { showToast } from "../common/toast.js";
 
 const formatters = {
   number: new Intl.NumberFormat("en"),
@@ -100,7 +101,7 @@ document.getElementById("repoForm").addEventListener("submit", async (e) => {
       repoData.filter((repo) => !repo.error),
     );
   } catch (error) {
-    alert(`Error: ${error.message}`);
+    showToast({ title: "Error", body: error.message, color: "bg-danger" });
   } finally {
     loading.classList.add("d-none");
   }

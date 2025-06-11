@@ -1,11 +1,7 @@
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
-import {
-  gfm,
-  strikethrough,
-  tables,
-  taskListItems,
-} from "@joplin/turndown-plugin-gfm";
+import { gfm, strikethrough, tables, taskListItems } from "@joplin/turndown-plugin-gfm";
+import { showToast } from "../common/toast.js";
 
 /**
  * Converts current page or selected text to Markdown and copies to clipboard
@@ -53,7 +49,7 @@ export async function convert() {
     // Copy to clipboard
     try {
       await navigator.clipboard.writeText(markdown);
-      alert("Page converted to Markdown and copied to clipboard!");
+      showToast({ title: "Success", body: "Page converted to Markdown and copied to clipboard!", color: "bg-success" });
     } catch (clipboardError) {
       // Fallback to creating a temporary textarea element
       const textarea = document.createElement("textarea");
@@ -64,11 +60,16 @@ export async function convert() {
       const success = document.execCommand("copy");
       document.body.removeChild(textarea);
 
-      if (success) alert("Page converted to Markdown and copied to clipboard!");
+      if (success)
+        showToast({
+          title: "Success",
+          body: "Page converted to Markdown and copied to clipboard!",
+          color: "bg-success",
+        });
       else throw new Error("Failed to copy to clipboard");
     }
   } catch (error) {
-    alert("Error converting page: " + error.message);
+    showToast({ title: "Error", body: `Error converting page: ${error.message}`, color: "bg-danger" });
     throw error;
   }
 }

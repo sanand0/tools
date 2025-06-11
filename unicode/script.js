@@ -1,13 +1,12 @@
+import { updateLatestToast } from "../common/toast.js";
 const readClipboardBtn = document.getElementById("readClipboard");
 const charContainer = document.getElementById("charContainer");
 const spinner = document.getElementById("spinner");
-const errorToast = new bootstrap.Toast(document.getElementById("errorToast"));
 const readTextBtn = document.getElementById("readText");
 const textInput = document.getElementById("textInput");
 
 function showError(message) {
-  document.querySelector("#errorToast .toast-body").textContent = message;
-  errorToast.show();
+  updateLatestToast({ title: "Error", body: message, color: "bg-danger" });
 }
 
 function getNonAsciiChars(text) {

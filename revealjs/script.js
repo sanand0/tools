@@ -1,4 +1,5 @@
 import { Marked } from "https://cdn.jsdelivr.net/npm/marked@13/+esm";
+import { showToast } from "../common/toast.js";
 const marked = new Marked();
 
 const textarea = document.getElementById("markdown-input");
@@ -59,6 +60,6 @@ generateBtn.addEventListener("click", () => {
     presentationWindow.document.write(presentationHTML);
     presentationWindow.document.close();
   } catch (error) {
-    alert(`Error: ${error.message}`);
+    showToast({ title: "Error", body: error.message, color: "bg-danger" });
   }
 });

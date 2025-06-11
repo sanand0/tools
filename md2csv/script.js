@@ -1,4 +1,5 @@
 import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv, copyText } from "../common/csv.js";
+import { updateLatestToast } from "../common/toast.js";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 
 const input = document.getElementById("markdownInput");
@@ -6,7 +7,6 @@ const extractBtn = document.getElementById("extractBtn");
 const output = document.getElementById("output");
 const downloadBtn = document.getElementById("downloadBtn");
 const copyBtn = document.getElementById("copyBtn");
-const toast = new bootstrap.Toast(document.getElementById("toast"));
 
 let data = [];
 let csv = "";
@@ -29,9 +29,8 @@ function parseTable(md) {
   return table.rows.map((row) => Object.fromEntries(headers.map((h, i) => [h, plain(row[i].tokens)])));
 }
 
-function showToast(msg) {
-  document.querySelector("#toast .toast-body").textContent = msg;
-  toast.show();
+function showToast(msg, color = "bg-primary") {
+  updateLatestToast({ body: msg, color });
 }
 
 function showError(msg) {

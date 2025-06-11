@@ -27,38 +27,13 @@
             rows="5"
             placeholder="Paste your JSON here..."
           ></textarea>
-          <button id="convertBtn" class="btn btn-primary">
-            <i class="bi bi-arrow-down-up"></i> Convert
-          </button>
-          <button id="downloadBtn" class="btn btn-success d-none">
-            <i class="bi bi-download"></i> Download CSV
-          </button>
-          <button id="copyBtn" class="btn btn-warning d-none">
-            <i class="bi bi-clipboard"></i> Copy to Excel
-          </button>
+          <button id="convertBtn" class="btn btn-primary"><i class="bi bi-arrow-down-up"></i> Convert</button>
+          <button id="downloadBtn" class="btn btn-success d-none"><i class="bi bi-download"></i> Download CSV</button>
+          <button id="copyBtn" class="btn btn-warning d-none"><i class="bi bi-clipboard"></i> Copy to Excel</button>
         </div>
       </div>
 
       <div id="output"></div>
-
-      <div
-        id="toast"
-        class="toast align-items-center text-white bg-primary border-0"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-        style="position: fixed; bottom: 20px; right: 20px"
-      >
-        <div class="d-flex">
-          <div class="toast-body"></div>
-          <button
-            type="button"
-            class="btn-close btn-close-white me-2 m-auto"
-            data-bs-dismiss="toast"
-            aria-label="Close"
-          ></button>
-        </div>
-      </div>
     </div>
 
     <script
