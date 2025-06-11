@@ -2,6 +2,7 @@ import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { showToast } from "../common/toast.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const COUNTRIES = {
   US: "United States",
@@ -31,6 +32,7 @@ const openaiApiKeyInput = document.getElementById("openaiApiKey");
 const llmResponseDiv = document.getElementById("llmResponse");
 const llmResponseCard = document.getElementById("llmResponseCard");
 const llmLoadingIndicator = document.getElementById("llmLoadingIndicator");
+saveform("#googlesuggest-form", { exclude: '[type="file"]' });
 
 // --- Application State ---
 let currentSuggestions = null;

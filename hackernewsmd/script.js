@@ -1,9 +1,11 @@
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 const extractButton = document.getElementById("extractButton");
 const copyButton = document.getElementById("copyButton");
 const progressBar = document.getElementById("progressBar");
 const outputTextarea = document.getElementById("outputTextarea");
 const errorContainer = document.getElementById("errorContainer");
 const storyTypeSelect = document.getElementById("storyTypeSelect");
+saveform("#hackernews-form");
 
 async function fetchJson(url) {
   const response = await fetch(url);

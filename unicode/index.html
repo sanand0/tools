@@ -42,7 +42,7 @@
       <div class="row justify-content-center mb-4">
         <div class="col-md-8 text-center">
           <h1 class="mb-4">Unicode Character Viewer</h1>
-          <div class="mb-3">
+          <form id="unicode-form" class="mb-3">
             <textarea id="textInput" class="form-control mb-2" rows="3" placeholder="Enter text here..."></textarea>
             <button id="readText" class="btn btn-primary btn-lg me-2">
               <i class="bi bi-file-text me-2"></i>Read Text
@@ -50,7 +50,7 @@
             <button id="readClipboard" class="btn btn-primary btn-lg">
               <i class="bi bi-clipboard me-2"></i>Read Clipboard
             </button>
-          </div>
+          </form>
           <div id="spinner" class="spinner-border text-primary mt-3 d-none" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>

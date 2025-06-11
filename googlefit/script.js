@@ -1,7 +1,10 @@
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 const form = document.getElementById("googlefit-form");
 const filesInput = document.getElementById("files");
 const headerRow = document.getElementById("header-row");
 const activityData = document.getElementById("activity-data");
+
+saveform("#googlefit-form");
 
 // Track unique sports and dates
 const sports = new Set();

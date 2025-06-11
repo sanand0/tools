@@ -1,4 +1,5 @@
 import { showToast } from "../common/toast.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const form = document.getElementById("speakForm");
 const markdownInput = document.getElementById("markdownInput");
@@ -8,6 +9,7 @@ const apiKeyInput = document.getElementById("apiKeyInput");
 const loading = document.getElementById("loading");
 const htmlOutput = document.getElementById("htmlOutput");
 const copyBtn = document.getElementById("copyBtn");
+saveform("#speakForm", { exclude: '[type="file"]' });
 const readBtn = document.getElementById("readBtn");
 
 let utterance;

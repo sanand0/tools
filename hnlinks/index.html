@@ -21,6 +21,7 @@
 
     <p class="lead">Select a Hacker News source and click "Scrape Links" to extract article URLs.</p>
 
+    <form id="hnlinks-form">
     <div class="row mb-3">
       <div class="col-md-6">
         <label for="sourceUrl" class="form-label">Select Source:</label>
@@ -45,6 +46,8 @@
     <button class="btn btn-secondary mb-3" id="copyButton">
       <i class="bi bi-clipboard me-1"></i> Copy to Clipboard
     </button>
+
+    </form>
 
     <div id="loadingIndicator" class="d-none">
       <div class="spinner-border text-primary" role="status">

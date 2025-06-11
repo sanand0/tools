@@ -1,6 +1,9 @@
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 const form = document.getElementById("urlForm");
 const alertsDiv = document.getElementById("alerts");
 const results = document.getElementById("results");
+
+saveform("#urlForm");
 
 let userDataStorage = []; // To store fetched and processed user data
 

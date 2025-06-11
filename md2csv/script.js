@@ -1,12 +1,14 @@
 import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv, copyText } from "../common/csv.js";
 import { updateLatestToast } from "../common/toast.js";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const input = document.getElementById("markdownInput");
 const extractBtn = document.getElementById("extractBtn");
 const output = document.getElementById("output");
 const downloadBtn = document.getElementById("downloadBtn");
 const copyBtn = document.getElementById("copyBtn");
+saveform("#md2csv-form");
 
 let data = [];
 let csv = "";

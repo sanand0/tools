@@ -1,4 +1,5 @@
 import { showToast } from "../common/toast.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 document.addEventListener("DOMContentLoaded", () => {
   const sourceUrlSelect = document.getElementById("sourceUrl");
@@ -6,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const linksTextArea = document.getElementById("linksTextArea");
   const copyButton = document.getElementById("copyButton");
   const loadingIndicator = document.getElementById("loadingIndicator");
+  saveform("#hnlinks-form");
 
   const PROXY_BASE = "https://llmfoundry.straive.com/-/proxy/";
 

@@ -1,9 +1,11 @@
 import { updateLatestToast } from "../common/toast.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 const readClipboardBtn = document.getElementById("readClipboard");
 const charContainer = document.getElementById("charContainer");
 const spinner = document.getElementById("spinner");
 const readTextBtn = document.getElementById("readText");
 const textInput = document.getElementById("textInput");
+saveform("#unicode-form");
 
 function showError(message) {
   updateLatestToast({ title: "Input error", body: message, color: "bg-danger" });

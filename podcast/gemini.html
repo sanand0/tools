@@ -51,6 +51,7 @@
 
 <body>
   <div class="container">
+    <form id="podcast-gemini-form">
     <header class="text-center mb-4">
       <h1>AI Podcast Generator</h1>
       <p class="lead">Create engaging podcast scripts and audio using Large Language Models.</p>
@@ -177,7 +178,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+  </form>
   <script type="module">
+    import saveform from 'https://cdn.jsdelivr.net/npm/saveform@1.2';
     // Import asyncLLM from CDN
     // Note: In a real app, you might want a fallback or to bundle this.
     let asyncLLM;
@@ -209,6 +212,7 @@
     const podcastPlayerEl = document.getElementById('podcastPlayer');
     const downloadAudioBtn = document.getElementById('downloadAudioBtn');
     const alertPlaceholder = document.getElementById('alertPlaceholder');
+    saveform('#podcast-gemini-form', { exclude: '[type="file"]' });
     document.getElementById('currentYear').textContent = new Date().getFullYear();
 
     // Default Settings

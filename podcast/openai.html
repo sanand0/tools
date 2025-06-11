@@ -10,6 +10,7 @@
 
 <body class="p-4">
   <div class="container">
+    <form id="podcast-openai-form">
     <h1 class="mb-3">LLM Podcast Generator</h1>
     <p>This app generates a two-voice podcast script from your reference text, then produces an audio file you can play or download.</p>
     <p><strong>Use cases:</strong> content repurposing, educational summaries, storytelling.</p>
@@ -115,11 +116,13 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
       <audio id="player" controls class="w-100"></audio>
     </div>
     <button id="dlAudio" class="btn btn-outline-secondary">Download Audio</button>
+    </form>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
     import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
+    import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
     const $ = id => document.getElementById(id);
     const showAlert = msg => { $('alertArea').innerHTML = `<div class="alert alert-danger">${msg}</div>`; };
     const getVoices = () => [{
@@ -129,6 +132,7 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
     }];
 
     $('apiKey').value = localStorage.getItem('OPENAI_KEY') || '';
+    saveform('#podcast-openai-form', { exclude: '[type="file"]' });
     $('apiKey').onchange = e => localStorage.setItem('OPENAI_KEY', e.target.value);
 
     $('genScript').onclick = async () => {

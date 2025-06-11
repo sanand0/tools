@@ -1,10 +1,12 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 import { updateLatestToast } from "../common/toast.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const inputTextarea = document.getElementById("input");
 const outputTextarea = document.getElementById("output");
 const copyBtn = document.getElementById("copyBtn");
 const downloadBtn = document.getElementById("downloadBtn");
+saveform("#excel2jsonl-form");
 
 function showToast(message, color = "bg-primary") {
   updateLatestToast({ body: message, color });
