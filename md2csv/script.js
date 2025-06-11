@@ -16,7 +16,7 @@ const plain = (tokens = []) => {
     .map((t) => {
       if (t.type === "link") return plain(t.tokens);
       if (t.type === "image") return "";
-      if (t.type === "html" && (t.text === "<br>" || t.text.startsWith("<svg"))) return "";
+      if (t.type === "html" && t.text === "<br>") return "";
       return t.tokens ? plain(t.tokens) : t.text || "";
     })
     .join("");
@@ -42,7 +42,10 @@ function showError(msg) {
 
 extractBtn.addEventListener("click", () => {
   try {
-    data = parseTable(input.value.trim());
+    let md = input.value.trim();
+    // Remove SVGs before lexing
+    md = md.replace(/<svg\b[\s\S]*?<\/svg>/g, "");
+    data = parseTable(md);
     csv = objectsToCsv(data);
     csvToTable(output, csv);
     downloadBtn.classList.remove("d-none");
