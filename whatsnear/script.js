@@ -1,4 +1,5 @@
 import { Marked } from "https://cdn.jsdelivr.net/npm/marked@13/+esm";
+import { showToast } from "../common/toast.js";
 const marked = new Marked();
 
 let map,
@@ -154,22 +155,7 @@ function showLoading(isLoading) {
 }
 
 function showError(message) {
-  const toastContainer = document.querySelector(".toast-container");
-  const toastElement = document.createElement("div");
-  toastElement.className = "toast";
-  toastElement.setAttribute("role", "alert");
-  toastElement.setAttribute("aria-live", "assertive");
-  toastElement.setAttribute("aria-atomic", "true");
-  toastElement.innerHTML = `
-              <div class="toast-header bg-danger text-white">
-                  <strong class="me-auto">Error</strong>
-                  <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-              </div>
-              <div class="toast-body">${message}</div>
-          `;
-  toastContainer.appendChild(toastElement);
-  const toast = new bootstrap.Toast(toastElement);
-  toast.show();
+  showToast({ title: "Error", body: message, color: "bg-danger" });
 }
 
 document.addEventListener("DOMContentLoaded", () => {

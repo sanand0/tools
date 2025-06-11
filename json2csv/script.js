@@ -1,11 +1,11 @@
 import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv, copyText } from "../common/csv.js";
+import { updateLatestToast } from "../common/toast.js";
 
 const $jsonInput = document.getElementById("jsonInput");
 const $convertBtn = document.getElementById("convertBtn");
 const $output = document.getElementById("output");
 const $downloadBtn = document.getElementById("downloadBtn");
 const $copyBtn = document.getElementById("copyBtn");
-const $toast = new bootstrap.Toast(document.getElementById("toast"));
 
 // Initialize with sample data
 $jsonInput.value = JSON.stringify([
@@ -48,11 +48,8 @@ const jsonToCsv = (jsonStringInput, toTsv = false) => {
 
 const displayCsvTable = (csv) => csvToTable($output, csv);
 
-function showToast(message, type = "bg-primary") {
-  const toastElement = document.getElementById("toast");
-  toastElement.querySelector(".toast-body").textContent = message;
-  toastElement.className = `toast align-items-center text-white ${type} border-0`;
-  $toast.show();
+function showToast(message, color = "bg-primary") {
+  updateLatestToast({ body: message, color });
 }
 
 $convertBtn.addEventListener("click", () => {

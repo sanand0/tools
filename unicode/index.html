@@ -43,12 +43,7 @@
         <div class="col-md-8 text-center">
           <h1 class="mb-4">Unicode Character Viewer</h1>
           <div class="mb-3">
-            <textarea
-              id="textInput"
-              class="form-control mb-2"
-              rows="3"
-              placeholder="Enter text here..."
-            ></textarea>
+            <textarea id="textInput" class="form-control mb-2" rows="3" placeholder="Enter text here..."></textarea>
             <button id="readText" class="btn btn-primary btn-lg me-2">
               <i class="bi bi-file-text me-2"></i>Read Text
             </button>
@@ -56,37 +51,15 @@
               <i class="bi bi-clipboard me-2"></i>Read Clipboard
             </button>
           </div>
-          <div
-            id="spinner"
-            class="spinner-border text-primary mt-3 d-none"
-            role="status"
-          >
+          <div id="spinner" class="spinner-border text-primary mt-3 d-none" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
         </div>
       </div>
       <div class="row justify-content-center">
         <div class="col-md-10">
-          <div
-            id="charContainer"
-            class="d-flex flex-wrap justify-content-center"
-          ></div>
+          <div id="charContainer" class="d-flex flex-wrap justify-content-center"></div>
         </div>
-      </div>
-    </div>
-
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-      <div id="errorToast" class="toast" role="alert">
-        <div class="toast-header bg-danger text-white">
-          <i class="bi bi-exclamation-circle me-2"></i>
-          <strong class="me-auto">Error</strong>
-          <button
-            type="button"
-            class="btn-close btn-close-white"
-            data-bs-dismiss="toast"
-          ></button>
-        </div>
-        <div class="toast-body"></div>
       </div>
     </div>
 

@@ -1,3 +1,5 @@
+import { showToast } from "../common/toast.js";
+
 const form = document.getElementById("speakForm");
 const markdownInput = document.getElementById("markdownInput");
 const modelSelect = document.getElementById("modelSelect");
@@ -52,7 +54,7 @@ form.addEventListener("submit", async (e) => {
       htmlOutput.scrollTop = htmlOutput.scrollHeight;
     }
   } catch (err) {
-    alert("Error: " + err.message);
+    showToast({ title: "Error", body: err.message, color: "bg-danger" });
   } finally {
     loading.classList.add("d-none");
   }

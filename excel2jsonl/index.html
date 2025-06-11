@@ -49,61 +49,23 @@
         <div class="col-md-6 mb-3">
           <h2><i class="bi bi-input-cursor-text me-2"></i>Input</h2>
           <p>Paste your Excel data here:</p>
-          <textarea
-            id="input"
-            class="form-control"
-            rows="10"
-            placeholder="Paste your Excel data here..."
-          ></textarea>
+          <textarea id="input" class="form-control" rows="10" placeholder="Paste your Excel data here..."></textarea>
         </div>
         <div class="col-md-6 mb-3">
           <h2><i class="bi bi-code me-2"></i>Output (JSONL)</h2>
           <p>Converted JSONL data:</p>
           <div class="textarea-container">
-            <textarea
-              id="output"
-              class="form-control"
-              rows="10"
-              readonly=""
-            ></textarea>
+            <textarea id="output" class="form-control" rows="10" readonly=""></textarea>
             <div class="action-btns">
-              <button
-                id="copyBtn"
-                class="btn btn-primary"
-                title="Copy to clipboard"
-              >
+              <button id="copyBtn" class="btn btn-primary" title="Copy to clipboard">
                 <i class="bi bi-clipboard"></i>
               </button>
-              <button
-                id="downloadBtn"
-                class="btn btn-success"
-                title="Download JSONL"
-                disabled=""
-              >
+              <button id="downloadBtn" class="btn btn-success" title="Download JSONL" disabled="">
                 <i class="bi bi-download"></i>
               </button>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div
-      id="toast"
-      class="toast align-items-center text-white bg-primary border-0"
-      role="alert"
-      aria-live="assertive"
-      aria-atomic="true"
-      style="position: fixed; bottom: 20px; right: 20px"
-    >
-      <div class="d-flex">
-        <div class="toast-body"></div>
-        <button
-          type="button"
-          class="btn-close btn-close-white me-2 m-auto"
-          data-bs-dismiss="toast"
-          aria-label="Close"
-        ></button>
       </div>
     </div>
 

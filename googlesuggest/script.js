@@ -1,6 +1,7 @@
 import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
+import { showToast } from "../common/toast.js";
 
 const COUNTRIES = {
   US: "United States",
@@ -195,7 +196,7 @@ function fetchJsonp(url, timeout = 5000) {
 async function fetchGoogleSuggestions(query) {
   currentQuery = query;
   if (!query.trim()) {
-    alert("Please enter a search term.");
+    showToast({ title: "Error", body: "Please enter a search term.", color: "bg-danger" });
     return null;
   }
 
@@ -329,11 +330,11 @@ async function fetchLLMExplanation(suggestions, query) {
   const apiKey = openaiApiKeyInput.value.trim();
 
   if (!apiKey) {
-    alert("Please enter your OpenAI API Key.");
+    showToast({ title: "Error", body: "Please enter your OpenAI API Key.", color: "bg-danger" });
     return;
   }
   if (!baseUrl) {
-    alert("Please enter the OpenAI Base URL.");
+    showToast({ title: "Error", body: "Please enter the OpenAI Base URL.", color: "bg-danger" });
     return;
   }
 
@@ -411,7 +412,7 @@ explainButton.addEventListener("click", () => {
   if (currentSuggestions && Object.keys(currentSuggestions).length > 0 && currentQuery) {
     fetchLLMExplanation(currentSuggestions, currentQuery);
   } else {
-    alert("Please fetch some suggestions first for a valid query.");
+    showToast({ title: "Error", body: "Please fetch some suggestions first for a valid query.", color: "bg-danger" });
   }
 });
 

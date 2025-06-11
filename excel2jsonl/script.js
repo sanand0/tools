@@ -1,16 +1,13 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+import { updateLatestToast } from "../common/toast.js";
 
 const inputTextarea = document.getElementById("input");
 const outputTextarea = document.getElementById("output");
 const copyBtn = document.getElementById("copyBtn");
 const downloadBtn = document.getElementById("downloadBtn");
-const toast = new bootstrap.Toast(document.getElementById("toast"));
 
-function showToast(message, type = "bg-primary") {
-  const toastElement = document.getElementById("toast");
-  toastElement.querySelector(".toast-body").textContent = message;
-  toastElement.className = `toast align-items-center text-white ${type} border-0`;
-  toast.show();
+function showToast(message, color = "bg-primary") {
+  updateLatestToast({ body: message, color });
 }
 
 function convertToJSONL(input) {

@@ -1,3 +1,5 @@
+import { showToast } from "../common/toast.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   const sourceUrlSelect = document.getElementById("sourceUrl");
   const scrapeButton = document.getElementById("scrapeButton");
@@ -130,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error("Error scraping links:", error);
       linksTextArea.value = `Error: ${error.message}`;
-      alert(`An error occurred: ${error.message}`);
+      showToast({ title: "Error", body: error.message, color: "bg-danger" });
     } finally {
       loadingIndicator.classList.add("d-none");
       scrapeButton.disabled = false;
@@ -154,7 +156,11 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch((err) => {
           console.error("Failed to copy links:", err);
-          alert("Failed to copy links to clipboard. See console for details.");
+          showToast({
+            title: "Error",
+            body: "Failed to copy links to clipboard. See console for details.",
+            color: "bg-danger",
+          });
         });
     }
   });
