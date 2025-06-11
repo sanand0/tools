@@ -414,7 +414,11 @@ explainButton.addEventListener("click", () => {
   if (currentSuggestions && Object.keys(currentSuggestions).length > 0 && currentQuery) {
     fetchLLMExplanation(currentSuggestions, currentQuery);
   } else {
-    showToast({ title: "No suggestions", body: "Please fetch some suggestions first for a valid query.", color: "bg-danger" });
+    showToast({
+      title: "No suggestions",
+      body: "Please fetch some suggestions first for a valid query.",
+      color: "bg-danger",
+    });
   }
 });
 

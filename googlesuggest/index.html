@@ -118,47 +118,47 @@
     <p class="lead mb-4">Enter a search term to see how Google auto-completes it across English-speaking countries (though your IP address location <em>does</em> influence this). You can also get an AI-powered humorous explanation of the results.</p>
     <form id="googlesuggest-form">
 
-    <div class="row align-items-end mb-3">
-      <div class="col-md">
-        <label for="searchTerm" class="form-label">Search Term:</label>
-        <input type="text" class="form-control" id="searchTerm" placeholder="e.g., learn python">
-      </div>
-      <div class="col-md-auto">
-        <button type="button" class="btn btn-primary w-100" id="fetchSuggestions">Fetch Suggestions</button>
-      </div>
-    </div>
-
-    <div id="loadingIndicator" class="spinner-border text-primary d-none mb-3" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-
-    <div class="search-history-section mb-4"> <!-- Changed to mb-4 for consistency -->
-      <div class="d-flex align-items-center flex-wrap">
-        <div id="initialKeywords" class="me-2">
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how to </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how do I </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">best way to </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">why is </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">can I </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how can I </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">what </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">where </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">when </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">why </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">unable to </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how do I convert to </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">best  </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">worst </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">first </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">last </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">I like </button>
-          <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">I hate </button>
+      <div class="row align-items-end mb-3">
+        <div class="col-md">
+          <label for="searchTerm" class="form-label">Search Term:</label>
+          <input type="text" class="form-control" id="searchTerm" placeholder="e.g., learn python">
         </div>
-        <div id="searchHistory" class="d-flex flex-wrap align-items-center">
-          <!-- User's search history items will be injected here -->
+        <div class="col-md-auto">
+          <button type="button" class="btn btn-primary w-100" id="fetchSuggestions">Fetch Suggestions</button>
         </div>
       </div>
-    </div>
+
+      <div id="loadingIndicator" class="spinner-border text-primary d-none mb-3" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+
+      <div class="search-history-section mb-4"> <!-- Changed to mb-4 for consistency -->
+        <div class="d-flex align-items-center flex-wrap">
+          <div id="initialKeywords" class="me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how to </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how do I </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">best way to </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">why is </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">can I </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how can I </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">what </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">where </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">when </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">why </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">unable to </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">how do I convert to </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">best </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">worst </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">first </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">last </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">I like </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary history-item me-1">I hate </button>
+          </div>
+          <div id="searchHistory" class="d-flex flex-wrap align-items-center">
+            <!-- User's search history items will be injected here -->
+          </div>
+        </div>
+      </div>
   </div>
 
   <div id="results" class="container-fluid my-4"></div>

@@ -1,72 +1,64 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Unicode Character Viewer</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      crossorigin="anonymous"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
-      rel="stylesheet"
-      crossorigin="anonymous"
-    />
-    <style>
-      .char-btn {
-        min-width: 200px;
-        margin: 0.5rem;
-        font-family: monospace;
-      }
 
-      .char-display {
-        font-size: 1.5rem;
-        margin-bottom: 0.5rem;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unicode Character Viewer</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIGZpbGw9IiMyNTYzZWIiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJtMTYgNyAyIDcgNyAyLTcgMi0yIDctMi03LTctMiA3LTJaIi8+PC9zdmc+">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous" />
+  <style>
+    .char-btn {
+      min-width: 200px;
+      margin: 0.5rem;
+      font-family: monospace;
+    }
 
-      .toast-container {
-        z-index: 5;
-      }
+    .char-display {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
 
-      .hex-value {
-        font-size: 1.2rem;
-        font-weight: bold;
-      }
-    </style>
-  </head>
+    .toast-container {
+      z-index: 5;
+    }
 
-  <body class="bg-light">
-    <div class="container-fluid py-4">
-      <div class="row justify-content-center mb-4">
-        <div class="col-md-8 text-center">
-          <h1 class="mb-4">Unicode Character Viewer</h1>
-          <form id="unicode-form" class="mb-3">
-            <textarea id="textInput" class="form-control mb-2" rows="3" placeholder="Enter text here..."></textarea>
-            <button id="readText" class="btn btn-primary btn-lg me-2">
-              <i class="bi bi-file-text me-2"></i>Read Text
-            </button>
-            <button id="readClipboard" class="btn btn-primary btn-lg">
-              <i class="bi bi-clipboard me-2"></i>Read Clipboard
-            </button>
-          </form>
-          <div id="spinner" class="spinner-border text-primary mt-3 d-none" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div>
-      </div>
-      <div class="row justify-content-center">
-        <div class="col-md-10">
-          <div id="charContainer" class="d-flex flex-wrap justify-content-center"></div>
+    .hex-value {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+  <div class="container-fluid py-4">
+    <div class="row justify-content-center mb-4">
+      <div class="col-md-8 text-center">
+        <h1 class="mb-4">Unicode Character Viewer</h1>
+        <form id="unicode-form" class="mb-3">
+          <textarea id="textInput" class="form-control mb-2" rows="3" placeholder="Enter text here..."></textarea>
+          <button id="readText" class="btn btn-primary btn-lg me-2">
+            <i class="bi bi-file-text me-2"></i>Read Text
+          </button>
+          <button id="readClipboard" class="btn btn-primary btn-lg">
+            <i class="bi bi-clipboard me-2"></i>Read Clipboard
+          </button>
+        </form>
+        <div id="spinner" class="spinner-border text-primary mt-3 d-none" role="status">
+          <span class="visually-hidden">Loading...</span>
         </div>
       </div>
     </div>
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div id="charContainer" class="d-flex flex-wrap justify-content-center"></div>
+      </div>
+    </div>
+  </div>
 
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
-      crossorigin="anonymous"
-    ></script>
-    <script type="module" src="script.js"></script>
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
 </html>

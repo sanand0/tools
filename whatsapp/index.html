@@ -1,48 +1,51 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WhatsApp Messenger</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-top: 50px;
-      }
 
-      input {
-        padding: 10px;
-        width: 250px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatsApp Messenger</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIGZpbGw9IiMyNTYzZWIiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJtMTYgNyAyIDcgNyAyLTcgMi0yIDctMi03LTctMiA3LTJaIi8+PC9zdmc+">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 50px;
+    }
 
-      button {
-        padding: 10px 15px;
-        background-color: #25d366;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 10px;
-      }
+    input {
+      padding: 10px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
 
-      button:hover {
-        background-color: #128c7e;
-      }
-    </style>
-  </head>
+    button {
+      padding: 10px 15px;
+      background-color: #25d366;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
 
-  <body>
-    <h1>WhatsApp Messenger</h1>
-    <form id="whatsapp-form">
-      <input type="text" id="phoneNumber" placeholder="Enter phone number" />
-      <button id="sendButton">Send via WhatsApp</button>
-    </form>
+    button:hover {
+      background-color: #128c7e;
+    }
+  </style>
+</head>
 
-    <script type="module" src="script.js"></script>
-  </body>
+<body>
+  <h1>WhatsApp Messenger</h1>
+  <form id="whatsapp-form">
+    <input type="text" id="phoneNumber" placeholder="Enter phone number" />
+    <button id="sendButton">Send via WhatsApp</button>
+  </form>
+
+  <script type="module" src="script.js"></script>
+</body>
+
 </html>

@@ -1,412 +1,357 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title class="app-name">Priority Matrix</title>
-    <style>
-      /* Based on normalize.css */
-      html {
-        font-family: Helvetica, Arial, sans-serif;
-        -webkit-text-size-adjust: 100%;
-        -ms-text-size-adjust: 100%;
-        /* Based on http://lea.verou.me/css3patterns/#shippo */
-        background-image:
-          radial-gradient(
-            closest-side,
-            transparent 98%,
-            rgba(0, 0, 0, 0.02) 99%
-          ),
-          radial-gradient(
-            closest-side,
-            transparent 98%,
-            rgba(0, 0, 0, 0.02) 99%
-          );
-        background-size: 40px 40px;
-        background-position:
-          0 0,
-          20px 20px;
-      }
 
-      body {
-        margin: 0 auto;
-        padding: 20px 0;
-        width: 920px;
-      }
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title class="app-name">Priority Matrix</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIGZpbGw9IiMyNTYzZWIiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJtMTYgNyAyIDcgNyAyLTcgMi0yIDctMi03LTctMiA3LTJaIi8+PC9zdmc+">
+  <style>
+    /* Based on normalize.css */
+    html {
+      font-family: Helvetica, Arial, sans-serif;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+      /* Based on http://lea.verou.me/css3patterns/#shippo */
+      background-image:
+        radial-gradient(closest-side,
+          transparent 98%,
+          rgba(0, 0, 0, 0.02) 99%),
+        radial-gradient(closest-side,
+          transparent 98%,
+          rgba(0, 0, 0, 0.02) 99%);
+      background-size: 40px 40px;
+      background-position:
+        0 0,
+        20px 20px;
+    }
 
-      *,
-      *:before,
-      *:after {
-        -webkit-box-sizing: border-box;
-        -moz-box-sizing: border-box;
-        box-sizing: border-box;
-      }
+    body {
+      margin: 0 auto;
+      padding: 20px 0;
+      width: 920px;
+    }
 
-      /* Based on Bootstrap 3 */
-      .pull-right {
-        float: right;
-      }
+    *,
+    *:before,
+    *:after {
+      -webkit-box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      box-sizing: border-box;
+    }
 
-      a {
-        color: #428bca;
-        text-decoration: none;
-      }
+    /* Based on Bootstrap 3 */
+    .pull-right {
+      float: right;
+    }
 
-      a:hover,
-      a:focus {
-        color: #2a6496;
-        text-decoration: underline;
-      }
+    a {
+      color: #428bca;
+      text-decoration: none;
+    }
 
-      code,
-      kbd {
-        font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-        font-size: 75%;
-        padding: 2px 4px;
-      }
+    a:hover,
+    a:focus {
+      color: #2a6496;
+      text-decoration: underline;
+    }
 
-      code {
-        color: #c7254e;
-        background-color: #f9f2f4;
-        white-space: nowrap;
-        border-radius: 3px;
-      }
+    code,
+    kbd {
+      font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+      font-size: 75%;
+      padding: 2px 4px;
+    }
 
-      kbd {
-        color: #fff;
-        background-color: #333;
-        border-radius: 3px;
-        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
-      }
+    code {
+      color: #c7254e;
+      background-color: #f9f2f4;
+      white-space: nowrap;
+      border-radius: 3px;
+    }
 
-      h1,
-      h2 {
-        font-family: Helvetica, Arial, sans-serif;
-        margin: 0.67em 0 0.25em 0;
-        font-size: 2em;
-      }
+    kbd {
+      color: #fff;
+      background-color: #333;
+      border-radius: 3px;
+      box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+    }
 
-      h2 {
-        font-size: 1.5em;
-      }
+    h1,
+    h2 {
+      font-family: Helvetica, Arial, sans-serif;
+      margin: 0.67em 0 0.25em 0;
+      font-size: 2em;
+    }
 
-      /* This is the DOM structure we're using:
+    h2 {
+      font-size: 1.5em;
+    }
+
+    /* This is the DOM structure we're using:
         #container        Overall container
           - svg.gridbase  Background grid
           - div#items     Container for items
               - div.item  Individual iteemes
    */
-      #container {
-        position: relative;
+    #container {
+      position: relative;
+    }
+
+    #items {
+      overflow: hidden;
+    }
+
+    .item {
+      position: absolute;
+      max-width: 15em;
+      min-width: 5em;
+      padding: 0.15em 0.25em;
+      background-color: #fff;
+      border: 1px solid rgb(91, 155, 213);
+      opacity: 0.95;
+      border-radius: 5px;
+    }
+
+    /* http://stackoverflow.com/a/12968143/100904 */
+    .item:before {
+      width: 50%;
+      position: absolute;
+      top: -5px;
+      left: -1px;
+      content: "";
+      border-top-width: 5px;
+      border-top-style: solid;
+      border-top-color: inherit;
+      cursor: move;
+    }
+
+    .item:focus,
+    .item:hover {
+      z-index: 1;
+      outline: none;
+    }
+
+    .item:hover:before,
+    .item:focus:before {
+      top: -20px;
+      border-top-width: 20px;
+    }
+
+    .to-be-deleted {
+      opacity: 0.5;
+    }
+
+    /* Button styling */
+    .button {
+      display: inline-block;
+      vertical-align: middle;
+      font-size: 14px;
+      line-height: 20px;
+      height: 34px;
+      font-weight: normal;
+      border: 1px solid #ccc;
+      background-color: #fff;
+      color: #333;
+      border-radius: 4px;
+      padding: 6px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .button:hover,
+    .button:focus,
+    .button:active {
+      color: #333;
+      text-decoration: none;
+      background-color: #ebebeb;
+      border-color: #adadad;
+    }
+
+    /* Grid styling */
+    #grid path {
+      stroke: #ccc;
+      fill: none;
+    }
+
+    .legend {
+      cursor: pointer;
+    }
+
+    .legend:hover {
+      fill: #ed7d31;
+    }
+
+    /* Indicate editable content subtly */
+    [contenteditable]:hover,
+    [contenteditable]:focus {
+      cursor: pointer;
+      color: #ed7d31;
+    }
+
+    .remote {
+      text-align: right;
+      font-size: 75%;
+      margin: 0.25em;
+      color: #888;
+    }
+
+    #publish-url:empty:after {
+      content: "any Firebase.com .json URL";
+    }
+
+    /* Body text (help, mainly) uses this style. Typography inspired by atlas.oreilly.com */
+    .copy {
+      max-width: 690px;
+      color: #333;
+      font-size: 18px;
+      line-height: 1.3em;
+      font-family:
+        "Book Antiqua", Palatino, "Palatino Linotype", "Palatino LT STD",
+        Georgia, serif;
+      -webkit-font-smoothing: subpixel-antialiased;
+      letter-spacing: 0.01em;
+    }
+
+    #notes {
+      margin-top: 1em;
+      margin-bottom: 3em;
+    }
+
+    @media print {
+      h1 {
+        margin: 0;
       }
 
-      #items {
-        overflow: hidden;
+      .no-print {
+        display: none;
       }
+    }
+  </style>
+</head>
 
-      .item {
-        position: absolute;
-        max-width: 15em;
-        min-width: 5em;
-        padding: 0.15em 0.25em;
-        background-color: #fff;
-        border: 1px solid rgb(91, 155, 213);
-        opacity: 0.95;
-        border-radius: 5px;
-      }
-
-      /* http://stackoverflow.com/a/12968143/100904 */
-      .item:before {
-        width: 50%;
-        position: absolute;
-        top: -5px;
-        left: -1px;
-        content: "";
-        border-top-width: 5px;
-        border-top-style: solid;
-        border-top-color: inherit;
-        cursor: move;
-      }
-
-      .item:focus,
-      .item:hover {
-        z-index: 1;
-        outline: none;
-      }
-
-      .item:hover:before,
-      .item:focus:before {
-        top: -20px;
-        border-top-width: 20px;
-      }
-
-      .to-be-deleted {
-        opacity: 0.5;
-      }
-
-      /* Button styling */
-      .button {
-        display: inline-block;
-        vertical-align: middle;
-        font-size: 14px;
-        line-height: 20px;
-        height: 34px;
-        font-weight: normal;
-        border: 1px solid #ccc;
-        background-color: #fff;
-        color: #333;
-        border-radius: 4px;
-        padding: 6px 12px;
-        cursor: pointer;
-        white-space: nowrap;
-        text-decoration: none;
-      }
-
-      .button:hover,
-      .button:focus,
-      .button:active {
-        color: #333;
-        text-decoration: none;
-        background-color: #ebebeb;
-        border-color: #adadad;
-      }
-
-      /* Grid styling */
-      #grid path {
-        stroke: #ccc;
-        fill: none;
-      }
-
-      .legend {
-        cursor: pointer;
-      }
-
-      .legend:hover {
-        fill: #ed7d31;
-      }
-
-      /* Indicate editable content subtly */
-      [contenteditable]:hover,
-      [contenteditable]:focus {
-        cursor: pointer;
-        color: #ed7d31;
-      }
-
-      .remote {
-        text-align: right;
-        font-size: 75%;
-        margin: 0.25em;
-        color: #888;
-      }
-
-      #publish-url:empty:after {
-        content: "any Firebase.com .json URL";
-      }
-
-      /* Body text (help, mainly) uses this style. Typography inspired by atlas.oreilly.com */
-      .copy {
-        max-width: 690px;
-        color: #333;
-        font-size: 18px;
-        line-height: 1.3em;
-        font-family:
-          "Book Antiqua", Palatino, "Palatino Linotype", "Palatino LT STD",
-          Georgia, serif;
-        -webkit-font-smoothing: subpixel-antialiased;
-        letter-spacing: 0.01em;
-      }
-
-      #notes {
-        margin-top: 1em;
-        margin-bottom: 3em;
-      }
-
-      @media print {
-        h1 {
-          margin: 0;
-        }
-
-        .no-print {
-          display: none;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <h1>
-      <span id="app-name" class="app-name" contentEditable
-        >Priority Matrix</span
-      >
-      <button id="add-item" class="button no-print">New item</button>
-      <div class="pull-right no-print">
-        <select class="button" id="app-list-select">
-          <optgroup label="Views" id="app-list"></optgroup>
-          <optgroup label="Edit">
-            <option id="_new_view">Add a new view</option>
-            <option id="_clear_view">Clear this view</option>
-          </optgroup>
-        </select>
-        <a
-          href="https://github.com/sanand0/whatnext/issues/new"
-          target="_blank"
-          class="button"
-          >Report an issue</a
-        >
-      </div>
-    </h1>
-
-    <div class="remote no-print">
-      <a id="publish" href="#">Publish</a> or
-      <a id="refresh-from" href="#">refresh from</a>
-      <span id="publish-url"></span>
+<body>
+  <h1>
+    <span id="app-name" class="app-name" contentEditable>Priority Matrix</span>
+    <button id="add-item" class="button no-print">New item</button>
+    <div class="pull-right no-print">
+      <select class="button" id="app-list-select">
+        <optgroup label="Views" id="app-list"></optgroup>
+        <optgroup label="Edit">
+          <option id="_new_view">Add a new view</option>
+          <option id="_clear_view">Clear this view</option>
+        </optgroup>
+      </select>
+      <a href="https://github.com/sanand0/whatnext/issues/new" target="_blank" class="button">Report an issue</a>
     </div>
+  </h1>
 
-    <div id="container">
-      <svg id="gridbase" width="920" height="559" ondragover="return false">
-        <!-- 920 / 559 ~ Golden ratio -->
-        <path d="M0,559 v-279.5 l460,279.5 z" fill="rgba(0,0,0,0)" />
-        <path d="M0,279.5 v-279.5 l920,559 h-460 z" fill="rgba(0,0,0,.05)" />
-        <path d="M0,0 h460 l460,279.5 v279.5 z" fill="rgba(0,0,0,.10)" />
-        <path d="M460,0 h460 v279.5 z" fill="rgba(0,0,0,.15)" />
-        <g id="grid"></g>
-        <text
-          id="col:new"
-          class="add-label legend no-print"
-          x="920"
-          y="559"
-          dx="-1em"
-          dy="-8"
-        >
-          +
-        </text>
-        <text
-          id="row:new"
-          class="add-label legend no-print"
-          x="0"
-          y="0"
-          dx="8"
-          dy="1em"
-        >
-          +
-        </text>
-      </svg>
-      <div id="items">
-        <div
-          draggable="true"
-          class="item"
-          style="left: 270px; top: 110px"
-          contenteditable
-        >
-          Items can now be deleted. Just delete the text
-        </div>
-        <div
-          draggable="true"
-          class="item"
-          style="left: 360px; top: 170px"
-          contenteditable
-        >
-          Empty items will automatically vanish after 5 seconds
-        </div>
-        <div
-          draggable="true"
-          class="item"
-          style="left: 100px; top: 390px"
-          contenteditable
-        >
-          But in those 5 seconds, you can go back and undo the change
-        </div>
-        <div
-          draggable="true"
-          class="item"
-          style="left: 600px; top: 390px"
-          contenteditable
-        >
-          Drag this item's handle to move it to a different location
-        </div>
-        <div
-          draggable="true"
-          class="item"
-          style="left: 45px; top: 180px"
-          contenteditable
-        >
-          The state of the page is automatically saved in the browser, and
-          restored when you load the page back
-        </div>
+  <div class="remote no-print">
+    <a id="publish" href="#">Publish</a> or
+    <a id="refresh-from" href="#">refresh from</a>
+    <span id="publish-url"></span>
+  </div>
+
+  <div id="container">
+    <svg id="gridbase" width="920" height="559" ondragover="return false">
+      <!-- 920 / 559 ~ Golden ratio -->
+      <path d="M0,559 v-279.5 l460,279.5 z" fill="rgba(0,0,0,0)" />
+      <path d="M0,279.5 v-279.5 l920,559 h-460 z" fill="rgba(0,0,0,.05)" />
+      <path d="M0,0 h460 l460,279.5 v279.5 z" fill="rgba(0,0,0,.10)" />
+      <path d="M460,0 h460 v279.5 z" fill="rgba(0,0,0,.15)" />
+      <g id="grid"></g>
+      <text id="col:new" class="add-label legend no-print" x="920" y="559" dx="-1em" dy="-8">
+        +
+      </text>
+      <text id="row:new" class="add-label legend no-print" x="0" y="0" dx="8" dy="1em">
+        +
+      </text>
+    </svg>
+    <div id="items">
+      <div draggable="true" class="item" style="left: 270px; top: 110px" contenteditable>
+        Items can now be deleted. Just delete the text
+      </div>
+      <div draggable="true" class="item" style="left: 360px; top: 170px" contenteditable>
+        Empty items will automatically vanish after 5 seconds
+      </div>
+      <div draggable="true" class="item" style="left: 100px; top: 390px" contenteditable>
+        But in those 5 seconds, you can go back and undo the change
+      </div>
+      <div draggable="true" class="item" style="left: 600px; top: 390px" contenteditable>
+        Drag this item's handle to move it to a different location
+      </div>
+      <div draggable="true" class="item" style="left: 45px; top: 180px" contenteditable>
+        The state of the page is automatically saved in the browser, and
+        restored when you load the page back
       </div>
     </div>
+  </div>
 
-    <div id="notes" class="copy" contenteditable>Your notes here</div>
-    <div id="help" class="copy no-print">
-      <h2>Help</h2>
-      <p>Sometimes, it’s hard to figure out what to do next.</p>
-      <p>
-        One classic approach is to list all your items, rate them on an urgency
-        and importance scale, and pick those on the top right quadrant. Stephen
-        Covey explains this in his book
-        <a
-          href="http://en.wikipedia.org/wiki/First_Things_First_(book)"
-          target="_blank"
-          >First Things First</a
-        >.
-      </p>
-      <p>
-        This can be generalised. Almost anything can be prioritised on a grid.
-      </p>
-      <p>
-        This page is an <strong>offline single-page app</strong> that lets you
-        add things and move them around. You can pick your axis scales.
-        Everything’s saved in your browser and available the next time you
-        visit. (But it won’t be available in other browsers or for other
-        people.)
-      </p>
+  <div id="notes" class="copy" contenteditable>Your notes here</div>
+  <div id="help" class="copy no-print">
+    <h2>Help</h2>
+    <p>Sometimes, it’s hard to figure out what to do next.</p>
+    <p>
+      One classic approach is to list all your items, rate them on an urgency
+      and importance scale, and pick those on the top right quadrant. Stephen
+      Covey explains this in his book
+      <a href="http://en.wikipedia.org/wiki/First_Things_First_(book)" target="_blank">First Things First</a>.
+    </p>
+    <p>
+      This can be generalised. Almost anything can be prioritised on a grid.
+    </p>
+    <p>
+      This page is an <strong>offline single-page app</strong> that lets you
+      add things and move them around. You can pick your axis scales.
+      Everything’s saved in your browser and available the next time you
+      visit. (But it won’t be available in other browsers or for other
+      people.)
+    </p>
 
-      <h2>Usage</h2>
-      <ul>
-        <li>
-          <strong>Add an item</strong> by clicking on the “New item” button on
-          top. You can edit and move the item around.
-        </li>
-        <li>
-          <strong>Delete the item</strong> by delete the text in it. It will
-          vanish in 5 seconds after it loses focus. (If you change your mind,
-          click on the item and press <kbd>Ctrl-Z</kbd> to undo.)
-        </li>
-        <li>
-          <strong>Edit labels</strong> by clicking on the labels at the left and
-          bottom. To delete a label, edit it and make it blank. It will
-          automatically be removed.
-        </li>
-        <li>
-          <strong>Add labels</strong> by clicking on the “+” button at the top
-          left or bottom right.
-        </li>
-        <li>
-          <strong>Change label colour</strong> by pressing Ctrl-click. The item
-          cycles through 5 different colours.
-        </li>
-        <li>
-          Your actions are automatically saved in your browser. Re-visit the
-          page to continue from where you left off.
-        </li>
-        <li>
-          <strong>Change views</strong> by selecting the dropdown at the top
-          right. A view is like a new clean slate. You can add or delete views.
-        </li>
-        <li>
-          <strong>Publish</strong> and <strong>refresh from</strong> across
-          machines by creating a free
-          <a href="https://www.firebase.com/signup/" target="_blank"
-            >Firebase account</a
-          >
-          and entering a <code>.json</code> URL. Or use this:
-          <code
-            >https://whatnextapp.firebaseio.com/your-name/sheet-name.json</code
-          >.
-        </li>
-      </ul>
-    </div>
+    <h2>Usage</h2>
+    <ul>
+      <li>
+        <strong>Add an item</strong> by clicking on the “New item” button on
+        top. You can edit and move the item around.
+      </li>
+      <li>
+        <strong>Delete the item</strong> by delete the text in it. It will
+        vanish in 5 seconds after it loses focus. (If you change your mind,
+        click on the item and press <kbd>Ctrl-Z</kbd> to undo.)
+      </li>
+      <li>
+        <strong>Edit labels</strong> by clicking on the labels at the left and
+        bottom. To delete a label, edit it and make it blank. It will
+        automatically be removed.
+      </li>
+      <li>
+        <strong>Add labels</strong> by clicking on the “+” button at the top
+        left or bottom right.
+      </li>
+      <li>
+        <strong>Change label colour</strong> by pressing Ctrl-click. The item
+        cycles through 5 different colours.
+      </li>
+      <li>
+        Your actions are automatically saved in your browser. Re-visit the
+        page to continue from where you left off.
+      </li>
+      <li>
+        <strong>Change views</strong> by selecting the dropdown at the top
+        right. A view is like a new clean slate. You can add or delete views.
+      </li>
+      <li>
+        <strong>Publish</strong> and <strong>refresh from</strong> across
+        machines by creating a free
+        <a href="https://www.firebase.com/signup/" target="_blank">Firebase account</a>
+        and entering a <code>.json</code> URL. Or use this:
+        <code>https://whatnextapp.firebaseio.com/your-name/sheet-name.json</code>.
+      </li>
+    </ul>
+  </div>
 
-    <script src="script.js"></script>
-  </body>
+  <script src="script.js"></script>
+</body>
+
 </html>
