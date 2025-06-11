@@ -1,12 +1,15 @@
 import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { showToast } from "../common/toast.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const formatters = {
   number: new Intl.NumberFormat("en"),
   fullDate: new Intl.DateTimeFormat("en", { day: "numeric", month: "short", year: "numeric" }),
   monthYear: new Intl.DateTimeFormat("en", { month: "short", year: "numeric" }),
 };
+
+saveform("#repoForm", { exclude: '[type="file"]' });
 
 const extractRepoLinks = (text) => {
   const links = [];

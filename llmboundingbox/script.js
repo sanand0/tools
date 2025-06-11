@@ -2,8 +2,10 @@ import { gemini } from "https://cdn.jsdelivr.net/npm/asyncllm@1/dist/gemini.js";
 import { anthropic } from "https://cdn.jsdelivr.net/npm/asyncllm@1/dist/anthropic.js";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3/+esm";
 import { showToast } from "../common/toast.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const openai = (d) => d;
+saveform("#llmboundingbox-form");
 
 const MODELS = [
   {

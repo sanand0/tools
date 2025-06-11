@@ -1,3 +1,4 @@
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 // Get DOM elements
 const inputJson = document.getElementById("inputJson");
 const outputJson = document.getElementById("outputJson");
@@ -5,6 +6,7 @@ const maxLength = document.getElementById("maxLength");
 const trimButton = document.getElementById("trimButton");
 const copyButton = document.getElementById("copyButton");
 const errorContainer = document.getElementById("error-container");
+saveform("#jsontrim-form");
 
 // Show error message
 function showError(message) {

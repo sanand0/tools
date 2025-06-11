@@ -11,6 +11,7 @@
 
 <body class="bg-light">
     <div class="container py-4">
+        <form id="podcast-claude-form">
         <!-- Header -->
         <header class="pb-3 mb-4 border-bottom">
             <div class="d-flex align-items-center">
@@ -215,11 +216,14 @@
                 <div class="text-end">Powered by OpenAI API</div>
             </div>
         </footer>
+        </form>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+    <script type="module">
+        import saveform from 'https://cdn.jsdelivr.net/npm/saveform@1.2';
         document.addEventListener('DOMContentLoaded', () => {
+            saveform('#podcast-claude-form', { exclude: '[type="file"]' });
             // Default values
             const DEFAULT_SYSTEM_PROMPT = `You are a professional podcast script editor. Write this content as an engaging, lay-friendly conversation between two enthusiastic experts, \${voice1.name} and \${voice2.name}.
 1. **Show Opener**. \${voice1.name} and \${voice2.name} greet listeners together. Example:

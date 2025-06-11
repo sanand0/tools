@@ -16,6 +16,7 @@
 <body>
   <div class="container my-5">
     <h1 class="text-center mb-4">Join CSV Tables</h1>
+    <form id="joincsv-form">
     <div class="mb-3">
       <label for="separator" class="form-label">Separator</label>
       <input id="separator" list="sep-list" class="form-control" value="," />
@@ -36,6 +37,7 @@
       Paste tables separated by two blank lines, pick the separator and click Join. Duplicate columns overwrite
       earlier values. Missing cells become blank.
     </p>
+    </form>
   </div>
   <script type="module" src="script.js"></script>
 </body>

@@ -1,3 +1,5 @@
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+saveform("#unicoder-form");
 // Unicode character mapping functions
 const styles = {
   // Convert to sans-serif bold (for headings and bold text)

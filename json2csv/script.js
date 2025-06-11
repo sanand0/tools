@@ -1,11 +1,13 @@
 import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv, copyText } from "../common/csv.js";
 import { updateLatestToast } from "../common/toast.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const $jsonInput = document.getElementById("jsonInput");
 const $convertBtn = document.getElementById("convertBtn");
 const $output = document.getElementById("output");
 const $downloadBtn = document.getElementById("downloadBtn");
 const $copyBtn = document.getElementById("copyBtn");
+saveform("#json2csv-form");
 
 // Initialize with sample data
 $jsonInput.value = JSON.stringify([

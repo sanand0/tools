@@ -1,5 +1,6 @@
 import { csvFormat, tsvFormat, dsvFormat } from "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm";
 import { downloadCsv, copyText } from "../common/csv.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const sepInput = document.getElementById("separator");
 const tablesInput = document.getElementById("tables");
@@ -7,6 +8,7 @@ const joinBtn = document.getElementById("joinBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const copyBtn = document.getElementById("copyBtn");
 const outputArea = document.getElementById("output");
+saveform("#joincsv-form");
 
 let joined;
 

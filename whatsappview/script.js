@@ -1,4 +1,6 @@
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 const $form = document.querySelector("#form");
+$form && saveform("#form");
 
 $form.addEventListener("submit", (e) => {
   e.preventDefault();

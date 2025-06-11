@@ -1,4 +1,6 @@
 import { showToast } from "../common/toast.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+saveform("#whatsapp-form");
 
 document.getElementById("sendButton").addEventListener("click", () => {
   const phoneNumber = document.getElementById("phoneNumber").value.trim();

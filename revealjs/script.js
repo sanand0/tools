@@ -1,9 +1,11 @@
 import { Marked } from "https://cdn.jsdelivr.net/npm/marked@13/+esm";
 import { showToast } from "../common/toast.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 const marked = new Marked();
 
 const textarea = document.getElementById("markdown-input");
 const generateBtn = document.getElementById("generate-btn");
+saveform("#revealjs-form");
 
 // Load saved content
 textarea.value = localStorage.getItem("revealjs-markdown-content") || "";
