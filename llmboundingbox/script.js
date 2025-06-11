@@ -140,7 +140,7 @@ async function handleImageUpload(file) {
     );
   } catch (error) {
     console.error("Error processing image:", error);
-    showToast({ title: "Error", body: "Error processing image. Please try again.", color: "bg-danger" });
+    showToast({ title: "Processing error", body: "Error processing image. Please try again.", color: "bg-danger" });
   }
 }
 

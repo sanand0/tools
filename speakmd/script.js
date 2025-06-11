@@ -54,7 +54,7 @@ form.addEventListener("submit", async (e) => {
       htmlOutput.scrollTop = htmlOutput.scrollHeight;
     }
   } catch (err) {
-    showToast({ title: "Error", body: err.message, color: "bg-danger" });
+    showToast({ title: "Processing error", body: err.message, color: "bg-danger" });
   } finally {
     loading.classList.add("d-none");
   }

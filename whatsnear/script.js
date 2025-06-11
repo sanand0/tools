@@ -155,7 +155,7 @@ function showLoading(isLoading) {
 }
 
 function showError(message) {
-  showToast({ title: "Error", body: message, color: "bg-danger" });
+  showToast({ title: "Location error", body: message, color: "bg-danger" });
 }
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -101,7 +101,7 @@ document.getElementById("repoForm").addEventListener("submit", async (e) => {
       repoData.filter((repo) => !repo.error),
     );
   } catch (error) {
-    showToast({ title: "Error", body: error.message, color: "bg-danger" });
+    showToast({ title: "Fetch error", body: error.message, color: "bg-danger" });
   } finally {
     loading.classList.add("d-none");
   }

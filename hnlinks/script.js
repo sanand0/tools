@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error("Error scraping links:", error);
       linksTextArea.value = `Error: ${error.message}`;
-      showToast({ title: "Error", body: error.message, color: "bg-danger" });
+      showToast({ title: "Scraping error", body: error.message, color: "bg-danger" });
     } finally {
       loadingIndicator.classList.add("d-none");
       scrapeButton.disabled = false;
@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch((err) => {
           console.error("Failed to copy links:", err);
           showToast({
-            title: "Error",
+            title: "Copy error",
             body: "Failed to copy links to clipboard. See console for details.",
             color: "bg-danger",
           });

@@ -1,4 +1,5 @@
 import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
+import { showToast } from "../common/toast.js";
 
 const $transcript = document.querySelector("#transcript");
 const $app = document.querySelector("#app");
@@ -82,5 +83,5 @@ try {
   $app.classList.remove("d-none");
   initTranscription();
 } catch (err) {
-  render(html`<div class="alert alert-danger">Your browser does not support speech recognition.</div>`, $app);
+  showToast({ title: "Unsupported", body: "Your browser does not support speech recognition.", color: "bg-danger" });
 }

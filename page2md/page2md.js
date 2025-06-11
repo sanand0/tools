@@ -49,7 +49,7 @@ export async function convert() {
     // Copy to clipboard
     try {
       await navigator.clipboard.writeText(markdown);
-      showToast({ title: "Success", body: "Page converted to Markdown and copied to clipboard!", color: "bg-success" });
+      showToast({ title: "Copied", body: "Page converted to Markdown and copied to clipboard!", color: "bg-success" });
     } catch (clipboardError) {
       // Fallback to creating a temporary textarea element
       const textarea = document.createElement("textarea");
@@ -62,14 +62,14 @@ export async function convert() {
 
       if (success)
         showToast({
-          title: "Success",
+          title: "Copied",
           body: "Page converted to Markdown and copied to clipboard!",
           color: "bg-success",
         });
       else throw new Error("Failed to copy to clipboard");
     }
   } catch (error) {
-    showToast({ title: "Error", body: `Error converting page: ${error.message}`, color: "bg-danger" });
+    showToast({ title: "Conversion error", body: `Error converting page: ${error.message}`, color: "bg-danger" });
     throw error;
   }
 }

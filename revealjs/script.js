@@ -60,6 +60,6 @@ generateBtn.addEventListener("click", () => {
     presentationWindow.document.write(presentationHTML);
     presentationWindow.document.close();
   } catch (error) {
-    showToast({ title: "Error", body: error.message, color: "bg-danger" });
+    showToast({ title: "Conversion error", body: error.message, color: "bg-danger" });
   }
 });

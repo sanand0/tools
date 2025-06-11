@@ -68,9 +68,8 @@ describe("JSON to CSV tests", async () => {
     convertBtn.click();
     await page.waitUntilComplete();
 
-    const alert = output.querySelector(".alert-danger");
-    expect(alert).not.toBeNull();
-    expect(alert.textContent).toContain("Error: Invalid JSON input.");
+    const toast = document.querySelector(".toast-body");
+    expect(toast.textContent).toContain("Error: Invalid JSON input.");
     expect(downloadBtn.classList.contains("d-none")).toBe(true);
     expect(copyBtn.classList.contains("d-none")).toBe(true);
   });
@@ -80,9 +79,8 @@ describe("JSON to CSV tests", async () => {
     convertBtn.click();
     await page.waitUntilComplete();
 
-    const alert = output.querySelector(".alert-danger");
-    expect(alert).not.toBeNull();
-    expect(alert.textContent).toContain("Error: Please enter some JSON data.");
+    const toast = document.querySelector(".toast-body");
+    expect(toast.textContent).toContain("Error: Please enter some JSON data.");
     expect(downloadBtn.classList.contains("d-none")).toBe(true);
     expect(copyBtn.classList.contains("d-none")).toBe(true);
   });
@@ -99,9 +97,8 @@ describe("JSON to CSV tests", async () => {
     expect(clipboardText).toBe("name	value\nCopy Test	123");
 
     // Check for toast message
-    const toastElement = document.getElementById("toast");
-    expect(toastElement.classList.contains("show")).toBe(true);
-    expect(toastElement.querySelector(".toast-body").textContent).toBe("Copied to clipboard!");
+    const toastElement = document.querySelector(".toast-body");
+    expect(toastElement.textContent).toBe("Copied to clipboard!");
   });
 
   // Note: Actual download functionality is hard to test in JSDOM.
