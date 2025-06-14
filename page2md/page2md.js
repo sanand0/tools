@@ -100,5 +100,6 @@ function cleanUp(container) {
   // Removes links without text content, e.g. <a id="#">...</a>
   container.querySelectorAll("a").forEach((a) => {
     if (!a.textContent) a.remove();
+    a.textContent = a.textContent.trim();
   });
 }
