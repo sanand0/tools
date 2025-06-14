@@ -1,7 +1,6 @@
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import { gfm, strikethrough, tables, taskListItems } from "@joplin/turndown-plugin-gfm";
-import { showToast } from "../common/toast.js";
 
 /**
  * Converts current page or selected text to Markdown and copies to clipboard
@@ -13,7 +12,7 @@ export async function convert() {
     const selection = window.getSelection();
     let content = "";
 
-    if (selection && selection.rangeCount > 0) {
+    if (selection && selection.toString().trim()) {
       const container = document.createElement("div");
       const range = selection.getRangeAt(0);
       container.appendChild(range.cloneContents());
@@ -49,7 +48,7 @@ export async function convert() {
     // Copy to clipboard
     try {
       await navigator.clipboard.writeText(markdown);
-      showToast({ title: "Copied", body: "Page converted to Markdown and copied to clipboard!", color: "bg-success" });
+      alert("Markdown copied to clipboard");
     } catch (clipboardError) {
       // Fallback to creating a temporary textarea element
       const textarea = document.createElement("textarea");
@@ -60,16 +59,11 @@ export async function convert() {
       const success = document.execCommand("copy");
       document.body.removeChild(textarea);
 
-      if (success)
-        showToast({
-          title: "Copied",
-          body: "Page converted to Markdown and copied to clipboard!",
-          color: "bg-success",
-        });
+      if (success) alert("Markdown copied to clipboard");
       else throw new Error("Failed to copy to clipboard");
     }
   } catch (error) {
-    showToast({ title: "Conversion error", body: `Error converting page: ${error.message}`, color: "bg-danger" });
+    alert(`Error converting page: ${error.message}`);
     throw error;
   }
 }
@@ -88,18 +82,19 @@ function cleanUp(container) {
 
     // Parse code blocks. Hoist any `pre code` under the pre and drop the rest.
     container.querySelectorAll("pre").forEach((pre) => {
-      const codeBlock = pre.querySelector("code");
-      if (codeBlock) {
-        const newPre = document.createElement("pre");
-        newPre.appendChild(codeBlock.cloneNode(true));
-        pre.parentNode.replaceChild(newPre, pre);
-      }
+      // Already has a <code> child, nothing to do
+      if (pre.children.length === 1 && pre.firstElementChild.tagName === "CODE") return;
+      // Use existing <code> if present, or create a new one
+      const code = pre.querySelector("code") ?? document.createElement("code");
+      // move (not clone) nodes, keeping listeners
+      if (!code.parentNode) while (pre.firstChild) code.appendChild(pre.firstChild);
+      pre.replaceChildren(code); // nuke leftovers, keep attrs
     });
   }
 
-  // Removes images with empty or short alt attributes
+  // Removes favicons and images with empty or short alt attributes
   container.querySelectorAll("img").forEach((img) => {
-    if (!img.alt || img.alt.length < 3) img.remove();
+    if (!img.alt || img.alt.length < 3 || img.alt == "Favicon") img.remove();
   });
 
   // Removes links without text content, e.g. <a id="#">...</a>
