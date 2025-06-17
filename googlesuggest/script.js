@@ -2,6 +2,7 @@ import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { showToast } from "../common/toast.js";
+import { copyText } from "../common/csv.js";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const COUNTRIES = {
@@ -32,17 +33,27 @@ const openaiApiKeyInput = document.getElementById("openaiApiKey");
 const llmResponseDiv = document.getElementById("llmResponse");
 const llmResponseCard = document.getElementById("llmResponseCard");
 const llmLoadingIndicator = document.getElementById("llmLoadingIndicator");
+const systemPromptTextarea = document.getElementById("systemPrompt");
+const resetPromptButton = document.getElementById("resetPrompt");
+const copyResponseButton = document.getElementById("copyResponse");
 saveform("#googlesuggest-form", { exclude: '[type="file"]' });
 
 // --- Application State ---
 let currentSuggestions = null;
 let currentQuery = "";
+let lastLLMResponse = "";
 
 // --- Constants ---
 const CACHE_VERSION = "v1.1";
 const GOOGLE_SUGGEST_CACHE_PREFIX = `googleSuggest_${CACHE_VERSION}_`;
-const LLM_EXPLANATION_CACHE_PREFIX = `llmExplanation_${CACHE_VERSION}_`;
 const SEARCH_HISTORY_KEY = `searchHistory_${CACHE_VERSION}`;
+const DEFAULT_SYSTEM_PROMPT = `You are a humorous cultural commentator.
+You will be given a keyword and the Google Search suggestion data for the keyword.
+Analyze how people in different English-speaking countries might be searching for this term.
+Provide a humorous interpretation of common themes, outliers (suggestions from a single country), and countries with unique or unusual perspectives on the search term.
+Begin paragraphs with a **bold** summary of the paragraph for easy visual scanning.
+Keep your analysis concise (around 200-250 words) and engaging.
+Use simple language.`;
 
 // --- UI Helper Functions ---
 function setLoadingState(type, isLoading) {
@@ -64,6 +75,8 @@ function resetUIElements(areas = ["suggestions", "llm"]) {
   if (areas.includes("llm")) {
     llmResponseCard.classList.add("d-none");
     llmResponseDiv.innerHTML = "";
+    copyResponseButton.classList.add("d-none");
+    lastLLMResponse = "";
   }
 }
 
@@ -136,7 +149,6 @@ function removeSearchHistoryItem(queryToRemove) {
   history = history.filter((query) => query !== queryToRemove);
   setToCache(SEARCH_HISTORY_KEY, history);
   localStorage.removeItem(GOOGLE_SUGGEST_CACHE_PREFIX + queryToRemove.toLowerCase());
-  localStorage.removeItem(LLM_EXPLANATION_CACHE_PREFIX + queryToRemove.toLowerCase());
   console.log("Removed from history:", queryToRemove.toLowerCase());
   renderSearchHistory();
 }
@@ -298,6 +310,7 @@ const llmSettingInputs = {
   llm_model: { element: llmModelSelect, defaultValue: "openai/gpt-4.1-mini" },
   openai_base_url: { element: openaiBaseUrlInput, defaultValue: "https://api.openai.com/v1" },
   openai_api_key: { element: openaiApiKeyInput, defaultValue: "" },
+  system_prompt: { element: systemPromptTextarea, defaultValue: DEFAULT_SYSTEM_PROMPT },
 };
 
 function loadLlmSettings() {
@@ -340,17 +353,6 @@ async function fetchLLMExplanation(suggestions, query) {
     return;
   }
 
-  const cacheKey = `${LLM_EXPLANATION_CACHE_PREFIX}${query.toLowerCase()}`;
-  const cachedExplanation = getFromCache(cacheKey);
-
-  if (cachedExplanation) {
-    console.log("Serving LLM explanation from cache for:", query, model);
-    llmResponseCard.classList.remove("d-none");
-    llmResponseDiv.innerHTML = marked.parse(cachedExplanation);
-    setLoadingState("llm", false); // Ensure button is reset
-    return;
-  }
-
   resetUIElements(["llm"]); // Clear previous LLM response before new fetch
   setLoadingState("llm", true);
   llmResponseCard.classList.remove("d-none"); // Show card for loading indicator
@@ -360,14 +362,8 @@ async function fetchLLMExplanation(suggestions, query) {
   if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
 
   const suggestionsText = formatSuggestionsForLLMPrompt(suggestions, query);
-  const promptContent = `You are a humorous cultural commentator.
-Based on the following Google Search suggestion data for the keyword "${query}", analyze how people in different English-speaking countries might be searching for this term.
-Provide a humorous interpretation of common themes, outliers (suggestions from a single country), and countries with unique or unusual perspectives on the search term.
-Begin paragraphs with a **bold** summary of the paragraph for easy visual scanning.
-Keep your analysis concise (around 200-250 words) and engaging.
-Use simple language.
-
-${suggestionsText}`;
+  const systemPrompt = systemPromptTextarea.value.trim() || DEFAULT_SYSTEM_PROMPT;
+  const userPrompt = `<keyword>${query}</keyword>\n\n<suggestions>\n${suggestionsText}\n</suggestions>`;
 
   try {
     let fullContent = "";
@@ -381,7 +377,10 @@ ${suggestionsText}`;
         model: effectiveModel,
         stream: true,
         temperature: 0.7,
-        messages: [{ role: "user", content: promptContent }],
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
       }),
     })) {
       if (content) {
@@ -389,8 +388,12 @@ ${suggestionsText}`;
         llmResponseDiv.innerHTML = marked.parse(fullContent);
       }
     }
-    if (fullContent) setToCache(cacheKey, fullContent);
-    else llmResponseDiv.innerHTML = marked.parse("No response from LLM.");
+    if (fullContent) {
+      lastLLMResponse = fullContent;
+      copyResponseButton.classList.remove("d-none");
+    } else {
+      llmResponseDiv.innerHTML = marked.parse("No response from LLM.");
+    }
   } catch (error) {
     console.error("LLM API Error:", error);
     llmResponseDiv.innerHTML = `<p class="text-danger">Error fetching explanation: ${error.message}. Check console.</p>`;
@@ -432,6 +435,21 @@ document.querySelectorAll("#initialKeywords .history-item").forEach((button) => 
     searchTermInput.value = button.textContent;
     handleFetchAction();
   });
+});
+
+resetPromptButton.addEventListener("click", () => {
+  systemPromptTextarea.value = DEFAULT_SYSTEM_PROMPT;
+  localStorage.setItem("system_prompt", DEFAULT_SYSTEM_PROMPT);
+});
+
+copyResponseButton.addEventListener("click", async () => {
+  if (!lastLLMResponse) return;
+  try {
+    await copyText(lastLLMResponse);
+    showToast({ title: "Copied", body: "LLM response copied", color: "bg-success" });
+  } catch (e) {
+    showToast({ title: "Copy error", body: "Unable to copy text", color: "bg-danger" });
+  }
 });
 
 // --- Initial Load ---
