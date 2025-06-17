@@ -193,6 +193,12 @@
             <button type="button" class="btn btn-success btn-sm w-100" id="explainButton" disabled>Explain This</button>
           </div>
         </div>
+        <div class="row g-3 mt-2">
+          <div class="col-12">
+            <label for="systemPrompt" class="form-label">System Prompt:</label>
+            <textarea id="systemPrompt" class="form-control form-control-sm" rows="3"></textarea>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -201,8 +207,11 @@
     </div>
 
     <div id="llmResponseCard" class="card mt-0 d-none">
-      <div class="card-header">
-        AI Explanation
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>AI Explanation</span>
+        <button type="button" id="copyResponseBtn" class="btn btn-outline-secondary btn-sm" disabled>
+          <i class="bi bi-clipboard"></i> Copy
+        </button>
       </div>
       <div class="card-body">
         <div id="llmResponse">

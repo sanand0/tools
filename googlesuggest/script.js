@@ -2,6 +2,7 @@ import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { showToast } from "../common/toast.js";
+import { copyText } from "../common/csv.js";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const COUNTRIES = {
@@ -29,14 +30,17 @@ const searchHistoryDiv = document.getElementById("searchHistory");
 const llmModelSelect = document.getElementById("llmModel");
 const openaiBaseUrlInput = document.getElementById("openaiBaseUrl");
 const openaiApiKeyInput = document.getElementById("openaiApiKey");
+const systemPromptInput = document.getElementById("systemPrompt");
 const llmResponseDiv = document.getElementById("llmResponse");
 const llmResponseCard = document.getElementById("llmResponseCard");
 const llmLoadingIndicator = document.getElementById("llmLoadingIndicator");
+const copyResponseBtn = document.getElementById("copyResponseBtn");
 saveform("#googlesuggest-form", { exclude: '[type="file"]' });
 
 // --- Application State ---
 let currentSuggestions = null;
 let currentQuery = "";
+let currentLlmResponse = "";
 
 // --- Constants ---
 const CACHE_VERSION = "v1.1";
@@ -64,6 +68,8 @@ function resetUIElements(areas = ["suggestions", "llm"]) {
   if (areas.includes("llm")) {
     llmResponseCard.classList.add("d-none");
     llmResponseDiv.innerHTML = "";
+    copyResponseBtn.disabled = true;
+    currentLlmResponse = "";
   }
 }
 
@@ -298,6 +304,16 @@ const llmSettingInputs = {
   llm_model: { element: llmModelSelect, defaultValue: "openai/gpt-4.1-mini" },
   openai_base_url: { element: openaiBaseUrlInput, defaultValue: "https://api.openai.com/v1" },
   openai_api_key: { element: openaiApiKeyInput, defaultValue: "" },
+  system_prompt: {
+    element: systemPromptInput,
+    defaultValue: `You are a humorous cultural commentator.
+You will be given a keyword and the Google Search suggestion data for the keyword.
+Analyze how people in different English-speaking countries might be searching for this term.
+Provide a humorous interpretation of common themes, outliers (suggestions from a single country), and countries with unique or unusual perspectives on the search term.
+Begin paragraphs with a **bold** summary of the paragraph for easy visual scanning.
+Keep your analysis concise (around 200-250 words) and engaging.
+Use simple language.`,
+  },
 };
 
 function loadLlmSettings() {
@@ -330,6 +346,9 @@ async function fetchLLMExplanation(suggestions, query) {
   const model = llmModelSelect.value;
   let baseUrl = openaiBaseUrlInput.value.trim();
   const apiKey = openaiApiKeyInput.value.trim();
+  const systemPrompt = systemPromptInput.value.trim();
+  copyResponseBtn.disabled = true;
+  currentLlmResponse = "";
 
   if (!apiKey) {
     showToast({ title: "Missing key", body: "Please enter your OpenAI API Key.", color: "bg-danger" });
@@ -347,6 +366,8 @@ async function fetchLLMExplanation(suggestions, query) {
     console.log("Serving LLM explanation from cache for:", query, model);
     llmResponseCard.classList.remove("d-none");
     llmResponseDiv.innerHTML = marked.parse(cachedExplanation);
+    currentLlmResponse = cachedExplanation;
+    copyResponseBtn.disabled = false;
     setLoadingState("llm", false); // Ensure button is reset
     return;
   }
@@ -360,14 +381,7 @@ async function fetchLLMExplanation(suggestions, query) {
   if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
 
   const suggestionsText = formatSuggestionsForLLMPrompt(suggestions, query);
-  const promptContent = `You are a humorous cultural commentator.
-Based on the following Google Search suggestion data for the keyword "${query}", analyze how people in different English-speaking countries might be searching for this term.
-Provide a humorous interpretation of common themes, outliers (suggestions from a single country), and countries with unique or unusual perspectives on the search term.
-Begin paragraphs with a **bold** summary of the paragraph for easy visual scanning.
-Keep your analysis concise (around 200-250 words) and engaging.
-Use simple language.
-
-${suggestionsText}`;
+  const promptContent = `<keyword>${query}</keyword>\n\n<suggestions>\n${suggestionsText}\n</suggestions>`;
 
   try {
     let fullContent = "";
@@ -381,7 +395,10 @@ ${suggestionsText}`;
         model: effectiveModel,
         stream: true,
         temperature: 0.7,
-        messages: [{ role: "user", content: promptContent }],
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: promptContent },
+        ],
       }),
     })) {
       if (content) {
@@ -391,9 +408,12 @@ ${suggestionsText}`;
     }
     if (fullContent) setToCache(cacheKey, fullContent);
     else llmResponseDiv.innerHTML = marked.parse("No response from LLM.");
+    currentLlmResponse = fullContent;
+    copyResponseBtn.disabled = !fullContent;
   } catch (error) {
     console.error("LLM API Error:", error);
     llmResponseDiv.innerHTML = `<p class="text-danger">Error fetching explanation: ${error.message}. Check console.</p>`;
+    copyResponseBtn.disabled = true;
   } finally {
     setLoadingState("llm", false);
   }
@@ -420,6 +440,11 @@ explainButton.addEventListener("click", () => {
       color: "bg-danger",
     });
   }
+});
+
+copyResponseBtn.addEventListener("click", async () => {
+  await copyText(currentLlmResponse);
+  showToast({ body: "Copied to clipboard" });
 });
 
 Object.keys(llmSettingInputs).forEach((key) => {
