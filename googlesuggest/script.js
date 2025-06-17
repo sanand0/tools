@@ -26,6 +26,8 @@ const fetchSuggestionsButton = document.getElementById("fetchSuggestions");
 const resultsDiv = document.getElementById("results");
 const loadingIndicator = document.getElementById("loadingIndicator");
 const explainButton = document.getElementById("explainButton");
+const explainDropdownToggle = document.getElementById("explainDropdownToggle");
+const explainNoCacheButton = document.getElementById("explainNoCacheButton");
 const searchHistoryDiv = document.getElementById("searchHistory");
 const llmModelSelect = document.getElementById("llmModel");
 const openaiBaseUrlInput = document.getElementById("openaiBaseUrl");
@@ -54,12 +56,16 @@ function setLoadingState(type, isLoading) {
     loadingIndicator.classList.toggle("d-none", !isLoading);
     fetchSuggestionsButton.disabled = isLoading;
     if (isLoading) {
-      explainButton.disabled = true;
+      [explainButton, explainDropdownToggle, explainNoCacheButton].forEach(
+        (el) => (el.disabled = true),
+      );
       explainButton.textContent = "Explain This";
     }
   } else if (type === "llm") {
     llmLoadingIndicator.classList.toggle("d-none", !isLoading);
-    explainButton.disabled = isLoading;
+    [explainButton, explainDropdownToggle, explainNoCacheButton].forEach(
+      (el) => (el.disabled = isLoading),
+    );
     explainButton.textContent = isLoading ? "Generating..." : "Explain This";
   }
 }
@@ -69,6 +75,9 @@ function resetUIElements(areas = ["suggestions", "llm"]) {
     llmResponseCard.classList.add("d-none");
     llmResponseDiv.innerHTML = "";
     copyResponseBtn.disabled = true;
+    [explainButton, explainDropdownToggle, explainNoCacheButton].forEach(
+      (el) => (el.disabled = true),
+    );
     currentLlmResponse = "";
   }
 }
@@ -215,7 +224,9 @@ async function fetchGoogleSuggestions(query) {
     console.log("Serving Google suggestions from cache for:", query);
     currentSuggestions = cachedSuggestions;
     renderSuggestions(cachedSuggestions, query);
-    explainButton.disabled = false;
+    [explainButton, explainDropdownToggle, explainNoCacheButton].forEach(
+      (el) => (el.disabled = false),
+    );
     resetUIElements(["llm"]);
     addToSearchHistory(query);
     return cachedSuggestions;
@@ -251,12 +262,16 @@ async function fetchGoogleSuggestions(query) {
     currentSuggestions = suggestionsByCountry;
     setToCache(cacheKey, suggestionsByCountry);
     renderSuggestions(suggestionsByCountry, query);
-    explainButton.disabled = false;
+    [explainButton, explainDropdownToggle, explainNoCacheButton].forEach(
+      (el) => (el.disabled = false),
+    );
     addToSearchHistory(query);
   } else {
     resultsDiv.innerHTML = `<p class="text-danger">Could not fetch any valid suggestions for "${query}". Please check your internet connection or try a different query.</p>`;
     currentSuggestions = null;
-    explainButton.disabled = true;
+    [explainButton, explainDropdownToggle, explainNoCacheButton].forEach(
+      (el) => (el.disabled = true),
+    );
   }
   return suggestionsByCountry;
 }
@@ -430,22 +445,26 @@ searchTermInput.addEventListener("keypress", (event) => {
   if (event.key === "Enter") handleFetchAction();
 });
 
-explainButton.addEventListener("click", () => {
-  if (currentSuggestions && Object.keys(currentSuggestions).length > 0 && currentQuery) {
-    fetchLLMExplanation(currentSuggestions, currentQuery);
-  } else {
+copyResponseBtn.addEventListener("click", async () => {
+  await copyText(currentLlmResponse);
+  showToast({ body: "Copied to clipboard" });
+});
+
+function handleExplain(noCache = false) {
+  if (!currentSuggestions || !currentQuery) {
     showToast({
       title: "No suggestions",
       body: "Please fetch some suggestions first for a valid query.",
       color: "bg-danger",
     });
+    return;
   }
-});
+  if (noCache) localStorage.removeItem(`${LLM_EXPLANATION_CACHE_PREFIX}${currentQuery.toLowerCase()}`);
+  fetchLLMExplanation(currentSuggestions, currentQuery);
+}
 
-copyResponseBtn.addEventListener("click", async () => {
-  await copyText(currentLlmResponse);
-  showToast({ body: "Copied to clipboard" });
-});
+explainButton.addEventListener("click", () => handleExplain());
+explainNoCacheButton.addEventListener("click", () => handleExplain(true));
 
 Object.keys(llmSettingInputs).forEach((key) => {
   const setting = llmSettingInputs[key];

@@ -190,7 +190,13 @@
             <input type="password" class="form-control form-control-sm" id="openaiApiKey" placeholder="sk-...">
           </div>
           <div class="col-lg-2 col-md-4 mb-2">
-            <button type="button" class="btn btn-success btn-sm w-100" id="explainButton" disabled>Explain This</button>
+            <div class="btn-group w-100" role="group">
+              <button type="button" class="btn btn-success btn-sm flex-grow-1" id="explainButton" disabled>Explain This</button>
+              <button type="button" class="btn btn-success btn-sm dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" id="explainDropdownToggle" disabled></button>
+              <ul class="dropdown-menu">
+                <li><button class="dropdown-item" id="explainNoCacheButton" type="button">Explain This (No Cache)</button></li>
+              </ul>
+            </div>
           </div>
         </div>
         <div class="row g-3 mt-2">
