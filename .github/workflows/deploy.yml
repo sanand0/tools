@@ -34,10 +34,14 @@ jobs:
           rm -rf public
           mkdir -p public
           git archive origin/main | tar -x -C public
+          echo "BRANCH is $BRANCH"
           if [[ "$BRANCH" != "main" ]]; then
             mkdir -p public/$BRANCH
+            echo "checkout branch"
             git archive HEAD | tar -x -C public/$BRANCH
+            find public/$BRANCH -type f
           fi
+          echo "--------- FINAL FILES"
           find public -type f
 
       # Deploy public/
