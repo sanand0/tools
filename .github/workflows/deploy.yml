@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Run when pushed. Use { branches: [main, master] } to run only on specific branches
+  push:
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
+
+permissions:
+  # To deploy to GitHub Pages
+  pages: write
+  # To verify that deployment originated from the right source
+  id-token: write
+
+jobs:
+  # Run as a single build + deploy job to reduce setup time
+  deploy:
+    # Specify the deployment environment. Displays the URL in the GitHub Actions UI
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    # Run on the latest Ubuntu LTS
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - uses: actions/checkout@v4
+
+      # main branch deploys at root
+      # Other branches deployed at $BRANCH/ in addition. Only latest pushed branch
+      - run: |
+          git fetch origin main
+          rm -rf public
+          mkdir -p public
+          git archive origin/main | tar -x -C public
+          if [[ "$BRANCH" != "main" ]]; then
+            mkdir -p public/$BRANCH
+            git archive HEAD | tar -x -C public/$BRANCH
+          fi
+
+      # Deploy public/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      # Deploy the built site to GitHub Pages. The `id:` is required to show the URL in the GitHub Actions UI
+      - id: deployment
+        uses: actions/deploy-pages@v4
