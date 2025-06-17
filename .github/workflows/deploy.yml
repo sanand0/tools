@@ -38,6 +38,7 @@ jobs:
             mkdir -p public/$BRANCH
             git archive HEAD | tar -x -C public/$BRANCH
           fi
+          find public -type f
 
       # Deploy public/
       - uses: actions/upload-pages-artifact@v3
