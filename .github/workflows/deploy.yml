@@ -30,14 +30,12 @@ jobs:
       # main branch deploys at root
       # Other branches deployed at $BRANCH/ in addition. Only latest pushed branch
       - run: |
-          set
           git fetch origin main
-          rm -rf public
           mkdir -p public
           git archive origin/main | tar -x -C public
-          if [[ "$BRANCH" != "main" ]]; then
-            mkdir -p public/$BRANCH
-            git archive HEAD | tar -x -C public/$BRANCH
+          if [[ "$GITHUB_REF_NAME" != "main" ]]; then
+            mkdir -p public/$GITHUB_REF_NAME
+            git archive HEAD | tar -x -C public/$GITHUB_REF_NAME
           fi
           find public -type f
 
