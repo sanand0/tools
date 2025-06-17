@@ -37,7 +37,6 @@ jobs:
             mkdir -p public/$GITHUB_REF_NAME
             git archive HEAD | tar -x -C public/$GITHUB_REF_NAME
           fi
-          find public -type f
 
       # Deploy public/
       - uses: actions/upload-pages-artifact@v3
