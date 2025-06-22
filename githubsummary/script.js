@@ -173,7 +173,6 @@ async function fetchEvents(user, headers, since) {
     url = null; // GitHub API doesn't provide easy pagination in JSON response
     if (page.length === 30) {
       // Standard page size
-      const lastEvent = page[page.length - 1];
       url = `https://api.github.com/users/${user}/events/public?page=${pageCount + 1}`;
     }
   }
@@ -202,7 +201,7 @@ async function fetchRepoDetails(repos, headers) {
       try {
         const readmeResp = await fetchWithCache(`https://api.github.com/repos/${repo}/readme`, { headers });
         readme = atob(readmeResp.content || "");
-      } catch (e) {
+      } catch {
         // README might not exist
       }
 
@@ -331,7 +330,6 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
   if (!form.checkValidity()) return form.classList.add("was-validated");
 
   // Get form values
-  const formData = new FormData(form);
   const config = {
     username: document.getElementById("username").value,
     githubToken: document.getElementById("github-token").value,

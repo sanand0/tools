@@ -33,7 +33,7 @@ function createPresentationHTML(markdown) {
               ${slideHTML}
             </div>
           </div>
-          <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"><\/script>
+          <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"></script>
           <script>
             Reveal.initialize({
               width: 1280,     // Base slide width
@@ -44,7 +44,7 @@ function createPresentationHTML(markdown) {
               hash: true,
               transition: 'slide'
             });
-          <\/script>
+          </script>
         </body>
         </html>
       `;

@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function getAbsoluteUrl(baseUrl, relativeUrl) {
     try {
       return new URL(relativeUrl, baseUrl).href;
-    } catch (e) {
+    } catch {
       // Handle cases where relativeUrl might be malformed or already absolute in a weird way
       if (relativeUrl.startsWith("http://") || relativeUrl.startsWith("https://")) return relativeUrl;
       console.warn(`Could not form absolute URL for base: ${baseUrl}, relative: ${relativeUrl}`);

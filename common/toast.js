@@ -48,4 +48,4 @@ function closeAllToasts() {
   toasts.slice().forEach(({ toast }) => toast.hide());
 }
 
-export {toasts, showToast, updateLatestToast, closeLatestToast, closeAllToasts };
+export { toasts, showToast, updateLatestToast, closeLatestToast, closeAllToasts };

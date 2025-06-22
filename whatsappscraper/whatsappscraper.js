@@ -3,7 +3,7 @@ export function whatsappMessages() {
   let lastAuthor;
   let lastTime;
   for (const el of document.querySelectorAll('#main [role="row"]')) {
-    let [isSystemMessage, userId, userDomain, messageId, authorPhone, authorDomain] = el
+    let [isSystemMessage, userId, _userDomain, messageId, authorPhone, _authorDomain] = el
       .querySelector("[data-id]")
       .dataset.id.split(/[_@]/);
     isSystemMessage = isSystemMessage === "true";
@@ -87,21 +87,5 @@ function updateTime(lastTime, time) {
 export async function scrape() {
   const messages = whatsappMessages();
   const text = JSON.stringify(messages, null, 2);
-  // Copy to clipboard
-  try {
-    await navigator.clipboard.writeText(text);
-    alert(`Copied ${messages.length} messages`);
-  } catch (clipboardError) {
-    // Fallback to creating a temporary textarea element
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    document.body.appendChild(textarea);
-    textarea.select();
-
-    const success = document.execCommand("copy");
-    document.body.removeChild(textarea);
-
-    if (success) alert(`Copied ${messages.length} messages`);
-    else throw new Error("Failed to copy to clipboard");
-  }
+  await navigator.clipboard.writeText(text);
 }

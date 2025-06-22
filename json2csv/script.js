@@ -24,7 +24,7 @@ const parseJsonInput = (input) => {
       // It's a single object, wrap it in an array
       return [parsed];
     }
-  } catch (e) {
+  } catch {
     // Initial parse failed, or it was a primitive/null which we don't want as a single object.
     // We'll fall through to the error if it's not a valid single object either.
   }
@@ -35,7 +35,7 @@ const parseJsonInput = (input) => {
     if (typeof parsedObject === "object" && parsedObject !== null && !Array.isArray(parsedObject)) {
       return [parsedObject];
     }
-  } catch (e) {
+  } catch {
     // This catch is for when the input is truly not JSON or not the object/array structure we expect
     throw new Error("Invalid JSON input. Expected an array or an object.");
   }

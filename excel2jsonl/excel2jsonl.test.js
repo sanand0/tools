@@ -2,10 +2,10 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { loadFrom, sleep } from "../common/testutils.js";
 
 describe("Excel (TSV) to JSONL tests", async () => {
-  let page, window, document, inputTextarea, outputTextarea, copyBtn, downloadBtn;
+  let window, document, inputTextarea, outputTextarea, copyBtn, downloadBtn;
 
   beforeEach(async () => {
-    ({ page, window, document } = await loadFrom(import.meta.dirname));
+    ({ window, document } = await loadFrom(import.meta.dirname));
     inputTextarea = document.getElementById("input");
     outputTextarea = document.getElementById("output");
     copyBtn = document.getElementById("copyBtn");

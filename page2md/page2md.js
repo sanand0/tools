@@ -49,7 +49,7 @@ export async function convert() {
     try {
       await navigator.clipboard.writeText(markdown);
       alert("Markdown copied to clipboard");
-    } catch (clipboardError) {
+    } catch {
       // Fallback to creating a temporary textarea element
       const textarea = document.createElement("textarea");
       textarea.value = markdown;

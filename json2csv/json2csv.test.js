@@ -2,10 +2,10 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { loadFrom } from "../common/testutils.js";
 
 describe("JSON to CSV tests", async () => {
-  let page, window, document, jsonInput, convertBtn, output, downloadBtn, copyBtn;
+  let window, document, jsonInput, convertBtn, output, downloadBtn, copyBtn;
 
   beforeEach(async () => {
-    ({ page, window, document } = await loadFrom(import.meta.dirname));
+    ({ window, document } = await loadFrom(import.meta.dirname));
     jsonInput = document.getElementById("jsonInput");
     convertBtn = document.getElementById("convertBtn");
     output = document.getElementById("output");

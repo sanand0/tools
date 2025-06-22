@@ -446,7 +446,7 @@ copyResponseButton.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(lastLLMResponse);
     showToast({ title: "Copied", body: "LLM response copied", color: "bg-success" });
-  } catch (e) {
+  } catch {
     showToast({ title: "Copy error", body: "Unable to copy text", color: "bg-danger" });
   }
 });

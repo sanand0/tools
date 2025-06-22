@@ -54,7 +54,7 @@ async function fetchNearbyAttractions() {
     const data = await response.json();
     const attractions = data.elements.slice(0, 5); // Limit to top 5 attractions
     await displayAttractions(attractions);
-  } catch (error) {
+  } catch {
     showError("Failed to fetch nearby attractions. Please try again.");
   } finally {
     showLoading(false);
@@ -80,7 +80,7 @@ async function getAttractionDescription(attraction) {
       }),
     }).then((r) => r.json());
     return response.choices?.[0]?.message?.content || "Description not available.";
-  } catch (error) {
+  } catch {
     return "Failed to generate description.";
   }
 }

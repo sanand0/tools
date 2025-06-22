@@ -126,7 +126,7 @@ const convertMarkdownToUnicode = (markdown) => {
     const renderer = new marked.Renderer();
 
     // Handle headings
-    renderer.heading = (text, level) => styles.heading(raw(text)) + "\n\n";
+    renderer.heading = (text) => styles.heading(raw(text)) + "\n\n";
 
     // Handle bold text
     renderer.strong = (text) => styles.bold(raw(text));
@@ -151,7 +151,7 @@ const convertMarkdownToUnicode = (markdown) => {
     renderer.paragraph = (text) => raw(text) + "\n\n";
 
     // Handle lists
-    renderer.list = (body, ordered) => body + "\n";
+    renderer.list = (body) => body + "\n";
     renderer.listitem = (text) => `• ${raw(text)}\n`;
 
     const options = {
@@ -182,7 +182,7 @@ const updateOutput = () => {
     .getElementById("output")
     .insertAdjacentHTML(
       "beforeend",
-      `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${output}</div>`
+      `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${output}</div>`,
     );
 };
 

@@ -64,7 +64,7 @@ function add_item(item_state) {
   return item;
 }
 
-document.getElementById("add-item").addEventListener("click", function (e) {
+document.getElementById("add-item").addEventListener("click", function () {
   // Add the item just below the new item button, making it easier to drag it
   add_item({
     x: this.getBoundingClientRect().left - document.body.getBoundingClientRect().left,
@@ -96,7 +96,7 @@ document.getElementById("refresh-from").addEventListener("click", function (e) {
     publish_node.textContent = publish_url;
     var xhr = new XMLHttpRequest();
     xhr.open("GET", publish_url, true);
-    xhr.onload = function (e) {
+    xhr.onload = function () {
       load(JSON.parse(this.response));
     };
     xhr.send();
@@ -293,7 +293,7 @@ function show_states() {
       app_list.appendChild(option);
     }
 }
-app_list_select.addEventListener("change", function (e) {
+app_list_select.addEventListener("change", function () {
   var hash = app_list_select[app_list_select.selectedIndex].id;
   if (hash == "_new_view") {
     window.location.hash = Math.round(Math.random() * 1000);

@@ -82,6 +82,6 @@ async function initTranscription() {
 try {
   $app.classList.remove("d-none");
   initTranscription();
-} catch (err) {
+} catch {
   showToast({ title: "Unsupported", body: "Your browser does not support speech recognition.", color: "bg-danger" });
 }

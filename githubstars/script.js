@@ -15,7 +15,7 @@ const extractRepoLinks = (text) => {
   const links = [];
   marked.walkTokens(marked.lexer(text), (token) => {
     if (token.type === "link") {
-      const match = token.href.match(/github\.com\/([^\/\s]+)\/([^\/\s]+)/);
+      const match = token.href.match(/github\.com\/([^/\s]+)\/([^/\s]+)/);
       if (match) links.push({ owner: match[1], repo: match[2] });
     }
   });

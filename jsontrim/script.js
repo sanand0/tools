@@ -56,7 +56,7 @@ trimButton.addEventListener("click", () => {
     const trimmed = trimStrings(json, max);
     outputJson.value = JSON.stringify(trimmed, null, 2);
     copyButton.disabled = false;
-  } catch (err) {
+  } catch {
     showError("Invalid JSON input");
     outputJson.value = "";
     copyButton.disabled = true;
@@ -72,7 +72,7 @@ copyButton.addEventListener("click", async () => {
     setTimeout(() => {
       copyButton.innerHTML = originalText;
     }, 2000);
-  } catch (err) {
+  } catch {
     showError("Failed to copy to clipboard");
   }
 });
