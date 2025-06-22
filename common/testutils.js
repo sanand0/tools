@@ -1,11 +1,13 @@
 import { Browser } from "happy-dom";
+import path from "path";
+import { fileURLToPath } from "url";
 
-export function newBrowser({ directory, ...settings }) {
-  return new Browser({
-    // console,
-    settings: { ...settings, fetch: { virtualServers: [{ url: "https://test/", directory }] } },
-  });
-}
+const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+
+const browser = new Browser({
+  console,
+  settings: { fetch: { virtualServers: [{ url: "https://test/", directory: root }] } },
+});
 
 export async function load(page, url) {
   await page.goto(url);
@@ -20,8 +22,11 @@ export async function load(page, url) {
   };
 }
 
-export async function loadFrom(dirname, file = "") {
-  const browser = newBrowser({ directory: dirname });
+export async function loadFrom(dirPath, file = "index.html") {
   const page = browser.newPage();
-  return await load(page, `https://test/${file}`);
+  return await load(page, `https://test/${path.basename(dirPath)}/${file}`);
+}
+
+export async function sleep(milliseconds) {
+  await new Promise((resolve) => setTimeout(resolve, milliseconds));
 }

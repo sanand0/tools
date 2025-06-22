@@ -2,7 +2,6 @@ import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { showToast } from "../common/toast.js";
-import { copyText } from "../common/csv.js";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const COUNTRIES = {
@@ -445,7 +444,7 @@ resetPromptButton.addEventListener("click", () => {
 copyResponseButton.addEventListener("click", async () => {
   if (!lastLLMResponse) return;
   try {
-    await copyText(lastLLMResponse);
+    await navigator.clipboard.writeText(lastLLMResponse);
     showToast({ title: "Copied", body: "LLM response copied", color: "bg-success" });
   } catch (e) {
     showToast({ title: "Copy error", body: "Unable to copy text", color: "bg-danger" });

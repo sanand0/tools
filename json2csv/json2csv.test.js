@@ -20,7 +20,6 @@ describe("JSON to CSV tests", async () => {
     ];
     jsonInput.value = JSON.stringify(json);
     convertBtn.click();
-    await page.waitUntilComplete();
 
     const table = output.querySelector("table");
     expect(table).not.toBeNull();
@@ -40,7 +39,6 @@ describe("JSON to CSV tests", async () => {
     const json = [{ name: "Peter", details: { age: 40, city: "New York" } }];
     jsonInput.value = JSON.stringify(json);
     convertBtn.click();
-    await page.waitUntilComplete();
 
     const table = output.querySelector("table");
     expect(table).not.toBeNull();
@@ -56,7 +54,6 @@ describe("JSON to CSV tests", async () => {
     const json = { name: "Alice", age: 25, place: { country: "Canada", city: "Ottawa" } };
     jsonInput.value = JSON.stringify(json);
     convertBtn.click();
-    await page.waitUntilComplete();
     const table = output.querySelector("table");
     expect(table).not.toBeNull();
     const headers = Array.from(table.querySelectorAll("th")).map((th) => th.textContent);
@@ -66,7 +63,6 @@ describe("JSON to CSV tests", async () => {
   it("should show an error for invalid JSON", async () => {
     jsonInput.value = "invalid json";
     convertBtn.click();
-    await page.waitUntilComplete();
 
     const toast = document.querySelector(".toast-body");
     expect(toast.textContent).toContain("Error: Invalid JSON input.");
@@ -77,7 +73,6 @@ describe("JSON to CSV tests", async () => {
   it("should show an error for empty input", async () => {
     jsonInput.value = "";
     convertBtn.click();
-    await page.waitUntilComplete();
 
     const toast = document.querySelector(".toast-body");
     expect(toast.textContent).toContain("Error: Please enter some JSON data.");
@@ -89,12 +84,10 @@ describe("JSON to CSV tests", async () => {
     const json = [{ name: "Copy Test", value: 123 }];
     jsonInput.value = JSON.stringify(json);
     convertBtn.click();
-    await page.waitUntilComplete();
 
     copyBtn.click();
 
-    const clipboardText = await window.navigator.clipboard.readText();
-    expect(clipboardText).toBe("name	value\nCopy Test	123");
+    expect(await window.navigator.clipboard.readText()).toBe("name	value\nCopy Test	123");
 
     // Check for toast message
     const toastElement = document.querySelector(".toast-body");
@@ -104,15 +97,16 @@ describe("JSON to CSV tests", async () => {
   // Note: Actual download functionality is hard to test in JSDOM.
   // We'll check if the download button is enabled and triggers a download attribute.
   it("should prepare for download", async () => {
+    expect(downloadBtn.classList.contains("d-none")).toBe(true);
+
     const json = [{ name: "Download Test", value: 456 }];
     jsonInput.value = JSON.stringify(json);
     convertBtn.click();
-    await page.waitUntilComplete();
 
-    expect(downloadBtn.disabled).toBe(false);
+    expect(downloadBtn.classList.contains("d-none")).toBe(false);
     // In a real browser, clicking downloadBtn would trigger a download.
     // We can't check the actual download here, but we know the button is active.
     // Spy on downloadCsv if possible or check attributes if any are set.
-    // For now, just ensuring it's clickable.
+    // For now, just ensuring it's visible.
   });
 });

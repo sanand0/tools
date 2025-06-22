@@ -1,5 +1,5 @@
 import { csvFormat, tsvFormat, dsvFormat } from "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm";
-import { downloadCsv, copyText } from "../common/csv.js";
+import { downloadCsv } from "../common/csv.js";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const sepInput = document.getElementById("separator");
@@ -55,8 +55,8 @@ downloadBtn.addEventListener("click", () => {
   if (joined) downloadCsv(csvFormat(joined.rows, joined.headers), "joined.csv");
 });
 
-copyBtn.addEventListener("click", () => {
-  if (joined) copyText(tsvFormat(joined.rows, joined.headers));
+copyBtn.addEventListener("click", async () => {
+  if (joined) await navigator.clipboard.writeText(tsvFormat(joined.rows, joined.headers));
 });
 
 // Default example

@@ -1,4 +1,4 @@
-export let toasts = [];
+let toasts = [];
 let container;
 
 function getContainer() {
@@ -23,11 +23,11 @@ function build({ title = "", body = "", color = "bg-primary" }) {
   return { element, toast };
 }
 
-export function showToast(opts) {
+function showToast(opts) {
   build(opts).toast.show();
 }
 
-export function updateLatestToast(opts) {
+function updateLatestToast(opts) {
   if (!toasts.length) return showToast(opts);
   const { element, toast } = toasts[toasts.length - 1];
   if (opts.title) element.querySelector(".me-auto").textContent = opts.title;
@@ -38,12 +38,14 @@ export function updateLatestToast(opts) {
   toast.show();
 }
 
-export function closeLatestToast() {
+function closeLatestToast() {
   if (!toasts.length) return;
   const { toast } = toasts[toasts.length - 1];
   toast.hide();
 }
 
-export function closeAllToasts() {
+function closeAllToasts() {
   toasts.slice().forEach(({ toast }) => toast.hide());
 }
+
+export {toasts, showToast, updateLatestToast, closeLatestToast, closeAllToasts };

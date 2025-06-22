@@ -1,4 +1,4 @@
-import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv, copyText } from "../common/csv.js";
+import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv } from "../common/csv.js";
 import { updateLatestToast } from "../common/toast.js";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
@@ -59,6 +59,6 @@ extractBtn.addEventListener("click", () => {
 
 downloadBtn.addEventListener("click", () => downloadCsv(csv));
 copyBtn.addEventListener("click", async () => {
-  await copyText(objectsToTsv(data));
+  await navigator.clipboard.writeText(objectsToTsv(data));
   showToast("Copied to clipboard");
 });

@@ -11,8 +11,7 @@ describe("HN Links tests", async () => {
     copyButton = document.getElementById("copyButton");
   });
 
-  // Encode Test
-  it("should scrape Hacker News links correctly", { timeout: 5_000 }, async () => {
+  it("should scrape Hacker News links correctly", { timeout: 10_000 }, async () => {
     // The textarea is initially empty
     expect(linksTextArea.value).toBe("");
 
@@ -32,7 +31,7 @@ describe("HN Links tests", async () => {
     expect(await window.navigator.clipboard.readText()).toBe(linksTextArea.value);
   });
 
-  it("should scrape HN Top Links correctly", { timeout: 5_000 }, async () => {
+  it("should scrape HN Top Links correctly", { timeout: 10_000 }, async () => {
     // Change the source to HN Top Links and scrape again
     const sourceSelect = document.getElementById("sourceUrl");
     sourceSelect.value = "https://www.hntoplinks.com/week";

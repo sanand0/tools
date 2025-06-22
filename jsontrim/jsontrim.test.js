@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { loadFrom } from "../common/testutils.js";
+import { loadFrom, sleep } from "../common/testutils.js";
 
 describe("JSON Trim tests", async () => {
-  let page, window, document, inputJson, outputJson, maxLength, trimButton, copyButton, errorContainer;
+  let window, document, inputJson, outputJson, maxLength, trimButton, copyButton, errorContainer;
 
   beforeEach(async () => {
-    ({ page, window, document } = await loadFrom(import.meta.dirname));
+    ({ window, document } = await loadFrom(import.meta.dirname));
     inputJson = document.getElementById("inputJson");
     outputJson = document.getElementById("outputJson");
     maxLength = document.getElementById("maxLength");
@@ -19,7 +19,6 @@ describe("JSON Trim tests", async () => {
     inputJson.value = JSON.stringify(json);
     maxLength.value = "10";
     trimButton.click();
-    // No need for waitUntilComplete as operations are synchronous
 
     const expectedOutput = { name: "John Doe", description: "A long des" };
     expect(JSON.parse(outputJson.value)).toEqual(expectedOutput);
@@ -82,26 +81,14 @@ describe("JSON Trim tests", async () => {
     maxLength.value = "15";
     trimButton.click();
 
-    // Store original clipboard writeText
-    const originalWriteText = window.navigator.clipboard.writeText;
-    let clipboardContent = "";
-    window.navigator.clipboard.writeText = async (text) => {
-      clipboardContent = text;
-      return Promise.resolve();
-    };
-
     copyButton.click();
-    await new Promise((resolve) => setTimeout(resolve, 0)); // Allow microtasks to process
-
-    expect(JSON.parse(clipboardContent)).toEqual({ message: "Hello World, th" });
-
-    // Restore original clipboard.writeText
-    window.navigator.clipboard.writeText = originalWriteText;
+    expect(JSON.parse(await window.navigator.clipboard.readText())).toEqual({ message: "Hello World, th" });
 
     // Check for copy confirmation message (optional, based on UI)
+    await sleep(100);
     expect(copyButton.innerHTML).toContain("Copied!");
     // Wait for button text to revert
-    await new Promise((resolve) => setTimeout(resolve, 2100));
+    await sleep(2100);
     expect(copyButton.innerHTML).not.toContain("Copied!");
   });
 

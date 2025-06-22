@@ -1,4 +1,4 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+import { dsvFormat } from "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm";
 import { updateLatestToast } from "../common/toast.js";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
@@ -13,13 +13,8 @@ function showToast(message, color = "bg-primary") {
 }
 
 function convertToJSONL(input) {
-  try {
-    const parsed = d3.dsvFormat("\t").parse(input);
-    const jsonl = parsed.map((row) => JSON.stringify(row)).join("\n");
-    return jsonl;
-  } catch (error) {
-    throw new Error("Failed to parse input. Please ensure it's valid tab-delimited data.");
-  }
+  const parsed = dsvFormat("\t").parse(input);
+  return parsed.map((row) => JSON.stringify(row)).join("\n");
 }
 
 function updateDownloadButton() {
@@ -39,9 +34,8 @@ inputTextarea.addEventListener("input", () => {
   }
 });
 
-copyBtn.addEventListener("click", () => {
-  outputTextarea.select();
-  document.execCommand("copy");
+copyBtn.addEventListener("click", async () => {
+  await navigator.clipboard.writeText(outputTextarea.value);
   showToast("Copied to clipboard!");
 });
 

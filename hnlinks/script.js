@@ -14,9 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function fetchAndParse(url) {
     const proxyUrl = PROXY_BASE + url;
     const response = await fetch(proxyUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
-    }
+    if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
     const htmlText = await response.text();
     const parser = new DOMParser();
     return parser.parseFromString(htmlText, "text/html");
@@ -27,9 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return new URL(relativeUrl, baseUrl).href;
     } catch (e) {
       // Handle cases where relativeUrl might be malformed or already absolute in a weird way
-      if (relativeUrl.startsWith("http://") || relativeUrl.startsWith("https://")) {
-        return relativeUrl;
-      }
+      if (relativeUrl.startsWith("http://") || relativeUrl.startsWith("https://")) return relativeUrl;
       console.warn(`Could not form absolute URL for base: ${baseUrl}, relative: ${relativeUrl}`);
       return relativeUrl; // fallback
     }
