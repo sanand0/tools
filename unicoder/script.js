@@ -1,5 +1,8 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 saveform("#unicoder-form");
+
+const raw = (s) => new DOMParser().parseFromString(s, "text/html").documentElement.textContent;
+
 // Unicode character mapping functions
 const styles = {
   // Convert to sans-serif bold (for headings and bold text)
@@ -123,33 +126,33 @@ const convertMarkdownToUnicode = (markdown) => {
     const renderer = new marked.Renderer();
 
     // Handle headings
-    renderer.heading = (text, level) => styles.heading(text) + "\n\n";
+    renderer.heading = (text, level) => styles.heading(raw(text)) + "\n\n";
 
     // Handle bold text
-    renderer.strong = (text) => styles.bold(text);
+    renderer.strong = (text) => styles.bold(raw(text));
 
     // Handle italic text
-    renderer.em = (text) => styles.italic(text);
+    renderer.em = (text) => styles.italic(raw(text));
 
     // Handle blockquotes
-    renderer.blockquote = (text) => styles.blockquote(text.replace(/<p>/g, "").replace(/<\/p>/g, "")) + "\n\n";
+    renderer.blockquote = (text) => styles.blockquote(raw(text).replace(/<p>/g, "").replace(/<\/p>/g, "")) + "\n\n";
 
     // Handle code
-    renderer.code = (code) => styles.code(code) + "\n\n";
-    renderer.codespan = (code) => styles.code(code);
+    renderer.code = (code) => styles.code(raw(code)) + "\n\n";
+    renderer.codespan = (code) => styles.code(raw(code));
 
     // Handle links
-    renderer.link = (href, title, text) => styles.link(text, href);
+    renderer.link = (href, title, text) => styles.link(raw(text), href);
 
     // Handle images
-    renderer.image = (href, title, alt) => styles.image(alt || "Image");
+    renderer.image = (href, title, alt) => styles.image(raw(alt) || "Image");
 
     // Handle paragraphs
-    renderer.paragraph = (text) => text + "\n\n";
+    renderer.paragraph = (text) => raw(text) + "\n\n";
 
     // Handle lists
     renderer.list = (body, ordered) => body + "\n";
-    renderer.listitem = (text) => `• ${text}\n`;
+    renderer.listitem = (text) => `• ${raw(text)}\n`;
 
     const options = {
       renderer: renderer,
@@ -179,7 +182,7 @@ const updateOutput = () => {
     .getElementById("output")
     .insertAdjacentHTML(
       "beforeend",
-      `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${output}</div>`,
+      `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${output}</div>`
     );
 };
 
@@ -191,7 +194,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize with example content
   const exampleMarkdown = `# Heading 1
 
-This is **bold text** and this is *italic text*.
+This is **"bold" text** and this is *"italic" text*.
 
 > This is a blockquote
 
@@ -202,7 +205,7 @@ function hello() {
 }
 \`\`\`
 
-This is \`inline code\`
+This is \`"inline" code\`
 
 [Link text](https://example.com)
 
