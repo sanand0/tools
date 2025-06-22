@@ -92,7 +92,6 @@ const copyToClipboard = () => {
   try {
     navigator.clipboard.writeText(outputText).then(() => {
       const copyButton = document.getElementById("copy-button");
-      const originalText = copyButton.textContent;
 
       copyButton.textContent = "Copied!";
       copyButton.classList.remove("btn-light");
