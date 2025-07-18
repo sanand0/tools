@@ -30,6 +30,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[WhatsApp Scraper](./whatsappscraper/)**: A browser bookmarklet that allows users to scrape messages from an active WhatsApp Web chat session into JSON format.
 - **[WhatsApp View](./whatsappview/)**: Renders a JSON array of WhatsApp messages (typically from `whatsappscraper`) into a readable, threaded discussion format.
 - **[Whats Near](./whatsnear/)**: Helps users discover nearby tourist attractions using geolocation, displaying them on a map with AI-generated descriptions and text-to-speech.
+- **[Daydream](./daydream/)**: Browse and rate creative ideas stored as JSONL.
 
 ## Local Development
 
