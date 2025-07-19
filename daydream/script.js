@@ -1,4 +1,5 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
+import { default as fuzzysort } from "https://cdn.jsdelivr.net/npm/fuzzysort@3.1.0/+esm";
 import { updateLatestToast } from "../common/toast.js";
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
@@ -7,11 +8,21 @@ let entries = [];
 let index = 0;
 let sortKey = "";
 let sortAsc = true;
+let searchTerm = "";
 
 const md = (s) => marked.parse(s || "");
-const snippet = (s) => s.replace(/\n/g, " ").slice(0, 60);
+const filterEntries = () => {
+  if (!searchTerm) return entries;
+  return fuzzysort.go(searchTerm, entries, { keys: ["goal", "idea", "concepts"] }).map((r) => r.obj);
+};
 
 load();
+document.getElementById("home").onclick = showTable;
+window.addEventListener("popstate", () => {
+  const n = parseInt(location.hash.slice(1)) - 1;
+  if (entries[n]) showEntry(n, false);
+  else showTable(false);
+});
 
 async function load() {
   try {
@@ -19,7 +30,10 @@ async function load() {
     entries = txt
       .trim()
       .split(/\n+/)
-      .map((l) => JSON.parse(l));
+      .map((l, i) => {
+        const e = JSON.parse(l);
+        return { id: i + 1, overall: e.novel + e.coherent + e.feasible + e.impactful, ...e };
+      });
     const n = parseInt(location.hash.slice(1)) - 1;
     if (entries[n]) return showEntry(n);
     showTable();
@@ -28,47 +42,75 @@ async function load() {
   }
 }
 
-function showTable() {
-  history.replaceState(null, "", location.pathname);
-  const rows = entries
+function sortIcon(k) {
+  if (sortKey !== k) return "";
+  return `<i class="bi bi-caret-${sortAsc ? "up" : "down"}-fill ms-1"></i>`;
+}
+
+function showTable(push = true) {
+  if (push && location.hash) history.pushState(null, "", location.pathname);
+  const list = filterEntries().slice();
+  if (sortKey) list.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : -1) * (sortAsc ? 1 : -1));
+  const rows = list
     .map(
-      (e, i) => /* html */ `
-      <tr data-i="${i}">
-        <td>${i + 1}</td>
-        <td class="w-25 text-truncate">${snippet(e.concept1)} | ${snippet(e.concept2)}</td>
-        <td class="w-50 text-truncate">${snippet(e.idea)}</td>
-        <td>${e.novel}</td>
-        <td>${e.coherent}</td>
-        <td>${e.feasible}</td>
-        <td>${e.impactful}</td>
-      </tr>`,
+      (e) => /* html */ `
+      <tr data-i="${e.id - 1}" class="align-top">
+        <td class="text-end">${e.id}</td>
+        <td class="fw-bold">${e.goal}</td>
+        <td>${e.concepts
+          .map((c) => `<div class="text-truncate" style="max-width:40rem;max-height:7.5rem;overflow:hidden">${md(c)}</div>`)
+          .join("")}</td>
+        <td><div style="max-height:12rem;overflow:hidden">${md(e.idea)}</div></td>
+        ${["novel", "coherent", "feasible", "impactful", "overall"]
+          .map(
+            (k) => `<td class="text-end" data-bs-toggle="tooltip" data-bs-title="${e[k + "_why"] || "OK"}">${e[k]}</td>`
+          )
+          .join("")}
+      </tr>`
     )
     .join("");
   view.innerHTML = /* html */ `
-    <table class="table table-hover table-striped text-nowrap">
-      <thead>
-        <tr>
-          ${["#", "Concepts", "Idea", "Novel", "Coherent", "Feasible", "Impactful"]
-            .map((h) => `<th data-k="${h.toLowerCase()}">${h}</th>`)
-            .join("")}
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+    <div class="mb-3"><input id="search" class="form-control" placeholder="Search" value="${searchTerm}"/></div>
+    <div class="table-responsive">
+      <table class="table table-hover table-striped">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th data-k="goal" style="cursor:pointer">Goal${sortIcon("goal")}</th>
+            <th>Concepts</th>
+            <th data-k="idea" style="cursor:pointer">Idea${sortIcon("idea")}</th>
+            ${["novel", "coherent", "feasible", "impactful", "overall"]
+              .map(
+                (k) =>
+                  `<th data-k="${k}" class="text-end" style="cursor:pointer">${
+                    k.charAt(0).toUpperCase() + k.slice(1)
+                  }${sortIcon(k)}</th>`
+              )
+              .join("")}
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  const q = document.getElementById("search");
+  q.oninput = () => {
+    searchTerm = q.value.trim();
+    showTable();
+  };
   view.querySelectorAll("tbody tr").forEach((r) => r.addEventListener("click", () => showEntry(r.dataset.i)));
-  view.querySelectorAll("th").forEach((h) => h.addEventListener("click", () => sort(h.dataset.k)));
+  view.querySelectorAll("th[data-k]").forEach((h) => h.addEventListener("click", () => sort(h.dataset.k)));
+  initTooltips();
 }
 
 function sort(k) {
   if (!k) return;
   sortAsc = sortKey === k ? !sortAsc : true;
   sortKey = k;
-  entries.sort((a, b) => {
-    const v1 = a[k];
-    const v2 = b[k];
-    return (v1 > v2 ? 1 : -1) * (sortAsc ? 1 : -1);
-  });
   showTable();
+}
+
+function initTooltips() {
+  view.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => new bootstrap.Tooltip(el));
 }
 
 function chart(e) {
@@ -109,12 +151,15 @@ function chart(e) {
   return svg.node();
 }
 
-function showEntry(i) {
+function showEntry(i, push = true) {
   index = +i;
   const e = entries[index];
-  location.hash = `#${index + 1}`;
+  if (push) location.hash = `#${index + 1}`;
   view.innerHTML = /* html */ `
-    <div class="mb-3">${md(e.concept1)}${md(e.concept2)}</div>
+    <h2 class="mb-3">${e.goal}</h2>
+    <h3>Concepts</h3>
+    <div class="mb-3">${e.concepts.map((c) => md(c)).join("")}</div>
+    <h3>Idea</h3>
     <div class="card mb-3"><div class="card-body">${md(e.idea)}</div></div>
     <div id="chart" class="mb-3"></div>
     <ul>
@@ -124,12 +169,12 @@ function showEntry(i) {
       <li><b>Impactful:</b> ${e.impactful} – ${e.impactful_why}</li>
     </ul>
     <div class="d-flex justify-content-between">
-      <button class="btn btn-outline-primary" id="prev">Previous</button>
-      <button class="btn btn-outline-primary" id="next">Next</button>
-      <button class="btn btn-secondary" id="back">Back</button>
+      <button class="btn btn-outline-primary" id="prev"><i class="bi bi-arrow-left"></i> Previous</button>
+      <button class="btn btn-secondary" id="list"><i class="bi bi-list"></i> List</button>
+      <button class="btn btn-outline-primary" id="next">Next <i class="bi bi-arrow-right"></i></button>
     </div>`;
   document.getElementById("chart").appendChild(chart(e));
   document.getElementById("prev").onclick = () => showEntry((index - 1 + entries.length) % entries.length);
   document.getElementById("next").onclick = () => showEntry((index + 1) % entries.length);
-  document.getElementById("back").onclick = showTable;
+  document.getElementById("list").onclick = showTable;
 }

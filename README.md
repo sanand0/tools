@@ -17,6 +17,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[LLM BoundingBox](./llmboundingbox/)**: Uploads an image and uses various Large Language Models (LLMs) via the LLM Foundry service to perform object detection, displaying results with bounding boxes and labels.
 - **[Page to MD](./page2md/)**: A browser bookmarklet that converts the content of the current web page, or a user's selection on that page, into Markdown format, copying it to the clipboard.
 - **[Podcast](./podcast/)**: Automates the creation of a two-person podcast episode, from script generation to audio synthesis, using Large Language Models (LLMs).
+- **[Daydream](./daydream/)**: Browse and rate creative ideas stored as JSONL.
 - **[SpeakMD](./speakmd/)**: Converts Markdown into conversational text suitable for audio narration.
 - **[Quotes Arena](./quotesarena/)**: A web application that allows users to compare short, AI-generated quotes side-by-side and vote for their preferred one, tracking AI model performance.
 - **[RevealJS](./revealjs/)**: Provides a simple web interface to convert Markdown text into a Reveal.js HTML slideshow.
@@ -30,7 +31,6 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[WhatsApp Scraper](./whatsappscraper/)**: A browser bookmarklet that allows users to scrape messages from an active WhatsApp Web chat session into JSON format.
 - **[WhatsApp View](./whatsappview/)**: Renders a JSON array of WhatsApp messages (typically from `whatsappscraper`) into a readable, threaded discussion format.
 - **[Whats Near](./whatsnear/)**: Helps users discover nearby tourist attractions using geolocation, displaying them on a map with AI-generated descriptions and text-to-speech.
-- **[Daydream](./daydream/)**: Browse and rate creative ideas stored as JSONL.
 
 ## Local Development
 
