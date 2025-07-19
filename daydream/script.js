@@ -56,17 +56,17 @@ function showTable(push = true) {
       (e) => /* html */ `
       <tr data-i="${e.id - 1}" class="align-top">
         <td class="text-end">${e.id}</td>
-        <td class="fw-bold" style="max-height:9rem;overflow:auto">${e.goal}</td>
-        <td style="max-height:9rem;overflow:auto">${e.concepts
-          .map((c) => `<div class="text-truncate" style="max-height:3rem;overflow:hidden">${md(c)}</div>`)
+        <td class="fw-bold">${e.goal}</td>
+        <td>${e.concepts
+          .map((c) => `<div class="text-truncate" style="max-width:40rem;max-height:7.5rem;overflow:hidden">${md(c)}</div>`)
           .join("")}</td>
-        <td style="max-height:9rem;overflow:auto">${md(e.idea)}</td>
+        <td><div style="max-height:12rem;overflow:hidden">${md(e.idea)}</div></td>
         ${["novel", "coherent", "feasible", "impactful", "overall"]
           .map(
-            (k) => `<td class="text-end" data-bs-toggle="tooltip" data-bs-title="${e[k + "_why"] || ""}">${e[k]}</td>`,
+            (k) => `<td class="text-end" data-bs-toggle="tooltip" data-bs-title="${e[k + "_why"] || "OK"}">${e[k]}</td>`
           )
           .join("")}
-      </tr>`,
+      </tr>`
     )
     .join("");
   view.innerHTML = /* html */ `
@@ -82,7 +82,9 @@ function showTable(push = true) {
             ${["novel", "coherent", "feasible", "impactful", "overall"]
               .map(
                 (k) =>
-                  `<th data-k="${k}" class="text-end" style="cursor:pointer">${k.charAt(0).toUpperCase() + k.slice(1)}${sortIcon(k)}</th>`,
+                  `<th data-k="${k}" class="text-end" style="cursor:pointer">${
+                    k.charAt(0).toUpperCase() + k.slice(1)
+                  }${sortIcon(k)}</th>`
               )
               .join("")}
           </tr>
