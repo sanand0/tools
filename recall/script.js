@@ -17,6 +17,7 @@ const fileSelect = document.getElementById("file-select");
 const anotherBtn = document.getElementById("another-btn");
 const copyBtn = document.getElementById("copy-btn");
 const decayInput = document.getElementById("decay-input");
+const title = document.getElementById("title");
 let items = [];
 let current = "";
 
@@ -58,6 +59,7 @@ function pick() {
 fileSelect.onchange = () => load(fileSelect.value);
 decayInput.oninput = pick;
 anotherBtn.onclick = pick;
+title.onclick = pick;
 copyBtn.onclick = async () => {
   await navigator.clipboard.writeText(current);
   updateLatestToast({ body: "Copied", color: "bg-success" });
