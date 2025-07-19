@@ -1,4 +1,5 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
+import { default as fuzzysort } from "https://cdn.jsdelivr.net/npm/fuzzysort@3.1.0/+esm";
 import { updateLatestToast } from "../common/toast.js";
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
@@ -7,11 +8,21 @@ let entries = [];
 let index = 0;
 let sortKey = "";
 let sortAsc = true;
+let searchTerm = "";
 
 const md = (s) => marked.parse(s || "");
-const snippet = (s) => s.replace(/\n/g, " ").slice(0, 160);
+const filterEntries = () => {
+  if (!searchTerm) return entries;
+  return fuzzysort.go(searchTerm, entries, { keys: ["goal", "idea", "concepts"] }).map((r) => r.obj);
+};
 
 load();
+document.getElementById("home").onclick = showTable;
+window.addEventListener("popstate", () => {
+  const n = parseInt(location.hash.slice(1)) - 1;
+  if (entries[n]) showEntry(n, false);
+  else showTable(false);
+});
 
 async function load() {
   try {
@@ -19,7 +30,10 @@ async function load() {
     entries = txt
       .trim()
       .split(/\n+/)
-      .map((l) => JSON.parse(l));
+      .map((l, i) => {
+        const e = JSON.parse(l);
+        return { id: i + 1, overall: e.novel + e.coherent + e.feasible + e.impactful, ...e };
+      });
     const n = parseInt(location.hash.slice(1)) - 1;
     if (entries[n]) return showEntry(n);
     showTable();
@@ -28,60 +42,73 @@ async function load() {
   }
 }
 
-function showTable() {
-  history.replaceState(null, "", location.pathname);
-  const rows = entries
+function sortIcon(k) {
+  if (sortKey !== k) return "";
+  return `<i class="bi bi-caret-${sortAsc ? "up" : "down"}-fill ms-1"></i>`;
+}
+
+function showTable(push = true) {
+  if (push && location.hash) history.pushState(null, "", location.pathname);
+  const list = filterEntries().slice();
+  if (sortKey) list.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : -1) * (sortAsc ? 1 : -1));
+  const rows = list
     .map(
-      (e, i) => /* html */ `
-      <tr data-i="${i}">
-        <td class="text-end">${i + 1}</td>
-        <td class="fw-bold text-truncate" style="max-width:40rem">${e.goal}</td>
-        <td style="max-width:40rem">${e.concepts.map((c) => md(c)).join("")}</td>
-        <td style="max-width:40rem">${md(snippet(e.idea))}</td>
-        ${["novel", "coherent", "feasible", "impactful"]
+      (e) => /* html */ `
+      <tr data-i="${e.id - 1}" class="align-top">
+        <td class="text-end">${e.id}</td>
+        <td class="fw-bold" style="max-height:9rem;overflow:auto">${e.goal}</td>
+        <td style="max-height:9rem;overflow:auto">${e.concepts
+          .map((c) => `<div class="text-truncate" style="max-height:3rem;overflow:hidden">${md(c)}</div>`)
+          .join("")}</td>
+        <td style="max-height:9rem;overflow:auto">${md(e.idea)}</td>
+        ${["novel", "coherent", "feasible", "impactful", "overall"]
           .map(
-            (k) =>
-              `<td class="text-end" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="${k}" data-bs-content="${e[k + "_why"]}">${e[k]}</td>`,
+            (k) => `<td class="text-end" data-bs-toggle="tooltip" data-bs-title="${e[k + "_why"] || ""}">${e[k]}</td>`,
           )
           .join("")}
       </tr>`,
     )
     .join("");
   view.innerHTML = /* html */ `
-    <table class="table table-hover table-striped align-middle">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Goal</th>
-          <th>Concepts</th>
-          <th>Idea</th>
-          <th data-k="novel">Novel</th>
-          <th data-k="coherent">Coherent</th>
-          <th data-k="feasible">Feasible</th>
-          <th data-k="impactful">Impactful</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+    <div class="mb-3"><input id="search" class="form-control" placeholder="Search" value="${searchTerm}"/></div>
+    <div class="table-responsive">
+      <table class="table table-hover table-striped">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th data-k="goal" style="cursor:pointer">Goal${sortIcon("goal")}</th>
+            <th>Concepts</th>
+            <th data-k="idea" style="cursor:pointer">Idea${sortIcon("idea")}</th>
+            ${["novel", "coherent", "feasible", "impactful", "overall"]
+              .map(
+                (k) =>
+                  `<th data-k="${k}" class="text-end" style="cursor:pointer">${k.charAt(0).toUpperCase() + k.slice(1)}${sortIcon(k)}</th>`,
+              )
+              .join("")}
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  const q = document.getElementById("search");
+  q.oninput = () => {
+    searchTerm = q.value.trim();
+    showTable();
+  };
   view.querySelectorAll("tbody tr").forEach((r) => r.addEventListener("click", () => showEntry(r.dataset.i)));
   view.querySelectorAll("th[data-k]").forEach((h) => h.addEventListener("click", () => sort(h.dataset.k)));
-  initPopovers();
+  initTooltips();
 }
 
 function sort(k) {
   if (!k) return;
   sortAsc = sortKey === k ? !sortAsc : true;
   sortKey = k;
-  entries.sort((a, b) => {
-    const v1 = a[k];
-    const v2 = b[k];
-    return (v1 > v2 ? 1 : -1) * (sortAsc ? 1 : -1);
-  });
   showTable();
 }
 
-function initPopovers() {
-  view.querySelectorAll('[data-bs-toggle="popover"]').forEach((el) => new bootstrap.Popover(el));
+function initTooltips() {
+  view.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => new bootstrap.Tooltip(el));
 }
 
 function chart(e) {
@@ -122,10 +149,10 @@ function chart(e) {
   return svg.node();
 }
 
-function showEntry(i) {
+function showEntry(i, push = true) {
   index = +i;
   const e = entries[index];
-  location.hash = `#${index + 1}`;
+  if (push) location.hash = `#${index + 1}`;
   view.innerHTML = /* html */ `
     <h2 class="mb-3">${e.goal}</h2>
     <h3>Concepts</h3>
