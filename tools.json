@@ -29,6 +29,13 @@
       "created": "2025-05-20T11:08:17+08:00"
     },
     {
+      "icon": "bi-clock-history",
+      "title": "Recall",
+      "description": "Randomly recall list items from Markdown",
+      "url": "recall",
+      "created": "2025-07-18T00:00:00+00:00"
+    },
+    {
       "icon": "bi-moon-stars",
       "title": "Daydream",
       "description": "View and sort creative ideas from a JSONL file",
