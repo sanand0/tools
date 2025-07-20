@@ -3,12 +3,20 @@ import { updateLatestToast } from "../common/toast.js";
 
 const files = [
   {
-    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/main/llms.md",
-    name: "llms.md",
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/llms.md",
+    name: "LLMs",
   },
   {
-    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/main/til.md",
-    name: "til.md",
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/til.md",
+    name: "Things I learned",
+  },
+  {
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/core-concepts.md",
+    name: "Core concepts",
+  },
+  {
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/oblique-strategies.md",
+    name: "Oblique strategies",
   },
 ];
 
