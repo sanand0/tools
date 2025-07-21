@@ -11,6 +11,10 @@ const files = [
     name: "Things I learned",
   },
   {
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/claude-code-uses.md",
+    name: "Claude Code Uses",
+  },
+  {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/core-concepts.md",
     name: "Core concepts",
   },
