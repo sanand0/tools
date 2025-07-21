@@ -26,7 +26,9 @@ window.addEventListener("popstate", () => {
 
 async function load() {
   try {
-    const txt = await fetch("daydream.jsonl").then((r) => r.text());
+    const txt = await fetch("https://raw.githubusercontent.com/sanand0/til/refs/heads/live/daydream.jsonl").then((r) =>
+      r.text()
+    );
     entries = txt
       .trim()
       .split(/\n+/)
@@ -58,7 +60,7 @@ function showTable(push = true) {
         <td class="text-end">${e.id}</td>
         <td class="fw-bold">${e.goal}</td>
         <td>${e.concepts
-          .map((c) => `<div class="text-truncate" style="max-width:40rem;max-height:7.5rem;overflow:hidden">${md(c)}</div>`)
+          .map((c) => `<div style="max-width:40rem;max-height:7.5rem;overflow:hidden">${md(c)}</div>`)
           .join("")}</td>
         <td><div style="max-height:12rem;overflow:hidden">${md(e.idea)}</div></td>
         ${["novel", "coherent", "feasible", "impactful", "overall"]
