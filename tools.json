@@ -50,6 +50,13 @@
       "created": "2025-06-04T11:25:48+08:00"
     },
     {
+      "icon": "bi-openai",
+      "title": "Straive Intelligence",
+      "description": "Bookmarklet to convert ChatGPT into a Straive-style user interface",
+      "url": "straiveintelligence",
+      "created": "2025-07-21T15:15:43+08:00"
+    },
+    {
       "icon": "bi-github",
       "title": "GitHub Summary",
       "description": "Summarize all activity by a user over a time period",

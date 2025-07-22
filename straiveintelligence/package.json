@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "npx -y esbuild straiveintelligence.js --bundle --minify --format=iife --global-name=straiveIntelligence --outfile=straiveintelligence.min.js"
+  }
+}
