@@ -181,13 +181,10 @@
               <option value="anthropic/claude-sonnet-4">Anthropic Claude Sonnet 4</option>
             </select>
           </div>
-          <div class="col-lg-3 col-md-6 mb-2">
-            <label for="openaiBaseUrl" class="form-label">Base URL:</label>
-            <input type="text" class="form-control form-control-sm" id="openaiBaseUrl" value="https://api.openai.com/v1">
-          </div>
-          <div class="col-lg-4 col-md-8 mb-2">
-            <label for="openaiApiKey" class="form-label">API Key:</label>
-            <input type="password" class="form-control form-control-sm" id="openaiApiKey" placeholder="sk-...">
+          <div class="col-lg-5 col-md-8 mb-2 d-flex align-items-end">
+            <button id="openai-config-btn" type="button" class="btn btn-outline-secondary btn-sm w-100">
+              Configure OpenRouter
+            </button>
           </div>
           <div class="col-lg-2 col-md-4 mb-2">
             <button type="button" class="btn btn-success btn-sm w-100" id="explainButton" disabled>Explain This</button>

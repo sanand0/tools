@@ -37,8 +37,8 @@
                   analysis period
                 </li>
                 <li>
-                  <strong>GitHub API Token:</strong> Personal access token for
-                  API access (required for higher rate limits)
+                  <strong>GitHub API Token (optional):</strong> Personal access
+                  token for higher rate limits
                 </li>
                 <li>
                   <strong>OpenAI API Key:</strong> Your OpenAI API key for
@@ -81,11 +81,8 @@
                   </div>
                 </div>
                 <div class="col-md-6">
-                  <label for="github-token" class="form-label">GitHub API Token</label>
-                  <input type="password" class="form-control" id="github-token" required />
-                  <div class="invalid-feedback">
-                    Please provide a GitHub API token.
-                  </div>
+                  <label for="github-token" class="form-label">GitHub API Token (optional)</label>
+                  <input type="password" class="form-control" id="github-token" />
                 </div>
               </div>
 
@@ -107,22 +104,10 @@
               </div>
 
               <div class="row mb-3">
-                <div class="col-md-6">
-                  <label for="openai-key" class="form-label">OpenAI API Key</label>
-                  <input type="password" class="form-control" id="openai-key" required />
-                  <div class="invalid-feedback">
-                    Please provide an OpenAI API key.
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <label for="openai-base-url" class="form-label">OpenAI API Base URL</label>
-                  <input type="url" class="form-control" id="openai-base-url" value="https://api.openai.com/v1" list="openai-base-url-list" />
-                  <datalist id="openai-base-url-list">
-                    <option value="https://api.openai.com/v1"></option>
-                    <option value="https://openrouter.ai/api/v1"></option>
-                    <option value="https://aipipe.org/openai/v1"></option>
-                    <option value="https://llmfoundry.straive.com/openai/v1"></option>
-                  </datalist>
+                <div class="col-md-6 d-flex align-items-end">
+                  <button id="openai-config-btn" type="button" class="btn btn-outline-secondary w-100">
+                    Configure OpenAI
+                  </button>
                 </div>
               </div>
 

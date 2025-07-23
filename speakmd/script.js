@@ -1,16 +1,23 @@
 import { showToast } from "../common/toast.js";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { loadOpenAI } from "../common/openai.js";
+
+const DEFAULT_BASE_URLS = ["https://openrouter.ai/api/v1", "https://aipipe.org/openrouter/v1"];
 
 const form = document.getElementById("speakForm");
 const markdownInput = document.getElementById("markdownInput");
 const modelSelect = document.getElementById("modelSelect");
-const baseUrlInput = document.getElementById("baseUrlInput");
-const apiKeyInput = document.getElementById("apiKeyInput");
+const openaiConfigBtn = document.getElementById("openai-config-btn");
 const loading = document.getElementById("loading");
 const htmlOutput = document.getElementById("htmlOutput");
 const copyBtn = document.getElementById("copyBtn");
 saveform("#speakForm", { exclude: '[type="file"]' });
 const readBtn = document.getElementById("readBtn");
+
+let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
+openaiConfigBtn.addEventListener("click", async () => {
+  aiConfig = await loadOpenAI(DEFAULT_BASE_URLS, true);
+});
 
 let utterance;
 function speak(text) {
@@ -23,11 +30,11 @@ function speak(text) {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const content = markdownInput.value.trim();
-  const apiKey = apiKeyInput.value.trim();
+  const { apiKey, baseURL } = aiConfig;
   if (!content || !apiKey) return;
   htmlOutput.innerHTML = "";
   loading.classList.remove("d-none");
-  const baseUrl = baseUrlInput.value.trim();
+  const baseUrl = baseURL;
   let model = modelSelect.value;
   if (model.startsWith("openai/") && baseUrl.includes("api.openai.com")) model = model.replace("openai/", "");
   const temperature = 0.3;

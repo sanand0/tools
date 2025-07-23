@@ -1,5 +1,13 @@
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { loadOpenAI } from "../common/openai.js";
+
+const DEFAULT_BASE_URLS = [
+  "https://api.openai.com/v1",
+  "https://aipipe.org/api/v1",
+  "https://llmfoundry.straivedemo.com/openai/v1",
+  "https://llmfoundry.straive.com/openai/v1",
+];
 
 // GitHub API field mappings
 const GITHUB_FIELDS = {
@@ -30,6 +38,12 @@ const STORE_NAME = "urls";
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 let db = null;
+
+const openaiConfigBtn = document.getElementById("openai-config-btn");
+let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
+openaiConfigBtn.addEventListener("click", async () => {
+  aiConfig = await loadOpenAI(DEFAULT_BASE_URLS, true);
+});
 
 async function initDB() {
   return new Promise((resolve, reject) => {
@@ -335,8 +349,6 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
     githubToken: document.getElementById("github-token").value,
     since: document.getElementById("since").value,
     until: document.getElementById("until").value,
-    openaiKey: document.getElementById("openai-key").value,
-    baseUrl: document.getElementById("openai-base-url").value,
     systemPrompt: document.querySelector("#system-prompt-tab-content .active textarea").value,
   };
 
@@ -348,10 +360,8 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
     if (document.getElementById("clear-cache").value) await clearCache();
 
     // Fetch GitHub data
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.githubToken}`,
-    };
+    const headers = { "Content-Type": "application/json" };
+    if (config.githubToken) headers.Authorization = `Bearer ${config.githubToken}`;
 
     const { activity, repos } = await fetchGitHubActivity(config.username, config.since, config.until, headers);
 
@@ -361,7 +371,7 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
     document.getElementById("results-section").style.display = "block";
 
     // Generate summary
-    await generateSummary({ activity, repos, context }, config.systemPrompt, config.openaiKey, config.baseUrl);
+    await generateSummary({ activity, repos, context }, config.systemPrompt, aiConfig.apiKey, aiConfig.baseURL);
   } catch (error) {
     showError(error.message);
   }

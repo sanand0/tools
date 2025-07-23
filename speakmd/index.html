@@ -55,13 +55,10 @@ For a table with columns Name and Score and a row Bob 5, say "Columns: Name, Sco
             </option>
           </select>
         </div>
-        <div class="col-md-4 mb-3">
-          <label for="baseUrlInput" class="form-label">OpenAI Base URL</label>
-          <input type="url" id="baseUrlInput" class="form-control" value="https://api.openai.com/v1" />
-        </div>
-        <div class="col-md-4 mb-3">
-          <label for="apiKeyInput" class="form-label">OpenAI API Key</label>
-          <input type="password" id="apiKeyInput" class="form-control" required />
+        <div class="col-md-6 mb-3 d-flex align-items-end">
+          <button id="openai-config-btn" type="button" class="btn btn-outline-secondary w-100">
+            Configure OpenRouter
+          </button>
         </div>
       </div>
       <button type="submit" class="btn btn-primary">
