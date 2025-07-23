@@ -7,12 +7,11 @@ const view = document.getElementById("view");
 const wrap = document.getElementById("wrap");
 let entries = [];
 let index = 0;
-let sortKey = "";
-let sortAsc = true;
+let sortKey = "timestamp";
+let sortAsc = false;
 let searchTerm = "";
 
-const fmt = (ts) =>
-  new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+const fmt = (ts) => new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 const md = (s) => marked.parse(s || "");
 const filterEntries = () => {
@@ -21,18 +20,18 @@ const filterEntries = () => {
 };
 
 load();
-document.getElementById("home").onclick = showTable;
-window.addEventListener("popstate", () => {
+const handleHash = () => {
   const ts = decodeURIComponent(location.hash.slice(1));
   const n = entries.findIndex((e) => e.timestamp === ts);
   if (n > -1) showEntry(n, false);
   else showTable(false);
-});
+};
+["popstate", "hashchange"].forEach((ev) => window.addEventListener(ev, handleHash));
 
 async function load() {
   try {
     const txt = await fetch("https://raw.githubusercontent.com/sanand0/til/refs/heads/live/daydream.jsonl").then((r) =>
-      r.text()
+      r.text(),
     );
     entries = txt
       .trim()
@@ -60,22 +59,28 @@ function showTable(push = true) {
   wrap.className = "container-fluid py-4";
   const list = filterEntries().slice();
   if (sortKey) list.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : -1) * (sortAsc ? 1 : -1));
+  const vals = [...entries.map((e) => e.overall)].sort((a, b) => b - a);
+  const top = vals[0];
+  const second = vals.find((v) => v < top);
   const rows = list
     .map(
       (e) => /* html */ `
       <tr data-i="${e.id - 1}" class="align-top">
         <td class="text-end">${fmt(e.timestamp)}</td>
         <td class="fw-bold">${e.goal}</td>
-        <td>${e.concepts
-          .map((c) => `<div style="max-width:40rem;max-height:7.5rem;overflow:hidden">${md(c)}</div>`)
-          .join("")}</td>
         <td><div style="max-height:12rem;overflow:hidden">${md(e.idea)}</div></td>
         ${["novel", "coherent", "feasible", "impactful", "overall"]
-          .map(
-            (k) => `<td class="text-end" data-bs-toggle="tooltip" data-bs-title="${e[k + "_why"] || "OK"}">${e[k]}</td>`
-          )
+          .map((k) => {
+            const cls =
+              k === "overall" && e[k] === top
+                ? "bg-success text-white"
+                : k === "overall" && e[k] === second
+                  ? "bg-success bg-opacity-50"
+                  : "";
+            return `<td class="text-end ${cls}" data-bs-toggle="tooltip" data-bs-title="${e[k + "_why"] || "OK"}">${e[k]}</td>`;
+          })
           .join("")}
-      </tr>`
+      </tr>`,
     )
     .join("");
   view.innerHTML = /* html */ `
@@ -84,16 +89,15 @@ function showTable(push = true) {
       <table class="table table-hover table-striped">
         <thead>
           <tr>
-            <th>#</th>
+            <th data-k="timestamp" style="cursor:pointer">Time${sortIcon("timestamp")}</th>
             <th data-k="goal" style="cursor:pointer">Goal${sortIcon("goal")}</th>
-            <th>Concepts</th>
             <th data-k="idea" style="cursor:pointer">Idea${sortIcon("idea")}</th>
             ${["novel", "coherent", "feasible", "impactful", "overall"]
               .map(
                 (k) =>
                   `<th data-k="${k}" class="text-end" style="cursor:pointer">${
                     k.charAt(0).toUpperCase() + k.slice(1)
-                  }${sortIcon(k)}</th>`
+                  }${sortIcon(k)}</th>`,
               )
               .join("")}
           </tr>
