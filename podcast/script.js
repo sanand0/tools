@@ -1,5 +1,12 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { loadOpenAI } from "../common/openai.js";
+
+const DEFAULT_BASE_URLS = [
+  "https://api.openai.com/v1",
+  "https://aipipe.org/api/v1",
+  "https://llmfoundry.straivedemo.com/openai/v1",
+  "https://llmfoundry.straive.com/openai/v1",
+];
 let savedForm;
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -27,9 +34,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const alertContainer = document.getElementById("alertContainer");
   const resetSettingsBtn = document.getElementById("resetSettingsBtn");
 
-  let aiConfig = await loadOpenAI();
+  let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
   openaiConfigBtn.addEventListener("click", async () => {
-    aiConfig = await loadOpenAI(true);
+    aiConfig = await loadOpenAI(DEFAULT_BASE_URLS, true);
   });
 
   // Function to show alerts

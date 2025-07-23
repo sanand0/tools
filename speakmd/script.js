@@ -2,6 +2,8 @@ import { showToast } from "../common/toast.js";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { loadOpenAI } from "../common/openai.js";
 
+const DEFAULT_BASE_URLS = ["https://openrouter.ai/api/v1", "https://aipipe.org/openrouter/v1"];
+
 const form = document.getElementById("speakForm");
 const markdownInput = document.getElementById("markdownInput");
 const modelSelect = document.getElementById("modelSelect");
@@ -12,9 +14,9 @@ const copyBtn = document.getElementById("copyBtn");
 saveform("#speakForm", { exclude: '[type="file"]' });
 const readBtn = document.getElementById("readBtn");
 
-let aiConfig = await loadOpenAI();
+let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
 openaiConfigBtn.addEventListener("click", async () => {
-  aiConfig = await loadOpenAI(true);
+  aiConfig = await loadOpenAI(DEFAULT_BASE_URLS, true);
 });
 
 let utterance;

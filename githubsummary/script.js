@@ -2,6 +2,13 @@ import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { loadOpenAI } from "../common/openai.js";
 
+const DEFAULT_BASE_URLS = [
+  "https://api.openai.com/v1",
+  "https://aipipe.org/api/v1",
+  "https://llmfoundry.straivedemo.com/openai/v1",
+  "https://llmfoundry.straive.com/openai/v1",
+];
+
 // GitHub API field mappings
 const GITHUB_FIELDS = {
   ForkEvent: ["type", "repo.name", "payload.forkee.full_name", "created_at"],
@@ -33,9 +40,9 @@ const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 let db = null;
 
 const openaiConfigBtn = document.getElementById("openai-config-btn");
-let aiConfig = await loadOpenAI();
+let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
 openaiConfigBtn.addEventListener("click", async () => {
-  aiConfig = await loadOpenAI(true);
+  aiConfig = await loadOpenAI(DEFAULT_BASE_URLS, true);
 });
 
 async function initDB() {
@@ -353,10 +360,8 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
     if (document.getElementById("clear-cache").value) await clearCache();
 
     // Fetch GitHub data
-    const headers = {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.githubToken}`,
-    };
+    const headers = { "Content-Type": "application/json" };
+    if (config.githubToken) headers.Authorization = `Bearer ${config.githubToken}`;
 
     const { activity, repos } = await fetchGitHubActivity(config.username, config.since, config.until, headers);
 

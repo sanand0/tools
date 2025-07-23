@@ -5,6 +5,8 @@ import { showToast } from "../common/toast.js";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { loadOpenAI } from "../common/openai.js";
 
+const DEFAULT_BASE_URLS = ["https://openrouter.ai/api/v1", "https://aipipe.org/openrouter/v1"];
+
 const COUNTRIES = {
   US: "United States",
   GB: "United Kingdom",
@@ -37,9 +39,9 @@ const resetPromptButton = document.getElementById("resetPrompt");
 const copyResponseButton = document.getElementById("copyResponse");
 saveform("#googlesuggest-form", { exclude: '[type="file"]' });
 
-let aiConfig = await loadOpenAI();
+let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
 openaiConfigBtn.addEventListener("click", async () => {
-  aiConfig = await loadOpenAI(true);
+  aiConfig = await loadOpenAI(DEFAULT_BASE_URLS, true);
 });
 
 // --- Application State ---
