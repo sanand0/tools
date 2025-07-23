@@ -1,0 +1,8 @@
+{
+  "defaultBaseUrls": [
+    "https://api.openai.com/v1",
+    "https://aipipe.org/api/v1",
+    "http://llmfoundry.straivedemo.com/openai/v1",
+    "http://llmfoundry.straive.com/openai/v1"
+  ]
+}

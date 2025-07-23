@@ -3,6 +3,7 @@ import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { showToast } from "../common/toast.js";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { loadOpenAI } from "../common/openai.js";
 
 const COUNTRIES = {
   US: "United States",
@@ -27,8 +28,7 @@ const loadingIndicator = document.getElementById("loadingIndicator");
 const explainButton = document.getElementById("explainButton");
 const searchHistoryDiv = document.getElementById("searchHistory");
 const llmModelSelect = document.getElementById("llmModel");
-const openaiBaseUrlInput = document.getElementById("openaiBaseUrl");
-const openaiApiKeyInput = document.getElementById("openaiApiKey");
+const openaiConfigBtn = document.getElementById("openai-config-btn");
 const llmResponseDiv = document.getElementById("llmResponse");
 const llmResponseCard = document.getElementById("llmResponseCard");
 const llmLoadingIndicator = document.getElementById("llmLoadingIndicator");
@@ -36,6 +36,11 @@ const systemPromptTextarea = document.getElementById("systemPrompt");
 const resetPromptButton = document.getElementById("resetPrompt");
 const copyResponseButton = document.getElementById("copyResponse");
 saveform("#googlesuggest-form", { exclude: '[type="file"]' });
+
+let aiConfig = await loadOpenAI();
+openaiConfigBtn.addEventListener("click", async () => {
+  aiConfig = await loadOpenAI(true);
+});
 
 // --- Application State ---
 let currentSuggestions = null;
@@ -307,8 +312,6 @@ function renderSuggestions(suggestionsByCountry, query) {
 // --- LLM Interaction ---
 const llmSettingInputs = {
   llm_model: { element: llmModelSelect, defaultValue: "openai/gpt-4.1-mini" },
-  openai_base_url: { element: openaiBaseUrlInput, defaultValue: "https://api.openai.com/v1" },
-  openai_api_key: { element: openaiApiKeyInput, defaultValue: "" },
   system_prompt: { element: systemPromptTextarea, defaultValue: DEFAULT_SYSTEM_PROMPT },
 };
 
@@ -340,15 +343,9 @@ function formatSuggestionsForLLMPrompt(suggestions, query) {
 
 async function fetchLLMExplanation(suggestions, query) {
   const model = llmModelSelect.value;
-  let baseUrl = openaiBaseUrlInput.value.trim();
-  const apiKey = openaiApiKeyInput.value.trim();
-
+  let { baseURL: baseUrl, apiKey } = aiConfig;
   if (!apiKey) {
-    showToast({ title: "Missing key", body: "Please enter your OpenAI API Key.", color: "bg-danger" });
-    return;
-  }
-  if (!baseUrl) {
-    showToast({ title: "Missing base URL", body: "Please enter the OpenAI Base URL.", color: "bg-danger" });
+    showToast({ title: "Missing key", body: "Configure your OpenAI API key first.", color: "bg-danger" });
     return;
   }
 

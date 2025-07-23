@@ -1,5 +1,6 @@
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { loadOpenAI } from "../common/openai.js";
 
 // GitHub API field mappings
 const GITHUB_FIELDS = {
@@ -30,6 +31,12 @@ const STORE_NAME = "urls";
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 let db = null;
+
+const openaiConfigBtn = document.getElementById("openai-config-btn");
+let aiConfig = await loadOpenAI();
+openaiConfigBtn.addEventListener("click", async () => {
+  aiConfig = await loadOpenAI(true);
+});
 
 async function initDB() {
   return new Promise((resolve, reject) => {
@@ -335,8 +342,6 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
     githubToken: document.getElementById("github-token").value,
     since: document.getElementById("since").value,
     until: document.getElementById("until").value,
-    openaiKey: document.getElementById("openai-key").value,
-    baseUrl: document.getElementById("openai-base-url").value,
     systemPrompt: document.querySelector("#system-prompt-tab-content .active textarea").value,
   };
 
@@ -361,7 +366,7 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
     document.getElementById("results-section").style.display = "block";
 
     // Generate summary
-    await generateSummary({ activity, repos, context }, config.systemPrompt, config.openaiKey, config.baseUrl);
+    await generateSummary({ activity, repos, context }, config.systemPrompt, aiConfig.apiKey, aiConfig.baseURL);
   } catch (error) {
     showError(error.message);
   }

@@ -107,22 +107,10 @@
               </div>
 
               <div class="row mb-3">
-                <div class="col-md-6">
-                  <label for="openai-key" class="form-label">OpenAI API Key</label>
-                  <input type="password" class="form-control" id="openai-key" required />
-                  <div class="invalid-feedback">
-                    Please provide an OpenAI API key.
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <label for="openai-base-url" class="form-label">OpenAI API Base URL</label>
-                  <input type="url" class="form-control" id="openai-base-url" value="https://api.openai.com/v1" list="openai-base-url-list" />
-                  <datalist id="openai-base-url-list">
-                    <option value="https://api.openai.com/v1"></option>
-                    <option value="https://openrouter.ai/api/v1"></option>
-                    <option value="https://aipipe.org/openai/v1"></option>
-                    <option value="https://llmfoundry.straive.com/openai/v1"></option>
-                  </datalist>
+                <div class="col-md-6 d-flex align-items-end">
+                  <button id="openai-config-btn" type="button" class="btn btn-outline-secondary w-100">
+                    Configure OpenAI
+                  </button>
                 </div>
               </div>
 

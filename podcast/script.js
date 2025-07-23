@@ -1,12 +1,12 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { loadOpenAI } from "../common/openai.js";
 let savedForm;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   savedForm = saveform("#podcast-form", { exclude: '[type="file"]' });
 
   // DOM Elements
-  const apiKeyInput = document.getElementById("apiKeyInput");
-  const baseUrlInput = document.getElementById("baseUrlInput");
+  const openaiConfigBtn = document.getElementById("openai-config-btn");
   const systemPromptInput = document.getElementById("systemPromptInput");
   const modelInput = document.getElementById("model");
   const voice1NameInput = document.getElementById("voice1Name");
@@ -26,6 +26,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const progressBar = document.getElementById("progressBar");
   const alertContainer = document.getElementById("alertContainer");
   const resetSettingsBtn = document.getElementById("resetSettingsBtn");
+
+  let aiConfig = await loadOpenAI();
+  openaiConfigBtn.addEventListener("click", async () => {
+    aiConfig = await loadOpenAI(true);
+  });
 
   // Function to show alerts
   function showAlert(message, type = "danger") {
@@ -82,12 +87,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Generate Script
   generateScriptBtn.addEventListener("click", async () => {
     const content = contentInput.value.trim();
-    const apiKey = apiKeyInput.value.trim();
-    const baseUrl = baseUrlInput.value.trim();
+    const { apiKey, baseURL: baseUrl } = aiConfig;
     const model = modelInput.value.trim();
 
     if (!content) return showAlert("Please enter some content to convert to a podcast.");
-    if (!apiKey) return showAlert("Please enter your OpenAI API key in the Advanced Settings.");
+    if (!apiKey) return showAlert("Configure your OpenAI API key first.");
 
     try {
       // Reset UI
@@ -136,11 +140,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Generate Audio
   generateAudioBtn.addEventListener("click", async () => {
     const script = podcastScriptTextarea.value.trim();
-    const apiKey = apiKeyInput.value.trim();
-    const baseUrl = baseUrlInput.value.trim();
+    const { apiKey, baseURL: baseUrl } = aiConfig;
 
     if (!script) return showAlert("Please generate a podcast script first.");
-    if (!apiKey) return showAlert("Please enter your OpenAI API key in the Advanced Settings.");
+    if (!apiKey) return showAlert("Configure your OpenAI API key first.");
 
     try {
       alertContainer.innerHTML = "";
