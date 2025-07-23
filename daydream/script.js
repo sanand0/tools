@@ -4,11 +4,15 @@ import { updateLatestToast } from "../common/toast.js";
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const view = document.getElementById("view");
+const wrap = document.getElementById("wrap");
 let entries = [];
 let index = 0;
 let sortKey = "";
 let sortAsc = true;
 let searchTerm = "";
+
+const fmt = (ts) =>
+  new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 const md = (s) => marked.parse(s || "");
 const filterEntries = () => {
@@ -19,8 +23,9 @@ const filterEntries = () => {
 load();
 document.getElementById("home").onclick = showTable;
 window.addEventListener("popstate", () => {
-  const n = parseInt(location.hash.slice(1)) - 1;
-  if (entries[n]) showEntry(n, false);
+  const ts = decodeURIComponent(location.hash.slice(1));
+  const n = entries.findIndex((e) => e.timestamp === ts);
+  if (n > -1) showEntry(n, false);
   else showTable(false);
 });
 
@@ -36,8 +41,9 @@ async function load() {
         const e = JSON.parse(l);
         return { id: i + 1, overall: e.novel + e.coherent + e.feasible + e.impactful, ...e };
       });
-    const n = parseInt(location.hash.slice(1)) - 1;
-    if (entries[n]) return showEntry(n);
+    const hash = decodeURIComponent(location.hash.slice(1));
+    const n = entries.findIndex((e) => e.timestamp === hash);
+    if (n > -1) return showEntry(n);
     showTable();
   } catch (e) {
     updateLatestToast({ title: "Load error", body: e.message, color: "bg-danger" });
@@ -51,13 +57,14 @@ function sortIcon(k) {
 
 function showTable(push = true) {
   if (push && location.hash) history.pushState(null, "", location.pathname);
+  wrap.className = "container-fluid py-4";
   const list = filterEntries().slice();
   if (sortKey) list.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : -1) * (sortAsc ? 1 : -1));
   const rows = list
     .map(
       (e) => /* html */ `
       <tr data-i="${e.id - 1}" class="align-top">
-        <td class="text-end">${e.id}</td>
+        <td class="text-end">${fmt(e.timestamp)}</td>
         <td class="fw-bold">${e.goal}</td>
         <td>${e.concepts
           .map((c) => `<div style="max-width:40rem;max-height:7.5rem;overflow:hidden">${md(c)}</div>`)
@@ -156,7 +163,8 @@ function chart(e) {
 function showEntry(i, push = true) {
   index = +i;
   const e = entries[index];
-  if (push) location.hash = `#${index + 1}`;
+  if (push) location.hash = `#${encodeURIComponent(e.timestamp)}`;
+  wrap.className = "container py-4";
   view.innerHTML = /* html */ `
     <h2 class="mb-3">${e.goal}</h2>
     <h3>Concepts</h3>
