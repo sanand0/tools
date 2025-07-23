@@ -56,7 +56,7 @@ function sortIcon(k) {
 
 function showTable(push = true) {
   if (push && location.hash) history.pushState(null, "", location.pathname);
-  wrap.className = "container-fluid py-4";
+  wrap.className = "container py-4";
   const list = filterEntries().slice();
   if (sortKey) list.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : -1) * (sortAsc ? 1 : -1));
   const vals = [...entries.map((e) => e.overall)].sort((a, b) => b - a);
@@ -171,10 +171,8 @@ function showEntry(i, push = true) {
   wrap.className = "container py-4";
   view.innerHTML = /* html */ `
     <h2 class="mb-3">${e.goal}</h2>
-    <h3>Concepts</h3>
-    <div class="mb-3">${e.concepts.map((c) => md(c)).join("")}</div>
     <h3>Idea</h3>
-    <div class="card mb-3"><div class="card-body">${md(e.idea)}</div></div>
+    <div class="card mb-3"><div class="card-body p-4 fs-5">${md(e.idea)}</div></div>
     <div id="chart" class="mb-3"></div>
     <ul>
       <li><b>Novel:</b> ${e.novel} – ${e.novel_why}</li>
@@ -182,7 +180,9 @@ function showEntry(i, push = true) {
       <li><b>Feasible:</b> ${e.feasible} – ${e.feasible_why}</li>
       <li><b>Impactful:</b> ${e.impactful} – ${e.impactful_why}</li>
     </ul>
-    <div class="d-flex justify-content-between">
+    <h3>Concepts</h3>
+    <div class="mb-3">${e.concepts.map((c) => md(c)).join("")}</div>
+    <div class="d-flex justify-content-between my-5">
       <button class="btn btn-outline-primary" id="prev"><i class="bi bi-arrow-left"></i> Previous</button>
       <button class="btn btn-secondary" id="list"><i class="bi bi-list"></i> List</button>
       <button class="btn btn-outline-primary" id="next">Next <i class="bi bi-arrow-right"></i></button>
