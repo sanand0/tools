@@ -4,9 +4,12 @@ import { showToast } from "../common/toast.js";
 const DEFAULT_BASE_URLS = ["https://llmfoundry.straivedemo.com/openai/v1", "https://llmfoundry.straive.com/openai/v1"];
 
 const uploadInput = document.getElementById("upload-input");
+const imageUrlInput = document.getElementById("image-url");
+const useUrlBtn = document.getElementById("use-url-btn");
 const imageSearch = document.getElementById("image-search");
 const searchBtn = document.getElementById("search-btn");
 const searchResults = document.getElementById("search-results");
+const samplesRow = document.getElementById("samples");
 const chatLog = document.getElementById("chat-log");
 const promptInput = document.getElementById("prompt-input");
 const sendBtn = document.getElementById("send-btn");
@@ -17,6 +20,23 @@ let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
 openaiConfigBtn.addEventListener("click", async () => {
   aiConfig = await loadOpenAI(DEFAULT_BASE_URLS, true);
 });
+
+fetch("config.json")
+  .then((r) => r.json())
+  .then(({ samples }) => {
+    samples.forEach(({ title, image, prompt }) => {
+      samplesRow.insertAdjacentHTML(
+        "beforeend",
+        `<div class="col-6 col-md-4 col-lg-2 sample" data-url="${image}" data-prompt="${prompt}">
+           <div class="card h-100 shadow-sm">
+             <img src="${image}" class="card-img-top" alt="${title}">
+             <div class="card-body p-2"><small class="card-title">${title}</small></div>
+           </div>
+         </div>`,
+      );
+    });
+  })
+  .catch((err) => showToast({ title: "Config error", body: err.message, color: "bg-danger" }));
 
 let baseImage = null;
 let selectedUrl = "";
@@ -53,6 +73,7 @@ searchResults.addEventListener("click", (e) => {
     e.target.classList.add("border-primary");
     baseImage = null;
     uploadInput.value = "";
+    imageUrlInput.value = selectedUrl;
   }
 });
 
@@ -62,6 +83,29 @@ uploadInput.addEventListener("change", () => {
   baseImage = file;
   selectedUrl = "";
   document.querySelectorAll(".search-thumb").forEach((img) => img.classList.remove("border-primary"));
+  imageUrlInput.value = "";
+});
+
+useUrlBtn.addEventListener("click", () => {
+  const url = imageUrlInput.value.trim();
+  if (!url) return;
+  selectedUrl = url;
+  baseImage = null;
+  uploadInput.value = "";
+  document.querySelectorAll(".search-thumb").forEach((img) => img.classList.remove("border-primary"));
+  document.querySelectorAll("#samples .sample .card").forEach((c) => c.classList.remove("border-primary"));
+});
+
+samplesRow.addEventListener("click", (e) => {
+  const card = e.target.closest(".sample");
+  if (!card) return;
+  selectedUrl = card.dataset.url;
+  promptInput.value = card.dataset.prompt;
+  baseImage = null;
+  uploadInput.value = "";
+  imageUrlInput.value = selectedUrl;
+  document.querySelectorAll("#samples .sample .card").forEach((c) => c.classList.remove("border-primary"));
+  card.querySelector(".card").classList.add("border-primary");
 });
 
 function appendUserMessage(text) {

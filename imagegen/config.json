@@ -1,0 +1,34 @@
+{
+  "samples": [
+    {
+      "title": "Chocolate bar",
+      "image": "https://plus.unsplash.com/premium_photo-1677678736472-3f7498116754?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Redesign the wrapper with a sleek eco-friendly look emphasizing the brand name for store shelves."
+    },
+    {
+      "title": "Mobile phone",
+      "image": "https://plus.unsplash.com/premium_photo-1681233751666-612c7bc77485?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Update the device to a futuristic form with a curved screen and minimal bezels for a high-end market."
+    },
+    {
+      "title": "Shoes",
+      "image": "https://plus.unsplash.com/premium_photo-1682435561654-20d84cef00eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Change the color to a bold palette and give the shoes a sporty yet stylish design for active customers."
+    },
+    {
+      "title": "Hotel uniform",
+      "image": "https://plus.unsplash.com/premium_photo-1682097423302-85542c59340f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Modernize the uniform with elegant lines and a luxury feel suited for a premium hotel brand."
+    },
+    {
+      "title": "Food",
+      "image": "https://plus.unsplash.com/premium_photo-1673108852141-e8c3c22a4a22?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Rearrange the dish into an appetizing presentation that looks irresistible on a restaurant menu."
+    },
+    {
+      "title": "Perfume",
+      "image": "https://plus.unsplash.com/premium_photo-1676748933022-e1183e997436?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Reimagine the bottle design to use eco-friendly materials with a minimalist aesthetic."
+    }
+  ]
+}
