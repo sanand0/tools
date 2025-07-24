@@ -100,21 +100,30 @@ async function generateImage() {
   promptInput.value = "";
   loading.classList.remove("d-none");
   try {
-    const body = { model: "gpt-image-1", prompt, n: 1, size: "1024x1024" };
-    if (baseImage) {
-      const b64 = await fileToBase64(baseImage);
-      body.image = b64.split(",")[1];
-    } else if (selectedUrl) {
-      body.image_url = selectedUrl;
+    const endpoint = baseImage || selectedUrl ? "edits" : "generations";
+    let init;
+    if (endpoint === "edits") {
+      const blob = baseImage || (await fetch(selectedUrl).then((r) => r.blob()));
+      const form = new FormData();
+      form.append("model", "gpt-image-1");
+      form.append("prompt", prompt);
+      form.append("n", "1");
+      form.append("size", "1024x1024");
+      form.append("image", blob, "image.png");
+      init = { method: "POST", headers: { Authorization: `Bearer ${apiKey}` }, body: form };
+    } else {
+      const body = { model: "gpt-image-1", prompt, n: 1, size: "1024x1024" };
+      init = {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify(body),
+      };
     }
-    const resp = await fetch(`${baseURL}/images/generations`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify(body),
-    });
+    const resp = await fetch(`${baseURL}/images/${endpoint}`, init);
     if (!resp.ok) throw new Error("API error");
     const data = await resp.json();
-    const url = data.data[0].url;
+    const b64 = data.data[0].b64_json;
+    const url = `data:image/png;base64,${b64}`;
     appendImageMessage(url);
     selectedUrl = url;
     baseImage = null;
@@ -123,13 +132,4 @@ async function generateImage() {
   } finally {
     loading.classList.add("d-none");
   }
-}
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
 }

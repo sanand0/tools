@@ -15,7 +15,8 @@ Interactively generate and modify images using OpenAI's `gpt-image-1` model. Upl
 
 1. Configure your OpenAI key and select an allowed base URL from LLM Foundry.
 2. Search or upload an image and type a prompt describing your desired output.
-3. The tool calls `gpt-image-1` to generate an updated image and displays it in the chat.
-4. Continue chatting with new prompts to iteratively improve the image.
+3. If an image is provided, it is sent to the `/images/edits` endpoint. Otherwise `/images/generations` is used.
+4. The returned `b64_json` is displayed and becomes the new base image.
+5. Continue chatting with new prompts to iteratively improve the image.
 
 Use dummy values for the Google Custom Search API key and search engine ID; replace them with real values to enable image search.
