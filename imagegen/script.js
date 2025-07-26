@@ -19,7 +19,28 @@ const chatForm = document.getElementById("chat-form");
 const loading = document.getElementById("loading");
 const loadingMsg = document.getElementById("loading-msg");
 const openaiConfigBtn = document.getElementById("openai-config-btn");
+const sizeInput = document.getElementById("size");
+const qualityInput = document.getElementById("quality");
+const formatInput = document.getElementById("format");
+const compressionInput = document.getElementById("output-compression");
+const backgroundInput = document.getElementById("background");
 let loadingTimer;
+
+const history = [];
+
+function collectOptions() {
+  const opts = { response_format: "b64_json" };
+  if (sizeInput.value !== "auto") opts.size = sizeInput.value;
+  if (qualityInput.value !== "auto") opts.quality = qualityInput.value;
+  if (formatInput.value !== "webp") opts.format = formatInput.value;
+  if (compressionInput.value !== "50") opts.output_compression = +compressionInput.value;
+  if (backgroundInput.checked) opts.background = "transparent";
+  return opts;
+}
+
+function restorePrompt(p) {
+  promptInput.value = promptInput.value ? `${promptInput.value}\n${p}` : p;
+}
 
 function randomMessage() {
   return LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
@@ -134,9 +155,19 @@ function appendImageMessage(url) {
 
 async function generateImage() {
   const prompt = promptInput.value.trim();
-  if (!prompt) return showToast({ title: "Prompt missing", body: "Describe the image", color: "bg-warning" });
+  if (!prompt)
+    return showToast({
+      title: "Prompt missing",
+      body: "Describe the image",
+      color: "bg-warning",
+    });
   const { apiKey, baseURL } = aiConfig;
-  if (!apiKey) return showToast({ title: "OpenAI key missing", body: "Configure your key", color: "bg-warning" });
+  if (!apiKey)
+    return showToast({
+      title: "OpenAI key missing",
+      body: "Configure your key",
+      color: "bg-warning",
+    });
 
   if (!baseImage && !selectedUrl) {
     const url = imageUrlInput.value.trim();
@@ -147,28 +178,43 @@ async function generateImage() {
     }
   }
   if (!baseImage && !selectedUrl)
-    return showToast({ title: "Image missing", body: "Upload a file or provide a URL", color: "bg-warning" });
+    return showToast({
+      title: "Image missing",
+      body: "Upload a file or provide a URL",
+      color: "bg-warning",
+    });
 
   const userCard = appendUserMessage(prompt);
   promptInput.value = "";
   startLoading();
   try {
     const endpoint = baseImage || selectedUrl ? "edits" : "generations";
+    const opts = collectOptions();
+    const fullPrompt = history.length
+      ? `Previous requests: ${history.join(" | ")}. Only follow the latest: ${prompt}`
+      : prompt;
     let init;
     if (endpoint === "edits") {
       const blob = baseImage || (await fetch(selectedUrl).then((r) => r.blob()));
       const form = new FormData();
       form.append("model", "gpt-image-1");
-      form.append("prompt", prompt);
+      form.append("prompt", fullPrompt);
       form.append("n", "1");
-      form.append("size", "1024x1024");
+      Object.entries(opts).forEach(([k, v]) => form.append(k, v));
       form.append("image", blob, "image.png");
-      init = { method: "POST", headers: { Authorization: `Bearer ${apiKey}` }, body: form };
-    } else {
-      const body = { model: "gpt-image-1", prompt, n: 1, size: "1024x1024" };
       init = {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        headers: { Authorization: `Bearer ${apiKey}` },
+        body: form,
+      };
+    } else {
+      const body = { model: "gpt-image-1", prompt: fullPrompt, n: 1, ...opts };
+      init = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
         body: JSON.stringify(body),
       };
     }
@@ -176,13 +222,23 @@ async function generateImage() {
     if (!resp.ok) {
       const text = await resp.text();
       userCard.remove();
-      return showToast({ title: prompt, body: `${resp.status}: ${text}`, color: "bg-danger" });
+      restorePrompt(prompt);
+      return showToast({
+        title: prompt,
+        body: `${resp.status}: ${text}`,
+        color: "bg-danger",
+      });
     }
     const data = await resp.json();
     const b64 = data.data?.[0]?.b64_json;
     if (!b64) {
       userCard.remove();
-      return showToast({ title: "Generation failed", body: JSON.stringify(data), color: "bg-danger" });
+      restorePrompt(prompt);
+      return showToast({
+        title: "Generation failed",
+        body: JSON.stringify(data),
+        color: "bg-danger",
+      });
     }
     const url = `data:image/png;base64,${b64}`;
     appendImageMessage(url);
@@ -190,9 +246,15 @@ async function generateImage() {
     baseImage = null;
     previewImage.src = url;
     previewImage.classList.remove("d-none");
+    history.push(prompt);
   } catch (err) {
     userCard.remove();
-    showToast({ title: "Generation error", body: err.message, color: "bg-danger" });
+    restorePrompt(prompt);
+    showToast({
+      title: "Generation error",
+      body: err.message,
+      color: "bg-danger",
+    });
   } finally {
     stopLoading();
   }
