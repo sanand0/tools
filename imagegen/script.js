@@ -21,7 +21,7 @@ const loadingMsg = document.getElementById("loading-msg");
 const openaiConfigBtn = document.getElementById("openai-config-btn");
 const sizeInput = document.getElementById("size");
 const qualityInput = document.getElementById("quality");
-const formatInput = document.getElementById("format");
+const outputFormatInput = document.getElementById("output-format");
 const compressionInput = document.getElementById("output-compression");
 const backgroundInput = document.getElementById("background");
 let loadingTimer;
@@ -29,10 +29,10 @@ let loadingTimer;
 const history = [];
 
 function collectOptions() {
-  const opts = { response_format: "b64_json" };
+  const opts = {};
   if (sizeInput.value !== "auto") opts.size = sizeInput.value;
   if (qualityInput.value !== "auto") opts.quality = qualityInput.value;
-  if (formatInput.value !== "webp") opts.format = formatInput.value;
+  if (outputFormatInput.value !== "png") opts.output_format = outputFormatInput.value;
   if (compressionInput.value !== "50") opts.output_compression = +compressionInput.value;
   if (backgroundInput.checked) opts.background = "transparent";
   return opts;
@@ -146,7 +146,7 @@ function appendUserMessage(text) {
 function appendImageMessage(url) {
   chatLog.insertAdjacentHTML(
     "beforeend",
-    `<div class="card mb-3 shadow-sm"><img src="${url}" class="card-img-top"><div class="card-body p-2"></div></div>`,
+    `<div class="card mb-3 shadow-sm"><img src="${url}" class="card-img-top"><div class="card-body p-2"><a href="${url}" download class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i></a></div></div>`,
   );
   const card = chatLog.lastElementChild;
   addHover(card);
@@ -191,7 +191,7 @@ async function generateImage() {
     const endpoint = baseImage || selectedUrl ? "edits" : "generations";
     const opts = collectOptions();
     const fullPrompt = history.length
-      ? `Previous requests: ${history.join(" | ")}. Only follow the latest: ${prompt}`
+      ? `${prompt}.\n\nFor context, here are previous messages:\n\n${history.join("\n")}\n\n${prompt}`
       : prompt;
     let init;
     if (endpoint === "edits") {
@@ -244,8 +244,6 @@ async function generateImage() {
     appendImageMessage(url);
     selectedUrl = url;
     baseImage = null;
-    previewImage.src = url;
-    previewImage.classList.remove("d-none");
     history.push(prompt);
   } catch (err) {
     userCard.remove();

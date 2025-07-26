@@ -29,6 +29,7 @@
             <li class="mb-2"><i class="bi bi-pencil-square me-2 text-secondary"></i>Describe your changes and send</li>
             <li class="mb-2"><i class="bi bi-images me-2 text-secondary"></i>Get a new image and continue the chat</li>
           </ul>
+          <div id="samples" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mt-3"></div>
         </div>
       </div>
       <div class="col-md-4">
@@ -51,10 +52,10 @@
             <option>medium</option>
             <option>high</option>
           </select>
-          <select id="format" class="form-select form-select-sm mb-2">
-            <option value="webp">webp</option>
+          <select id="output-format" class="form-select form-select-sm mb-2">
             <option>png</option>
             <option>jpeg</option>
+            <option>webp</option>
           </select>
           <input type="number" id="output-compression" value="50" min="0" max="100" class="form-control form-control-sm mb-2" placeholder="Compression 0-100" />
           <div class="form-check form-switch">
@@ -64,8 +65,6 @@
         </div>
       </div>
     </div>
-
-    <div id="samples" class="row g-4 mb-4"></div>
 
     <div class="row g-4">
       <div class="col-12">
