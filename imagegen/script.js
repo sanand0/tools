@@ -11,7 +11,6 @@ const LOADING_MESSAGES = [
 
 const uploadInput = document.getElementById("upload-input");
 const imageUrlInput = document.getElementById("image-url");
-const useUrlBtn = document.getElementById("use-url-btn");
 const samplesRow = document.getElementById("samples");
 const chatLog = document.getElementById("chat-log");
 const promptInput = document.getElementById("prompt-input");
@@ -69,15 +68,6 @@ uploadInput.addEventListener("change", () => {
   imageUrlInput.value = "";
 });
 
-useUrlBtn.addEventListener("click", () => {
-  const url = imageUrlInput.value.trim();
-  if (!url) return;
-  selectedUrl = url;
-  baseImage = null;
-  uploadInput.value = "";
-  document.querySelectorAll("#samples .sample .card").forEach((c) => c.classList.remove("border-primary"));
-});
-
 samplesRow.addEventListener("click", (e) => {
   const card = e.target.closest(".sample");
   if (!card) return;
@@ -120,6 +110,14 @@ async function generateImage() {
   if (!prompt) return;
   if (!apiKey) {
     showToast({ title: "OpenAI key missing", body: "Configure your key first", color: "bg-warning" });
+    return;
+  }
+  if (!baseImage && !selectedUrl) {
+    const url = imageUrlInput.value.trim();
+    if (url) selectedUrl = url;
+  }
+  if (!baseImage && !selectedUrl) {
+    showToast({ title: "Image missing", body: "Upload a file or provide a URL", color: "bg-warning" });
     return;
   }
   appendUserMessage(prompt);
