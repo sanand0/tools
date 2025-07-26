@@ -30,10 +30,17 @@ const mergeSubtasks = (arr) => {
   });
   const fmt = (t, lvl = 0) => {
     const indent = "  ".repeat(lvl);
-    const note = (t.notes || "").replace(/\n+/g, " ").trim();
-    const link = (t.links || "").trim();
     const lines = [`${indent}- ${t.title}`];
-    if (note) lines.push(`${indent}  - ${note}`);
+    const notes = (t.notes || "").trim();
+    if (notes)
+      lines.push(
+        notes
+          .split("\n")
+          .filter(Boolean)
+          .map((l) => `${indent}  ${l}`)
+          .join("\n"),
+      );
+    const link = (t.links || "").trim();
     if (link) lines.push(`${indent}  - ${link}`);
     t.children.forEach((c) => lines.push(fmt(c, lvl + 1)));
     return lines.join("\n");
@@ -122,10 +129,17 @@ mdBtn.addEventListener("click", async () => {
     .filter((t) => t.status !== "completed")
     .map((t) => {
       const base = `- **${t.title}** #${t.list} (${fmtDate(t.updated)})`;
-      const notes = (t.notes || "").replace(/\n+/g, " ").trim();
+      const notes = (t.notes || "").trim();
       const links = (t.links || "").trim();
       const extras = [];
-      if (notes) extras.push(`  - ${notes}`);
+      if (notes)
+        extras.push(
+          notes
+            .split("\n")
+            .filter(Boolean)
+            .map((l) => `  ${l}`)
+            .join("\n"),
+        );
       if (links) extras.push(`  - ${links}`);
       return [base, ...extras].join("\n");
     })
