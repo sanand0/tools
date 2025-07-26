@@ -1,0 +1,64 @@
+{
+  "samples": [
+    {
+      "title": "Chocolate bar",
+      "image": "https://plus.unsplash.com/premium_photo-1677678736472-3f7498116754?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Redesign the wrapper with a sleek eco-friendly look emphasizing the brand name for store shelves."
+    },
+    {
+      "title": "Mobile phone",
+      "image": "https://plus.unsplash.com/premium_photo-1681233751666-612c7bc77485?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Update the device to a futuristic form with a curved screen and minimal bezels for a high-end market."
+    },
+    {
+      "title": "Shoes",
+      "image": "https://plus.unsplash.com/premium_photo-1682435561654-20d84cef00eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Change the color to a bold palette and give the shoes a sporty yet stylish design for active customers."
+    },
+    {
+      "title": "Hotel uniform",
+      "image": "https://plus.unsplash.com/premium_photo-1682097423302-85542c59340f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Modernize the uniform with elegant lines and a luxury feel suited for a premium hotel brand."
+    },
+    {
+      "title": "Food",
+      "image": "https://plus.unsplash.com/premium_photo-1673108852141-e8c3c22a4a22?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Rearrange the dish into an appetizing presentation that looks irresistible on a restaurant menu."
+    },
+    {
+      "title": "Perfume",
+      "image": "https://plus.unsplash.com/premium_photo-1676748933022-e1183e997436?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Reimagine the bottle design to use eco-friendly materials with a minimalist aesthetic."
+    },
+    {
+      "title": "Travel backpack",
+      "image": "https://plus.unsplash.com/premium_photo-1664908364593-729f67b1a0e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Enhance ergonomics and add modular pockets for a long hiking trip."
+    },
+    {
+      "title": "Coffee mug",
+      "image": "https://plus.unsplash.com/premium_photo-1674406102318-c9d362ad510b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Give the mug a vibrant pattern and a comfortable handle for everyday use."
+    },
+    {
+      "title": "Bicycle",
+      "image": "https://plus.unsplash.com/premium_photo-1678718713393-2b88cde9605b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Streamline the frame with modern materials for a lightweight aerodynamic feel."
+    },
+    {
+      "title": "Headphones",
+      "image": "https://plus.unsplash.com/premium_photo-1679513691474-73102089c117?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Add plush earcups and advanced noise cancellation aimed at commuters."
+    },
+    {
+      "title": "Sofa",
+      "image": "https://plus.unsplash.com/premium_photo-1661765778256-169bf5e561a6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Update the style to a sleek contemporary look that fits a modern loft."
+    },
+    {
+      "title": "Watch",
+      "image": "https://plus.unsplash.com/premium_photo-1682125779534-76c5debea767?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080",
+      "prompt": "Refine the watch with premium materials and a minimalist dial suitable for a luxury brand."
+    }
+  ]
+}
