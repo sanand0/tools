@@ -40,25 +40,45 @@
           <input type="text" id="image-url" placeholder="Image URL" class="form-control mb-3" />
           <button id="openai-config-btn" type="button" class="btn btn-outline-secondary w-100 mb-3">Configure OpenAI</button>
           <h4 class="h6">Advanced options</h4>
-          <select id="size" class="form-select form-select-sm mb-2">
-            <option value="auto">Size: auto</option>
-            <option value="1024x1024">Square 1024×1024</option>
-            <option value="1536x1024">Wide 1536×1024</option>
-            <option value="1024x1536">Tall 1024×1536</option>
-          </select>
-          <select id="quality" class="form-select form-select-sm mb-2">
-            <option value="auto">Quality: auto</option>
-            <option>low</option>
-            <option>medium</option>
-            <option>high</option>
-          </select>
-          <select id="output-format" class="form-select form-select-sm mb-2">
-            <option>png</option>
-            <option>jpeg</option>
-            <option>webp</option>
-          </select>
-          <input type="number" id="output-compression" value="50" min="0" max="100" class="form-control form-control-sm mb-2" placeholder="Compression 0-100" />
-          <div class="form-check form-switch">
+          <div class="row g-2 mb-2 align-items-center">
+            <label for="size" class="col-4 col-form-label">Size</label>
+            <div class="col">
+              <select id="size" class="form-select form-select-sm">
+                <option value="auto">auto</option>
+                <option value="1024x1024">1024×1024</option>
+                <option value="1536x1024">1536×1024</option>
+                <option value="1024x1536">1024×1536</option>
+              </select>
+            </div>
+          </div>
+          <div class="row g-2 mb-2 align-items-center">
+            <label for="quality" class="col-4 col-form-label">Quality</label>
+            <div class="col">
+              <select id="quality" class="form-select form-select-sm">
+                <option value="auto">auto</option>
+                <option>low</option>
+                <option>medium</option>
+                <option>high</option>
+              </select>
+            </div>
+          </div>
+          <div class="row g-2 mb-2 align-items-center">
+            <label for="output-format" class="col-4 col-form-label">Format</label>
+            <div class="col">
+              <select id="output-format" class="form-select form-select-sm">
+                <option>png</option>
+                <option>jpeg</option>
+                <option>webp</option>
+              </select>
+            </div>
+          </div>
+          <div class="row g-2 mb-2 align-items-center">
+            <label for="output-compression" class="col-4 col-form-label">Compression</label>
+            <div class="col">
+              <input type="number" id="output-compression" value="50" min="0" max="100" class="form-control form-control-sm" />
+            </div>
+          </div>
+          <div class="form-check form-switch mb-2">
             <input id="background" type="checkbox" class="form-check-input" />
             <label class="form-check-label" for="background">Transparent background</label>
           </div>
@@ -71,7 +91,7 @@
         <div class="p-3 bg-white rounded-3 shadow-sm d-flex flex-column h-100">
           <div id="chat-log" class="flex-grow-1 overflow-auto mb-3"></div>
           <form id="chat-form" class="input-group">
-            <textarea id="prompt-input" class="form-control" rows="2" placeholder="Describe the image..."></textarea>
+            <textarea id="prompt-input" class="form-control" rows="2" placeholder="Describe the image modification..."></textarea>
             <button id="send-btn" type="submit" class="btn btn-primary"><i class="bi bi-send"></i></button>
           </form>
           <div id="loading" class="text-center py-5 d-none">

@@ -29,7 +29,7 @@ let loadingTimer;
 const history = [];
 
 function collectOptions() {
-  const opts = {};
+  const opts = { moderation: "low" };
   if (sizeInput.value !== "auto") opts.size = sizeInput.value;
   if (qualityInput.value !== "auto") opts.quality = qualityInput.value;
   if (outputFormatInput.value !== "png") opts.output_format = outputFormatInput.value;
@@ -79,7 +79,7 @@ fetch("config.json")
     samples.forEach(({ title, image, prompt }) => {
       samplesRow.insertAdjacentHTML(
         "beforeend",
-        `<div class="col-6 col-md-4 col-lg-2 sample" data-url="${image}" data-prompt="${prompt}">
+        `<div class="col-6 col-md-4 col-lg-3 sample" data-url="${image}" data-prompt="${prompt}">
            <div class="card h-100 shadow-sm cursor-pointer">
              <img src="${image}" class="card-img-top object-fit-cover" style="height:120px" alt="${title}">
              <div class="card-body p-2"><small class="card-title">${title}</small></div>
@@ -158,7 +158,7 @@ async function generateImage() {
   if (!prompt)
     return showToast({
       title: "Prompt missing",
-      body: "Describe the image",
+      body: "Describe the image modification",
       color: "bg-warning",
     });
   const { apiKey, baseURL } = aiConfig;
@@ -170,19 +170,11 @@ async function generateImage() {
     });
 
   if (!baseImage && !selectedUrl) {
-    const url = imageUrlInput.value.trim();
-    if (url) {
-      selectedUrl = url;
-      previewImage.src = url;
-      previewImage.classList.remove("d-none");
-    }
+    selectedUrl = imageUrlInput.value.trim();
+    if (!selectedUrl) return showToast({ title: "Image missing", body: "Upload or paste a URL", color: "bg-warning" });
+    previewImage.src = selectedUrl;
+    previewImage.classList.remove("d-none");
   }
-  if (!baseImage && !selectedUrl)
-    return showToast({
-      title: "Image missing",
-      body: "Upload a file or provide a URL",
-      color: "bg-warning",
-    });
 
   const userCard = appendUserMessage(prompt);
   promptInput.value = "";
