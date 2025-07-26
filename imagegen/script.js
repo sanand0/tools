@@ -43,11 +43,11 @@ function restorePrompt(p) {
 }
 
 function randomMessage() {
-  return LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
+  return `Generating image (1-2 min)... ${LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]}`;
 }
 
 function startLoading() {
-  loadingMsg.textContent = `Generating image (1-2 min)... ${randomMessage()}`;
+  loadingMsg.textContent = randomMessage();
   loading.classList.remove("d-none");
   loadingTimer = setInterval(() => (loadingMsg.textContent = randomMessage()), 5000);
 }
@@ -61,6 +61,27 @@ function addHover(el) {
   el.classList.add("cursor-pointer");
   el.addEventListener("mouseenter", () => el.classList.add("shadow"));
   el.addEventListener("mouseleave", () => el.classList.remove("shadow"));
+}
+
+function deleteFrom(idx) {
+  let node = chatLog.querySelector(`.user-card[data-index="${idx}"]`);
+  while (node) {
+    const next = node.nextElementSibling;
+    node.remove();
+    node = next;
+  }
+  history.splice(idx);
+  const lastImg = chatLog.querySelector(".ai img:last-of-type");
+  if (lastImg) {
+    selectedUrl = lastImg.src;
+    baseImage = null;
+  } else if (uploadInput.files[0]) {
+    baseImage = uploadInput.files[0];
+    selectedUrl = "";
+  } else {
+    selectedUrl = imageUrlInput.value.trim();
+    baseImage = null;
+  }
 }
 
 let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
@@ -135,10 +156,16 @@ samplesRow.addEventListener("click", (e) => {
 function appendUserMessage(text) {
   chatLog.insertAdjacentHTML(
     "beforeend",
-    `<div class="card mb-3 shadow-sm"><div class="card-body"><h5 class="h5 mb-0">${text}</h5></div></div>`,
+    `<div class="card mb-3 shadow-sm user-card" data-index="${history.length}">
+       <div class="card-body d-flex">
+         <h5 class="h5 mb-0 flex-grow-1">${text}</h5>
+         <button class="btn-close ms-2" aria-label="Delete"></button>
+       </div>
+     </div>`,
   );
   const card = chatLog.lastElementChild;
   addHover(card);
+  card.querySelector(".btn-close").addEventListener("click", () => deleteFrom(+card.dataset.index));
   chatLog.scrollTop = chatLog.scrollHeight;
   return card;
 }
@@ -146,7 +173,7 @@ function appendUserMessage(text) {
 function appendImageMessage(url) {
   chatLog.insertAdjacentHTML(
     "beforeend",
-    `<div class="card mb-3 shadow-sm"><img src="${url}" class="card-img-top"><div class="card-body p-2"><a href="${url}" download class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i></a></div></div>`,
+    `<div class="card mb-3 shadow-sm ai"><img src="${url}" class="card-img-top object-fit-cover" style="height:240px"><div class="card-body p-2"><a href="${url}" download class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i></a></div></div>`,
   );
   const card = chatLog.lastElementChild;
   addHover(card);
@@ -171,7 +198,12 @@ async function generateImage() {
 
   if (!baseImage && !selectedUrl) {
     selectedUrl = imageUrlInput.value.trim();
-    if (!selectedUrl) return showToast({ title: "Image missing", body: "Upload or paste a URL", color: "bg-warning" });
+    if (!selectedUrl)
+      return showToast({
+        title: "Image missing",
+        body: "Upload or paste a URL",
+        color: "bg-warning",
+      });
     previewImage.src = selectedUrl;
     previewImage.classList.remove("d-none");
   }

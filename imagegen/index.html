@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
 </head>
 
-<body class="bg-light">
+<body class="bg-light" style="margin-bottom:50vh">
   <div class="container py-4">
     <header class="pb-3 mb-4 border-bottom">
       <div class="d-flex align-items-center">
@@ -35,8 +35,8 @@
       <div class="col-md-4">
         <div class="p-3 bg-white rounded-3 shadow-sm h-100">
           <h3 class="h5 mb-3">Choose Image</h3>
-          <img id="preview-image" class="img-fluid rounded mb-3 d-none" alt="Preview" />
           <input type="file" id="upload-input" accept="image/*" class="form-control mb-3" />
+          <img id="preview-image" class="img-fluid rounded mb-3 d-none" alt="Preview" />
           <input type="text" id="image-url" placeholder="Image URL" class="form-control mb-3" />
           <button id="openai-config-btn" type="button" class="btn btn-outline-secondary w-100 mb-3">Configure OpenAI</button>
           <h4 class="h6">Advanced options</h4>
