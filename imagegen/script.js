@@ -11,10 +11,11 @@ const LOADING_MESSAGES = [
 
 const uploadInput = document.getElementById("upload-input");
 const imageUrlInput = document.getElementById("image-url");
+const previewImage = document.getElementById("preview-image");
 const samplesRow = document.getElementById("samples");
 const chatLog = document.getElementById("chat-log");
 const promptInput = document.getElementById("prompt-input");
-const sendBtn = document.getElementById("send-btn");
+const chatForm = document.getElementById("chat-form");
 const loading = document.getElementById("loading");
 const loadingMsg = document.getElementById("loading-msg");
 const openaiConfigBtn = document.getElementById("openai-config-btn");
@@ -25,7 +26,7 @@ function randomMessage() {
 }
 
 function startLoading() {
-  loadingMsg.textContent = randomMessage();
+  loadingMsg.textContent = `Generating image (1-2 min)... ${randomMessage()}`;
   loading.classList.remove("d-none");
   loadingTimer = setInterval(() => (loadingMsg.textContent = randomMessage()), 5000);
 }
@@ -35,9 +36,20 @@ function stopLoading() {
   loading.classList.add("d-none");
 }
 
+function addHover(el) {
+  el.classList.add("cursor-pointer");
+  el.addEventListener("mouseenter", () => el.classList.add("shadow"));
+  el.addEventListener("mouseleave", () => el.classList.remove("shadow"));
+}
+
 let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
 openaiConfigBtn.addEventListener("click", async () => {
   aiConfig = await loadOpenAI(DEFAULT_BASE_URLS, true);
+});
+
+chatForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  generateImage();
 });
 
 fetch("config.json")
@@ -47,12 +59,13 @@ fetch("config.json")
       samplesRow.insertAdjacentHTML(
         "beforeend",
         `<div class="col-6 col-md-4 col-lg-2 sample" data-url="${image}" data-prompt="${prompt}">
-           <div class="card h-100 shadow-sm">
+           <div class="card h-100 shadow-sm cursor-pointer">
              <img src="${image}" class="card-img-top object-fit-cover" style="height:120px" alt="${title}">
              <div class="card-body p-2"><small class="card-title">${title}</small></div>
            </div>
          </div>`,
       );
+      addHover(samplesRow.lastElementChild.querySelector(".card"));
     });
   })
   .catch((err) => showToast({ title: "Config error", body: err.message, color: "bg-danger" }));
@@ -66,6 +79,22 @@ uploadInput.addEventListener("change", () => {
   baseImage = file;
   selectedUrl = "";
   imageUrlInput.value = "";
+  previewImage.src = URL.createObjectURL(file);
+  previewImage.classList.remove("d-none");
+});
+
+imageUrlInput.addEventListener("input", () => {
+  const url = imageUrlInput.value.trim();
+  if (!url) {
+    previewImage.classList.add("d-none");
+    selectedUrl = "";
+    return;
+  }
+  selectedUrl = url;
+  baseImage = null;
+  uploadInput.value = "";
+  previewImage.src = url;
+  previewImage.classList.remove("d-none");
 });
 
 samplesRow.addEventListener("click", (e) => {
@@ -76,6 +105,8 @@ samplesRow.addEventListener("click", (e) => {
   baseImage = null;
   uploadInput.value = "";
   imageUrlInput.value = selectedUrl;
+  previewImage.src = selectedUrl;
+  previewImage.classList.remove("d-none");
   document.querySelectorAll("#samples .sample .card").forEach((c) => c.classList.remove("border-primary"));
   card.querySelector(".card").classList.add("border-primary");
 });
@@ -83,44 +114,42 @@ samplesRow.addEventListener("click", (e) => {
 function appendUserMessage(text) {
   chatLog.insertAdjacentHTML(
     "beforeend",
-    `<div class="mb-2"><div class="d-flex"><i class="bi bi-person-circle me-2"></i><div>${text}</div></div></div>`,
+    `<div class="card mb-3 shadow-sm"><div class="card-body"><h5 class="h5 mb-0">${text}</h5></div></div>`,
   );
+  const card = chatLog.lastElementChild;
+  addHover(card);
   chatLog.scrollTop = chatLog.scrollHeight;
+  return card;
 }
 
 function appendImageMessage(url) {
   chatLog.insertAdjacentHTML(
     "beforeend",
-    `<div class="mb-2 text-center"><img src="${url}" class="img-fluid rounded"></div>`,
+    `<div class="card mb-3 shadow-sm"><img src="${url}" class="card-img-top"><div class="card-body p-2"></div></div>`,
   );
+  const card = chatLog.lastElementChild;
+  addHover(card);
   chatLog.scrollTop = chatLog.scrollHeight;
 }
 
-sendBtn.addEventListener("click", () => generateImage());
-promptInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    generateImage();
-  }
-});
-
 async function generateImage() {
   const prompt = promptInput.value.trim();
+  if (!prompt) return showToast({ title: "Prompt missing", body: "Describe the image", color: "bg-warning" });
   const { apiKey, baseURL } = aiConfig;
-  if (!prompt) return;
-  if (!apiKey) {
-    showToast({ title: "OpenAI key missing", body: "Configure your key first", color: "bg-warning" });
-    return;
-  }
+  if (!apiKey) return showToast({ title: "OpenAI key missing", body: "Configure your key", color: "bg-warning" });
+
   if (!baseImage && !selectedUrl) {
     const url = imageUrlInput.value.trim();
-    if (url) selectedUrl = url;
+    if (url) {
+      selectedUrl = url;
+      previewImage.src = url;
+      previewImage.classList.remove("d-none");
+    }
   }
-  if (!baseImage && !selectedUrl) {
-    showToast({ title: "Image missing", body: "Upload a file or provide a URL", color: "bg-warning" });
-    return;
-  }
-  appendUserMessage(prompt);
+  if (!baseImage && !selectedUrl)
+    return showToast({ title: "Image missing", body: "Upload a file or provide a URL", color: "bg-warning" });
+
+  const userCard = appendUserMessage(prompt);
   promptInput.value = "";
   startLoading();
   try {
@@ -144,14 +173,25 @@ async function generateImage() {
       };
     }
     const resp = await fetch(`${baseURL}/images/${endpoint}`, init);
-    if (!resp.ok) throw new Error("API error");
+    if (!resp.ok) {
+      const text = await resp.text();
+      userCard.remove();
+      return showToast({ title: prompt, body: `${resp.status}: ${text}`, color: "bg-danger" });
+    }
     const data = await resp.json();
-    const b64 = data.data[0].b64_json;
+    const b64 = data.data?.[0]?.b64_json;
+    if (!b64) {
+      userCard.remove();
+      return showToast({ title: "Generation failed", body: JSON.stringify(data), color: "bg-danger" });
+    }
     const url = `data:image/png;base64,${b64}`;
     appendImageMessage(url);
     selectedUrl = url;
     baseImage = null;
+    previewImage.src = url;
+    previewImage.classList.remove("d-none");
   } catch (err) {
+    userCard.remove();
     showToast({ title: "Generation error", body: err.message, color: "bg-danger" });
   } finally {
     stopLoading();
