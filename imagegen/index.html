@@ -23,9 +23,9 @@
       <div class="col-md-8">
         <div class="p-4 bg-white rounded-3 shadow-sm h-100">
           <h2 class="fs-4 mb-2">Create and modify images through conversation</h2>
-          <p>Upload or search for an image, describe how you'd like it changed, and keep chatting to iterate.</p>
+          <p>Upload an image or paste its URL, describe your changes, and keep chatting to iterate.</p>
           <ul class="list-unstyled mb-0">
-            <li class="mb-2"><i class="bi bi-cloud-upload me-2 text-secondary"></i>Upload or search for a starting image</li>
+            <li class="mb-2"><i class="bi bi-cloud-upload me-2 text-secondary"></i>Upload or link to a starting image</li>
             <li class="mb-2"><i class="bi bi-pencil-square me-2 text-secondary"></i>Describe your changes and send</li>
             <li class="mb-2"><i class="bi bi-images me-2 text-secondary"></i>Get a new image and continue the chat</li>
           </ul>
@@ -37,11 +37,6 @@
           <input type="file" id="upload-input" accept="image/*" class="form-control mb-3" />
           <input type="text" id="image-url" placeholder="Image URL" class="form-control mb-3" />
           <button id="use-url-btn" class="btn btn-outline-secondary w-100 mb-3">Use URL</button>
-          <div class="input-group mb-3">
-            <input type="text" class="form-control" placeholder="Search images" id="image-search" />
-            <button class="btn btn-outline-secondary" id="search-btn"><i class="bi bi-search"></i></button>
-          </div>
-          <div id="search-results" class="d-flex flex-wrap gap-2 mb-3"></div>
           <button id="openai-config-btn" type="button" class="btn btn-outline-secondary w-100">Configure OpenAI</button>
         </div>
       </div>
@@ -59,6 +54,7 @@
           </div>
           <div id="loading" class="text-center mt-2 d-none">
             <div class="spinner-border text-primary" role="status"></div>
+            <div id="loading-msg" class="mt-2 small"></div>
           </div>
         </div>
       </div>

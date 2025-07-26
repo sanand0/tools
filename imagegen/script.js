@@ -2,19 +2,39 @@ import { loadOpenAI } from "../common/openai.js";
 import { showToast } from "../common/toast.js";
 
 const DEFAULT_BASE_URLS = ["https://llmfoundry.straivedemo.com/openai/v1", "https://llmfoundry.straive.com/openai/v1"];
+const LOADING_MESSAGES = [
+  "Painting pixels...",
+  "Talking to the muse...",
+  "Polishing details...",
+  "Finalizing masterpiece...",
+];
 
 const uploadInput = document.getElementById("upload-input");
 const imageUrlInput = document.getElementById("image-url");
 const useUrlBtn = document.getElementById("use-url-btn");
-const imageSearch = document.getElementById("image-search");
-const searchBtn = document.getElementById("search-btn");
-const searchResults = document.getElementById("search-results");
 const samplesRow = document.getElementById("samples");
 const chatLog = document.getElementById("chat-log");
 const promptInput = document.getElementById("prompt-input");
 const sendBtn = document.getElementById("send-btn");
 const loading = document.getElementById("loading");
+const loadingMsg = document.getElementById("loading-msg");
 const openaiConfigBtn = document.getElementById("openai-config-btn");
+let loadingTimer;
+
+function randomMessage() {
+  return LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)];
+}
+
+function startLoading() {
+  loadingMsg.textContent = randomMessage();
+  loading.classList.remove("d-none");
+  loadingTimer = setInterval(() => (loadingMsg.textContent = randomMessage()), 5000);
+}
+
+function stopLoading() {
+  clearInterval(loadingTimer);
+  loading.classList.add("d-none");
+}
 
 let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
 openaiConfigBtn.addEventListener("click", async () => {
@@ -29,7 +49,7 @@ fetch("config.json")
         "beforeend",
         `<div class="col-6 col-md-4 col-lg-2 sample" data-url="${image}" data-prompt="${prompt}">
            <div class="card h-100 shadow-sm">
-             <img src="${image}" class="card-img-top" alt="${title}">
+             <img src="${image}" class="card-img-top object-fit-cover" style="height:120px" alt="${title}">
              <div class="card-body p-2"><small class="card-title">${title}</small></div>
            </div>
          </div>`,
@@ -41,48 +61,11 @@ fetch("config.json")
 let baseImage = null;
 let selectedUrl = "";
 
-searchBtn.addEventListener("click", async () => {
-  const query = imageSearch.value.trim();
-  if (!query) return;
-  searchResults.innerHTML = "";
-  loading.classList.remove("d-none");
-  const key = "YOUR_KEY";
-  const cx = "YOUR_CX";
-  try {
-    const url = `https://www.googleapis.com/customsearch/v1?key=${key}&cx=${cx}&searchType=image&q=${encodeURIComponent(query)}`;
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error("Search failed");
-    const data = await resp.json();
-    data.items.slice(0, 8).forEach(({ link }) => {
-      searchResults.insertAdjacentHTML(
-        "beforeend",
-        `<img src="${link}" data-url="${link}" class="img-thumbnail search-thumb" style="height:80px;cursor:pointer">`,
-      );
-    });
-  } catch (err) {
-    showToast({ title: "Search error", body: err.message, color: "bg-danger" });
-  } finally {
-    loading.classList.add("d-none");
-  }
-});
-
-searchResults.addEventListener("click", (e) => {
-  if (e.target.dataset.url) {
-    selectedUrl = e.target.dataset.url;
-    document.querySelectorAll(".search-thumb").forEach((img) => img.classList.remove("border-primary"));
-    e.target.classList.add("border-primary");
-    baseImage = null;
-    uploadInput.value = "";
-    imageUrlInput.value = selectedUrl;
-  }
-});
-
 uploadInput.addEventListener("change", () => {
   const file = uploadInput.files[0];
   if (!file) return;
   baseImage = file;
   selectedUrl = "";
-  document.querySelectorAll(".search-thumb").forEach((img) => img.classList.remove("border-primary"));
   imageUrlInput.value = "";
 });
 
@@ -92,7 +75,6 @@ useUrlBtn.addEventListener("click", () => {
   selectedUrl = url;
   baseImage = null;
   uploadInput.value = "";
-  document.querySelectorAll(".search-thumb").forEach((img) => img.classList.remove("border-primary"));
   document.querySelectorAll("#samples .sample .card").forEach((c) => c.classList.remove("border-primary"));
 });
 
@@ -142,7 +124,7 @@ async function generateImage() {
   }
   appendUserMessage(prompt);
   promptInput.value = "";
-  loading.classList.remove("d-none");
+  startLoading();
   try {
     const endpoint = baseImage || selectedUrl ? "edits" : "generations";
     let init;
@@ -174,6 +156,6 @@ async function generateImage() {
   } catch (err) {
     showToast({ title: "Generation error", body: err.message, color: "bg-danger" });
   } finally {
-    loading.classList.add("d-none");
+    stopLoading();
   }
 }
