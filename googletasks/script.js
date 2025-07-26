@@ -23,6 +23,33 @@ const sortTasks = (arr) =>
     return new Date(b.updated) - new Date(a.updated);
   });
 
+const mergeSubtasks = (arr) => {
+  const byId = Object.fromEntries(arr.map((t) => [t.id, { ...t, children: [] }]));
+  arr.forEach((t) => {
+    if (t.parent && byId[t.parent]) byId[t.parent].children.push(byId[t.id]);
+  });
+  const fmt = (t, lvl = 0) => {
+    const indent = "  ".repeat(lvl);
+    const note = (t.notes || "").replace(/\n+/g, " ").trim();
+    const link = (t.links || "").trim();
+    const lines = [`${indent}- ${t.title}`];
+    if (note) lines.push(`${indent}  - ${note}`);
+    if (link) lines.push(`${indent}  - ${link}`);
+    t.children.forEach((c) => lines.push(fmt(c, lvl + 1)));
+    return lines.join("\n");
+  };
+  Object.values(byId).forEach((t) => {
+    if (!t.parent) {
+      const base = (t.notes || "").trim();
+      const subs = t.children.map((c) => fmt(c));
+      t.notes = [base, ...subs].filter(Boolean).join("\n");
+    }
+  });
+  return Object.values(byId)
+    .filter((t) => !t.parent)
+    .map(({ children, ...rest }) => rest);
+};
+
 const alerts = document.getElementById("alertContainer");
 const tokenInput = document.getElementById("token");
 const output = document.getElementById("output");
@@ -65,7 +92,7 @@ fetchBtn.addEventListener("click", async () => {
   const token = tokenInput.value.trim();
   if (!token) return showAlert("Please sign in first", "warning", true);
   try {
-    tasks = await fetchTasks(token);
+    tasks = mergeSubtasks(await fetchTasks(token));
     if (!tasks.length) return showAlert("No tasks found", "warning", true);
     sortTasks(tasks);
     const display = tasks.map((t) => ({

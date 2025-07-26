@@ -9,5 +9,6 @@ It also lets you copy the results straight into Excel or Markdown, and delete al
 2. Click **Fetch Tasks** to list all tasks from every list, including completed ones.
 3. Use **Download CSV**, **Copy to Excel**, or **Copy to Markdown** to export the table.
 4. **Delete Completed** removes all tasks marked as completed.
+5. Sub-tasks show up as bullet points in the notes of their parent tasks.
 
 Your access token is stored locally in your browser using `saveform`.
