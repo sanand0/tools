@@ -43,6 +43,13 @@
       "created": "2025-07-17T22:24:13+08:00"
     },
     {
+      "icon": "bi-image",
+      "title": "AI Image Chat",
+      "description": "Chat to generate or update images",
+      "url": "imagegen",
+      "created": "2025-07-22T00:00:00+00:00"
+    },
+    {
       "icon": "bi-headset",
       "title": "SpeakMD",
       "description": "Turn Markdown into conversational text",
@@ -233,13 +240,6 @@
       "description": "Extract the first Markdown table and download it as CSV",
       "url": "md2csv",
       "created": "2025-06-10T09:30:00+00:00"
-    },
-    {
-      "icon": "bi-image",
-      "title": "AI Image Chat",
-      "description": "Chat to generate or update images",
-      "url": "imagegen",
-      "created": "2025-07-22T00:00:00+00:00"
     }
   ]
 }
