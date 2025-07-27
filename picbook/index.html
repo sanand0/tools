@@ -20,70 +20,64 @@
     </header>
     <form id="picbook-form" class="bg-white rounded-3 shadow-sm p-3 mb-3">
       <div class="row g-3">
-        <div class="col-md-6">
+        <div class="col-lg-4">
           <label for="context" class="form-label">Context</label>
           <textarea id="context" rows="2" class="form-control" placeholder="Common guidance for all images, e.g. Draw anime style with bright colors"></textarea>
-        </div>
-        <div class="col-md-6">
-          <label for="panels" class="form-label">Panels</label>
-          <textarea id="panels" rows="6" class="form-control" placeholder="One line per panel, each in the format 'Text caption to display [Prompt for LLM]'"></textarea>
-        </div>
-      </div>
-      <div class="row g-3 mt-0">
-        <div class="col-md-6">
-          <input type="file" id="upload-input" accept="image/*" class="form-control" />
+          <input type="file" id="upload-input" accept="image/*" class="form-control mt-2" />
           <img id="preview-image" class="img-fluid rounded mt-2 d-none" alt="Preview" />
           <input type="text" id="image-url" placeholder="Reference image URL" class="form-control mt-2" />
+          <h4 class="h6 mt-3">Advanced options</h4>
+          <div class="row g-2 mb-2 align-items-center">
+            <label for="size" class="col-4 col-form-label">Size</label>
+            <div class="col">
+              <select id="size" class="form-select form-select-sm">
+                <option>auto</option>
+                <option>1024x1024</option>
+                <option>1536x1024</option>
+                <option>1024x1536</option>
+              </select>
+            </div>
+          </div>
+          <div class="row g-2 mb-2 align-items-center">
+            <label for="quality" class="col-4 col-form-label">Quality</label>
+            <div class="col">
+              <select id="quality" class="form-select form-select-sm">
+                <option>low</option>
+                <option>medium</option>
+                <option>high</option>
+                <option>auto</option>
+              </select>
+            </div>
+          </div>
+          <div class="row g-2 mb-2 align-items-center">
+            <label for="output-format" class="col-4 col-form-label">Format</label>
+            <div class="col">
+              <select id="output-format" class="form-select form-select-sm">
+                <option>webp</option>
+                <option>png</option>
+                <option>jpeg</option>
+              </select>
+            </div>
+          </div>
+          <div class="row g-2 mb-2 align-items-center">
+            <label for="output-compression" class="col-4 col-form-label">Compression</label>
+            <div class="col">
+              <input type="number" id="output-compression" value="50" min="0" max="100" class="form-control form-control-sm" />
+            </div>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input id="background" type="checkbox" class="form-check-input" />
+            <label class="form-check-label" for="background">Transparent background</label>
+          </div>
         </div>
-        <div class="col-md-6 text-end">
-          <button id="openai-config-btn" type="button" class="btn btn-outline-secondary"><i class="bi bi-gear me-1"></i>Configure OpenAI</button>
+        <div class="col-lg-8">
+          <label for="panels" class="form-label">Panels</label>
+          <textarea id="panels" rows="16" class="form-control" placeholder="One line per panel, each in the format 'Text caption to display [Prompt for LLM]'"></textarea>
+          <div class="d-flex justify-content-end gap-2 mt-2">
+            <button id="openai-config-btn" type="button" class="btn btn-outline-secondary"><i class="bi bi-gear me-1"></i>Configure OpenAI</button>
+            <button id="start-btn" class="btn btn-primary" type="submit"><i class="bi bi-play-fill me-1"></i>Start</button>
+          </div>
         </div>
-      </div>
-      <h4 class="h6 mt-3">Advanced options</h4>
-      <div class="row g-2 mb-2 align-items-center">
-        <label for="size" class="col-4 col-form-label">Size</label>
-        <div class="col">
-          <select id="size" class="form-select form-select-sm">
-            <option>auto</option>
-            <option>1024x1024</option>
-            <option>1536x1024</option>
-            <option>1024x1536</option>
-          </select>
-        </div>
-      </div>
-      <div class="row g-2 mb-2 align-items-center">
-        <label for="quality" class="col-4 col-form-label">Quality</label>
-        <div class="col">
-          <select id="quality" class="form-select form-select-sm">
-            <option>low</option>
-            <option>medium</option>
-            <option>high</option>
-            <option>auto</option>
-          </select>
-        </div>
-      </div>
-      <div class="row g-2 mb-2 align-items-center">
-        <label for="output-format" class="col-4 col-form-label">Format</label>
-        <div class="col">
-          <select id="output-format" class="form-select form-select-sm">
-            <option>webp</option>
-            <option>png</option>
-            <option>jpeg</option>
-          </select>
-        </div>
-      </div>
-      <div class="row g-2 mb-2 align-items-center">
-        <label for="output-compression" class="col-4 col-form-label">Compression</label>
-        <div class="col">
-          <input type="number" id="output-compression" value="50" min="0" max="100" class="form-control form-control-sm" />
-        </div>
-      </div>
-      <div class="form-check form-switch mb-3">
-        <input id="background" type="checkbox" class="form-check-input" />
-        <label class="form-check-label" for="background">Transparent background</label>
-      </div>
-      <div class="text-end">
-        <button id="start-btn" class="btn btn-primary" type="submit"><i class="bi bi-play-fill me-1"></i>Start</button>
       </div>
     </form>
     <div id="progress-row" class="d-flex align-items-center gap-2 mb-3 d-none">

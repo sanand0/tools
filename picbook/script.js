@@ -128,13 +128,16 @@ function createCard(caption) {
     `<div class="col-md-6 col-lg-4 col-xl-3">
        <div class="card h-100 text-center">
          <div class="card-header small opacity-75">${caption}</div>
-         <div class="card-body d-flex justify-content-center align-items-center" style="height:250px">
-           <div class="spinner-border"></div>
-         </div>
+         <div class="card-body d-flex justify-content-center align-items-center" style="height:250px"></div>
        </div>
      </div>`,
   );
   return ui.log.lastElementChild.querySelector(".card");
+}
+
+function setSpinner(card, show) {
+  const body = card.querySelector(".card-body");
+  body.innerHTML = show ? '<div class="spinner-border"></div>' : "";
 }
 
 async function downloadZip() {
@@ -167,9 +170,10 @@ async function requestImage(prompt, refs, opts) {
     form.append("prompt", prompt);
     form.append("n", "1");
     Object.entries(opts).forEach(([k, v]) => form.append(k, v));
+    const name = refs.length > 1 ? "image[]" : "image";
     for (const r of refs) {
       const blob = await fetch(r).then((q) => q.blob());
-      form.append("image", blob, "image.png");
+      form.append(name, blob, "image.png");
     }
     return fetch(`${baseURL}/images/edits`, {
       method: "POST",
@@ -196,10 +200,9 @@ async function run() {
   const panels = lines.map((l) => {
     const i = l.indexOf("[");
     const j = l.indexOf("]", i + 1);
-    return {
-      caption: i >= 0 ? l.slice(0, i).trim() : l,
-      prompt: i >= 0 && j > i ? l.slice(i + 1, j).trim() : l,
-    };
+    if (i >= 0 && j > i + 1) return { caption: l.slice(0, i).trim(), prompt: l.slice(i + 1, j).trim() };
+    const line = l.trim();
+    return { caption: line, prompt: line };
   });
   if (state === "idle") {
     ui.log.innerHTML = "";
@@ -222,6 +225,7 @@ async function run() {
     if (index) refs.push(cards[index - 1].querySelector("img")?.src);
     const fullPrompt = ctx ? `${ctx} ${prompt}` : prompt;
     const t0 = performance.now();
+    setSpinner(cards[index], true);
     try {
       const resp = await requestImage(fullPrompt, refs, opts);
       if (!resp || !resp.ok) throw new Error(await resp.text());
@@ -235,7 +239,7 @@ async function run() {
       index++;
       updateProgress(index, panels.length);
     } catch (err) {
-      cards[index].querySelector(".spinner-border")?.remove();
+      setSpinner(cards[index], false);
       bootstrapAlert({ title: caption, body: err.message, color: "danger" });
       setState("paused");
       return;
