@@ -19,6 +19,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[Podcast](./podcast/)**: Automates the creation of a two-person podcast episode, from script generation to audio synthesis, using Large Language Models (LLMs).
 - **[Recall](./recall/)**: Randomly recall list items from Markdown.
 - **[Daydream](./daydream/)**: Browse and rate creative ideas stored as JSONL.
+- **[AI Image Chat](./imagegen/)**: Chat to generate or update images.
 - **[SpeakMD](./speakmd/)**: Converts Markdown into conversational text suitable for audio narration.
 - **[Quotes Arena](./quotesarena/)**: A web application that allows users to compare short, AI-generated quotes side-by-side and vote for their preferred one, tracking AI model performance.
 - **[RevealJS](./revealjs/)**: Provides a simple web interface to convert Markdown text into a Reveal.js HTML slideshow.
@@ -32,7 +33,6 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[WhatsApp Scraper](./whatsappscraper/)**: A browser bookmarklet that allows users to scrape messages from an active WhatsApp Web chat session into JSON format.
 - **[WhatsApp View](./whatsappview/)**: Renders a JSON array of WhatsApp messages (typically from `whatsappscraper`) into a readable, threaded discussion format.
 - **[Whats Near](./whatsnear/)**: Helps users discover nearby tourist attractions using geolocation, displaying them on a map with AI-generated descriptions and text-to-speech.
-- **[AI Image Chat](./imagegen/)**: Chat to generate or update images.
 
 ## Local Development
 
