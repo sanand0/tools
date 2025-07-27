@@ -20,6 +20,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[Recall](./recall/)**: Randomly recall list items from Markdown.
 - **[Daydream](./daydream/)**: Browse and rate creative ideas stored as JSONL.
 - **[AI Image Chat](./imagegen/)**: Chat to generate or update images.
+- **[PicBook](./picbook/)**: Generate a sequence of images from multiline captions.
 - **[SpeakMD](./speakmd/)**: Converts Markdown into conversational text suitable for audio narration.
 - **[Quotes Arena](./quotesarena/)**: A web application that allows users to compare short, AI-generated quotes side-by-side and vote for their preferred one, tracking AI model performance.
 - **[RevealJS](./revealjs/)**: Provides a simple web interface to convert Markdown text into a Reveal.js HTML slideshow.
