@@ -1,6 +1,6 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { default as fuzzysort } from "https://cdn.jsdelivr.net/npm/fuzzysort@3.1.0/+esm";
-import { updateLatestToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
 const view = document.getElementById("view");
@@ -45,7 +45,7 @@ async function load() {
     if (n > -1) return showEntry(n);
     showTable();
   } catch (e) {
-    updateLatestToast({ title: "Load error", body: e.message, color: "bg-danger" });
+    bootstrapAlert({ title: "Load error", body: e.message, color: "danger", replace: true });
   }
 }
 

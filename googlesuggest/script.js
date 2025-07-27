@@ -1,7 +1,7 @@
 import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
-import { showToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 
@@ -216,7 +216,7 @@ function fetchJsonp(url, timeout = 5000) {
 async function fetchGoogleSuggestions(query) {
   currentQuery = query;
   if (!query.trim()) {
-    showToast({ title: "Input needed", body: "Please enter a search term.", color: "bg-danger" });
+    bootstrapAlert({ title: "Input needed", body: "Please enter a search term.", color: "danger" });
     return null;
   }
 
@@ -347,7 +347,7 @@ async function fetchLLMExplanation(suggestions, query) {
   const model = llmModelSelect.value;
   let { baseURL: baseUrl, apiKey } = aiConfig;
   if (!apiKey) {
-    showToast({ title: "Missing key", body: "Configure your OpenAI API key first.", color: "bg-danger" });
+    bootstrapAlert({ title: "Missing key", body: "Configure your OpenAI API key first.", color: "danger" });
     return;
   }
 
@@ -415,10 +415,10 @@ explainButton.addEventListener("click", () => {
   if (currentSuggestions && Object.keys(currentSuggestions).length > 0 && currentQuery) {
     fetchLLMExplanation(currentSuggestions, currentQuery);
   } else {
-    showToast({
+    bootstrapAlert({
       title: "No suggestions",
       body: "Please fetch some suggestions first for a valid query.",
-      color: "bg-danger",
+      color: "danger",
     });
   }
 });
@@ -444,9 +444,9 @@ copyResponseButton.addEventListener("click", async () => {
   if (!lastLLMResponse) return;
   try {
     await navigator.clipboard.writeText(lastLLMResponse);
-    showToast({ title: "Copied", body: "LLM response copied", color: "bg-success" });
+    bootstrapAlert({ title: "Copied", body: "LLM response copied", color: "success" });
   } catch {
-    showToast({ title: "Copy error", body: "Unable to copy text", color: "bg-danger" });
+    bootstrapAlert({ title: "Copy error", body: "Unable to copy text", color: "danger" });
   }
 });
 

@@ -1,5 +1,5 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
-import { updateLatestToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 
 const files = [
   {
@@ -55,7 +55,7 @@ async function load(url) {
     applyFilter();
   } catch (e) {
     content.innerHTML = "";
-    updateLatestToast({ title: "Error", body: e.message, color: "bg-danger" });
+    bootstrapAlert({ title: "Error", body: e.message, color: "danger", replace: true });
   }
 }
 
@@ -69,7 +69,7 @@ function applyFilter() {
   if (!view.length) {
     content.innerHTML = "";
     indexInput.value = "";
-    updateLatestToast({ body: "No ⭐ items", color: "bg-danger" });
+    bootstrapAlert({ body: "No ⭐ items", color: "danger", replace: true });
     return;
   }
   randomPick();
@@ -77,7 +77,7 @@ function applyFilter() {
 
 function show(i) {
   if (i < 0 || i >= view.length) {
-    updateLatestToast({ body: "Index out of range", color: "bg-danger" });
+    bootstrapAlert({ body: "Index out of range", color: "danger", replace: true });
     return;
   }
   index = i;
@@ -103,7 +103,7 @@ nextBtn.onclick = () => show(index + 1);
 indexInput.oninput = () => show(+indexInput.value - 1);
 copyBtn.onclick = async () => {
   await navigator.clipboard.writeText(view[index] || "");
-  updateLatestToast({ body: "Copied", color: "bg-success" });
+  bootstrapAlert({ body: "Copied", color: "success", replace: true });
 };
 
 starBtn.onclick = () => {

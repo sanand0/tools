@@ -1,7 +1,7 @@
 import { gemini } from "https://cdn.jsdelivr.net/npm/asyncllm@1/dist/gemini.js";
 import { anthropic } from "https://cdn.jsdelivr.net/npm/asyncllm@1/dist/anthropic.js";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3/+esm";
-import { showToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const openai = (d) => d;
@@ -142,7 +142,7 @@ async function handleImageUpload(file) {
     );
   } catch (error) {
     console.error("Error processing image:", error);
-    showToast({ title: "Processing error", body: "Error processing image. Please try again.", color: "bg-danger" });
+    bootstrapAlert({ title: "Processing error", body: "Error processing image. Please try again.", color: "danger" });
   }
 }
 

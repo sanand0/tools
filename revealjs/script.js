@@ -1,5 +1,5 @@
 import { Marked } from "https://cdn.jsdelivr.net/npm/marked@13/+esm";
-import { showToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 const marked = new Marked();
 
@@ -62,6 +62,6 @@ generateBtn.addEventListener("click", () => {
     presentationWindow.document.write(presentationHTML);
     presentationWindow.document.close();
   } catch (error) {
-    showToast({ title: "Conversion error", body: error.message, color: "bg-danger" });
+    bootstrapAlert({ title: "Conversion error", body: error.message, color: "danger" });
   }
 });

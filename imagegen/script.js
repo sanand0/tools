@@ -1,5 +1,5 @@
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
-import { showToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -149,7 +149,7 @@ const buildPrompt = (p) =>
 async function makeRequest(prompt, opts) {
   const { apiKey, baseURL } = aiConfig;
   if (!apiKey) {
-    showToast({ title: "OpenAI key missing", body: "Configure your key", color: "bg-warning" });
+    bootstrapAlert({ title: "OpenAI key missing", body: "Configure your key", color: "warning" });
     return null;
   }
   const endpoint = baseImage || selectedUrl ? "edits" : "generations";
@@ -182,7 +182,7 @@ async function handleResponse(resp, userCard, prompt) {
     const text = resp ? await resp.text() : "";
     userCard.remove();
     restorePrompt(prompt);
-    showToast({ title: prompt, body: `${resp?.status || "?"}: ${text}`, color: "bg-danger" });
+    bootstrapAlert({ title: prompt, body: `${resp?.status || "?"}: ${text}`, color: "danger" });
     return null;
   }
   const data = await resp.json();
@@ -190,7 +190,7 @@ async function handleResponse(resp, userCard, prompt) {
   if (!b64) {
     userCard.remove();
     restorePrompt(prompt);
-    showToast({ title: "Generation failed", body: JSON.stringify(data), color: "bg-danger" });
+    bootstrapAlert({ title: "Generation failed", body: JSON.stringify(data), color: "danger" });
     return null;
   }
   return `data:image/png;base64,${b64}`;
@@ -199,7 +199,7 @@ async function handleResponse(resp, userCard, prompt) {
 async function generateImage() {
   const prompt = ui.prompt.value.trim();
   if (!prompt) {
-    showToast({ title: "Prompt missing", body: "Describe the image/modification", color: "bg-warning" });
+    bootstrapAlert({ title: "Prompt missing", body: "Describe the image/modification", color: "warning" });
     return;
   }
   if (!selectImage()) return;
@@ -219,7 +219,7 @@ async function generateImage() {
   } catch (err) {
     card.remove();
     restorePrompt(prompt);
-    showToast({ title: "Generation error", body: err.message, color: "bg-danger" });
+    bootstrapAlert({ title: "Generation error", body: err.message, color: "danger" });
   } finally {
     stopLoading();
   }
@@ -284,4 +284,4 @@ fetch("config.json")
       addHover(ui.samples.lastElementChild.querySelector(".card"));
     });
   })
-  .catch((err) => showToast({ title: "Config error", body: err.message, color: "bg-danger" }));
+  .catch((err) => bootstrapAlert({ title: "Config error", body: err.message, color: "danger" }));
