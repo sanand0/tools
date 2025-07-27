@@ -11,7 +11,7 @@
 </head>
 
 <body class="bg-light">
-  <div class="container py-4">
+  <div class="container py-4" style="max-width: 40rem">
     <header class="pb-3 mb-4 border-bottom">
       <div class="d-flex align-items-center">
         <i class="bi bi-clock-history fs-1 me-3 text-primary"></i>
@@ -28,7 +28,11 @@
     <div class="d-flex flex-nowrap gap-2 mt-4">
       <select id="file-select" class="form-select form-select-sm w-auto"></select>
       <input id="decay-input" type="number" class="form-control form-control-sm w-auto" min="0" max="1" step="0.01" value="0.02" style="max-width: 7rem" />
-      <button id="another-btn" class="btn btn-primary btn-sm"><i class="bi bi-shuffle"></i> Next</button>
+      <input id="index-input" type="number" class="form-control form-control-sm w-auto" min="1" style="max-width: 6rem" />
+      <button id="prev-btn" class="btn btn-outline-primary btn-sm"><i class="bi bi-arrow-left"></i></button>
+      <button id="random-btn" class="btn btn-primary btn-sm"><i class="bi bi-shuffle"></i> Random</button>
+      <button id="next-btn" class="btn btn-outline-primary btn-sm"><i class="bi bi-arrow-right"></i></button>
+      <button id="star-btn" class="btn btn-outline-warning btn-sm"><i class="bi bi-star"></i></button>
       <button id="copy-btn" class="btn btn-secondary btn-sm"><i class="bi bi-clipboard"></i> Copy</button>
     </div>
   </div>
