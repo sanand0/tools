@@ -14,7 +14,7 @@ PicBook turns a list of short captions into a sequence of images while keeping t
    - A progress bar shows how many panels are done and estimates total time.
    - You can pause after any panel and continue later.
 4. **Download**
-   - Each panel has a download button, and you can download all as a ZIP archive.
+   - Download all generated panels as a ZIP archive.
 
 ## How it works
 

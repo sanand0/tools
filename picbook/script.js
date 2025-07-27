@@ -36,7 +36,10 @@ const ui = {
 
 let aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
 ui.configBtn.addEventListener("click", async () => {
-  aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
+  aiConfig = await openaiConfig({
+    defaultBaseUrls: DEFAULT_BASE_URLS,
+    show: true,
+  });
 });
 
 let baseFile = null;
@@ -128,14 +131,9 @@ function createCard(caption, ratioClass, ratioStyle) {
   ui.log.insertAdjacentHTML(
     "beforeend",
     `<div class="col-md-6 col-lg-4 col-xl-3">
-       <div class="card p-0 text-center position-relative h-100">
-         <div class="card-header small opacity-75 px-2 py-1" contenteditable="true">${caption}</div>
-         <div class="${ratioClass}" style="${ratioStyle}">
-           <div class="card-body d-flex justify-content-center align-items-center h-100"></div>
-         </div>
-         <a class="download-btn btn btn-outline-secondary btn-sm position-absolute top-0 end-0 m-2" href="#" download>
-           <i class="bi bi-download"></i>
-         </a>
+       <div class="card overflow-hidden p-0 text-center position-relative h-100">
+         <div class="card-header text-bg-warning small opacity-75 px-2 py-1" contenteditable="true">${caption}</div>
+         <div class="card-body d-flex justify-content-center align-items-center h-100 p-0 ${ratioClass}" style="${ratioStyle}"></div>
        </div>
      </div>`,
   );
@@ -145,7 +143,6 @@ function createCard(caption, ratioClass, ratioStyle) {
 function setSpinner(card, show) {
   const body = card.querySelector(".card-body");
   body.innerHTML = show ? '<div class="spinner-border"></div>' : "";
-  card.querySelector(".download-btn").classList.toggle("invisible", show);
 }
 
 async function downloadZip() {
@@ -169,7 +166,11 @@ async function downloadZip() {
 async function requestImage(prompt, refs, opts) {
   const { apiKey, baseURL } = aiConfig;
   if (!apiKey) {
-    bootstrapAlert({ title: "OpenAI key missing", body: "Configure your key", color: "warning" });
+    bootstrapAlert({
+      title: "OpenAI key missing",
+      body: "Configure your key",
+      color: "warning",
+    });
     return null;
   }
   if (refs.length) {
@@ -191,7 +192,10 @@ async function requestImage(prompt, refs, opts) {
   }
   return fetch(`${baseURL}/images/generations`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
     body: JSON.stringify({ model: "gpt-image-1", prompt, n: 1, ...opts }),
   });
 }
@@ -208,7 +212,11 @@ async function run() {
   const panels = lines.map((l) => {
     const i = l.indexOf("[");
     const j = l.indexOf("]", i + 1);
-    if (i >= 0 && j > i + 1) return { caption: l.slice(0, i).trim(), prompt: l.slice(i + 1, j).trim() };
+    if (i >= 0 && j > i + 1)
+      return {
+        caption: l.slice(0, i).trim(),
+        prompt: l.slice(i + 1, j).trim(),
+      };
     const line = l.trim();
     return { caption: line, prompt: line };
   });
@@ -240,7 +248,6 @@ async function run() {
     const t0 = performance.now();
     const card = cards[index];
     const body = card.querySelector(".card-body");
-    const dl = card.querySelector(".download-btn");
     setSpinner(card, true);
     try {
       const resp = await requestImage(fullPrompt, refs, opts);
@@ -250,8 +257,6 @@ async function run() {
       if (!b64) throw new Error("No image returned");
       const imgUrl = `data:image/${ui.format.value};base64,${b64}`;
       body.innerHTML = `<img src="${imgUrl}" title="${caption}" alt="${caption}" class="w-100 h-100 object-fit-cover">`;
-      dl.href = imgUrl;
-      dl.download = `${String(index + 1).padStart(3, "0")}-${slug(caption)}.${ui.format.value}`;
       times.push((performance.now() - t0) / 1000);
       index++;
       updateProgress(index, panels.length);
