@@ -124,13 +124,18 @@ ui.url.oninput = () => {
 ui.zipBtn.onclick = downloadZip;
 ui.printBtn.onclick = () => window.print();
 
-function createCard(caption) {
+function createCard(caption, ratioClass, ratioStyle) {
   ui.log.insertAdjacentHTML(
     "beforeend",
     `<div class="col-md-6 col-lg-4 col-xl-3">
-       <div class="card h-100 text-center">
-         <div class="card-header small opacity-75">${caption}</div>
-         <div class="card-body d-flex justify-content-center align-items-center" style="height:250px"></div>
+       <div class="card p-0 text-center position-relative h-100">
+         <div class="card-header small opacity-75 px-2 py-1" contenteditable="true">${caption}</div>
+         <div class="${ratioClass}" style="${ratioStyle}">
+           <div class="card-body d-flex justify-content-center align-items-center h-100"></div>
+         </div>
+         <a class="download-btn btn btn-outline-secondary btn-sm position-absolute top-0 end-0 m-2" href="#" download>
+           <i class="bi bi-download"></i>
+         </a>
        </div>
      </div>`,
   );
@@ -140,6 +145,7 @@ function createCard(caption) {
 function setSpinner(card, show) {
   const body = card.querySelector(".card-body");
   body.innerHTML = show ? '<div class="spinner-border"></div>' : "";
+  card.querySelector(".download-btn").classList.toggle("invisible", show);
 }
 
 async function downloadZip() {
@@ -208,11 +214,16 @@ async function run() {
   });
   if (state === "idle") {
     ui.log.innerHTML = "";
-    cards = panels.map((p) => createCard(p.caption));
+    const ratio = {
+      "1024x1024": ["ratio ratio-1x1", ""],
+      "1536x1024": ["ratio", "--bs-aspect-ratio: 66.6667%"],
+      "1024x1536": ["ratio", "--bs-aspect-ratio: 150%"],
+    }[ui.size.value] || ["", ""];
+    cards = panels.map((p) => createCard(p.caption, ratio[0], ratio[1]));
     index = 0;
     startTime = Date.now();
     times.length = 0;
-    ui.startBtn?.remove();
+    ui.startBtn?.classList.add("d-none");
   }
   setState("running");
   ui.progressRow.classList.remove("d-none");
@@ -227,8 +238,10 @@ async function run() {
     if (index) refs.push(cards[index - 1].querySelector("img")?.src);
     const fullPrompt = ctx ? `${ctx} ${prompt}` : prompt;
     const t0 = performance.now();
-    const body = cards[index].querySelector(".card-body");
-    setSpinner(cards[index], true);
+    const card = cards[index];
+    const body = card.querySelector(".card-body");
+    const dl = card.querySelector(".download-btn");
+    setSpinner(card, true);
     try {
       const resp = await requestImage(fullPrompt, refs, opts);
       if (!resp || !resp.ok) throw new Error(await resp.text());
@@ -236,9 +249,9 @@ async function run() {
       const b64 = data.data?.[0]?.b64_json;
       if (!b64) throw new Error("No image returned");
       const imgUrl = `data:image/${ui.format.value};base64,${b64}`;
-      body.innerHTML =
-        `<img src="${imgUrl}" title="${caption}" alt="${caption}" class="img-fluid object-fit-contain" style="height:250px">` +
-        `<div class="mt-2"><a download="${String(index + 1).padStart(3, "0")}-${slug(caption)}.${ui.format.value}" href="${imgUrl}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i></a></div>`;
+      body.innerHTML = `<img src="${imgUrl}" title="${caption}" alt="${caption}" class="w-100 h-100 object-fit-cover">`;
+      dl.href = imgUrl;
+      dl.download = `${String(index + 1).padStart(3, "0")}-${slug(caption)}.${ui.format.value}`;
       times.push((performance.now() - t0) / 1000);
       index++;
       updateProgress(index, panels.length);
@@ -263,4 +276,16 @@ ui.startBtn?.addEventListener("click", (e) => {
 ui.form.addEventListener("submit", (e) => {
   e.preventDefault();
   run();
+});
+
+ui.form.addEventListener("reset", () => {
+  baseFile = null;
+  baseUrl = "";
+  ui.preview.classList.add("d-none");
+  ui.preview.removeAttribute("src");
+  ui.log.innerHTML = "";
+  ui.progressRow.classList.add("d-none");
+  ui.bar.style.width = 0;
+  ui.startBtn?.classList.remove("d-none");
+  setState("idle");
 });
