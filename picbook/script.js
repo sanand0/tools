@@ -18,6 +18,7 @@ const ui = {
   startBtn: document.getElementById("start-btn"),
   pauseBtn: document.getElementById("pause-btn"),
   zipBtn: document.getElementById("zip-btn"),
+  printBtn: document.getElementById("print-btn"),
   progressRow: document.getElementById("progress-row"),
   bar: document.getElementById("progress-bar"),
   progText: document.getElementById("progress-text"),
@@ -121,6 +122,7 @@ ui.url.oninput = () => {
 };
 
 ui.zipBtn.onclick = downloadZip;
+ui.printBtn.onclick = () => window.print();
 
 function createCard(caption) {
   ui.log.insertAdjacentHTML(
@@ -225,6 +227,7 @@ async function run() {
     if (index) refs.push(cards[index - 1].querySelector("img")?.src);
     const fullPrompt = ctx ? `${ctx} ${prompt}` : prompt;
     const t0 = performance.now();
+    const body = cards[index].querySelector(".card-body");
     setSpinner(cards[index], true);
     try {
       const resp = await requestImage(fullPrompt, refs, opts);
@@ -233,8 +236,9 @@ async function run() {
       const b64 = data.data?.[0]?.b64_json;
       if (!b64) throw new Error("No image returned");
       const imgUrl = `data:image/${ui.format.value};base64,${b64}`;
-      cards[index].innerHTML =
-        `<img src="${imgUrl}" title="${caption}" alt="${caption}" class="card-img-top object-fit-contain" style="height:250px"><div class="card-body p-2"><a download="${String(index + 1).padStart(3, "0")}-${slug(caption)}.${ui.format.value}" href="${imgUrl}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i></a></div>`;
+      body.innerHTML =
+        `<img src="${imgUrl}" title="${caption}" alt="${caption}" class="img-fluid object-fit-contain" style="height:250px">` +
+        `<div class="mt-2"><a download="${String(index + 1).padStart(3, "0")}-${slug(caption)}.${ui.format.value}" href="${imgUrl}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i></a></div>`;
       times.push((performance.now() - t0) / 1000);
       index++;
       updateProgress(index, panels.length);
