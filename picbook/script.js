@@ -14,12 +14,13 @@ saveform("#picbook-form", { exclude: '[type="file"]' });
 const ui = {
   form: document.getElementById("picbook-form"),
   context: document.getElementById("context"),
-  captions: document.getElementById("captions"),
+  panels: document.getElementById("panels"),
   startBtn: document.getElementById("start-btn"),
   pauseBtn: document.getElementById("pause-btn"),
   zipBtn: document.getElementById("zip-btn"),
-  progress: document.getElementById("progress"),
+  progressRow: document.getElementById("progress-row"),
   bar: document.getElementById("progress-bar"),
+  progText: document.getElementById("progress-text"),
   log: document.getElementById("picbook-log"),
   upload: document.getElementById("upload-input"),
   url: document.getElementById("image-url"),
@@ -69,18 +70,18 @@ function updateProgress(current, total) {
   const avg = times.length ? times.reduce((a, b) => a + b, 0) / times.length : 60;
   const est = avg * total;
   ui.bar.style.width = `${(current / total) * 100}%`;
-  ui.bar.textContent = `${current}/${total} - ${Math.round(elapsed)}s / ~${Math.round(est)}s`;
+  ui.progText.textContent = `${current}/${total} - ${Math.round(elapsed)}s / ~${Math.round(est)}s`;
 }
 
 function setState(s) {
   state = s;
   ui.pauseBtn.disabled = false;
   ui.pauseBtn.classList.toggle("d-none", s === "idle");
-  if (s === "running") ui.pauseBtn.textContent = "Pause";
-  else if (s === "pausing") ui.pauseBtn.textContent = "Pausing...";
-  else if (s === "paused") ui.pauseBtn.textContent = "Continue";
+  if (s === "running") ui.pauseBtn.innerHTML = '<i class="bi bi-pause-fill me-1"></i>Pause';
+  else if (s === "pausing") ui.pauseBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Pausing...';
+  else if (s === "paused") ui.pauseBtn.innerHTML = '<i class="bi bi-play-fill me-1"></i>Continue';
   else {
-    ui.pauseBtn.textContent = "Done";
+    ui.pauseBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Done';
     ui.pauseBtn.disabled = true;
   }
 }
@@ -92,7 +93,11 @@ ui.pauseBtn.onclick = () => {
 
 ui.upload.onchange = () => {
   const file = ui.upload.files[0];
-  if (!file) return;
+  if (!file) {
+    baseFile = null;
+    ui.preview.classList.add("d-none");
+    return;
+  }
   baseFile = file;
   baseUrl = "";
   ui.url.value = "";
@@ -105,6 +110,7 @@ ui.url.oninput = () => {
   if (!url) {
     ui.preview.classList.add("d-none");
     baseUrl = "";
+    if (!ui.upload.files[0]) baseFile = null;
     return;
   }
   baseUrl = url;
@@ -119,9 +125,16 @@ ui.zipBtn.onclick = downloadZip;
 function createCard(caption) {
   ui.log.insertAdjacentHTML(
     "beforeend",
-    `<div class="card mb-3 text-center picture-card"><div class="card-body"><div class="spinner-border m-5" role="status"></div><div class="small opacity-75 mt-3">${caption}</div></div></div>`,
+    `<div class="col-md-6 col-lg-4 col-xl-3">
+       <div class="card h-100 text-center">
+         <div class="card-header small opacity-75">${caption}</div>
+         <div class="card-body d-flex justify-content-center align-items-center" style="height:250px">
+           <div class="spinner-border"></div>
+         </div>
+       </div>
+     </div>`,
   );
-  return ui.log.lastElementChild;
+  return ui.log.lastElementChild.querySelector(".card");
 }
 
 async function downloadZip() {
@@ -142,20 +155,22 @@ async function downloadZip() {
   URL.revokeObjectURL(a.href);
 }
 
-async function requestImage(prompt, reference, opts) {
+async function requestImage(prompt, refs, opts) {
   const { apiKey, baseURL } = aiConfig;
   if (!apiKey) {
     bootstrapAlert({ title: "OpenAI key missing", body: "Configure your key", color: "warning" });
     return null;
   }
-  if (reference) {
-    const blob = await fetch(reference).then((r) => r.blob());
+  if (refs.length) {
     const form = new FormData();
     form.append("model", "gpt-image-1");
     form.append("prompt", prompt);
     form.append("n", "1");
     Object.entries(opts).forEach(([k, v]) => form.append(k, v));
-    form.append("image", blob, "image.png");
+    for (const r of refs) {
+      const blob = await fetch(r).then((q) => q.blob());
+      form.append("image", blob, "image.png");
+    }
     return fetch(`${baseURL}/images/edits`, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}` },
@@ -170,34 +185,45 @@ async function requestImage(prompt, reference, opts) {
 }
 
 async function run() {
-  const captions = ui.captions.value
+  const lines = ui.panels.value
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
-  if (!captions.length) {
-    bootstrapAlert({ title: "Captions missing", color: "warning" });
+  if (!lines.length) {
+    bootstrapAlert({ title: "Panels missing", color: "warning" });
     return;
   }
+  const panels = lines.map((l) => {
+    const i = l.indexOf("[");
+    const j = l.indexOf("]", i + 1);
+    return {
+      caption: i >= 0 ? l.slice(0, i).trim() : l,
+      prompt: i >= 0 && j > i ? l.slice(i + 1, j).trim() : l,
+    };
+  });
   if (state === "idle") {
     ui.log.innerHTML = "";
-    cards = captions.map(createCard);
+    cards = panels.map((p) => createCard(p.caption));
     index = 0;
     startTime = Date.now();
     times.length = 0;
+    ui.startBtn?.remove();
   }
   setState("running");
-  ui.progress.classList.remove("d-none");
+  ui.progressRow.classList.remove("d-none");
   ui.zipBtn.classList.remove("d-none");
   const opts = collectOptions();
   const ctx = ui.context.value.trim();
-  while (index < captions.length && state === "running") {
-    const caption = captions[index];
-    const prompt = ctx ? `${ctx} ${caption}` : caption;
-    const reference =
-      index === 0 ? (baseFile ? URL.createObjectURL(baseFile) : baseUrl) : cards[index - 1].querySelector("img")?.src;
+  while (index < panels.length && state === "running") {
+    const { caption, prompt } = panels[index];
+    const refs = [];
+    if (baseFile) refs.push(URL.createObjectURL(baseFile));
+    else if (baseUrl) refs.push(baseUrl);
+    if (index) refs.push(cards[index - 1].querySelector("img")?.src);
+    const fullPrompt = ctx ? `${ctx} ${prompt}` : prompt;
     const t0 = performance.now();
     try {
-      const resp = await requestImage(prompt, reference, opts);
+      const resp = await requestImage(fullPrompt, refs, opts);
       if (!resp || !resp.ok) throw new Error(await resp.text());
       const data = await resp.json();
       const b64 = data.data?.[0]?.b64_json;
@@ -207,7 +233,7 @@ async function run() {
         `<img src="${imgUrl}" title="${caption}" alt="${caption}" class="card-img-top object-fit-contain" style="height:250px"><div class="card-body p-2"><a download="${String(index + 1).padStart(3, "0")}-${slug(caption)}.${ui.format.value}" href="${imgUrl}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i></a></div>`;
       times.push((performance.now() - t0) / 1000);
       index++;
-      updateProgress(index, captions.length);
+      updateProgress(index, panels.length);
     } catch (err) {
       cards[index].querySelector(".spinner-border")?.remove();
       bootstrapAlert({ title: caption, body: err.message, color: "danger" });
@@ -219,13 +245,13 @@ async function run() {
       return;
     }
   }
-  if (index >= captions.length) setState("done");
+  if (index >= panels.length) setState("done");
 }
 
-ui.startBtn.onclick = (e) => {
+ui.startBtn?.addEventListener("click", (e) => {
   e.preventDefault();
   run();
-};
+});
 ui.form.addEventListener("submit", (e) => {
   e.preventDefault();
   run();

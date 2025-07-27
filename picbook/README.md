@@ -4,12 +4,12 @@ PicBook turns a list of short captions into a sequence of images while keeping t
 
 ## What it does
 
-1. **Context and Captions**
-   - Enter an overall description of the picture book's style.
-   - Provide one caption per line; each becomes an image.
+1. **Context and Panels**
+   - Enter common guidance for the whole book.
+   - Each line is `Caption text [Prompt for LLM]`.
 2. **Reference Image**
    - Optionally upload or link to an image so the first panel matches its style.
-   - Subsequent panels use the previous image as an additional reference.
+   - Later panels use both the original reference and the previous image.
 3. **Progress Tracking**
    - A progress bar shows how many panels are done and estimates total time.
    - You can pause after any panel and continue later.
@@ -19,6 +19,6 @@ PicBook turns a list of short captions into a sequence of images while keeping t
 ## How it works
 
 1. Configure your OpenAI API key and base URL.
-2. The first caption is sent to `/images/edits` if a reference is provided, otherwise to `/images/generations`.
-3. Each subsequent caption is sent along with the previous panel as the reference image to maintain consistency.
-4. Images are displayed as they arrive and can be individually downloaded or saved as a ZIP file.
+2. The first panel uses the uploaded image (or URL) if provided.
+3. Later panels also send the previous image for style consistency.
+4. Images appear as soon as they are ready and can be saved individually or as a ZIP.

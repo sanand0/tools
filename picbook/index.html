@@ -18,80 +18,85 @@
         <h1 class="display-5 fw-bold">PicBook</h1>
       </div>
     </header>
-    <form id="picbook-form" class="row g-4 mb-4">
-      <div class="col-md-4">
-        <div class="p-3 bg-white rounded-3 shadow-sm h-100">
-          <div class="mb-3">
-            <label for="context" class="form-label">Context</label>
-            <textarea id="context" rows="2" class="form-control" placeholder="e.g. A brave cat explores space in anime style"></textarea>
-          </div>
-          <div class="mb-3">
-            <label for="captions" class="form-label">Captions</label>
-            <textarea id="captions" rows="6" class="form-control" placeholder="One caption per line\nThe cat boards a rocket\nStars twinkle as it lifts off"></textarea>
-          </div>
-          <div class="mb-3">
-            <input type="file" id="upload-input" accept="image/*" class="form-control" />
-            <img id="preview-image" class="img-fluid rounded mt-2 d-none" alt="Preview" />
-            <input type="text" id="image-url" placeholder="Reference image URL" class="form-control mt-2" />
-          </div>
-          <button id="openai-config-btn" type="button" class="btn btn-outline-secondary w-100 mb-3">Configure OpenAI</button>
-          <h4 class="h6">Advanced options</h4>
-          <div class="row g-2 mb-2 align-items-center">
-            <label for="size" class="col-4 col-form-label">Size</label>
-            <div class="col">
-              <select id="size" class="form-select form-select-sm">
-                <option>auto</option>
-                <option>1024x1024</option>
-                <option>1536x1024</option>
-                <option>1024x1536</option>
-              </select>
-            </div>
-          </div>
-          <div class="row g-2 mb-2 align-items-center">
-            <label for="quality" class="col-4 col-form-label">Quality</label>
-            <div class="col">
-              <select id="quality" class="form-select form-select-sm">
-                <option>low</option>
-                <option>medium</option>
-                <option>high</option>
-                <option>auto</option>
-              </select>
-            </div>
-          </div>
-          <div class="row g-2 mb-2 align-items-center">
-            <label for="output-format" class="col-4 col-form-label">Format</label>
-            <div class="col">
-              <select id="output-format" class="form-select form-select-sm">
-                <option>webp</option>
-                <option>png</option>
-                <option>jpeg</option>
-              </select>
-            </div>
-          </div>
-          <div class="row g-2 mb-2 align-items-center">
-            <label for="output-compression" class="col-4 col-form-label">Compression</label>
-            <div class="col">
-              <input type="number" id="output-compression" value="50" min="0" max="100" class="form-control form-control-sm" />
-            </div>
-          </div>
-          <div class="form-check form-switch mb-3">
-            <input id="background" type="checkbox" class="form-check-input" />
-            <label class="form-check-label" for="background">Transparent background</label>
-          </div>
-          <div class="d-grid gap-2">
-            <button id="start-btn" class="btn btn-primary" type="submit">Start</button>
-            <button id="pause-btn" type="button" class="btn btn-outline-secondary d-none">Pause</button>
-            <button id="zip-btn" type="button" class="btn btn-outline-primary d-none"><i class="bi bi-download me-2"></i>Download ZIP</button>
-          </div>
-          <div id="progress" class="progress mt-3 d-none">
-            <div id="progress-bar" class="progress-bar" role="progressbar"></div>
-          </div>
+    <form id="picbook-form" class="bg-white rounded-3 shadow-sm p-3 mb-3">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="context" class="form-label">Context</label>
+          <textarea id="context" rows="2" class="form-control" placeholder="Common guidance for all images, e.g. Draw anime style with bright colors"></textarea>
+        </div>
+        <div class="col-md-6">
+          <label for="panels" class="form-label">Panels</label>
+          <textarea id="panels" rows="6" class="form-control" placeholder="One line per panel, each in the format 'Text caption to display [Prompt for LLM]'"></textarea>
         </div>
       </div>
-      <div class="col-md-8">
-        <div id="picbook-log" class="p-3 bg-white rounded-3 shadow-sm h-100 overflow-auto"></div>
+      <div class="row g-3 mt-0">
+        <div class="col-md-6">
+          <input type="file" id="upload-input" accept="image/*" class="form-control" />
+          <img id="preview-image" class="img-fluid rounded mt-2 d-none" alt="Preview" />
+          <input type="text" id="image-url" placeholder="Reference image URL" class="form-control mt-2" />
+        </div>
+        <div class="col-md-6 text-end">
+          <button id="openai-config-btn" type="button" class="btn btn-outline-secondary"><i class="bi bi-gear me-1"></i>Configure OpenAI</button>
+        </div>
+      </div>
+      <h4 class="h6 mt-3">Advanced options</h4>
+      <div class="row g-2 mb-2 align-items-center">
+        <label for="size" class="col-4 col-form-label">Size</label>
+        <div class="col">
+          <select id="size" class="form-select form-select-sm">
+            <option>auto</option>
+            <option>1024x1024</option>
+            <option>1536x1024</option>
+            <option>1024x1536</option>
+          </select>
+        </div>
+      </div>
+      <div class="row g-2 mb-2 align-items-center">
+        <label for="quality" class="col-4 col-form-label">Quality</label>
+        <div class="col">
+          <select id="quality" class="form-select form-select-sm">
+            <option>low</option>
+            <option>medium</option>
+            <option>high</option>
+            <option>auto</option>
+          </select>
+        </div>
+      </div>
+      <div class="row g-2 mb-2 align-items-center">
+        <label for="output-format" class="col-4 col-form-label">Format</label>
+        <div class="col">
+          <select id="output-format" class="form-select form-select-sm">
+            <option>webp</option>
+            <option>png</option>
+            <option>jpeg</option>
+          </select>
+        </div>
+      </div>
+      <div class="row g-2 mb-2 align-items-center">
+        <label for="output-compression" class="col-4 col-form-label">Compression</label>
+        <div class="col">
+          <input type="number" id="output-compression" value="50" min="0" max="100" class="form-control form-control-sm" />
+        </div>
+      </div>
+      <div class="form-check form-switch mb-3">
+        <input id="background" type="checkbox" class="form-check-input" />
+        <label class="form-check-label" for="background">Transparent background</label>
+      </div>
+      <div class="text-end">
+        <button id="start-btn" class="btn btn-primary" type="submit"><i class="bi bi-play-fill me-1"></i>Start</button>
       </div>
     </form>
+    <div id="progress-row" class="d-flex align-items-center gap-2 mb-3 d-none">
+      <div class="progress flex-grow-1" style="height: 20px">
+        <div id="progress-bar" class="progress-bar" role="progressbar"></div>
+      </div>
+      <span id="progress-text" class="small text-muted"></span>
+      <button id="pause-btn" type="button" class="btn btn-outline-secondary"><i class="bi bi-pause-fill"></i></button>
+      <button id="zip-btn" type="button" class="btn btn-outline-primary"><i class="bi bi-download"></i></button>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div id="picbook-log" class="row g-3"></div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module" src="script.js"></script>
