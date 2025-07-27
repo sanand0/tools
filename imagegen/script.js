@@ -52,7 +52,7 @@ const collectOptions = () => {
   if (ui.size.value !== "auto") opts.size = ui.size.value;
   if (ui.quality.value !== "auto") opts.quality = ui.quality.value;
   if (ui.format.value !== "png") opts.output_format = ui.format.value;
-  if (ui.compression.value !== "50") opts.output_compression = +ui.compression.value;
+  if (ui.format.value !== "png") opts.output_compression = +ui.compression.value;
   if (ui.background.checked) opts.background = "transparent";
   return opts;
 };
@@ -199,7 +199,7 @@ async function handleResponse(resp, userCard, prompt) {
 async function generateImage() {
   const prompt = ui.prompt.value.trim();
   if (!prompt) {
-    showToast({ title: "Prompt missing", body: "Describe the image modification", color: "bg-warning" });
+    showToast({ title: "Prompt missing", body: "Describe the image/modification", color: "bg-warning" });
     return;
   }
   if (!selectImage()) return;

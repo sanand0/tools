@@ -2,12 +2,7 @@ import { showToast } from "../common/toast.js";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 
-const DEFAULT_BASE_URLS = [
-  "https://api.openai.com/v1",
-  "https://aipipe.org/openai/v1",
-  "https://llmfoundry.straivedemo.com/openai/v1",
-  "https://llmfoundry.straive.com/openai/v1",
-];
+const DEFAULT_BASE_URLS = ["https://openrouter.ai/api/v1", "https://aipipe.org/openrouter/v1"];
 
 const form = document.getElementById("speakForm");
 const markdownInput = document.getElementById("markdownInput");
