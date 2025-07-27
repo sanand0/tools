@@ -14,14 +14,27 @@ const formatDate = (dateString) => {
   });
 };
 
+const getAgeColor = (dateString) => {
+  if (!dateString) return "light";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = now - date;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays <= 7) return "primary";
+  if (diffDays <= 30) return "success";
+  if (diffDays <= 365) return "warning";
+  return "light";
+};
+
 const toolCard = ({ icon, title, description, url, created }) => /* html */ `
-  <div class="col-md-6 col-lg-4">
+  <div class="col-md-6 col-lg-4 col-xl-3">
     <div class="card h-100">
       <a href="${url}" class="card-body text-decoration-none">
         <i class="bi ${icon} fs-2 text-primary mb-3"></i>
         <h5 class="card-title">${title}</h5>
         <p class="card-text">${description}</p>
-        ${created ? `<small class="text-muted">Created: ${formatDate(created)}</small>` : ""}
+        ${created ? `<small class="text-muted"><i class="bi bi-circle-fill text-${getAgeColor(created)} me-1"></i>Created: ${formatDate(created)}</small>` : ""}
       </a>
     </div>
   </div>
