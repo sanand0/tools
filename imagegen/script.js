@@ -1,7 +1,11 @@
-import { loadOpenAI } from "../common/openai.js";
+import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 import { showToast } from "../common/toast.js";
 
-const DEFAULT_BASE_URLS = ["https://llmfoundry.straivedemo.com/openai/v1", "https://llmfoundry.straive.com/openai/v1"];
+const DEFAULT_BASE_URLS = [
+  "https://api.openai.com/v1",
+  "https://llmfoundry.straivedemo.com/openai/v1",
+  "https://llmfoundry.straive.com/openai/v1",
+];
 const LOADING_MESSAGES = [
   "Painting pixels...",
   "Talking to the muse...",
@@ -28,9 +32,9 @@ const ui = {
   background: qs("background"),
 };
 
-let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
+let aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
 ui.configBtn.addEventListener("click", async () => {
-  aiConfig = await loadOpenAI(DEFAULT_BASE_URLS, true);
+  aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
 });
 
 let baseImage = null;
@@ -105,7 +109,7 @@ function addUserCard(text) {
          <h5 class="h5 mb-0 flex-grow-1">${text}</h5>
          <button class="btn-close ms-2" aria-label="Delete"></button>
        </div>
-     </div>`,
+     </div>`
   );
   const card = ui.log.lastElementChild;
   addHover(card);
@@ -124,7 +128,7 @@ function addImageCard(url) {
            <i class="bi bi-download"></i>
          </a>
        </div>
-     </div>`,
+     </div>`
   );
   addHover(ui.log.lastElementChild);
   ui.log.scrollTop = ui.log.scrollHeight;
@@ -275,7 +279,7 @@ fetch("config.json")
              <img src="${image}" class="card-img-top object-fit-cover" style="height:120px" alt="${title}">
              <div class="card-body p-2"><small class="card-title">${title}</small></div>
            </div>
-         </div>`,
+         </div>`
       );
       addHover(ui.samples.lastElementChild.querySelector(".card"));
     });

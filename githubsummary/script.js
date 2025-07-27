@@ -1,6 +1,6 @@
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
-import { loadOpenAI } from "../common/openai.js";
+import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -40,9 +40,9 @@ const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 let db = null;
 
 const openaiConfigBtn = document.getElementById("openai-config-btn");
-let aiConfig = await loadOpenAI(DEFAULT_BASE_URLS);
+let aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
 openaiConfigBtn.addEventListener("click", async () => {
-  aiConfig = await loadOpenAI(DEFAULT_BASE_URLS, true);
+  aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
 });
 
 async function initDB() {
