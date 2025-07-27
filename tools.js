@@ -14,6 +14,19 @@ const formatDate = (dateString) => {
   });
 };
 
+const getDateColorClass = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = Math.abs(now - date);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 7) return "text-primary";
+  if (diffDays <= 30) return "text-success";
+  if (diffDays <= 365) return "text-warning";
+  return "text-light";
+};
+
 const toolCard = ({ icon, title, description, url, created }) => /* html */ `
   <div class="col-md-6 col-lg-4">
     <div class="card h-100">
