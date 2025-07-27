@@ -133,10 +133,7 @@ function addImageCard(url) {
 function selectImage() {
   if (baseImage || selectedUrl) return true;
   selectedUrl = ui.url.value.trim();
-  if (!selectedUrl) {
-    showToast({ title: "Image missing", body: "Upload or paste a URL", color: "bg-warning" });
-    return false;
-  }
+  if (!selectedUrl) return true;
   ui.preview.src = selectedUrl;
   ui.preview.classList.remove("d-none");
   return true;
