@@ -1,6 +1,6 @@
 import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
-import { showToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const formatters = {
@@ -104,7 +104,7 @@ document.getElementById("repoForm").addEventListener("submit", async (e) => {
       repoData.filter((repo) => !repo.error),
     );
   } catch (error) {
-    showToast({ title: "Fetch error", body: error.message, color: "bg-danger" });
+    bootstrapAlert({ title: "Fetch error", body: error.message, color: "danger" });
   } finally {
     loading.classList.add("d-none");
   }

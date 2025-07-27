@@ -1,4 +1,4 @@
-import { showToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error("Error scraping links:", error);
       linksTextArea.value = `Error: ${error.message}`;
-      showToast({ title: "Scraping error", body: error.message, color: "bg-danger" });
+      bootstrapAlert({ title: "Scraping error", body: error.message, color: "danger" });
     } finally {
       loadingIndicator.classList.add("d-none");
       scrapeButton.disabled = false;
@@ -154,10 +154,10 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch((err) => {
           console.error("Failed to copy links:", err);
-          showToast({
+          bootstrapAlert({
             title: "Copy error",
             body: "Failed to copy links to clipboard. See console for details.",
-            color: "bg-danger",
+            color: "danger",
           });
         });
     }

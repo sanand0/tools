@@ -1,4 +1,4 @@
-import { showToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 
@@ -63,7 +63,7 @@ form.addEventListener("submit", async (e) => {
       htmlOutput.scrollTop = htmlOutput.scrollHeight;
     }
   } catch (err) {
-    showToast({ title: "Processing error", body: err.message, color: "bg-danger" });
+    bootstrapAlert({ title: "Processing error", body: err.message, color: "danger" });
   } finally {
     loading.classList.add("d-none");
   }

@@ -1,5 +1,5 @@
 import { Marked } from "https://cdn.jsdelivr.net/npm/marked@13/+esm";
-import { showToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 const marked = new Marked();
 
 let map,
@@ -155,7 +155,7 @@ function showLoading(isLoading) {
 }
 
 function showError(message) {
-  showToast({ title: "Location error", body: message, color: "bg-danger" });
+  bootstrapAlert({ title: "Location error", body: message, color: "danger" });
 }
 
 document.addEventListener("DOMContentLoaded", () => {

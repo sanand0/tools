@@ -1,4 +1,4 @@
-import { showToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 saveform("#whatsapp-form");
 
@@ -8,6 +8,6 @@ document.getElementById("sendButton").addEventListener("click", () => {
     const whatsappUrl = `https://wa.me/${phoneNumber}`;
     window.open(whatsappUrl, "_blank");
   } else {
-    showToast({ title: "Invalid number", body: "Please enter a valid phone number.", color: "bg-danger" });
+    bootstrapAlert({ title: "Invalid number", body: "Please enter a valid phone number.", color: "danger" });
   }
 });

@@ -1,5 +1,5 @@
 import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv } from "../common/csv.js";
-import { updateLatestToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
 const $jsonInput = document.getElementById("jsonInput");
@@ -50,9 +50,6 @@ const jsonToCsv = (jsonStringInput, toTsv = false) => {
 
 const displayCsvTable = (csv) => csvToTable($output, csv);
 
-function showToast(message, color = "bg-primary") {
-  updateLatestToast({ body: message, color });
-}
 
 $convertBtn.addEventListener("click", () => {
   try {
@@ -65,7 +62,7 @@ $convertBtn.addEventListener("click", () => {
     $copyBtn.classList.remove("d-none");
   } catch (error) {
     $output.textContent = "";
-    showToast(`Error: ${error.message}`, "bg-danger");
+    bootstrapAlert(`Error: ${error.message}`, "danger");
     $downloadBtn.classList.add("d-none");
     $copyBtn.classList.add("d-none");
   }
@@ -74,5 +71,5 @@ $convertBtn.addEventListener("click", () => {
 $downloadBtn.addEventListener("click", () => downloadCsv(jsonToCsv($jsonInput.value.trim())));
 $copyBtn.addEventListener("click", async () => {
   await navigator.clipboard.writeText(jsonToCsv($jsonInput.value.trim(), true));
-  showToast("Copied to clipboard!");
+  bootstrapAlert("Copied to clipboard!");
 });

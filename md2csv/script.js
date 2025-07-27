@@ -1,5 +1,5 @@
 import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv } from "../common/csv.js";
-import { updateLatestToast } from "../common/toast.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 
@@ -31,13 +31,9 @@ function parseTable(md) {
   return table.rows.map((row) => Object.fromEntries(headers.map((h, i) => [h, plain(row[i].tokens)])));
 }
 
-function showToast(msg, color = "bg-primary") {
-  updateLatestToast({ body: msg, color });
-}
-
 function showError(msg) {
   output.textContent = "";
-  showToast(msg, "bg-danger");
+  bootstrapAlert(msg, "danger");
   downloadBtn.classList.add("d-none");
   copyBtn.classList.add("d-none");
 }
@@ -60,5 +56,5 @@ extractBtn.addEventListener("click", () => {
 downloadBtn.addEventListener("click", () => downloadCsv(csv));
 copyBtn.addEventListener("click", async () => {
   await navigator.clipboard.writeText(objectsToTsv(data));
-  showToast("Copied to clipboard");
+  bootstrapAlert("Copied to clipboard");
 });
