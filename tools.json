@@ -50,6 +50,13 @@
       "created": "2025-07-22T00:00:00+00:00"
     },
     {
+      "icon": "bi-book",
+      "title": "PicBook",
+      "description": "Create a sequence of images from captions",
+      "url": "picbook",
+      "created": "2025-07-23T00:00:00+00:00"
+    },
+    {
       "icon": "bi-headset",
       "title": "SpeakMD",
       "description": "Turn Markdown into conversational text",
