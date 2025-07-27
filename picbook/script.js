@@ -142,7 +142,7 @@ function createCard(caption, ratioClass, ratioStyle) {
 
 function setSpinner(card, show) {
   const body = card.querySelector(".card-body");
-  body.innerHTML = show ? '<div class="spinner-border"></div>' : "";
+  body.innerHTML = show ? '<div class="d-flex justify-content-center align-items-center"><div class="spinner-border"></div></div>' : "";
 }
 
 async function downloadZip() {
