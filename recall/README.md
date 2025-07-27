@@ -6,6 +6,7 @@ Recall is a spaced repetition viewer. It loads a Markdown file, picks a list ite
 
 - Choose from preset Markdown files
 - Adjustable decay factor for selection probability
-- "Another" and "Copy" buttons to cycle items or copy the Markdown
+- Random, Previous, Next, Copy, and ⭐ buttons for navigation and filtering
+- Editable index field to jump directly to a bullet
 
 This tool is mobile responsive and styled with Bootstrap, similar to the Podcast Generator tool.
