@@ -2,6 +2,8 @@
 
 This tool provides a simple web interface to convert Markdown text into a Reveal.js HTML slideshow. It allows users to quickly create web-based presentations using familiar Markdown syntax.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 The tool takes Markdown input from a user and transforms it into a fully functional Reveal.js presentation.

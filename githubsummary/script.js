@@ -40,9 +40,8 @@ const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 let db = null;
 
 const openaiConfigBtn = document.getElementById("openai-config-btn");
-let aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
 openaiConfigBtn.addEventListener("click", async () => {
-  aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
+  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
 });
 
 async function initDB() {
@@ -371,7 +370,8 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
     document.getElementById("results-section").style.display = "block";
 
     // Generate summary
-    await generateSummary({ activity, repos, context }, config.systemPrompt, aiConfig.apiKey, aiConfig.baseURL);
+    const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
+    await generateSummary({ activity, repos, context }, config.systemPrompt, apiKey, baseUrl);
   } catch (error) {
     showError(error.message);
   }

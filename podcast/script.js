@@ -34,9 +34,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const alertContainer = document.getElementById("alertContainer");
   const resetSettingsBtn = document.getElementById("resetSettingsBtn");
 
-  let aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
   openaiConfigBtn.addEventListener("click", async () => {
-    aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
+    await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
   });
 
   // Function to show alerts
@@ -94,7 +93,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Generate Script
   generateScriptBtn.addEventListener("click", async () => {
     const content = contentInput.value.trim();
-    const { apiKey, baseURL: baseUrl } = aiConfig;
+    const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
     const model = modelInput.value.trim();
 
     if (!content) return showAlert("Please enter some content to convert to a podcast.");
@@ -147,7 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Generate Audio
   generateAudioBtn.addEventListener("click", async () => {
     const script = podcastScriptTextarea.value.trim();
-    const { apiKey, baseURL: baseUrl } = aiConfig;
+    const { apiKey, baseUrl } = aiConfig;
 
     if (!script) return showAlert("Please generate a podcast script first.");
     if (!apiKey) return showAlert("Configure your OpenAI API key first.");

@@ -2,6 +2,8 @@
 
 This tool generates a blog-post-style summary of a GitHub user's activity within a specified date range.
 
+![Screenshot](screenshot.webp)
+
 ## Use Cases
 
 - **Track Contributions:** Quickly understand a developer's work and contributions over a period.

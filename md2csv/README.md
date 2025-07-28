@@ -2,6 +2,8 @@
 
 Extract the first table from Markdown and convert it to CSV. Links become their text and images are removed.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 - Paste Markdown text containing a table

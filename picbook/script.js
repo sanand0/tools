@@ -34,12 +34,8 @@ const ui = {
   background: document.getElementById("background"),
 };
 
-let aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
 ui.configBtn.addEventListener("click", async () => {
-  aiConfig = await openaiConfig({
-    defaultBaseUrls: DEFAULT_BASE_URLS,
-    show: true,
-  });
+  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
 });
 
 let baseFile = null;
@@ -164,7 +160,7 @@ async function downloadZip() {
 }
 
 async function requestImage(prompt, refs, opts) {
-  const { apiKey, baseURL } = aiConfig;
+  const { apiKey, baseURL } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
   if (!apiKey) {
     bootstrapAlert({
       title: "OpenAI key missing",

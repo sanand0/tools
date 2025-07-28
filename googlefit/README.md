@@ -2,6 +2,8 @@
 
 This tool allows you to view and summarize your Google Fit activity data obtained from Google Takeout.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 The tool processes `.tcx` files exported from Google Fit (via Google Takeout) and presents a consolidated view of your activities. It groups activities by date and sport, displaying key metrics like distance, duration, and calories burned for each recorded session.

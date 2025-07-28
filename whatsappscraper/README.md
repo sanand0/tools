@@ -2,6 +2,8 @@
 
 This tool is a browser bookmarklet that allows users to scrape messages from an active WhatsApp Web chat session. The extracted messages are compiled into a JSON format and copied to the user's clipboard.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 The WhatsApp Scraper extracts message data from the currently open chat in WhatsApp Web. To use it, a user navigates to WhatsApp Web, opens the desired chat, scrolls to load the message history they wish to capture, and then clicks the bookmarklet.

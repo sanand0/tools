@@ -3,6 +3,8 @@
 This tool lets you sign in with your Google account and download all of your tasks as a CSV file.
 It also lets you copy the results straight into Excel or Markdown, and delete all completed tasks.
 
+![Screenshot](screenshot.webp)
+
 ## How it works
 
 1. Click **Sign in** and approve access to your Google Tasks.

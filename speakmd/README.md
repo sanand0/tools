@@ -2,6 +2,8 @@
 
 SpeakMD converts Markdown into a conversational script that is easy to narrate aloud. It streams the conversion through a Large Language Model so you can watch the text appear in real time.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 1. **Paste Markdown:** Provide any Markdown text in the input box.

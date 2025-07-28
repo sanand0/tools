@@ -39,9 +39,8 @@ const resetPromptButton = document.getElementById("resetPrompt");
 const copyResponseButton = document.getElementById("copyResponse");
 saveform("#googlesuggest-form", { exclude: '[type="file"]' });
 
-let aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
 openaiConfigBtn.addEventListener("click", async () => {
-  aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
+  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
 });
 
 // --- Application State ---
@@ -345,7 +344,7 @@ function formatSuggestionsForLLMPrompt(suggestions, query) {
 
 async function fetchLLMExplanation(suggestions, query) {
   const model = llmModelSelect.value;
-  let { baseURL: baseUrl, apiKey } = aiConfig;
+  let { baseUrl, apiKey } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
   if (!apiKey) {
     bootstrapAlert({ title: "Missing key", body: "Configure your OpenAI API key first.", color: "danger" });
     return;

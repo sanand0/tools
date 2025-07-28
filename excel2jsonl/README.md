@@ -2,6 +2,8 @@
 
 This tool converts Excel files (.xlsx, .xls) into JSONL (JSON Lines) format.
 
+![Screenshot](screenshot.webp)
+
 ## Use Cases
 
 - **Data Preparation for Machine Learning:** Convert Excel data into a format suitable for training machine learning models.

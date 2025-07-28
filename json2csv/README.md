@@ -2,6 +2,8 @@
 
 This tool converts JSON data into Comma Separated Values (CSV) format. It can also prepare the data for easy pasting into spreadsheet applications like Excel by converting it to Tab Separated Values (TSV).
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 The tool takes JSON input, processes it, and converts it into a tabular CSV structure.

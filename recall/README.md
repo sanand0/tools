@@ -2,6 +2,8 @@
 
 Recall is a spaced repetition viewer. It loads a Markdown file, picks a list item using an exponentially decaying weight, and shows it for quick review.
 
+![Screenshot](screenshot.webp)
+
 ## Features
 
 - Choose from preset Markdown files

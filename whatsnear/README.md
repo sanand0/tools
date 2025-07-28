@@ -2,6 +2,8 @@
 
 This web application helps users discover nearby tourist attractions based on their current geolocation. It displays these attractions on a map, provides AI-generated descriptions for them, and offers a text-to-speech feature to read these descriptions aloud.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 The "Nearby Attractions Explorer" leverages browser geolocation, the Overpass API (for fetching points of interest), and an AI model (GPT-4o Mini via LLM Foundry) to provide a rich experience for discovering local attractions.

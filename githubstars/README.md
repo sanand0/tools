@@ -2,6 +2,8 @@
 
 This tool updates GitHub repository links in Markdown text. It replaces the link text with the repository's name, star count, and the last pushed date.
 
+![Screenshot](screenshot.webp)
+
 ## Use Cases
 
 - **Assessing Repository Activity:** Quickly gauge the popularity and maintenance status of repositories listed in a document.

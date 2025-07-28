@@ -15,7 +15,7 @@ in other browsers or for other people.)
 
 [Use the app](http://tools.s-anand.net/whatnext/)
 
-![Screenshot](img/screenshot.png)
+![Screenshot](screenshot.png)
 
 ## Usage
 

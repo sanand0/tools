@@ -4,6 +4,8 @@
 
 The Github User Data Extractor is a web-based tool that allows you to fetch publicly available information for specified GitHub users. You can input multiple GitHub usernames or profile URLs, and the tool will display their data in a structured table. This data can then be easily exported as a CSV file or copied to your clipboard for pasting into spreadsheet applications like Excel.
 
+![Screenshot](screenshot.webp)
+
 ## Features
 
 - **Flexible Input:** Accepts GitHub usernames (e.g., `username`, `@username`) or full GitHub profile URLs (e.g., `https://github.com/username`).

@@ -2,6 +2,8 @@
 
 This tool fetches top or best stories from Hacker News, converts their linked content to Markdown, and prepends Hacker News metadata as frontmatter. The primary intended use is for importing into NotebookLM.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 The tool retrieves a list of either "Top Stories" or "Best Stories" from Hacker News via the official Firebase API. For the first 10 stories in the selected list, it:

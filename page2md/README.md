@@ -2,6 +2,8 @@
 
 This tool is a browser bookmarklet that converts the content of the current web page, or a user's selection on that page, into Markdown format. The resulting Markdown is automatically copied to the clipboard.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 The "Page to Markdown" bookmarklet provides a quick way to grab web content and convert it into clean Markdown. It prioritizes content intelligently:

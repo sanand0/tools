@@ -32,9 +32,8 @@ const ui = {
   background: qs("background"),
 };
 
-let aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
 ui.configBtn.addEventListener("click", async () => {
-  aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
+  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
 });
 
 let baseImage = null;
@@ -147,7 +146,7 @@ const buildPrompt = (p) =>
   history.length ? `${p}.\n\nFor context, here are previous messages:\n\n${history.join("\n")}\n\n${p}` : p;
 
 async function makeRequest(prompt, opts) {
-  const { apiKey, baseURL } = aiConfig;
+  const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
   if (!apiKey) {
     bootstrapAlert({ title: "OpenAI key missing", body: "Configure your key", color: "warning" });
     return null;
@@ -161,13 +160,13 @@ async function makeRequest(prompt, opts) {
     form.append("n", "1");
     Object.entries(opts).forEach(([k, v]) => form.append(k, v));
     form.append("image", blob, "image.png");
-    return fetch(`${baseURL}/images/${endpoint}`, {
+    return fetch(`${baseUrl}/images/${endpoint}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}` },
       body: form,
     });
   }
-  return fetch(`${baseURL}/images/${endpoint}`, {
+  return fetch(`${baseUrl}/images/${endpoint}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

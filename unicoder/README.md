@@ -2,6 +2,8 @@
 
 This tool converts standard Markdown syntax into text styled with special Unicode characters. This allows you to create visually distinct text (e.g., bold, italic, monospace) that can be used on platforms that don't support traditional rich text formatting but do render a wide range of Unicode characters.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 The "Markdown to Unicode Converter" takes Markdown input from the user and applies specific Unicode character substitutions to simulate common formatting styles:

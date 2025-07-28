@@ -14,9 +14,8 @@ const copyBtn = document.getElementById("copyBtn");
 saveform("#speakForm", { exclude: '[type="file"]' });
 const readBtn = document.getElementById("readBtn");
 
-let aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
 openaiConfigBtn.addEventListener("click", async () => {
-  aiConfig = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
+  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
 });
 
 let utterance;
@@ -30,11 +29,10 @@ function speak(text) {
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   const content = markdownInput.value.trim();
-  const { apiKey, baseURL } = aiConfig;
+  const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
   if (!content || !apiKey) return;
   htmlOutput.innerHTML = "";
   loading.classList.remove("d-none");
-  const baseUrl = baseURL;
   let model = modelSelect.value;
   if (model.startsWith("openai/") && baseUrl.includes("api.openai.com")) model = model.replace("openai/", "");
   const temperature = 0.3;

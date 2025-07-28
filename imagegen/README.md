@@ -2,6 +2,8 @@
 
 Interactively generate and modify images using OpenAI's `gpt-image-1` model. Optionally upload an image or paste a URL, describe the changes you want, and chat to refine the result. A few sample images are loaded from `config.json` to try out the tool quickly.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 1. **Image Selection**

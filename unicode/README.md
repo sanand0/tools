@@ -2,6 +2,8 @@
 
 This tool helps users identify, view, and copy non-ASCII Unicode characters present in a given text. It provides a clear display of each unique non-ASCII character along with its hexadecimal and decimal Unicode code points.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 The Unicode Character Viewer processes text input (either from a textarea or the system clipboard) and extracts all unique characters whose Unicode code points are greater than 127 (i.e., characters outside the standard ASCII range). For each such character, it displays:

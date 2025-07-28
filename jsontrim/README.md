@@ -2,6 +2,8 @@
 
 This tool recursively traverses a JSON object or array and truncates string values that exceed a user-specified maximum length.
 
+![Screenshot](screenshot.webp)
+
 ## What it does
 
 The JSON String Trimmer processes an input JSON structure. For every string value found within the JSON (whether at the top level or nested within objects or arrays), it checks if its length is greater than the defined maximum. If it is, the string is shortened to this maximum length. Other data types (numbers, booleans, nulls, objects, arrays themselves) are preserved, though strings within nested structures are also subject to trimming.
