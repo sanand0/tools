@@ -28,7 +28,7 @@ function createCharacterButton(char) {
 
   const button = document.createElement("button");
   button.className = "btn btn-outline-secondary char-btn";
-  button.innerHTML = `
+  button.innerHTML = /* html */ `
         <div class="char-display">${char}</div>
         <div class="text-muted">
           <div class="hex-value">U+${hex}</div>

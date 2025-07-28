@@ -130,7 +130,7 @@ ui.printBtn.onclick = () => window.print();
 function createCard(caption, ratioClass, ratioStyle) {
   ui.log.insertAdjacentHTML(
     "beforeend",
-    `<div class="col-md-6 col-lg-4 col-xl-3">
+    /* html */ `<div class="col-md-6 col-lg-4 col-xl-3">
        <div class="card overflow-hidden p-0 text-center position-relative h-100">
          <div class="card-header text-bg-warning small opacity-75 px-2 py-1" contenteditable="true">${caption}</div>
          <div class="card-body d-flex justify-content-center align-items-center h-100 p-0 ${ratioClass}" style="${ratioStyle}"></div>
@@ -256,7 +256,7 @@ async function run() {
       const b64 = data.data?.[0]?.b64_json;
       if (!b64) throw new Error("No image returned");
       const imgUrl = `data:image/${ui.format.value};base64,${b64}`;
-      body.innerHTML = `<img src="${imgUrl}" title="${caption}" alt="${caption}" class="w-100 h-100 object-fit-cover">`;
+      body.innerHTML = /* html */ `<img src="${imgUrl}" title="${caption}" alt="${caption}" class="w-100 h-100 object-fit-cover">`;
       times.push((performance.now() - t0) / 1000);
       index++;
       updateProgress(index, panels.length);

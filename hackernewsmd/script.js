@@ -29,7 +29,7 @@ function updateProgress(current, total) {
 function displayError(message) {
   const alertDiv = document.createElement("div");
   alertDiv.className = "alert alert-danger alert-dismissible fade show";
-  alertDiv.innerHTML = `
+  alertDiv.innerHTML = /* html */ `
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
               `;

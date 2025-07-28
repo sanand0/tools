@@ -44,7 +44,7 @@
     },
     {
       "icon": "bi-image",
-      "title": "AI Image Chat",
+      "title": "Image Generator",
       "description": "Chat to generate or update images",
       "url": "imagegen",
       "created": "2025-07-22T00:00:00+00:00"
