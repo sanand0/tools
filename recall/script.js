@@ -40,10 +40,7 @@ let index = 0;
 let starOnly = false;
 
 files.forEach((f) =>
-  fileSelect.insertAdjacentHTML(
-    "beforeend",
-    /* html */ `<option value="${f.url}">${f.name}</option>`,
-  ),
+  fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="${f.url}">${f.name}</option>`),
 );
 
 async function load(url) {

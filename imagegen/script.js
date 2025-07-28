@@ -1,4 +1,5 @@
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
+import { openaiHelp } from "../common/aiconfig.js";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 
 const DEFAULT_BASE_URLS = [
@@ -33,7 +34,7 @@ const ui = {
 };
 
 ui.configBtn.addEventListener("click", async () => {
-  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
+  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true, help: openaiHelp });
 });
 
 let baseImage = null;
@@ -108,7 +109,7 @@ function addUserCard(text) {
          <h5 class="h5 mb-0 flex-grow-1">${text}</h5>
          <button class="btn-close ms-2" aria-label="Delete"></button>
        </div>
-     </div>`
+     </div>`,
   );
   const card = ui.log.lastElementChild;
   addHover(card);
@@ -127,7 +128,7 @@ function addImageCard(url) {
            <i class="bi bi-download"></i>
          </a>
        </div>
-     </div>`
+     </div>`,
   );
   addHover(ui.log.lastElementChild);
   ui.log.scrollTop = ui.log.scrollHeight;
@@ -146,7 +147,7 @@ const buildPrompt = (p) =>
   history.length ? `${p}.\n\nFor context, here are previous messages:\n\n${history.join("\n")}\n\n${p}` : p;
 
 async function makeRequest(prompt, opts) {
-  const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
+  const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
   if (!apiKey) {
     bootstrapAlert({ title: "OpenAI key missing", body: "Configure your key", color: "warning" });
     return null;
@@ -278,7 +279,7 @@ fetch("config.json")
              <img src="${image}" class="card-img-top object-fit-cover" style="height:120px" alt="${title}">
              <div class="card-body p-2"><small class="card-title">${title}</small></div>
            </div>
-         </div>`
+         </div>`,
       );
       addHover(ui.samples.lastElementChild.querySelector(".card"));
     });

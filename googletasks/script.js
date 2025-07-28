@@ -54,7 +54,7 @@ const mergeSubtasks = (arr) => {
   });
   return Object.values(byId)
     .filter((t) => !t.parent)
-    .map(({ children, ...rest }) => rest);
+    .map(({ children: _, ...rest }) => rest);
 };
 
 const alerts = document.getElementById("alertContainer");

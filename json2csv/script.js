@@ -50,7 +50,6 @@ const jsonToCsv = (jsonStringInput, toTsv = false) => {
 
 const displayCsvTable = (csv) => csvToTable($output, csv);
 
-
 $convertBtn.addEventListener("click", () => {
   try {
     const jsonStringInput = $jsonInput.value.trim();

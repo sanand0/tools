@@ -4,6 +4,7 @@ import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
+import { openrouterHelp } from "../common/aiconfig.js";
 
 const DEFAULT_BASE_URLS = ["https://openrouter.ai/api/v1", "https://aipipe.org/openrouter/v1"];
 
@@ -40,7 +41,7 @@ const copyResponseButton = document.getElementById("copyResponse");
 saveform("#googlesuggest-form", { exclude: '[type="file"]' });
 
 openaiConfigBtn.addEventListener("click", async () => {
-  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
+  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true, help: openrouterHelp });
 });
 
 // --- Application State ---
@@ -344,7 +345,7 @@ function formatSuggestionsForLLMPrompt(suggestions, query) {
 
 async function fetchLLMExplanation(suggestions, query) {
   const model = llmModelSelect.value;
-  let { baseUrl, apiKey } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
+  let { baseUrl, apiKey } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
   if (!apiKey) {
     bootstrapAlert({ title: "Missing key", body: "Configure your OpenAI API key first.", color: "danger" });
     return;

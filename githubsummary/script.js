@@ -1,6 +1,7 @@
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
+import { openaiHelp } from "../common/aiconfig.js";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -41,7 +42,7 @@ let db = null;
 
 const openaiConfigBtn = document.getElementById("openai-config-btn");
 openaiConfigBtn.addEventListener("click", async () => {
-  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
+  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true, help: openaiHelp });
 });
 
 async function initDB() {
@@ -370,7 +371,7 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
     document.getElementById("results-section").style.display = "block";
 
     // Generate summary
-    const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
+    const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
     await generateSummary({ activity, repos, context }, config.systemPrompt, apiKey, baseUrl);
   } catch (error) {
     showError(error.message);

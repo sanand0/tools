@@ -59,7 +59,7 @@ function showTable(push = true) {
   wrap.className = "container py-4";
   const list = filterEntries().slice();
   if (sortKey) list.sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : -1) * (sortAsc ? 1 : -1));
-  const vals = [...entries.map((e) => e.overall)].sort((a, b) => b - a);
+  const vals = entries.map((e) => e.overall).sort((a, b) => b - a);
   const top = vals[0];
   const second = vals.find((v) => v < top);
   const rows = list

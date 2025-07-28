@@ -170,8 +170,8 @@ button.btn-primary {
 
 /* Hide temporary chat and Get Plus buttons */
 button[aria-label="Turn on temporary chat"],
-button.flex.items-center.rounded-full.bg-\[\#F1F1FB\],
-button.dark\:bg-\[\#373669\] {
+button.flex.items-center.rounded-full.bg-[#F1F1FB],
+button.dark:bg-[#373669] {
   display: none !important;
 }
 

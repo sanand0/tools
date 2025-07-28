@@ -1,5 +1,6 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1.1";
+import { openaiHelp } from "../common/aiconfig.js";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3/+esm";
 
@@ -35,7 +36,7 @@ const ui = {
 };
 
 ui.configBtn.addEventListener("click", async () => {
-  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
+  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true, help: openaiHelp });
 });
 
 let baseFile = null;
@@ -138,7 +139,9 @@ function createCard(caption, ratioClass, ratioStyle) {
 
 function setSpinner(card, show) {
   const body = card.querySelector(".card-body");
-  body.innerHTML = show ? '<div class="d-flex justify-content-center align-items-center"><div class="spinner-border"></div></div>' : "";
+  body.innerHTML = show
+    ? '<div class="d-flex justify-content-center align-items-center"><div class="spinner-border"></div></div>'
+    : "";
 }
 
 async function downloadZip() {
@@ -160,7 +163,7 @@ async function downloadZip() {
 }
 
 async function requestImage(prompt, refs, opts) {
-  const { apiKey, baseURL } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
+  const { apiKey, baseURL } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
   if (!apiKey) {
     bootstrapAlert({
       title: "OpenAI key missing",

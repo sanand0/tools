@@ -1,5 +1,6 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
+import { openaiHelp } from "../common/aiconfig.js";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -35,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resetSettingsBtn = document.getElementById("resetSettingsBtn");
 
   openaiConfigBtn.addEventListener("click", async () => {
-    await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true });
+    await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true, openaiHelp });
   });
 
   // Function to show alerts
@@ -93,7 +94,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Generate Script
   generateScriptBtn.addEventListener("click", async () => {
     const content = contentInput.value.trim();
-    const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS });
+    const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
     const model = modelInput.value.trim();
 
     if (!content) return showAlert("Please enter some content to convert to a podcast.");
