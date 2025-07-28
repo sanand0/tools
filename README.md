@@ -19,7 +19,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[Podcast](./podcast/)**: Automates the creation of a two-person podcast episode, from script generation to audio synthesis, using Large Language Models (LLMs).
 - **[Recall](./recall/)**: Randomly recall list items from Markdown.
 - **[Daydream](./daydream/)**: Browse and rate creative ideas stored as JSONL.
-- **[AI Image Chat](./imagegen/)**: Chat to generate or update images.
+- **[Image Generator](./imagegen/)**: Chat to generate or update images.
 - **[PicBook](./picbook/)**: Generate a sequence of images from multiline captions.
 - **[SpeakMD](./speakmd/)**: Converts Markdown into conversational text suitable for audio narration.
 - **[Quotes Arena](./quotesarena/)**: A web application that allows users to compare short, AI-generated quotes side-by-side and vote for their preferred one, tracking AI model performance.
@@ -73,32 +73,6 @@ The site is automatically deployed to GitHub Pages when changes are pushed to th
 - `tools.js` - Dynamic tool card generator
 - `tools.json` - Tool metadata
 - `/[tool-name]/` - Individual tool directories, with an `index.html` and ESM `script.js` imported as `<script type="module" src="script.js"></script>`
-
-## Coding rules
-
-- Write SHORT, CONCISE, READABLE code
-- Deduplicate maximally. Use iteration, higher-order functions, vectorization
-- Avoid try blocks unless the operation is error-prone
-- Validate early. Use the if-return pattern. Avoid unnecessary else statements
-- Keep configurations in separate config files, not code (.env, config.json, config.toml)
-- Keep files under ~500 lines, split logically
-- When modifying code, follow existing style. Retain existing comments.
-- Use ESM: <script type="module">
-- No TypeScript. Only JavaScript
-- Use MODERN JavaScript. Minimize libraries
-- Use hyphenated HTML class/ID names (id="user-id" not id="userId")
-- For single line if / for statements, avoid { blocks }
-- Show errors to the user (beautifully). Avoid console.error()
-- Use .insertAdjacentHTML / .replaceChildren (or lit-html). Avoid document.createElement
-- Use Bootstrap classes for CSS. Avoid custom CSS
-- Use D3 for data visualization
-- Add a favicon like in /index.html
-- Use [saveform](./https://www.npmjs.com/package/saveform) to save form data, like in githubsummary/
-- Let users pick their own OpenAI API key / base like in podcast/
-- Use [asyncllm](./https://www.npmjs.com/package/asyncllm) to stream LLM calls
-- Import common code from common/ and keep JSON/CSV conversions, error reporting, LLM calls, etc. in common/
-- When in doubt, check other tools and follow the same style
-- Lint using `npm run lint`
 
 ## License
 

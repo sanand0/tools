@@ -39,7 +39,12 @@ let view = [];
 let index = 0;
 let starOnly = false;
 
-files.forEach((f) => fileSelect.insertAdjacentHTML("beforeend", `<option value="${f.url}">${f.name}</option>`));
+files.forEach((f) =>
+  fileSelect.insertAdjacentHTML(
+    "beforeend",
+    /* html */ `<option value="${f.url}">${f.name}</option>`,
+  ),
+);
 
 async function load(url) {
   content.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
@@ -109,7 +114,7 @@ copyBtn.onclick = async () => {
 starBtn.onclick = () => {
   starOnly = !starOnly;
   starBtn.className = `btn btn-${starOnly ? "warning" : "outline-warning"} btn-sm`;
-  starBtn.innerHTML = `<i class="bi bi-${starOnly ? "star-fill" : "star"}"></i>`;
+  starBtn.innerHTML = /* html */ `<i class="bi bi-${starOnly ? "star-fill" : "star"}"></i>`;
   applyFilter();
 };
 

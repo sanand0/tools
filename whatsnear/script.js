@@ -95,7 +95,7 @@ async function displayAttractions(attractions) {
     const description = await getAttractionDescription(attraction);
     const card = document.createElement("div");
     card.className = "card attraction-card";
-    card.innerHTML = `
+    card.innerHTML = /* html */ `
                   <div class="card-body">
                       <h5 class="card-title">${attraction.tags.name || "Unnamed Attraction"}</h5>
                       <p class="card-text">${marked.parse(description)}</p>

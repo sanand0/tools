@@ -29,11 +29,11 @@ const getAgeColor = (dateString) => {
 const toolCard = ({ icon, title, description, url, created }) => /* html */ `
   <div class="col-md-6 col-lg-4 col-xl-3">
     <div class="card h-100">
-      <a href="${url}" class="card-body text-decoration-none">
+      <a href="${url}" class="card-body d-flex flex-column text-decoration-none">
         <i class="bi ${icon} fs-2 text-primary mb-3"></i>
         <h5 class="card-title">${title}</h5>
-        <p class="card-text">${description}</p>
-        ${created ? `<small class="text-muted"><i class="bi bi-circle-fill ${getAgeColor(created)} me-1"></i>Created: ${formatDate(created)}</small>` : ""}
+        <p class="card-text flex-grow-1">${description}</p>
+        ${created ? `<small class="text-muted mt-auto"><i class="bi bi-circle-fill ${getAgeColor(created)} me-1"></i>Created: ${formatDate(created)}</small>` : ""}
       </a>
     </div>
   </div>
@@ -83,7 +83,7 @@ const renderTools = () => {
 document.querySelector("#tools-container").innerHTML = /* html */ `
   <div class="d-flex justify-content-center mb-4">
     <div class="btn-group" role="group">
-      <button type="button" class="btn btn-primary sort-btn" data-sort="default">Default</button>
+      <button type="button" class="btn btn-primary sort-btn" data-sort="default">Useful</button>
       <button type="button" class="btn btn-outline-primary sort-btn" data-sort="alphabetical">A-Z</button>
       <button type="button" class="btn btn-outline-primary sort-btn" data-sort="date">By Date</button>
     </div>

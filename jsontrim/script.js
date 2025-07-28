@@ -10,7 +10,7 @@ saveform("#jsontrim-form");
 
 // Show error message
 function showError(message) {
-  errorContainer.innerHTML = `
+  errorContainer.innerHTML = /* html */ `
               <div class="alert alert-danger alert-dismissible fade show" role="alert">
                   <i class="bi bi-exclamation-triangle-fill"></i> ${message}
                   <button type="button" class="btn-close" data-bs-dismiss="alert"></button>

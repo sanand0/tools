@@ -74,7 +74,7 @@ filesInput.addEventListener("change", async () => {
       const td = document.createElement("td");
       const data = activities.get(date)?.get(sport);
       if (data) {
-        td.innerHTML = `
+        td.innerHTML = /* html */ `
               ${(data.distance / 1000).toFixed(2)} km<br>
               ${Math.floor(data.time / 60)}m ${Math.round(data.time % 60)}s<br>
               ${Math.round(data.calories)} cal

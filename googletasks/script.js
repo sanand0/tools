@@ -73,7 +73,7 @@ saveform("#googletasks-form", { exclude: '[type="file"], [type="button"]' });
 function showAlert(message, type = "info", autoClose = false) {
   alerts.insertAdjacentHTML(
     "beforeend",
-    `<div class="alert alert-${type} alert-dismissible fade show">${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`,
+    /* html */ `<div class="alert alert-${type} alert-dismissible fade show">${message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`,
   );
   const alert = alerts.lastElementChild;
   if (autoClose) setTimeout(() => alert.remove(), 3000);

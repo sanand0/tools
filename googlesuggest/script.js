@@ -266,7 +266,7 @@ async function fetchGoogleSuggestions(query) {
     explainButton.disabled = false;
     addToSearchHistory(query);
   } else {
-    resultsDiv.innerHTML = `<p class="text-danger">Could not fetch any valid suggestions for "${query}". Please check your internet connection or try a different query.</p>`;
+    resultsDiv.innerHTML = /* html */ `<p class="text-danger">Could not fetch any valid suggestions for "${query}". Please check your internet connection or try a different query.</p>`;
     currentSuggestions = null;
     explainButton.disabled = true;
   }
@@ -394,7 +394,7 @@ async function fetchLLMExplanation(suggestions, query) {
     }
   } catch (error) {
     console.error("LLM API Error:", error);
-    llmResponseDiv.innerHTML = `<p class="text-danger">Error fetching explanation: ${error.message}. Check console.</p>`;
+    llmResponseDiv.innerHTML = /* html */ `<p class="text-danger">Error fetching explanation: ${error.message}. Check console.</p>`;
   } finally {
     setLoadingState("llm", false);
   }

@@ -97,7 +97,7 @@ function createModelCanvas(modelName) {
   const container = document.getElementById("modelResults");
   container.insertAdjacentHTML(
     "beforeend",
-    `
+    /* html */ `
         <canvas id="canvas-${modelName}" class="img-fluid"></canvas>
         <table id="table-${modelName}" class="table table-striped mt-2">
           <thead>
@@ -258,7 +258,7 @@ function drawBoundingBoxes(ctx, objects, model) {
     // Add table row
     tbody.insertAdjacentHTML(
       "beforeend",
-      `
+      /* html */ `
           <tr>
             <td>${label}</td>
             <td>${color}</td>
