@@ -231,6 +231,13 @@
       "created": "2024-11-02T00:01:59+08:00"
     },
     {
+      "icon": "bi-sliders",
+      "title": "AWS Configurator",
+      "description": "Chat to choose AWS services for your project.",
+      "url": "configurator",
+      "created": "2025-07-23T00:00:00+00:00"
+    },
+    {
       "icon": "bi-markdown-fill",
       "title": "Render Markdown",
       "description": "Render Markdown to HTML using the GitHub Markdown API.",
