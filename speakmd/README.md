@@ -2,6 +2,7 @@
 
 SpeakMD converts Markdown into a conversational script that is easy to narrate aloud. It streams the conversion through a Large Language Model so you can watch the text appear in real time.
 
+To use this tool you'll need an [OpenAI API key](https://platform.openai.com/account/api-keys). The key stays in your browser and is never stored on any server. Check [the code](script.js) to confirm. Straive employees can visit [LLM Foundry](https://llmfoundry.straive.com/code) for a token.
 ## What it does
 
 1. **Paste Markdown:** Provide any Markdown text in the input box.

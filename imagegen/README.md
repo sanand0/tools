@@ -2,6 +2,8 @@
 
 Interactively generate and modify images using OpenAI's `gpt-image-1` model. Optionally upload an image or paste a URL, describe the changes you want, and chat to refine the result. A few sample images are loaded from `config.json` to try out the tool quickly.
 
+To use this tool you'll need an [OpenAI API key](https://platform.openai.com/account/api-keys). The key stays in your browser and is never stored on any server. Check [the code](script.js) to confirm. Straive employees can visit https://llmfoundry.straive.com/code for a token.
+
 ## What it does
 
 1. **Image Selection**

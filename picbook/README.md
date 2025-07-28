@@ -2,6 +2,18 @@
 
 PicBook turns a list of short captions into a sequence of images while keeping the style consistent. You can provide a reference image or URL as inspiration, add some context about the story and desired style, and then generate one panel per line.
 
+PicBook quickly generates a cohesive series of images from your captions. It certainly can produce comic books, but the same approach also works for:
+
+- marketing storyboards
+- product tour slides
+- training or onboarding modules
+- process documentation
+- consistent presentation graphics
+- personal comic strips
+
+To use the tool you'll need an [OpenAI API key](https://platform.openai.com/account/api-keys). Your key stays in your browser and is never sent anywhere. Check [the code](index.html) to verify. Straive employees can visit [LLM Foundry](https://llmfoundry.straive.com/code) for a token.
+
+
 ## What it does
 
 1. **Context and Panels**
