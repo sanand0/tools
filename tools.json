@@ -1,103 +1,6 @@
 {
   "tools": [
     {
-      "icon": "bi-braces",
-      "title": "JSON to CSV",
-      "description": "Convert arrays of JSON objects to CSV format.",
-      "url": "json2csv",
-      "created": "2024-11-01T20:02:17+08:00"
-    },
-    {
-      "icon": "bi-whatsapp",
-      "title": "WhatsApp Scraper",
-      "description": "Scrape WhatsApp chat messages into JSON",
-      "url": "whatsappscraper",
-      "created": "2025-05-11T15:46:35+05:30"
-    },
-    {
-      "icon": "bi-whatsapp",
-      "title": "WhatsApp Thread Viewer",
-      "description": "View WhatsApp chat messages in a threaded discussion",
-      "url": "whatsappview",
-      "created": "2025-05-11T16:15:54+05:30"
-    },
-    {
-      "icon": "bi-mic",
-      "title": "Podcast Generator",
-      "description": "Generate podcasts from text using LLMs",
-      "url": "podcast",
-      "created": "2025-05-20T11:08:17+08:00"
-    },
-    {
-      "icon": "bi-clock-history",
-      "title": "Recall",
-      "description": "Randomly recall list items from Markdown",
-      "url": "recall",
-      "created": "2025-07-18T00:00:00+00:00"
-    },
-    {
-      "icon": "bi-moon-stars",
-      "title": "Daydream",
-      "description": "View and sort creative ideas from a JSONL file",
-      "url": "daydream",
-      "created": "2025-07-17T22:24:13+08:00"
-    },
-    {
-      "icon": "bi-image",
-      "title": "Image Generator",
-      "description": "Chat to generate or update images",
-      "url": "imagegen",
-      "created": "2025-07-22T00:00:00+00:00"
-    },
-    {
-      "icon": "bi-book",
-      "title": "PicBook",
-      "description": "Create a sequence of images from captions",
-      "url": "picbook",
-      "created": "2025-07-23T00:00:00+00:00"
-    },
-    {
-      "icon": "bi-headset",
-      "title": "SpeakMD",
-      "description": "Turn Markdown into conversational text",
-      "url": "speakmd",
-      "created": "2025-06-04T11:25:48+08:00"
-    },
-    {
-      "icon": "bi-openai",
-      "title": "Straive Intelligence",
-      "description": "Bookmarklet to convert ChatGPT into a Straive-style user interface",
-      "url": "straiveintelligence",
-      "created": "2025-07-21T15:15:43+08:00"
-    },
-    {
-      "icon": "bi-github",
-      "title": "GitHub Summary",
-      "description": "Summarize all activity by a user over a time period",
-      "url": "githubsummary",
-      "created": "2025-05-22T15:28:43+08:00"
-    },
-    {
-      "icon": "bi-file-excel",
-      "title": "Excel to JSONL",
-      "description": "Convert Excel data to JSONL format.",
-      "url": "excel2jsonl",
-      "created": "2024-11-01T20:02:17+08:00"
-    },
-    {
-      "icon": "bi-image",
-      "title": "Image Compressor",
-      "description": "Compress images to WebP pasting them anywhere on the page.",
-      "url": "clipimg"
-    },
-    {
-      "icon": "bi-code-slash",
-      "title": "JSON Trimmer",
-      "description": "Trim JSON strings to a specified length.",
-      "url": "jsontrim",
-      "created": "2024-12-07T07:40:42+05:30"
-    },
-    {
       "icon": "bi-code",
       "title": "Unicoder",
       "description": "Convert Markdown to text to unicode equivalent with formatting.",
@@ -105,31 +8,46 @@
       "created": "2025-05-20T18:56:01+08:00"
     },
     {
-      "icon": "bi-bounding-box",
-      "title": "Unicode Characters",
-      "description": "Find non-ASCII Unicode characters in the clipboard",
-      "url": "unicode",
-      "created": "2024-12-07T08:55:00+05:30"
+      "icon": "bi-clock-history",
+      "title": "Recall",
+      "description": "Randomly recall list items from Markdown.",
+      "url": "recall",
+      "created": "2025-07-18T00:00:00+00:00"
     },
     {
       "icon": "bi-mic",
-      "title": "Transcribe Audio",
-      "description": "Transcribe audio from the speakers and microphone.",
-      "url": "transcribe",
-      "created": "2024-12-11T11:16:08+05:30"
+      "title": "Podcast Generator",
+      "description": "Generate podcasts from text using LLMs.",
+      "url": "podcast",
+      "created": "2025-05-20T11:08:17+08:00"
     },
     {
-      "icon": "bi-table",
-      "title": "Join CSV Tables",
-      "description": "Join multiple tables on the first column.",
-      "url": "joincsv",
-      "created": "2025-06-10T09:38:18+00:00"
+      "icon": "bi-image",
+      "title": "Image Generator",
+      "description": "Chat to generate or update images.",
+      "url": "imagegen",
+      "created": "2025-07-22T00:00:00+00:00"
     },
     {
-      "icon": "bi-markdown-fill",
-      "title": "Render Markdown",
-      "description": "Render Markdown to HTML using the GitHub Markdown API.",
-      "url": "https://tools.simonwillison.net/render-markdown"
+      "icon": "bi-moon-stars",
+      "title": "Daydream",
+      "description": "View and sort creative ideas from a JSONL file.",
+      "url": "daydream",
+      "created": "2025-07-17T22:24:13+08:00"
+    },
+    {
+      "icon": "bi-braces",
+      "title": "JSON to CSV",
+      "description": "Convert arrays of JSON objects to CSV format.",
+      "url": "json2csv",
+      "created": "2024-11-01T20:02:17+08:00"
+    },
+    {
+      "icon": "bi-book",
+      "title": "PicBook",
+      "description": "Create a sequence of images from captions.",
+      "url": "picbook",
+      "created": "2025-07-23T00:00:00+00:00"
     },
     {
       "icon": "bi-markdown",
@@ -139,11 +57,66 @@
       "created": "2024-12-21T17:15:17+08:00"
     },
     {
-      "icon": "bi-file-slides-fill",
-      "title": "RevealJS Slides",
-      "description": "Convert Markdown to RevealJS HTML",
-      "url": "revealjs",
-      "created": "2025-02-18T17:18:18-05:00"
+      "icon": "bi-code",
+      "title": "GitHub Stars",
+      "description": "Replaces GitHub links in Markdown with the repo name, stars, and last pushed date.",
+      "url": "githubstars",
+      "created": "2025-04-28T11:32:38+08:00"
+    },
+    {
+      "icon": "bi-check2-square",
+      "title": "Google Tasks",
+      "description": "Download all your Google Tasks as CSV or Markdown and delete completed tasks.",
+      "url": "googletasks"
+    },
+    {
+      "icon": "bi-whatsapp",
+      "title": "WhatsApp Scraper",
+      "description": "Scrape WhatsApp chat messages into JSON.",
+      "url": "whatsappscraper",
+      "created": "2025-05-11T15:46:35+05:30"
+    },
+    {
+      "icon": "bi-openai",
+      "title": "Straive Intelligence",
+      "description": "Bookmarklet to convert ChatGPT into a Straive-style user interface.",
+      "url": "straiveintelligence",
+      "created": "2025-07-21T15:15:43+08:00"
+    },
+    {
+      "icon": "bi-github",
+      "title": "GitHub Summary",
+      "description": "Summarize all activity by a user over a time period.",
+      "url": "githubsummary",
+      "created": "2025-05-22T15:28:43+08:00"
+    },
+    {
+      "icon": "bi-table",
+      "title": "Join CSV Tables",
+      "description": "Join multiple tables on the first column.",
+      "url": "joincsv",
+      "created": "2025-06-10T09:38:18+00:00"
+    },
+    {
+      "icon": "bi-search-heart",
+      "title": "Google Suggest Explorer",
+      "description": "Explore Google Search suggestions from different countries and get AI-powered humorous explanations.",
+      "url": "googlesuggest",
+      "created": "2025-06-03T22:05:52+08:00"
+    },
+    {
+      "icon": "bi-github",
+      "title": "GitHub Users",
+      "description": "Get information about GitHub users.",
+      "url": "githubusers",
+      "created": "2024-11-07T23:22:11+08:00"
+    },
+    {
+      "icon": "bi-bounding-box",
+      "title": "Unicode Characters",
+      "description": "Find non-ASCII Unicode characters in the clipboard.",
+      "url": "unicode",
+      "created": "2024-12-07T08:55:00+05:30"
     },
     {
       "icon": "bi-newspaper",
@@ -160,11 +133,74 @@
       "created": "2025-06-03T08:43:21+00:00"
     },
     {
-      "icon": "bi-search-heart",
-      "title": "Google Suggest Explorer",
-      "description": "Explore Google Search suggestions from different countries and get AI-powered humorous explanations.",
-      "url": "googlesuggest",
-      "created": "2025-06-03T22:05:52+08:00"
+      "icon": "bi-person-walking",
+      "title": "Google Fit",
+      "description": "Upload Google Fit activity data and see a summary of the activity data by date.",
+      "url": "googlefit",
+      "created": "2025-04-01T11:09:14+08:00"
+    },
+    {
+      "icon": "bi-code-slash",
+      "title": "JSON Trimmer",
+      "description": "Trim JSON strings to a specified length.",
+      "url": "jsontrim",
+      "created": "2024-12-07T07:40:42+05:30"
+    },
+    {
+      "icon": "bi-table",
+      "title": "Markdown to CSV",
+      "description": "Extract the first Markdown table and download it as CSV. Useful to extract from ChatGPT",
+      "url": "md2csv",
+      "created": "2025-06-10T09:30:00+00:00"
+    },
+    {
+      "icon": "bi-file-excel",
+      "title": "Excel to JSONL",
+      "description": "Convert Excel data to JSONL format.",
+      "url": "excel2jsonl",
+      "created": "2024-11-01T20:02:17+08:00"
+    },
+    {
+      "icon": "bi-mic",
+      "title": "Transcribe Audio",
+      "description": "Transcribe audio from the speakers and microphone.",
+      "url": "transcribe",
+      "created": "2024-12-11T11:16:08+05:30"
+    },
+    {
+      "icon": "bi-headset",
+      "title": "SpeakMD",
+      "description": "Turn Markdown into conversational text. Useful to read out copied ChatGPT output.",
+      "url": "speakmd",
+      "created": "2025-06-04T11:25:48+08:00"
+    },
+    {
+      "icon": "bi-file-slides-fill",
+      "title": "RevealJS Slides",
+      "description": "Convert Markdown to RevealJS HTML.",
+      "url": "revealjs",
+      "created": "2025-02-18T17:18:18-05:00"
+    },
+    {
+      "icon": "bi-whatsapp",
+      "title": "WhatsApp Thread Viewer",
+      "description": "View WhatsApp chat messages in a threaded discussion.",
+      "url": "whatsappview",
+      "created": "2025-05-11T16:15:54+05:30"
+    },
+    {
+      "icon": "bi-whatsapp",
+      "title": "WhatsApp",
+      "description": "Enter a mobile number and open a WhatsApp chat to them.",
+      "url": "whatsapp",
+      "created": "2025-02-02T21:32:15+05:30"
+    },
+    {
+      "icon": "bi-check-circle",
+      "title": "What Next?",
+      "description": "Prioritization matrix helping you pick what to do next.",
+      "url": "whatnext",
+      "created": "2025-02-02T21:32:15+05:30"
     },
     {
       "icon": "bi-geo-alt",
@@ -174,25 +210,18 @@
       "created": "2024-11-01T20:02:17+08:00"
     },
     {
-      "icon": "bi-check-circle",
-      "title": "What Next?",
-      "description": "Prioritization matrix helping you pick what to do next",
-      "url": "whatnext",
-      "created": "2025-02-02T21:32:15+05:30"
-    },
-    {
-      "icon": "bi-whatsapp",
-      "title": "WhatsApp",
-      "description": "Enter a mobile number and open a WhatsApp chat to them",
-      "url": "whatsapp",
-      "created": "2025-02-02T21:32:15+05:30"
-    },
-    {
       "icon": "bi-bicycle",
       "title": "SG Bike Park",
-      "description": "Find out where to park your bicycle nearby in Singapore",
+      "description": "Find out where to park your bicycle nearby in Singapore.",
       "url": "sgbikepark",
       "created": "2025-02-02T21:32:15+05:30"
+    },
+    {
+      "icon": "bi-quote",
+      "title": "Quotes arena",
+      "description": "Evaluate quotes from different models and see which one wins.",
+      "url": "quotesarena",
+      "created": "2025-03-30T09:18:58+08:00"
     },
     {
       "icon": "bi-bounding-box",
@@ -202,51 +231,16 @@
       "created": "2024-11-02T00:01:59+08:00"
     },
     {
-      "icon": "bi-github",
-      "title": "GitHub Users",
-      "description": "Get information about GitHub users.",
-      "url": "githubusers",
-      "created": "2024-11-07T23:22:11+08:00"
-    },
-    {
-      "icon": "bi-code",
-      "title": "GitHub Stars",
-      "description": "Replaces GitHub links in Markdown with the repo name, stars, and last pushed date.",
-      "url": "githubstars",
-      "created": "2025-04-28T11:32:38+08:00"
-    },
-    {
-      "icon": "bi-person-walking",
-      "title": "Google Fit",
-      "description": "Upload Google Fit activity data and see a summary of the activity data by date.",
-      "url": "googlefit",
-      "created": "2025-04-01T11:09:14+08:00"
+      "icon": "bi-markdown-fill",
+      "title": "Render Markdown",
+      "description": "Render Markdown to HTML using the GitHub Markdown API.",
+      "url": "https://tools.simonwillison.net/render-markdown"
     },
     {
       "icon": "bi-youtube",
       "title": "YouTube Thumbnails",
       "description": "Get YouTube video thumbnails.",
       "url": "https://tools.simonwillison.net/youtube-thumbnails"
-    },
-    {
-      "icon": "bi-quote",
-      "title": "Quotes arena",
-      "description": "Evaluate quotes from different models and see which one wins",
-      "url": "quotesarena",
-      "created": "2025-03-30T09:18:58+08:00"
-    },
-    {
-      "icon": "bi-check2-square",
-      "title": "Google Tasks",
-      "description": "Download your Google Tasks as CSV and delete completed tasks",
-      "url": "googletasks"
-    },
-    {
-      "icon": "bi-table",
-      "title": "Markdown to CSV",
-      "description": "Extract the first Markdown table and download it as CSV",
-      "url": "md2csv",
-      "created": "2025-06-10T09:30:00+00:00"
     }
   ]
 }

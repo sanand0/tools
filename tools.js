@@ -19,7 +19,7 @@ const getAgeColor = (dateString) => {
   const now = new Date();
   const createdDate = new Date(dateString);
   const daysDiff = (now - createdDate) / (1000 * 60 * 60 * 24);
-  
+
   if (daysDiff <= 7) return "text-primary";
   if (daysDiff <= 30) return "text-success";
   if (daysDiff <= 365) return "text-warning";
@@ -83,7 +83,7 @@ const renderTools = () => {
 document.querySelector("#tools-container").innerHTML = /* html */ `
   <div class="d-flex justify-content-center mb-4">
     <div class="btn-group" role="group">
-      <button type="button" class="btn btn-primary sort-btn" data-sort="default">Useful</button>
+      <button type="button" class="btn btn-primary sort-btn" data-sort="default">Usefulness</button>
       <button type="button" class="btn btn-outline-primary sort-btn" data-sort="alphabetical">A-Z</button>
       <button type="button" class="btn btn-outline-primary sort-btn" data-sort="date">By Date</button>
     </div>
