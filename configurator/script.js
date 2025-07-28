@@ -18,6 +18,7 @@ const ui = {
   loading: qs("loading"),
   loadingMsg: qs("loading-msg"),
   configBtn: qs("openai-config-btn"),
+  exportBtn: qs("export-btn"),
 };
 
 let services = [];
@@ -61,24 +62,47 @@ const TOOL = {
 };
 
 function renderServices() {
+  const order = (s) => {
+    if (s.ai && s.user) return 1;
+    if (s.user && !s.ai) return 2;
+    if (s.ai && !s.user) return 3;
+    return 4;
+  };
   ui.list.replaceChildren();
-  services.forEach((s) => {
-    ui.list.insertAdjacentHTML(
-      "beforeend",
-      `<div class="col service" data-name="${s.name}">\n        <div class="card h-100">\n          <div class="card-body">\n            <h6 class="card-title">${s.name}</h6>\n            <p class="small text-muted mb-1">${s.description}</p>\n            <div class="rationale small text-success"></div>\n          </div>\n        </div>\n      </div>`,
-    );
-  });
+  services
+    .slice()
+    .sort((a, b) => order(a) - order(b))
+    .forEach((s) => {
+      const cls =
+        s.ai && s.user
+          ? "border-primary bg-primary-subtle"
+          : s.user && !s.ai
+            ? "border-success bg-success-subtle"
+            : s.ai && !s.user
+              ? "border-warning"
+              : "";
+      ui.list.insertAdjacentHTML(
+        "beforeend",
+        `<div class="col service" data-name="${s.name}">
+          <div class="card h-100 ${cls}">
+            <div class="card-body">
+              <h6 class="card-title">${s.name}</h6>
+              <p class="small text-muted mb-1">${s.description}</p>
+              <div class="rationale small text-success">${s.rationale || ""}</div>
+            </div>
+          </div>
+        </div>`,
+      );
+    });
 }
 
 function highlightSelections(selected) {
   const map = new Map(selected.map((s) => [s.name, s.rationale]));
-  document.querySelectorAll(".service").forEach((el) => {
-    const card = el.querySelector(".card");
-    const text = el.querySelector(".rationale");
-    const rationale = map.get(el.dataset.name);
-    card.classList.toggle("border-primary", !!rationale);
-    text.textContent = rationale || "";
+  services.forEach((s) => {
+    s.ai = map.has(s.name);
+    if (s.ai) s.rationale = map.get(s.name);
   });
+  renderServices();
 }
 
 function addUser(text) {
@@ -96,11 +120,22 @@ function addAI(selected) {
 
 async function chat(prompt) {
   messages.push({ role: "user", content: prompt });
-  const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
-  if (!apiKey) return bootstrapAlert({ title: "OpenAI key missing", body: "Configure your key", color: "warning" });
+  const { apiKey, baseUrl } = await openaiConfig({
+    defaultBaseUrls: DEFAULT_BASE_URLS,
+    help: openaiHelp,
+  });
+  if (!apiKey)
+    return bootstrapAlert({
+      title: "OpenAI key missing",
+      body: "Configure your key",
+      color: "warning",
+    });
   const resp = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
     body: JSON.stringify({
       model: "gpt-4o",
       messages,
@@ -109,25 +144,69 @@ async function chat(prompt) {
     }),
   });
   if (!resp.ok) {
-    bootstrapAlert({ title: "API error", body: `${resp.status}: ${await resp.text()}`, color: "danger" });
+    bootstrapAlert({
+      title: "API error",
+      body: `${resp.status}: ${await resp.text()}`,
+      color: "danger",
+    });
     messages.pop();
     return null;
   }
   const data = await resp.json();
   const fc = data.choices?.[0]?.message?.tool_calls?.[0];
   if (!fc) {
-    bootstrapAlert({ title: "Response error", body: "No function call", color: "danger" });
+    bootstrapAlert({
+      title: "Response error",
+      body: "No function call",
+      color: "danger",
+    });
     messages.pop();
     return null;
   }
   const args = JSON.parse(fc.function.arguments);
   messages.push({ role: "assistant", tool_calls: [fc] });
-  messages.push({ role: "tool", tool_call_id: fc.id, name: "select_services", content: JSON.stringify(args) });
+  messages.push({
+    role: "tool",
+    tool_call_id: fc.id,
+    name: "select_services",
+    content: JSON.stringify(args),
+  });
   return args.services;
 }
 
 ui.configBtn.addEventListener("click", async () => {
-  await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true, help: openaiHelp });
+  await openaiConfig({
+    defaultBaseUrls: DEFAULT_BASE_URLS,
+    show: true,
+    help: openaiHelp,
+  });
+});
+
+ui.list.addEventListener("click", (e) => {
+  const el = e.target.closest(".service");
+  if (!el) return;
+  const svc = services.find((s) => s.name === el.dataset.name);
+  svc.user = !svc.user;
+  renderServices();
+});
+
+ui.exportBtn.addEventListener("click", () => {
+  const sel = services
+    .filter((s) => s.ai || s.user)
+    .map((s) => ({
+      name: s.name,
+      description: s.description,
+      rationale: s.rationale || (s.user && !s.ai ? "Selected by user" : ""),
+      selected: s.ai || s.user,
+    }));
+  const blob = new Blob([JSON.stringify({ services: sel }, null, 2)], {
+    type: "application/json",
+  });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "services.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
 });
 
 ui.form.addEventListener("submit", async (e) => {
@@ -159,7 +238,12 @@ ui.samples.addEventListener("click", (e) => {
 fetch("config.json")
   .then((r) => r.json())
   .then((data) => {
-    services = data.services;
+    services = data.services.map((s) => ({
+      ...s,
+      ai: false,
+      user: false,
+      rationale: "",
+    }));
     renderServices();
     messages = [
       {
@@ -174,4 +258,10 @@ fetch("config.json")
       );
     });
   })
-  .catch((err) => bootstrapAlert({ title: "Config error", body: err.message, color: "danger" }));
+  .catch((err) =>
+    bootstrapAlert({
+      title: "Config error",
+      body: err.message,
+      color: "danger",
+    }),
+  );
