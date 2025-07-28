@@ -11,7 +11,7 @@ PicBook quickly generates a cohesive series of images from your captions. It cer
 - consistent presentation graphics
 - personal comic strips
 
-To use the tool you'll need an [OpenAI API key](https://platform.openai.com/account/api-keys). Your key stays in your browser and is never sent anywhere. Check [the code](index.html) to verify. Straive employees can visit [LLM Foundry](https://llmfoundry.straive.com/code) for a token.
+To use this tool you'll need an [OpenAI API key](https://platform.openai.com/account/api-keys). The key stays in your browser and is never stored on any server. Check [the code](script.js) to confirm. Straive employees can visit https://llmfoundry.straive.com/code for their token.
 
 
 ## What it does
