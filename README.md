@@ -14,6 +14,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[JSON to CSV](./json2csv/)**: Converts JSON data into Comma Separated Values (CSV) format and can also prepare data for pasting into spreadsheet applications by converting to Tab Separated Values (TSV).
 - **[PicBook](./picbook/)**: Generate a sequence of images from multiline captions.
 - **[Page to MD](./page2md/)**: A browser bookmarklet that converts the content of the current web page, or a user's selection on that page, into Markdown format, copying it to the clipboard.
+- **[Comparator](./comparator/)**: Compare LLM output against baseline for tab-delimited data.
 - **[GitHub Stars](./githubstars/)**: Updates GitHub repository links in Markdown text, replacing link text with the repository's name, star count, and last pushed date.
 - **[Google Tasks](./googletasks/)**: Download all your Google Tasks as CSV or Markdown and delete completed tasks
 - **[WhatsApp Scraper](./whatsappscraper/)**: A browser bookmarklet that allows users to scrape messages from an active WhatsApp Web chat session into JSON format.

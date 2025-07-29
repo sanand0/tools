@@ -224,6 +224,13 @@
       "created": "2025-03-30T09:18:58+08:00"
     },
     {
+      "icon": "bi-table",
+      "title": "Comparator",
+      "description": "Compare LLM output against baseline for tab-delimited data.",
+      "url": "comparator",
+      "created": "2025-07-28T00:00:00+00:00"
+    },
+    {
       "icon": "bi-bounding-box",
       "title": "LLM Bounding Boxes",
       "description": "Check how well LLMs draw object bounding boxes in images.",
