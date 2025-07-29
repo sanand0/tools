@@ -20,6 +20,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[Straive Intelligence](./straiveintelligence/)**: Bookmarklet to convert ChatGPT into a Straive-style user interface
 - **[GitHub Summary](./githubsummary/)**: Generates a blog-post-style summary of a GitHub user's activity within a specified date range.
 - **[Join CSV Tables](./joincsv/)**: Join multiple tables on the first column.
+- **[Comparator](./comparator/)**: Highlight differences between ground truth and system output using LLM.
 - **[Google Suggest Explorer](./googlesuggest/)**: Explore Google Search suggestions from different countries and get AI-powered humorous explanations.
 - **[GitHub Users](./githubusers/)**: A web-based tool that allows you to fetch publicly available information for specified GitHub users.
 - **[Unicode](./unicode/)**: Helps users identify, view, and copy non-ASCII Unicode characters present in a given text, showing their hexadecimal and decimal code points.
