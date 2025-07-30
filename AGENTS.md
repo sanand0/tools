@@ -22,5 +22,9 @@
 - Import utilities from common/ for CSV and errors (googletasks/, json2csv/, excel2jsonl/, joincsv/)
 - Include `<div class="bootstrap-dark-theme"></div>` and load bootstrap-dark-theme@1 (index.html, daydream/)
 - Lint with `npm run lint`; run tests with `npm test`; take full-page screenshots with `npm run screenshot -- tool/ tool/screenshot.webp`
+- Never commit generated images. Codex PRs ignore binary files.
+- Run a single tool's tests via `npm test -- tool/test.js`.
+- Prefer `asyncllm` for all LLM calls: `import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2"` then `for await (const chunk of asyncLLM(...)) {}`.
 
 Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1.13.1, a base64 favicon, a container with headers and forms, and a `<script type="module" src="script.js"></script>` that manipulates the DOM with Bootstrap classes.
+Each navbar includes a dark theme toggle.
