@@ -15,3 +15,7 @@ export const openrouterHelp = /* html */ `
   <div><a href="https://llmfoundry.straive.com/code" target="_blank">LLM Foundry</a>: Use <code>https://llmfoundry.straive.com/openrouter/v1</code></div>
 </div>
 `;
+
+export const llmfoundryHelp = /* html */ `
+  <p>Get the API key from <a href="https://llmfoundry.straive.com/code" target="_blank">LLM Foundry</a></p>
+`;

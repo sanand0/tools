@@ -10,6 +10,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[Recall](./recall/)**: Randomly recall list items from Markdown.
 - **[Podcast](./podcast/)**: Automates the creation of a two-person podcast episode, from script generation to audio synthesis, using Large Language Models (LLMs).
 - **[Image Generator](./imagegen/)**: Chat to generate or update images.
+- **[Postergen](./postergen/)**: Create posters and social media banners based on templates
 - **[Daydream](./daydream/)**: Browse and rate creative ideas stored as JSONL.
 - **[JSON to CSV](./json2csv/)**: Converts JSON data into Comma Separated Values (CSV) format and can also prepare data for pasting into spreadsheet applications by converting to Tab Separated Values (TSV).
 - **[PicBook](./picbook/)**: Generate a sequence of images from multiline captions.
