@@ -6,9 +6,7 @@ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
 const browser = new Browser({
   console,
-  settings: {
-    fetch: { virtualServers: [{ url: "https://test/", directory: root }] },
-  },
+  settings: { fetch: { virtualServers: [{ url: "https://test/", directory: root }] } },
 });
 
 export async function load(page, url) {
