@@ -36,7 +36,9 @@ copyBtn.addEventListener("click", async () => {
 });
 
 downloadBtn.addEventListener("click", () => {
-  const blob = new Blob([outputTextarea.value], { type: "application/x-jsonlines" });
+  const blob = new Blob([outputTextarea.value], {
+    type: "application/x-jsonlines",
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

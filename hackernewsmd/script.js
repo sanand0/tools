@@ -9,29 +9,22 @@ const storyTypeSelect = document.getElementById("storyTypeSelect");
 saveform("#hackernews-form");
 
 async function fetchJson(url) {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(r.statusText);
-  return r.json();
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  return await response.json();
 }
 
 async function fetchMarkdown(url) {
-  const r = await fetch(`https://llmfoundry.straive.com/-/markdown?n=0&url=${encodeURIComponent(url)}`);
-  if (!r.ok) throw new Error(r.statusText);
-  return r.text();
-}
-
-function startProgress(bar, total) {
-  bar.dataset.total = total;
-  bar.style.width = "0%";
-  bar.setAttribute("aria-valuenow", 0);
-  bar.textContent = "0%";
+  const response = await fetch(`https://llmfoundry.straive.com/-/markdown?n=0&url=${encodeURIComponent(url)}`);
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  return await response.text();
 }
 
 function updateProgress(current, total) {
-  const pct = (current / total) * 100;
-  progressBar.style.width = `${pct}%`;
-  progressBar.setAttribute("aria-valuenow", pct);
-  progressBar.textContent = `${Math.round(pct)}%`;
+  const percentage = (current / total) * 100;
+  progressBar.style.width = `${percentage}%`;
+  progressBar.setAttribute("aria-valuenow", percentage);
+  progressBar.textContent = `${Math.round(percentage)}%`;
 }
 
 function displayError(message) {
@@ -48,7 +41,9 @@ async function extractNews() {
   extractButton.disabled = true;
   outputTextarea.value = "";
   errorContainer.innerHTML = "";
-  startProgress(progressBar, 10);
+  progressBar.style.width = "0%";
+  progressBar.setAttribute("aria-valuenow", 0);
+  progressBar.textContent = "0%";
 
   const storyType = storyTypeSelect.value;
   const url = `https://hacker-news.firebaseio.com/v0/${storyType}.json`;
@@ -83,5 +78,9 @@ async function extractNews() {
   }
 }
 
+function copyOutput() {
+  copyText(outputTextarea.value);
+}
+
 extractButton.addEventListener("click", extractNews);
-copyButton.addEventListener("click", () => copyText(outputTextarea.value));
+copyButton.addEventListener("click", copyOutput);
