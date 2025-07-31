@@ -1,4 +1,7 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { fetchJson, fetchText } from "../common/fetch-utils.js";
+import { copyText } from "../common/clipboard-utils.js";
+import { startProgress, updateProgress } from "../common/progress-bar.js";
 const extractButton = document.getElementById("extractButton");
 const copyButton = document.getElementById("copyButton");
 const progressBar = document.getElementById("progressBar");
@@ -6,25 +9,6 @@ const outputTextarea = document.getElementById("outputTextarea");
 const errorContainer = document.getElementById("errorContainer");
 const storyTypeSelect = document.getElementById("storyTypeSelect");
 saveform("#hackernews-form");
-
-async function fetchJson(url) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-  return await response.json();
-}
-
-async function fetchMarkdown(url) {
-  const response = await fetch(`https://llmfoundry.straive.com/-/markdown?n=0&url=${encodeURIComponent(url)}`);
-  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-  return await response.text();
-}
-
-function updateProgress(current, total) {
-  const percentage = (current / total) * 100;
-  progressBar.style.width = `${percentage}%`;
-  progressBar.setAttribute("aria-valuenow", percentage);
-  progressBar.textContent = `${Math.round(percentage)}%`;
-}
 
 function displayError(message) {
   const alertDiv = document.createElement("div");
@@ -40,9 +24,7 @@ async function extractNews() {
   extractButton.disabled = true;
   outputTextarea.value = "";
   errorContainer.innerHTML = "";
-  progressBar.style.width = "0%";
-  progressBar.setAttribute("aria-valuenow", 0);
-  progressBar.textContent = "0%";
+  startProgress(progressBar, 10);
 
   const storyType = storyTypeSelect.value;
   const url = `https://hacker-news.firebaseio.com/v0/${storyType}.json`;
@@ -54,7 +36,9 @@ async function extractNews() {
     for (let i = 0; i < topIds.length; i++) {
       try {
         const item = await fetchJson(`https://hacker-news.firebaseio.com/v0/item/${topIds[i]}.json`);
-        const markdown = await fetchMarkdown(item.url);
+        const markdown = await fetchText(
+          `https://llmfoundry.straive.com/-/markdown?n=0&url=${encodeURIComponent(item.url)}`,
+        );
         const content = `---
       time: ${item.time}
       title: ${item.title}
@@ -77,10 +61,5 @@ async function extractNews() {
   }
 }
 
-function copyOutput() {
-  outputTextarea.select();
-  document.execCommand("copy");
-}
-
 extractButton.addEventListener("click", extractNews);
-copyButton.addEventListener("click", copyOutput);
+copyButton.addEventListener("click", () => copyText(outputTextarea.value));

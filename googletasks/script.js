@@ -1,6 +1,6 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv } from "../common/csv.js";
-
+import { copyText } from "../common/clipboard-utils.js";
 // root.node@gmail.com | Project: Personal mail etc. OAuth Client: Web apps
 // https://console.cloud.google.com/auth/clients/872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com?inv=1&invt=AbzTOQ&project=encoded-ensign-221
 const clientId = "872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com";
@@ -120,7 +120,7 @@ fetchBtn.addEventListener("click", async () => {
 downloadBtn.addEventListener("click", () => downloadCsv(objectsToCsv(tasks), "tasks.csv"));
 
 copyBtn.addEventListener("click", async () => {
-  await navigator.clipboard.writeText(objectsToTsv(tasks));
+  await copyText(objectsToTsv(tasks));
   showAlert("Copied to clipboard", "success", true);
 });
 
@@ -144,7 +144,7 @@ mdBtn.addEventListener("click", async () => {
       return [base, ...extras].join("\n");
     })
     .join("\n");
-  await navigator.clipboard.writeText(lines);
+  await copyText(lines);
   showAlert("Markdown copied", "success", true);
 });
 

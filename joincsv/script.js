@@ -1,6 +1,7 @@
 import { csvFormat, tsvFormat, dsvFormat } from "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm";
 import { downloadCsv } from "../common/csv.js";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { copyText } from "../common/clipboard-utils.js";
 
 const sepInput = document.getElementById("separator");
 const tablesInput = document.getElementById("tables");
@@ -9,7 +10,6 @@ const downloadBtn = document.getElementById("downloadBtn");
 const copyBtn = document.getElementById("copyBtn");
 const outputArea = document.getElementById("output");
 saveform("#joincsv-form");
-
 let joined;
 
 const getSep = () => (sepInput.value === "tab" ? "\t" : sepInput.value || ",");
@@ -56,7 +56,7 @@ downloadBtn.addEventListener("click", () => {
 });
 
 copyBtn.addEventListener("click", async () => {
-  if (joined) await navigator.clipboard.writeText(tsvFormat(joined.rows, joined.headers));
+  if (joined) await copyText(tsvFormat(joined.rows, joined.headers));
 });
 
 // Default example

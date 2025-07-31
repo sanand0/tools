@@ -1,6 +1,8 @@
 import { dsvFormat } from "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { copyText } from "../common/clipboard-utils.js";
+import { download } from "../common/download-helper.js";
 
 const inputTextarea = document.getElementById("input");
 const outputTextarea = document.getElementById("output");
@@ -30,22 +32,12 @@ inputTextarea.addEventListener("input", () => {
 });
 
 copyBtn.addEventListener("click", async () => {
-  await navigator.clipboard.writeText(outputTextarea.value);
+  await copyText(outputTextarea.value);
   bootstrapAlert("Copied to clipboard!");
 });
 
 downloadBtn.addEventListener("click", () => {
-  const blob = new Blob([outputTextarea.value], {
-    type: "application/x-jsonlines",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "data.jsonl";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  download(new Blob([outputTextarea.value], { type: "application/x-jsonlines" }), "data.jsonl");
   bootstrapAlert("File downloaded!", "success");
 });
 
