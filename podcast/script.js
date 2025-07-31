@@ -147,10 +147,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Generate Audio
   generateAudioBtn.addEventListener("click", async () => {
     const script = podcastScriptTextarea.value.trim();
-    const { apiKey, baseUrl } = aiConfig;
-
     if (!script) return showAlert("Please generate a podcast script first.");
-    if (!apiKey) return showAlert("Configure your OpenAI API key first.");
+
+    const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
 
     try {
       alertContainer.innerHTML = "";
