@@ -1,4 +1,5 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { copyText } from "../common/clipboard-utils.js";
 const extractButton = document.getElementById("extractButton");
 const copyButton = document.getElementById("copyButton");
 const progressBar = document.getElementById("progressBar");
@@ -78,8 +79,7 @@ async function extractNews() {
 }
 
 function copyOutput() {
-  outputTextarea.select();
-  document.execCommand("copy");
+  copyText(outputTextarea.value);
 }
 
 extractButton.addEventListener("click", extractNews);

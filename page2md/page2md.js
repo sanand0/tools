@@ -1,6 +1,7 @@
 import { Readability } from "@mozilla/readability";
 import TurndownService from "turndown";
 import { gfm, strikethrough, tables, taskListItems } from "@joplin/turndown-plugin-gfm";
+import { copyText } from "../common/clipboard-utils.js";
 
 /**
  * Converts current page or selected text to Markdown and copies to clipboard
@@ -45,23 +46,8 @@ export async function convert() {
 
     const markdown = turndownService.turndown(content);
 
-    // Copy to clipboard
-    try {
-      await navigator.clipboard.writeText(markdown);
-      alert("Markdown copied to clipboard");
-    } catch {
-      // Fallback to creating a temporary textarea element
-      const textarea = document.createElement("textarea");
-      textarea.value = markdown;
-      document.body.appendChild(textarea);
-      textarea.select();
-
-      const success = document.execCommand("copy");
-      document.body.removeChild(textarea);
-
-      if (success) alert("Markdown copied to clipboard");
-      else throw new Error("Failed to copy to clipboard");
-    }
+    if (await copyText(markdown)) alert("Markdown copied to clipboard");
+    else throw new Error("Failed to copy to clipboard");
   } catch (error) {
     alert(`Error converting page: ${error.message}`);
     throw error;
