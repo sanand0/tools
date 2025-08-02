@@ -1,6 +1,7 @@
 import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
+import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html@3";
 import { openaiHelp } from "../common/aiconfig.js";
 
 const DEFAULT_BASE_URLS = [
@@ -39,6 +40,7 @@ const STORE_NAME = "urls";
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 let db = null;
+let fetchedEvents = [];
 
 const openaiConfigBtn = document.getElementById("openai-config-btn");
 openaiConfigBtn.addEventListener("click", async () => {
@@ -163,6 +165,52 @@ function getNestedValue(obj, path) {
   return current;
 }
 
+function renderEventsTable(events) {
+  const container = document.getElementById("events-table-section");
+  const table = html`
+    <table class="table table-striped table-sm">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Type</th>
+          <th>Repo</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${events.map((event) => {
+          let description = "";
+          switch (event.type) {
+            case "PushEvent":
+              description = event.payload.commits.map((c) => c.message.split("\n")[0]).join(", ");
+              break;
+            case "PullRequestEvent":
+              description = `#${event.payload.number} ${event.payload.pull_request.title}`;
+              break;
+            case "DeleteEvent":
+              description = `${event.payload.ref_type} ${event.payload.ref}`;
+              break;
+            case "CreateEvent":
+              description = `${event.payload.ref_type} ${event.payload.ref || event.repo.name}`;
+              break;
+            default:
+              description = "";
+          }
+          return html`
+            <tr>
+              <td>${new Date(event.created_at).toLocaleString()}</td>
+              <td>${event.type}</td>
+              <td><a href="https://github.com/${event.repo.name}" target="_blank">${event.repo.name}</a></td>
+              <td>${description}</td>
+            </tr>
+          `;
+        })}
+      </tbody>
+    </table>
+  `;
+  render(table, container);
+}
+
 // Fetch GitHub events
 async function fetchEvents(user, headers, since) {
   let url = `https://api.github.com/users/${user}/events/public`;
@@ -178,6 +226,7 @@ async function fetchEvents(user, headers, since) {
 
     const page = await fetchWithCache(url, { headers });
     events.push(...page);
+    renderEventsTable(events);
 
     // Stop if all events on this page are before our start date
     const sinceDate = new Date(since);
@@ -234,8 +283,7 @@ async function fetchRepoDetails(repos, headers) {
 }
 
 // Fetch GitHub activity
-async function fetchGitHubActivity(user, since, until, headers) {
-  const events = await fetchEvents(user, headers, since);
+async function fetchGitHubActivity(events, since, until, headers) {
   const activity = [];
   const repos = new Set();
 
@@ -329,6 +377,32 @@ async function generateSummary(context, systemPrompt, openaiKey, baseUrl) {
   }
 }
 
+document.getElementById("get-events-btn").addEventListener("click", async (e) => {
+  e.preventDefault();
+  const form = document.getElementById("github-form");
+  if (!form.checkValidity()) return form.classList.add("was-validated");
+
+  const username = document.getElementById("username").value;
+  const since = document.getElementById("since").value;
+  const githubToken = document.getElementById("github-token").value;
+
+  document.getElementById("progress-section").style.display = "block";
+  document.getElementById("error-section").style.display = "none";
+  document.getElementById("results-section").style.display = "none";
+  document.getElementById("progress-container").innerHTML = "";
+
+  const headers = { "Content-Type": "application/json" };
+  if (githubToken) headers.Authorization = `Bearer ${githubToken}`;
+
+  try {
+    if (document.getElementById("clear-cache").value) await clearCache();
+    fetchedEvents = await fetchEvents(username, headers, since);
+    document.getElementById("generate-summary-btn").disabled = false;
+  } catch (error) {
+    showError(error.message);
+  }
+});
+
 // Main form handler
 document.getElementById("github-form").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -356,14 +430,11 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
   document.getElementById("progress-section").style.display = "block";
 
   try {
-    // Clear cache if required
-    if (document.getElementById("clear-cache").value) await clearCache();
-
     // Fetch GitHub data
     const headers = { "Content-Type": "application/json" };
     if (config.githubToken) headers.Authorization = `Bearer ${config.githubToken}`;
 
-    const { activity, repos } = await fetchGitHubActivity(config.username, config.since, config.until, headers);
+    const { activity, repos } = await fetchGitHubActivity(fetchedEvents, config.since, config.until, headers);
 
     const context = await fetchRepoDetails(repos, headers);
 
