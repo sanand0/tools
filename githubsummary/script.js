@@ -189,16 +189,19 @@ function renderEventsTable(events) {
         ${events.map((event) => {
           let description = "";
           let eventUrl = `https://github.com/${event.repo.name}`;
+          let hasSpecificUrl = false;
           switch (event.type) {
             case "PushEvent":
               description = event.payload.commits.map((c) => c.message.split("\n")[0]).join(", ");
               if (event.payload.commits.length > 0) {
                 eventUrl = `https://github.com/${event.repo.name}/commit/${event.payload.head}`;
+                hasSpecificUrl = true;
               }
               break;
             case "PullRequestEvent":
               description = `#${event.payload.number} ${event.payload.pull_request.title}`;
               eventUrl = event.payload.pull_request.html_url;
+              hasSpecificUrl = true;
               break;
             case "DeleteEvent":
               description = `${event.payload.ref_type} ${event.payload.ref}`;
@@ -209,14 +212,17 @@ function renderEventsTable(events) {
             case "IssueCommentEvent":
               description = `#${event.payload.issue.number} ${event.payload.issue.title}`;
               eventUrl = event.payload.comment.html_url;
+              hasSpecificUrl = true;
               break;
             case "IssuesEvent":
               description = `#${event.payload.issue.number} ${event.payload.issue.title}`;
               eventUrl = event.payload.issue.html_url;
+              hasSpecificUrl = true;
               break;
             case "ReleaseEvent":
               description = event.payload.release.name || event.payload.release.tag_name;
               eventUrl = event.payload.release.html_url;
+              hasSpecificUrl = true;
               break;
             default:
               description = "";
@@ -227,7 +233,7 @@ function renderEventsTable(events) {
               <td>${event.type.replace("Event", "")}</td>
               <td><a href="https://github.com/${event.repo.name}" target="_blank">${event.repo.name}</a></td>
               <td>
-                <a href=${eventUrl} target="_blank">🔗</a>
+                ${hasSpecificUrl ? html`<a href=${eventUrl} target="_blank">🔗</a>` : ""}
                 ${description}
               </td>
             </tr>
