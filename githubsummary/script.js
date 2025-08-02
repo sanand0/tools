@@ -2,6 +2,7 @@ import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 import { openaiHelp } from "../common/aiconfig.js";
+import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -44,6 +45,45 @@ const openaiConfigBtn = document.getElementById("openai-config-btn");
 openaiConfigBtn.addEventListener("click", async () => {
   await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true, help: openaiHelp });
 });
+
+const dt = new Intl.DateTimeFormat("en", { dateStyle: "short", timeStyle: "short" });
+let fetchedEvents = [];
+const eventDesc = (ev) =>
+  ev.payload?.commits?.map((c) => c.message).join("; ") ||
+  ev.payload?.pull_request?.title ||
+  ev.payload?.issue?.title ||
+  ev.payload?.description ||
+  ev.payload?.action ||
+  "";
+const renderEvents = (events) => {
+  render(
+    html`<table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Type</th>
+          <th>Repo</th>
+          <th>Branch</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${events.map(
+          (ev) =>
+            html`<tr>
+              <td>${dt.format(new Date(ev.created_at))}</td>
+              <td>${ev.type.replace("Event", "")}</td>
+              <td><a href="https://github.com/${ev.repo.name}" target="_blank">${ev.repo.name}</a></td>
+              <td>${ev.payload?.ref || ""}</td>
+              <td>${eventDesc(ev)}</td>
+            </tr>`,
+        )}
+      </tbody>
+    </table>`,
+    document.getElementById("events-table"),
+  );
+  document.getElementById("events-section").style.display = "block";
+};
 
 async function initDB() {
   return new Promise((resolve, reject) => {
@@ -164,7 +204,7 @@ function getNestedValue(obj, path) {
 }
 
 // Fetch GitHub events
-async function fetchEvents(user, headers, since) {
+async function fetchEvents(user, headers, since, onUpdate) {
   let url = `https://api.github.com/users/${user}/events/public`;
   const events = [];
 
@@ -178,17 +218,12 @@ async function fetchEvents(user, headers, since) {
 
     const page = await fetchWithCache(url, { headers });
     events.push(...page);
+    onUpdate?.(events);
 
-    // Stop if all events on this page are before our start date
     const sinceDate = new Date(since);
     if (page.every((ev) => new Date(ev.created_at) < sinceDate)) break;
 
-    // Get next page URL from Link header (simplified)
-    url = null; // GitHub API doesn't provide easy pagination in JSON response
-    if (page.length === 30) {
-      // Standard page size
-      url = `https://api.github.com/users/${user}/events/public?page=${pageCount + 1}`;
-    }
+    url = page.length === 30 ? `https://api.github.com/users/${user}/events/public?page=${pageCount + 1}` : null;
   }
 
   updateProgress("events-progress", 1, 1);
@@ -234,8 +269,8 @@ async function fetchRepoDetails(repos, headers) {
 }
 
 // Fetch GitHub activity
-async function fetchGitHubActivity(user, since, until, headers) {
-  const events = await fetchEvents(user, headers, since);
+async function fetchGitHubActivity(user, since, until, headers, events) {
+  const eventsList = events || (await fetchEvents(user, headers, since));
   const activity = [];
   const repos = new Set();
 
@@ -244,9 +279,9 @@ async function fetchGitHubActivity(user, since, until, headers) {
   const sinceDate = new Date(since);
   const untilDate = new Date(until);
 
-  for (let i = 0; i < events.length; i++) {
-    const ev = events[i];
-    updateProgress("activity-progress", i, events.length);
+  for (let i = 0; i < eventsList.length; i++) {
+    const ev = eventsList[i];
+    updateProgress("activity-progress", i, eventsList.length);
 
     const ts = new Date(ev.created_at);
     if (!(sinceDate <= ts && ts < untilDate)) continue;
@@ -292,7 +327,7 @@ async function fetchGitHubActivity(user, since, until, headers) {
     }
   }
 
-  updateProgress("activity-progress", events.length, events.length);
+  updateProgress("activity-progress", eventsList.length, eventsList.length);
   return { activity, repos: [...repos] };
 }
 
@@ -329,21 +364,46 @@ async function generateSummary(context, systemPrompt, openaiKey, baseUrl) {
   }
 }
 
-// Main form handler
-document.getElementById("github-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
+const getEventsBtn = document.getElementById("get-events-btn");
+const generateBtn = document.getElementById("generate-summary-btn");
 
-  // Clear previous results
-  document.getElementById("progress-section").style.display = "none";
-  document.getElementById("error-section").style.display = "none";
-  document.getElementById("results-section").style.display = "none";
-  document.getElementById("progress-container").innerHTML = "";
-
-  // Validate form
-  const form = e.target;
+getEventsBtn.addEventListener("click", async () => {
+  const form = document.getElementById("github-form");
   if (!form.checkValidity()) return form.classList.add("was-validated");
 
-  // Get form values
+  document.getElementById("error-section").style.display = "none";
+  document.getElementById("results-section").style.display = "none";
+  document.getElementById("events-section").style.display = "none";
+  document.getElementById("progress-container").innerHTML = "";
+  document.getElementById("progress-section").style.display = "block";
+  generateBtn.disabled = true;
+
+  const headers = { "Content-Type": "application/json" };
+  const token = document.getElementById("github-token").value;
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  try {
+    if (document.getElementById("clear-cache").value) await clearCache();
+    const user = document.getElementById("username").value;
+    const since = document.getElementById("since").value;
+    fetchedEvents = await fetchEvents(user, headers, since, renderEvents);
+    generateBtn.disabled = false;
+  } catch (error) {
+    showError(error.message);
+  } finally {
+    document.getElementById("progress-section").style.display = "none";
+  }
+});
+
+generateBtn.addEventListener("click", async () => {
+  const form = document.getElementById("github-form");
+  if (!form.checkValidity()) return form.classList.add("was-validated");
+
+  document.getElementById("progress-container").innerHTML = "";
+  document.getElementById("progress-section").style.display = "block";
+  document.getElementById("error-section").style.display = "none";
+  document.getElementById("results-section").style.display = "none";
+
   const config = {
     username: document.getElementById("username").value,
     githubToken: document.getElementById("github-token").value,
@@ -352,25 +412,19 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
     systemPrompt: document.querySelector("#system-prompt-tab-content .active textarea").value,
   };
 
-  // Show progress section
-  document.getElementById("progress-section").style.display = "block";
+  const headers = { "Content-Type": "application/json" };
+  if (config.githubToken) headers.Authorization = `Bearer ${config.githubToken}`;
 
   try {
-    // Clear cache if required
-    if (document.getElementById("clear-cache").value) await clearCache();
-
-    // Fetch GitHub data
-    const headers = { "Content-Type": "application/json" };
-    if (config.githubToken) headers.Authorization = `Bearer ${config.githubToken}`;
-
-    const { activity, repos } = await fetchGitHubActivity(config.username, config.since, config.until, headers);
-
+    const { activity, repos } = await fetchGitHubActivity(
+      config.username,
+      config.since,
+      config.until,
+      headers,
+      fetchedEvents,
+    );
     const context = await fetchRepoDetails(repos, headers);
-
-    // Show results section
     document.getElementById("results-section").style.display = "block";
-
-    // Generate summary
     const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
     await generateSummary({ activity, repos, context }, config.systemPrompt, apiKey, baseUrl);
   } catch (error) {
