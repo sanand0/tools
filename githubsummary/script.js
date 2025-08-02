@@ -229,11 +229,13 @@ function renderEventsTable(events) {
           }
           return html`
             <tr>
-              <td>${dateFormatter.format(new Date(event.created_at))}</td>
+              <td class="text-nowrap">${dateFormatter.format(new Date(event.created_at))}</td>
               <td>${event.type.replace("Event", "")}</td>
               <td><a href="https://github.com/${event.repo.name}" target="_blank">${event.repo.name}</a></td>
               <td>
-                ${hasSpecificUrl ? html`<a href=${eventUrl} target="_blank">🔗</a>` : ""}
+                ${hasSpecificUrl
+                  ? html`<a href=${eventUrl} class="btn btn-sm btn-outline-primary" target="_blank">🔗</a>`
+                  : ""}
                 ${description}
               </td>
             </tr>
@@ -258,7 +260,10 @@ async function fetchEvents(user, headers, since) {
     pageCount++;
     updateProgress("events-progress", pageCount, pageCount + 1);
 
-    const page = await fetchWithCache(url, { headers });
+    const response = await fetch(url, { headers });
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    const page = await response.json();
+
     events.push(...page);
     renderEventsTable(events);
 
@@ -411,7 +416,7 @@ async function generateSummary(context, systemPrompt, openaiKey, baseUrl) {
   }
 }
 
-document.getElementById("get-events-btn").addEventListener("click", async (e) => {
+document.getElementById("github-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = document.getElementById("github-form");
   if (!form.checkValidity()) return form.classList.add("was-validated");
@@ -437,8 +442,7 @@ document.getElementById("get-events-btn").addEventListener("click", async (e) =>
   }
 });
 
-// Main form handler
-document.getElementById("github-form").addEventListener("submit", async (e) => {
+document.getElementById("generate-summary-btn").addEventListener("click", async (e) => {
   e.preventDefault();
 
   // Clear previous results

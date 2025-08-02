@@ -11,176 +11,174 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@9.1.2/marked.min.js"></script>
 </head>
 
-<body class="bg-light">
-  <div class="container my-5">
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
-        <div class="card shadow" style="margin-bottom: 25vh">
-          <div class="card-header bg-primary text-white">
-            <h1 class="card-title mb-0">GitHub Activity Summarizer</h1>
-          </div>
-          <div class="card-body">
-            <div class="alert alert-info" role="alert">
-              <h5 class="alert-heading">How to Use This App</h5>
-              <p class="mb-2">
-                This tool analyzes your GitHub activity within a date range
-                and generates an AI-powered summary blog post. Here's what you
-                need:
-              </p>
-              <ul class="mb-2">
-                <li>
-                  <strong>GitHub Username:</strong> The user whose activity
-                  you want to analyze
-                </li>
-                <li>
-                  <strong>Date Range:</strong> Start and end dates for the
-                  analysis period
-                </li>
-                <li>
-                  <strong>GitHub API Token (optional):</strong> Personal access
-                  token for higher rate limits
-                </li>
-                <li>
-                  <strong>OpenAI API Key:</strong> Your OpenAI API key for
-                  generating the summary
-                </li>
-                <li>
-                  <strong>API Base URL:</strong> OpenAI API endpoint (defaults
-                  to official API)
-                </li>
-              </ul>
-              <p class="mb-0">
-                The app will fetch your GitHub events, repository details, and
-                commit information, then use AI to create a structured blog
-                post summary.
-              </p>
+<body class="bg-light" style="margin-bottom:50vh">
+  <div class="container mt-5">
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white">
+        <h1 class="card-title mb-0">GitHub Activity Summarizer</h1>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-info" role="alert">
+          <h5 class="alert-heading">How to Use This App</h5>
+          <p class="mb-2">
+            This tool analyzes your GitHub activity within a date range
+            and generates an AI-powered summary blog post. Here's what you
+            need:
+          </p>
+          <ul class="mb-2">
+            <li>
+              <strong>GitHub Username:</strong> The user whose activity
+              you want to analyze
+            </li>
+            <li>
+              <strong>Date Range:</strong> Start and end dates for the
+              analysis period
+            </li>
+            <li>
+              <strong>GitHub API Token (optional):</strong> Personal access
+              token for higher rate limits
+            </li>
+            <li>
+              <strong>OpenAI API Key:</strong> Your OpenAI API key for
+              generating the summary
+            </li>
+            <li>
+              <strong>API Base URL:</strong> OpenAI API endpoint (defaults
+              to official API)
+            </li>
+          </ul>
+          <p class="mb-0">
+            The app will fetch your GitHub events, repository details, and
+            commit information, then use AI to create a structured blog
+            post summary.
+          </p>
+        </div>
+
+        <form id="github-form" class="needs-validation" novalidate>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="username" class="form-label">GitHub Username</label>
+              <input type="text" class="form-control" id="username" required list="github-users" />
+              <datalist id="github-users">
+                <option value="sanand0">Anand S, LLM Psychologist</option>
+                <option value="simonw">
+                  Simon Willison: llm, datasette, sqlite-utils
+                </option>
+                <option value="lukeed">
+                  Luke Edwards: Fast JS libraries (oxc, clsx, pola)
+                </option>
+                <option value="tiangolo">
+                  Sebastián Ramírez: FastAPI, Typer, SQLModel
+                </option>
+                <option value="sindresorhus">
+                  Sindre Sorhus: JavaScript microlibraries
+                </option>
+              </datalist>
+              <div class="invalid-feedback">
+                Please provide a GitHub username.
+              </div>
             </div>
+            <div class="col-md-6">
+              <label for="github-token" class="form-label">GitHub API Token (optional)</label>
+              <input type="password" class="form-control" id="github-token" />
+            </div>
+          </div>
 
-            <form id="github-form" class="needs-validation" novalidate>
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label for="username" class="form-label">GitHub Username</label>
-                  <input type="text" class="form-control" id="username" required list="github-users" />
-                  <datalist id="github-users">
-                    <option value="sanand0">Anand S, LLM Psychologist</option>
-                    <option value="simonw">
-                      Simon Willison: llm, datasette, sqlite-utils
-                    </option>
-                    <option value="lukeed">
-                      Luke Edwards: Fast JS libraries (oxc, clsx, pola)
-                    </option>
-                    <option value="tiangolo">
-                      Sebastián Ramírez: FastAPI, Typer, SQLModel
-                    </option>
-                    <option value="sindresorhus">
-                      Sindre Sorhus: JavaScript microlibraries
-                    </option>
-                  </datalist>
-                  <div class="invalid-feedback">
-                    Please provide a GitHub username.
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <label for="github-token" class="form-label">GitHub API Token (optional)</label>
-                  <input type="password" class="form-control" id="github-token" />
-                </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="since" class="form-label">Start Date</label>
+              <input type="date" class="form-control" id="since" required />
+              <div class="invalid-feedback">
+                Please provide a start date.
               </div>
-
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label for="since" class="form-label">Start Date</label>
-                  <input type="date" class="form-control" id="since" required />
-                  <div class="invalid-feedback">
-                    Please provide a start date.
-                  </div>
-                </div>
-                <div class="col-md-6">
-                  <label for="until" class="form-label">End Date</label>
-                  <input type="date" class="form-control" id="until" required />
-                  <div class="invalid-feedback">
-                    Please provide an end date.
-                  </div>
-                </div>
+            </div>
+            <div class="col-md-6">
+              <label for="until" class="form-label">End Date</label>
+              <input type="date" class="form-control" id="until" required />
+              <div class="invalid-feedback">
+                Please provide an end date.
               </div>
+            </div>
+          </div>
 
-              <div class="row mb-3">
-                <div class="col-md-6 d-flex align-items-end">
-                  <button id="openai-config-btn" type="button" class="btn btn-outline-secondary w-100">
-                    Configure OpenAI
-                  </button>
-                </div>
-              </div>
+          <div class="row mb-3">
+            <div class="col-md-6 d-flex align-items-end">
+              <button id="openai-config-btn" type="button" class="btn btn-outline-secondary w-100">
+                Configure OpenAI
+              </button>
+            </div>
+          </div>
 
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label for="model" class="form-label">Model</label>
-                  <input type="text" class="form-control" id="model" value="gpt-4.1-nano" list="model-list" required />
-                  <datalist id="model-list">
-                    <option value="gpt-4.1-nano"></option>
-                    <option value="gpt-4.1-mini"></option>
-                    <option value="gpt-4.1"></option>
-                  </datalist>
-                  <div class="invalid-feedback">Please provide a model.</div>
-                </div>
-                <div class="col-md-6">
-                  <label for="clear-cache" class="form-label">Clear URL Cache</label>
-                  <select class="form-select" id="clear-cache">
-                    <option value="">No</option>
-                    <option value="yes">Yes</option>
-                  </select>
-                </div>
-              </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="model" class="form-label">Model</label>
+              <input type="text" class="form-control" id="model" value="gpt-4.1-nano" list="model-list" required />
+              <datalist id="model-list">
+                <option value="gpt-4.1-nano"></option>
+                <option value="gpt-4.1-mini"></option>
+                <option value="gpt-4.1"></option>
+              </datalist>
+              <div class="invalid-feedback">Please provide a model.</div>
+            </div>
+            <div class="col-md-6">
+              <label for="clear-cache" class="form-label">Clear URL Cache</label>
+              <select class="form-select" id="clear-cache">
+                <option value="">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+          </div>
 
-              <div class="mb-3">
-                <ul class="nav nav-tabs" id="system-prompt-tabs" role="tablist">
-                  <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="readme-tab" data-bs-toggle="tab" data-bs-target="#readme-content" type="button" role="tab" aria-controls="readme-content" aria-selected="true">
-                      README
-                    </button>
-                  </li>
-                  <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="technical-tab" data-bs-toggle="tab" data-bs-target="#technical-content" type="button" role="tab" aria-controls="technical-content" aria-selected="false">
-                      Technical
-                    </button>
-                  </li>
-                  <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="podcast-tab" data-bs-toggle="tab" data-bs-target="#podcast-content" type="button" role="tab" aria-controls="podcast-content" aria-selected="false">
-                      Podcast
-                    </button>
-                  </li>
-                </ul>
-                <div class="tab-content pt-3" id="system-prompt-tab-content">
-                  <div class="tab-pane fade show active" id="readme-content" role="tabpanel" aria-labelledby="readme-tab">
-                    <textarea class="form-control" id="readme-prompt" rows="8">
+          <div class="mb-3">
+            <ul class="nav nav-tabs" id="system-prompt-tabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="readme-tab" data-bs-toggle="tab" data-bs-target="#readme-content" type="button" role="tab" aria-controls="readme-content" aria-selected="true">
+                  README
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="technical-tab" data-bs-toggle="tab" data-bs-target="#technical-content" type="button" role="tab" aria-controls="technical-content" aria-selected="false">
+                  Technical
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="podcast-tab" data-bs-toggle="tab" data-bs-target="#podcast-content" type="button" role="tab" aria-controls="podcast-content" aria-selected="false">
+                  Podcast
+                </button>
+              </li>
+            </ul>
+            <div class="tab-content pt-3" id="system-prompt-tab-content">
+              <div class="tab-pane fade show active" id="readme-content" role="tabpanel" aria-labelledby="readme-tab">
+                <textarea class="form-control" id="readme-prompt" rows="8">
 You are a personal technical-blog assistant. Your job is to transform descriptions of recently updated Github repositories and activities and into a concise, engaging README. Follow these rules:
 
 1. **Structure & Organization**
-   - **Title & Intro:** Start with a `##` heading (no document title) that summarizes the changes in one sentence, followed by a two-sentence intro.
-   - **Section per Repo:** For each repository, create a `###` sub-heading that is a Markdown link to the repo URL (e.g. `### [repo](https://github.com/$USER/repo)`).
-   - **Overview:** Begin each repo section with one italicized sentence summarizing the changes in the repo in practical terms for someone using the repo.
-   - **Bulleted Highlights:** Under each repo, list 3-5 bullets. Each bullet:
-      1. Begins with a **bold summary** (one short phrase).
-      2. Follows with a concise sentence describing what changed, and how it might be useful to the user. Include inline Markdown links to each relevant commit (e.g. `[75d212c](https://github.com/$USER/repo/commit/75d212c)`), file, or external resource.
-      3. If multiple commits relate to the same theme, combine them in one bullet with multiple links.
+- **Title & Intro:** Start with a `##` heading (no document title) that summarizes the changes in one sentence, followed by a two-sentence intro.
+- **Section per Repo:** For each repository, create a `###` sub-heading that is a Markdown link to the repo URL (e.g. `### [repo](https://github.com/$USER/repo)`).
+- **Overview:** Begin each repo section with one italicized sentence summarizing the changes in the repo in practical terms for someone using the repo.
+- **Bulleted Highlights:** Under each repo, list 3-5 bullets. Each bullet:
+  1. Begins with a **bold summary** (one short phrase).
+  2. Follows with a concise sentence describing what changed, and how it might be useful to the user. Include inline Markdown links to each relevant commit (e.g. `[75d212c](https://github.com/$USER/repo/commit/75d212c)`), file, or external resource.
+  3. If multiple commits relate to the same theme, combine them in one bullet with multiple links.
 
 2. **Tone & Style**
-   - Explain the changes to a layman who might not know what the repo does. Focus on how the change helps practically.
-   - Write in short, punchy sentences (≤20 words).
-   - Use active voice and simple words (8th-grade level).
-   - Inject one light, wry aside per section
-   - Don't mention any personal names or assume prior knowledge of the author.
+- Explain the changes to a layman who might not know what the repo does. Focus on how the change helps practically.
+- Write in short, punchy sentences (≤20 words).
+- Use active voice and simple words (8th-grade level).
+- Inject one light, wry aside per section
+- Don't mention any personal names or assume prior knowledge of the author.
 
 3. **Formatting & Links**
-   - Use Markdown for all headings, links, and bullets.
-   - Dates in bullets should be "DD Mon YYYY" format.
-   - Link headings to the repo homepages.
-   - Link commit SHAs to their GitHub commit pages.
-   - If it adds value, link to external docs, issue pages, or related files.
+- Use Markdown for all headings, links, and bullets.
+- Dates in bullets should be "DD Mon YYYY" format.
+- Link headings to the repo homepages.
+- Link commit SHAs to their GitHub commit pages.
+- If it adds value, link to external docs, issue pages, or related files.
 
 When you receive the JSON, produce the full blog post accordingly.</textarea>
-                  </div>
-                  <div class="tab-pane fade" id="technical-content" role="tabpanel" aria-labelledby="technical-tab">
-                    <textarea class="form-control" id="technical-prompt" rows="8">
+              </div>
+              <div class="tab-pane fade" id="technical-content" role="tabpanel" aria-labelledby="technical-tab">
+                <textarea class="form-control" id="technical-prompt" rows="8">
 You are a technical documentation specialist. Your task is to analyze GitHub repository changes and create a detailed, technically precise summary. Each commit object contains repository name, SHA identifier, author details, timestamp, commit message, and modified files list.
 
 Your output should begin with a concise heading summarizing the key technical achievements, followed by a brief technical context introduction. For each repository, create a dedicated section with a heading linked to the repository URL.
@@ -192,9 +190,9 @@ When describing multiple related commits, consolidate them under a single techni
 This is for an audio narration. No Markdown formatting, lists, links, IDs, etc. Just conversational English. Convert near-English user or repository names into English (e.g. write "apiagent" as "API agent repo"). Say dates as "May 23rd, 2025", not numerically.
 
 Upon receiving the JSON data, generate a comprehensive technical summary suitable for a development team's review.</textarea>
-                  </div>
-                  <div class="tab-pane fade" id="podcast-content" role="tabpanel" aria-labelledby="podcast-tab">
-                    <textarea class="form-control" id="podcast-prompt" rows="8">
+              </div>
+              <div class="tab-pane fade" id="podcast-content" role="tabpanel" aria-labelledby="podcast-tab">
+                <textarea class="form-control" id="podcast-prompt" rows="8">
 You're creating a tech podcast script about GitHub activity. I'll give you a the repository changes and activities.
 
 Start with an exciting headline that captures the biggest achievement. Then give listeners a quick two-sentence introduction to set the stage.
@@ -206,47 +204,47 @@ Keep everything conversational and enthusiastic! Explain technical concepts as i
 This is for an audio narration. No Markdown formatting, lists, links, IDs, etc. Just conversational English. Convert near-English user or repository names into English (e.g. write "apiagent" as "API agent repo"). Say dates as "May 23rd, 2025", not numerically.
 
 Make it engaging and easy to follow just by listening.</textarea>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col">
-                  <button type="button" id="get-events-btn" class="btn btn-primary btn-lg w-100">
-                    Get events
-                  </button>
-                </div>
-                <div class="col">
-                  <button type="submit" id="generate-summary-btn" class="btn btn-secondary btn-lg w-100" disabled>
-                    Generate Summary
-                  </button>
-                </div>
-              </div>
-            </form>
-
-            <div id="progress-section" class="mt-4" style="display: none">
-              <h5>Progress</h5>
-              <div id="progress-container"></div>
-              <div id="current-url" class="mt-2 text-muted small"></div>
-            </div>
-
-            <div id="error-section" class="mt-4" style="display: none">
-              <div class="alert alert-danger" role="alert">
-                <h5 class="alert-heading">Error</h5>
-                <p id="error-message" class="mb-0"></p>
               </div>
             </div>
-
-            <div id="results-section" class="mt-4" style="display: none">
-              <h5>Summary</h5>
-              <div id="results-content" class="border rounded p-3 bg-white"></div>
-            </div>
-
-            <div id="events-table-section" class="mt-4 table-responsive"></div>
           </div>
+
+          <div class="row">
+            <div class="col">
+              <button type="submit" id="get-events-btn" class="btn btn-primary btn-lg w-100">
+                Get events
+              </button>
+            </div>
+            <div class="col">
+              <button type="button" id="generate-summary-btn" class="btn btn-secondary btn-lg w-100" disabled>
+                Generate Summary
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div id="progress-section" class="mt-4" style="display: none">
+          <h5>Progress</h5>
+          <div id="progress-container"></div>
+          <div id="current-url" class="mt-2 text-muted small"></div>
+        </div>
+
+        <div id="error-section" class="mt-4" style="display: none">
+          <div class="alert alert-danger" role="alert">
+            <h5 class="alert-heading">Error</h5>
+            <p id="error-message" class="mb-0"></p>
+          </div>
+        </div>
+
+        <div id="results-section" class="mt-4" style="display: none">
+          <h5>Summary</h5>
+          <div id="results-content" class="border rounded p-3 bg-white"></div>
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="container-fluid">
+    <div id="events-table-section" class="mt-4 table-responsive"></div>
   </div>
 
   <script type="module" src="script.js"></script>
