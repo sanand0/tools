@@ -210,9 +210,18 @@ Make it engaging and easy to follow just by listening.</textarea>
                 </div>
               </div>
 
-              <button type="submit" class="btn btn-primary btn-lg w-100">
-                Generate Summary
-              </button>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <button id="get-events-btn" type="button" class="btn btn-primary w-100">
+                    Get events
+                  </button>
+                </div>
+                <div class="col-md-6">
+                  <button id="generate-summary-btn" type="button" class="btn btn-primary w-100" disabled>
+                    Generate Summary
+                  </button>
+                </div>
+              </div>
             </form>
 
             <div id="progress-section" class="mt-4" style="display: none">
@@ -232,6 +241,7 @@ Make it engaging and easy to follow just by listening.</textarea>
               <h5>Summary</h5>
               <div id="results-content" class="border rounded p-3 bg-white"></div>
             </div>
+            <div id="events-table" class="mt-4 table-responsive" style="display: none"></div>
           </div>
         </div>
       </div>

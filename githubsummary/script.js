@@ -39,6 +39,7 @@ const STORE_NAME = "urls";
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 let db = null;
+let fetchedData = null;
 
 const openaiConfigBtn = document.getElementById("openai-config-btn");
 openaiConfigBtn.addEventListener("click", async () => {
@@ -296,6 +297,20 @@ async function fetchGitHubActivity(user, since, until, headers) {
   return { activity, repos: [...repos] };
 }
 
+function renderEventsTable(events) {
+  const div = document.getElementById("events-table");
+  if (!events.length) return div.replaceChildren("No events");
+  const headers = [...new Set(events.flatMap(Object.keys))];
+  const head = headers.map((h) => `<th>${h}</th>`).join("");
+  const rows = events.map((ev) => `<tr>${headers.map((h) => `<td>${ev[h] ?? ""}</td>`).join("")}</tr>`).join("");
+  div.replaceChildren();
+  div.insertAdjacentHTML(
+    "beforeend",
+    `<table class="table table-sm table-striped"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>`,
+  );
+  div.style.display = "block";
+}
+
 // Generate summary using OpenAI
 async function generateSummary(context, systemPrompt, openaiKey, baseUrl) {
   const resultsDiv = document.getElementById("results-content");
@@ -329,18 +344,21 @@ async function generateSummary(context, systemPrompt, openaiKey, baseUrl) {
   }
 }
 
-// Main form handler
-document.getElementById("github-form").addEventListener("submit", async (e) => {
-  e.preventDefault();
+// Main form handlers
+const form = document.getElementById("github-form");
+const getEventsBtn = document.getElementById("get-events-btn");
+const generateBtn = document.getElementById("generate-summary-btn");
 
+getEventsBtn.addEventListener("click", async () => {
   // Clear previous results
   document.getElementById("progress-section").style.display = "none";
   document.getElementById("error-section").style.display = "none";
   document.getElementById("results-section").style.display = "none";
+  document.getElementById("events-table").style.display = "none";
   document.getElementById("progress-container").innerHTML = "";
+  generateBtn.disabled = true;
 
   // Validate form
-  const form = e.target;
   if (!form.checkValidity()) return form.classList.add("was-validated");
 
   // Get form values
@@ -364,15 +382,26 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
     if (config.githubToken) headers.Authorization = `Bearer ${config.githubToken}`;
 
     const { activity, repos } = await fetchGitHubActivity(config.username, config.since, config.until, headers);
-
     const context = await fetchRepoDetails(repos, headers);
 
-    // Show results section
-    document.getElementById("results-section").style.display = "block";
+    fetchedData = { activity, repos, context, config };
+    // Show events table
+    renderEventsTable(activity);
+    generateBtn.disabled = false;
+  } catch (error) {
+    showError(error.message);
+  }
+});
 
+generateBtn.addEventListener("click", async () => {
+  if (!fetchedData) return;
+  document.getElementById("error-section").style.display = "none";
+  // Show results section
+  document.getElementById("results-section").style.display = "block";
+  try {
     // Generate summary
     const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
-    await generateSummary({ activity, repos, context }, config.systemPrompt, apiKey, baseUrl);
+    await generateSummary(fetchedData, fetchedData.config.systemPrompt, apiKey, baseUrl);
   } catch (error) {
     showError(error.message);
   }
