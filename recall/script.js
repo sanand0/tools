@@ -11,6 +11,14 @@ const files = [
     name: "Things I learned",
   },
   {
+    url: "https://notes.s-anand.net/explore.md",
+    name: "Explore",
+  },
+  {
+    url: "https://notes.s-anand.net/jobs-people.md",
+    name: "Jobs - People",
+  },
+  {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/claude-code-uses.md",
     name: "Claude Code Uses",
   },
@@ -40,13 +48,14 @@ let index = 0;
 let starOnly = false;
 
 files.forEach((f) =>
-  fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="${f.url}">${f.name}</option>`),
+  fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="${f.url}">${f.name}</option>`)
 );
 
 async function load(url) {
   content.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+  const options = url.match(/notes.s-anand.net/) ? { credentials: "include" } : {};
   try {
-    const text = await fetch(url).then((r) => {
+    const text = await fetch(url, options).then((r) => {
       if (r.ok) return r.text();
       throw new Error(`Load failed: ${r.status}`);
     });
