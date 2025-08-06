@@ -86,7 +86,7 @@ function applyFilter() {
     bootstrapAlert({ body: "No ⭐ items", color: "danger", replace: true });
     return;
   }
-  fuse = new Fuse(base);
+  fuse = new Fuse(base, { ignoreLocation: true });
   const term = searchInput.value.trim();
   view = term ? fuse.search(term, { limit: 5 }).map((r) => r.item) : base.slice();
   if (!view.length) {
