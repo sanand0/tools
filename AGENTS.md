@@ -21,14 +21,23 @@
 - Stream LLM calls with asyncllm (podcast/, speakmd/, githubsummary/, llmboundingbox/)
 - Import utilities from common/ for CSV and errors (googletasks/, json2csv/, excel2jsonl/, joincsv/)
 - Include a navbar and apply add a `bootstrap-dark-theme` (most tools)
-- Lint with `npm run lint`; run tests with `npm test`; take full-page screenshots with `npm run screenshot -- ${tool}/ ${tool}/screenshot.webp`
+- Lint with `npm run lint`; take full-page screenshots with `npm run screenshot -- ${tool}/ ${tool}/screenshot.webp`
 - Never commit generated images. Codex PRs ignore binary files.
-- Run a single tool's tests via `npm test -- ${tool}/${tool}.test.js`.
 - Prefer `asyncllm` for all LLM calls: `import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2"` then `for await (const { content, error } of asyncLLM(...)) {}` where `content` has the FULL (not incremental) content
 
 Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1.13.1, a base64 favicon, a container with headers and forms, and a `<script type="module" src="script.js"></script>` that manipulates the DOM with Bootstrap classes.
 
-## Testing guidelines
+## Running tests
+
+1. Run `npm ci`
+2. Before running `npm test`, mirror CDN assets under `vendor/` with the same paths used in HTML and scripts. E.g. `curl -L https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css -o vendor/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css`
+   - Mirror bootstrap@5.3.6 (CSS/JS), bootstrap-icons@1.13.1 (CSS/fonts), bootstrap-alert@1, saveform@1.2, marked@4.3.0, d3-dsv@3/+esm
+   - Mirror pages for `news.ycombinator.com`, `www.hntoplinks.com/week`, etc.
+3. Extend `common/testutils.js` `virtualServers` with `https://cdn.jsdelivr.net/`, `https://news.ycombinator.com/`, etc. pointing to those mirrors.
+4. `npm test` tests all tools
+5. `npm test -- ${tool}/${tool}.test.js` tests a single tool
+
+## Writing tests
 
 - Use [vitest](http://npmjs.com/package/vitest) and [happy-dom](https://www.npmjs.com/package/happy-dom) for front-end testing.
 - Avoid `vitest.config.*`; default ESM import works, launch via `"test": "npx -y vitest run"` in `package.json`. Add `happy-dom` as a `devDependency`. Add `npm test` to `prepublishOnly`
@@ -46,10 +55,3 @@ Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1
 - Build specialised browsers (`new Browser({device:{prefersColorScheme:"dark"}})`) to test colour-scheme logic.
 - Drive UI through real DOM events. `element.click()` / `dispatchEvent(new window.Event("input",{bubbles:true}))` instead of directly calling handlers; matches user behaviour.
 - Add timeouts per test case, e.g. `{ timeout: 10_000 }`, for long-running tests.
-
-### Running tests
-
-- Tests fetch CDN assets inaccessible in agent containers. Mirror them under `vendor/` with the same paths used in HTML and scripts. E.g. `curl -L https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css -o vendor/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css`
-  - Mirror bootstrap@5.3.6 (CSS/JS), bootstrap-icons@1.13.1 (CSS/fonts), bootstrap-alert@1, saveform@1.2, marked@4.3.0, d3-dsv@3/+esm
-  - Mirror pages for `news.ycombinator.com`, `www.hntoplinks.com/week`, etc.
-- Extend `common/testutils.js` `virtualServers` with `https://cdn.jsdelivr.net/`, `https://news.ycombinator.com/`, etc. pointing to those mirrors.
