@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Exit at the very start unless VITE_TEST_LOCAL is set
-if [ -z "$VITE_TEST_LOCAL" ]; then
-  echo "No VITE_TEST_LOCAL; no local setup required." >&2
+# We need local setup only in Codex (sets CODEX_PROXY_CERT) or Jules ($USER = jules)
+if [ -z "$CODEX_PROXY_CERT" ] && [ "$USER" != "jules" ]; then
+  echo "No local setup required." >&2
   exit 0
 fi
 

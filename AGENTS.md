@@ -22,17 +22,11 @@
 - Import utilities from common/ for CSV and errors (googletasks/, json2csv/, excel2jsonl/, joincsv/)
 - Include a navbar and apply add a `bootstrap-dark-theme` (most tools)
 - Lint with `npm run lint`; take full-page screenshots with `npm run screenshot -- ${tool}/ ${tool}/screenshot.webp`
+- Test with `npm test`. To test a single tool, run `npm test -- ${tool}/${tool}.test.js`
 - Never commit generated images. Codex PRs ignore binary files.
 - Prefer `asyncllm` for all LLM calls: `import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2"` then `for await (const { content, error } of asyncLLM(...)) {}` where `content` has the FULL (not incremental) content
 
 Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1.13.1, a base64 favicon, a container with headers and forms, and a `<script type="module" src="script.js"></script>` that manipulates the DOM with Bootstrap classes.
-
-## Running tests
-
-1. Run `npm ci`
-2. `./test-local.sh` mirrors CDN assets under `vendor/`
-3. `VITE_TEST_LOCAL=1 npm test` tests all tools
-4. `VITE_TEST_LOCAL=1 npm test -- ${tool}/${tool}.test.js` tests a single tool
 
 ## Writing tests
 

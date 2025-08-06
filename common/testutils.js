@@ -1,11 +1,12 @@
 import { Browser } from "happy-dom";
 import path from "path";
+import fs from "node:fs";
 import { fileURLToPath } from "url";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
 const servers = [{ url: "https://test/", directory: root }];
-if (import.meta.env?.VITE_TEST_LOCAL)
+if (fs.existsSync(path.join(root, "vendor")))
   servers.push(
     { url: "https://cdn.jsdelivr.net/npm/", directory: path.join(root, "vendor/npm") },
     {
