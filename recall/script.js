@@ -1,5 +1,6 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
+import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7/+esm";
 
 const files = [
   {
@@ -39,6 +40,7 @@ const copyBtn = document.getElementById("copy-btn");
 const starBtn = document.getElementById("star-btn");
 const decayInput = document.getElementById("decay-input");
 const indexInput = document.getElementById("index-input");
+const searchInput = document.getElementById("search-input");
 const prevBtn = document.getElementById("prev-btn");
 const nextBtn = document.getElementById("next-btn");
 const title = document.getElementById("title");
@@ -46,9 +48,10 @@ let items = [];
 let view = [];
 let index = 0;
 let starOnly = false;
+let fuse;
 
 files.forEach((f) =>
-  fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="${f.url}">${f.name}</option>`)
+  fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="${f.url}">${f.name}</option>`),
 );
 
 async function load(url) {
@@ -83,6 +86,7 @@ function applyFilter() {
     bootstrapAlert({ body: "No ⭐ items", color: "danger", replace: true });
     return;
   }
+  fuse = new Fuse(view);
   randomPick();
 }
 
@@ -112,6 +116,16 @@ title.onclick = randomPick;
 prevBtn.onclick = () => show(index - 1);
 nextBtn.onclick = () => show(index + 1);
 indexInput.oninput = () => show(+indexInput.value - 1);
+searchInput.oninput = () => {
+  if (!fuse) return;
+  const result = fuse.search(searchInput.value);
+  if (!result.length) {
+    content.innerHTML = "";
+    bootstrapAlert({ body: "No match", color: "danger", replace: true });
+    return;
+  }
+  show(result[0].refIndex);
+};
 copyBtn.onclick = async () => {
   await navigator.clipboard.writeText(view[index] || "");
   bootstrapAlert({ body: "Copied", color: "success", replace: true });
