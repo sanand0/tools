@@ -14,4 +14,4 @@ It also lets you copy the results straight into Excel or Markdown, and delete al
 5. Sub-tasks show up as bullet points in the notes of their parent tasks.
 6. Markdown exports keep line breaks and nested bullets from the notes.
 
-Your access token is stored locally in your browser using `saveform`.
+Your refresh token and email are saved together in localStorage (key: `googletasks`) so you stay signed in and see your address on the Sign in button.

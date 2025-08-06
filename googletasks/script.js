@@ -4,7 +4,12 @@ import { copyText } from "../common/clipboard-utils.js";
 // root.node@gmail.com | Project: Personal mail etc. OAuth Client: Web apps
 // https://console.cloud.google.com/auth/clients/872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com?inv=1&invt=AbzTOQ&project=encoded-ensign-221
 const clientId = "872568319651-r1jl15a1oektabjl48ch3v9dhipkpdjh.apps.googleusercontent.com";
-let tokenClient;
+const LS_KEY = "googletasks";
+const getAuth = () => JSON.parse(localStorage.getItem(LS_KEY) || "{}");
+const setAuth = (auth) => localStorage.setItem(LS_KEY, JSON.stringify(auth));
+const clearAuth = () => localStorage.removeItem(LS_KEY);
+let codeClient;
+let codeVerifier;
 let tasks = [];
 
 const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -80,24 +85,117 @@ function showAlert(message, type = "info", autoClose = false) {
   return alert;
 }
 
-window.onload = () => {
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: clientId,
-    scope: "https://www.googleapis.com/auth/tasks",
-    callback: (resp) => {
-      tokenInput.value = resp.access_token;
-      tokenInput.dispatchEvent(new Event("change", { bubbles: true }));
-    },
-  });
+const setSignin = (email) => {
+  signinBtn.replaceChildren();
+  signinBtn.insertAdjacentHTML("beforeend", `<i class="bi bi-google"></i> ${email || "Sign in"}`);
 };
 
-signinBtn.addEventListener("click", () => tokenClient.requestAccessToken());
+const toggleLoading = (btn, show) => {
+  if (show) {
+    btn.disabled = true;
+    btn.insertAdjacentHTML("afterbegin", '<span class="spinner-border spinner-border-sm me-2"></span>');
+    return;
+  }
+  btn.disabled = false;
+  btn.querySelector(".spinner-border")?.remove();
+};
+
+async function initAuth() {
+  codeVerifier = google.accounts.oauth2.generateCodeVerifier();
+  const codeChallenge = await google.accounts.oauth2.calculateCodeChallenge(codeVerifier);
+  codeClient = google.accounts.oauth2.initCodeClient({
+    client_id: clientId,
+    scope: "https://www.googleapis.com/auth/tasks https://www.googleapis.com/auth/userinfo.email",
+    ux_mode: "popup",
+    code_challenge: codeChallenge,
+    code_challenge_method: "S256",
+    callback: handleCode,
+  });
+}
+
+async function handleCode(resp) {
+  toggleLoading(signinBtn, true);
+  const data = await exchangeCode(resp.code);
+  if (!data.access_token) {
+    toggleLoading(signinBtn, false);
+    return showAlert("Failed to get access token", "danger");
+  }
+  tokenInput.value = data.access_token;
+  tokenInput.dispatchEvent(new Event("change", { bubbles: true }));
+  const email = await fetchEmail(data.access_token);
+  setAuth({ refresh: data.refresh_token, email });
+  setSignin(email);
+  toggleLoading(signinBtn, false);
+}
+
+const tokenRequest = async (params) => {
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ client_id: clientId, ...params }),
+  });
+  return res.ok ? res.json() : {};
+};
+
+const exchangeCode = (code) =>
+  tokenRequest({
+    code,
+    code_verifier: codeVerifier,
+    grant_type: "authorization_code",
+    redirect_uri: "postmessage",
+  });
+
+const refreshAccess = (refresh) => tokenRequest({ refresh_token: refresh, grant_type: "refresh_token" });
+
+async function fetchEmail(token) {
+  const res = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return "";
+  const { email } = await res.json();
+  return email || "";
+}
+
+async function ensureToken(btn = signinBtn) {
+  let token = tokenInput.value.trim();
+  if (token) return token;
+  const { refresh } = getAuth();
+  if (!refresh) return "";
+  toggleLoading(btn, true);
+  const data = await refreshAccess(refresh);
+  toggleLoading(btn, false);
+  token = data.access_token || "";
+  if (!token) return "";
+  tokenInput.value = token;
+  tokenInput.dispatchEvent(new Event("change", { bubbles: true }));
+  return token;
+}
+
+window.onload = async () => {
+  await initAuth();
+  const { email } = getAuth();
+  if (email) setSignin(email);
+  await ensureToken();
+};
+
+signinBtn.addEventListener("click", async () => {
+  const { refresh } = getAuth();
+  if (refresh) {
+    clearAuth();
+    tokenInput.value = "";
+    setSignin();
+    return;
+  }
+  await initAuth();
+  codeClient.requestCode();
+});
 
 fetchBtn.addEventListener("click", async () => {
   output.innerHTML = "";
   status.textContent = "";
-  const token = tokenInput.value.trim();
+  const token = await ensureToken(fetchBtn);
   if (!token) return showAlert("Please sign in first", "warning", true);
+  toggleLoading(fetchBtn, true);
   try {
     tasks = mergeSubtasks(await fetchTasks(token));
     if (!tasks.length) return showAlert("No tasks found", "warning", true);
@@ -115,6 +213,7 @@ fetchBtn.addEventListener("click", async () => {
     showAlert(e.message, "danger");
     status.textContent = "";
   }
+  toggleLoading(fetchBtn, false);
 });
 
 downloadBtn.addEventListener("click", () => downloadCsv(objectsToCsv(tasks), "tasks.csv"));
@@ -149,8 +248,9 @@ mdBtn.addEventListener("click", async () => {
 });
 
 deleteBtn.addEventListener("click", async () => {
-  const token = tokenInput.value.trim();
+  const token = await ensureToken(deleteBtn);
   if (!token) return showAlert("Please sign in first", "warning", true);
+  toggleLoading(deleteBtn, true);
   try {
     status.textContent = "Deleting completed tasks";
     await deleteCompleted(token);
@@ -160,6 +260,7 @@ deleteBtn.addEventListener("click", async () => {
     showAlert(e.message, "danger");
     status.textContent = "";
   }
+  toggleLoading(deleteBtn, false);
 });
 
 async function fetchTasks(token) {
