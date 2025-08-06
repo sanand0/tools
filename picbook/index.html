@@ -43,6 +43,16 @@
           <input type="file" id="upload-input" accept="image/*" class="form-control mt-2" />
           <img id="preview-image" class="img-fluid rounded mt-2 d-none" alt="Preview" />
           <input type="text" id="image-url" placeholder="Reference image URL" class="form-control mt-2" />
+          <div class="form-check form-switch mt-2">
+            <input id="keep-base" type="checkbox" class="form-check-input" checked />
+            <label class="form-check-label" for="keep-base">Send reference image above every time</label>
+            <div class="form-text">First panel always uses it if supplied</div>
+          </div>
+          <div class="form-check form-switch mt-2">
+            <input id="use-prev" type="checkbox" class="form-check-input" checked />
+            <label class="form-check-label" for="use-prev">Also send previous image output</label>
+            <div class="form-text">The next panel will look similar to previous ones</div>
+          </div>
           <h4 class="h6 mt-3">Advanced options</h4>
           <div class="row g-2 mb-2 align-items-center">
             <label for="size" class="col-4 col-form-label">Size</label>
@@ -81,18 +91,9 @@
               <input type="number" id="output-compression" value="50" min="0" max="100" class="form-control form-control-sm" />
             </div>
           </div>
-          <div class="form-check form-switch mb-3">
+          <div class="form-check form-switch mt-2">
             <input id="background" type="checkbox" class="form-check-input" />
             <label class="form-check-label" for="background">Transparent background</label>
-          </div>
-          <div class="form-check form-switch mb-3">
-            <input id="use-prev" type="checkbox" class="form-check-input" checked />
-            <label class="form-check-label" for="use-prev">Use previous panel</label>
-          </div>
-          <div class="form-check form-switch mb-3">
-            <input id="keep-base" type="checkbox" class="form-check-input" checked />
-            <label class="form-check-label" for="keep-base">Reuse reference image</label>
-            <div class="form-text">First panel always uses it if supplied</div>
           </div>
         </div>
         <div class="col-lg-8">
