@@ -47,8 +47,9 @@ Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1
 - Drive UI through real DOM events. `element.click()` / `dispatchEvent(new window.Event("input",{bubbles:true}))` instead of directly calling handlers; matches user behaviour.
 - Add timeouts per test case, e.g. `{ timeout: 10_000 }`, for long-running tests.
 
-### Running tests offline
+### Running tests
 
-- Mirror CDN assets under `vendor/` with the same paths used in HTML and scripts.
-  - bootstrap@5.3.6 (CSS/JS), bootstrap-icons@1.13.1 (CSS/fonts), bootstrap-alert@1, saveform@1.2, marked@4.3.0, d3-dsv@3/+esm, pages for `news.ycombinator.com` and `www.hntoplinks.com/week`.
-- Extend `common/testutils.js` `virtualServers` with `https://cdn.jsdelivr.net/` and `https://llmfoundry.straive.com/` pointing to those mirrors.
+- Tests fetch CDN assets. Before running tests, mirror them under `vendor/` with the same paths used in HTML and scripts. E.g. `curl -L https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css -o vendor/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css`
+  - Mirror bootstrap@5.3.6 (CSS/JS), bootstrap-icons@1.13.1 (CSS/fonts), bootstrap-alert@1, saveform@1.2, marked@4.3.0, d3-dsv@3/+esm
+  - Mirror pages for `news.ycombinator.com`, `www.hntoplinks.com/week`, etc.
+- Extend `common/testutils.js` `virtualServers` with `https://cdn.jsdelivr.net/`, `https://news.ycombinator.com/`, etc. pointing to those mirrors.
