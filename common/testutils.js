@@ -8,8 +8,14 @@ const servers = [{ url: "https://test/", directory: root }];
 if (import.meta.env?.VITE_TEST_LOCAL)
   servers.push(
     { url: "https://cdn.jsdelivr.net/npm/", directory: path.join(root, "vendor/npm") },
-    { url: "https://news.ycombinator.com/", directory: path.join(root, "vendor/news.ycombinator.com") },
-    { url: "https://www.hntoplinks.com/", directory: path.join(root, "vendor/www.hntoplinks.com") },
+    {
+      url: "https://llmfoundry.straive.com/-/proxy/https://news.ycombinator.com/",
+      directory: path.join(root, "vendor/news.ycombinator.com"),
+    },
+    {
+      url: "https://llmfoundry.straive.com/-/proxy/https://www.hntoplinks.com/",
+      directory: path.join(root, "vendor/www.hntoplinks.com"),
+    }
   );
 
 const browser = new Browser({

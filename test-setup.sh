@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+
+# Exit at the very start unless VITE_TEST_LOCAL is set
+if [ -z "$VITE_TEST_LOCAL" ]; then
+  echo "No VITE_TEST_LOCAL; no local setup required." >&2
+  exit 0
+fi
+
 set -euo pipefail
 root=$(dirname "$0")
 vendor="$root/vendor"
@@ -20,7 +27,7 @@ assets=(
   "https://cdn.jsdelivr.net/npm/marked@4.3.0" "$vendor/npm/marked@4.3.0"
   "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm" "$vendor/npm/d3-dsv@3/+esm"
   "https://news.ycombinator.com/" "$vendor/news.ycombinator.com/index.html"
-  "https://www.hntoplinks.com/week" "$vendor/www.hntoplinks.com/week/index.html"
+  "https://www.hntoplinks.com/week" "$vendor/www.hntoplinks.com/week"
 )
 
 for ((i=0; i<${#assets[@]}; i+=2)); do
