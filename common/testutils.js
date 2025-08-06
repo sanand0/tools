@@ -4,9 +4,17 @@ import { fileURLToPath } from "url";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
+const servers = [{ url: "https://test/", directory: root }];
+if (import.meta.env?.VITE_TEST_LOCAL)
+  servers.push(
+    { url: "https://cdn.jsdelivr.net/npm/", directory: path.join(root, "vendor/npm") },
+    { url: "https://news.ycombinator.com/", directory: path.join(root, "vendor/news.ycombinator.com") },
+    { url: "https://www.hntoplinks.com/", directory: path.join(root, "vendor/www.hntoplinks.com") },
+  );
+
 const browser = new Browser({
   console,
-  settings: { fetch: { virtualServers: [{ url: "https://test/", directory: root }] } },
+  settings: { fetch: { virtualServers: servers } },
 });
 
 export async function load(page, url) {

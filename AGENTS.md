@@ -30,12 +30,9 @@ Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1
 ## Running tests
 
 1. Run `npm ci`
-2. Before running `npm test`, mirror CDN assets under `vendor/` with the same paths used in HTML and scripts. E.g. `curl -L https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css -o vendor/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css`
-   - Mirror bootstrap@5.3.6 (CSS/JS), bootstrap-icons@1.13.1 (CSS/fonts), bootstrap-alert@1, saveform@1.2, marked@4.3.0, d3-dsv@3/+esm
-   - Mirror pages for `news.ycombinator.com`, `www.hntoplinks.com/week`, etc.
-3. Extend `common/testutils.js` `virtualServers` with `https://cdn.jsdelivr.net/`, `https://news.ycombinator.com/`, etc. pointing to those mirrors.
-4. `npm test` tests all tools
-5. `npm test -- ${tool}/${tool}.test.js` tests a single tool
+2. `./test-local.sh` mirrors CDN assets under `vendor/`
+3. `VITE_TEST_LOCAL=1 npm test` tests all tools
+4. `VITE_TEST_LOCAL=1 npm test -- ${tool}/${tool}.test.js` tests a single tool
 
 ## Writing tests
 
