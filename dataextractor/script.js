@@ -30,7 +30,7 @@ ui.form.addEventListener("submit", extract);
 
 const defaultCols = "company,date,period,fact,value,units,comments";
 ui.cols.value = defaultCols;
-ui.sys.value = `From the image extract rows of {${defaultCols}}. Company from context or "unknown". Unknown fields empty. Return {"data":[...]}.`;
+ui.sys.value = `From the image extract EVERY fact from tables or charts as one row each. Fill each row as best as possible. Skip cells if uncertain.`;
 
 let creds = {};
 async function configure(show = false) {
