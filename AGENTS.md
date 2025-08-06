@@ -46,3 +46,9 @@ Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1
 - Build specialised browsers (`new Browser({device:{prefersColorScheme:"dark"}})`) to test colour-scheme logic.
 - Drive UI through real DOM events. `element.click()` / `dispatchEvent(new window.Event("input",{bubbles:true}))` instead of directly calling handlers; matches user behaviour.
 - Add timeouts per test case, e.g. `{ timeout: 10_000 }`, for long-running tests.
+
+### Running tests offline
+
+- Mirror CDN assets under `vendor/` with the same paths used in HTML and scripts.
+  - bootstrap@5.3.6 (CSS/JS), bootstrap-icons@1.13.1 (CSS/fonts), bootstrap-alert@1, saveform@1.2, marked@4.3.0, d3-dsv@3/+esm, pages for `news.ycombinator.com` and `www.hntoplinks.com/week`.
+- Extend `common/testutils.js` `virtualServers` with `https://cdn.jsdelivr.net/` and `https://llmfoundry.straive.com/` pointing to those mirrors.
