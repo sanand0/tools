@@ -100,9 +100,18 @@ const toggleLoading = (btn, show) => {
   btn.querySelector(".spinner-border")?.remove();
 };
 
+const b64url = (arr) =>
+  btoa(String.fromCharCode(...arr))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+const genCodeVerifier = () => b64url(crypto.getRandomValues(new Uint8Array(32)));
+const genCodeChallenge = async (verifier) =>
+  b64url(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier))));
+
 async function initAuth() {
-  codeVerifier = google.accounts.oauth2.generateCodeVerifier();
-  const codeChallenge = await google.accounts.oauth2.calculateCodeChallenge(codeVerifier);
+  codeVerifier = genCodeVerifier();
+  const codeChallenge = await genCodeChallenge(codeVerifier);
   codeClient = google.accounts.oauth2.initCodeClient({
     client_id: clientId,
     scope: "https://www.googleapis.com/auth/tasks https://www.googleapis.com/auth/userinfo.email",
