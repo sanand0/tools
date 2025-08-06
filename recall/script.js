@@ -13,11 +13,11 @@ const files = [
   },
   {
     url: "https://notes.s-anand.net/explore.md",
-    name: "Explore",
+    name: "🔒 Explore",
   },
   {
     url: "https://notes.s-anand.net/jobs-people.md",
-    name: "Jobs - People",
+    name: "🔒 Jobs - People",
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/claude-code-uses.md",
@@ -79,14 +79,28 @@ function weight(i) {
 }
 
 function applyFilter() {
-  view = starOnly ? items.filter((t) => t.includes("⭐")) : items.slice();
-  if (!view.length) {
+  const base = starOnly ? items.filter((t) => t.includes("⭐")) : items;
+  if (!base.length) {
     content.innerHTML = "";
     indexInput.value = "";
     bootstrapAlert({ body: "No ⭐ items", color: "danger", replace: true });
     return;
   }
-  fuse = new Fuse(view);
+  fuse = new Fuse(base);
+  const term = searchInput.value.trim();
+  view = term ? fuse.search(term, { limit: 5 }).map((r) => r.item) : base.slice();
+  if (!view.length) {
+    content.innerHTML = "";
+    indexInput.value = "";
+    bootstrapAlert({ body: "No match", color: "danger", replace: true });
+    return;
+  }
+  if (term) {
+    index = 0;
+    content.innerHTML = marked.parse(view.join("\n"));
+    indexInput.value = "";
+    return;
+  }
   randomPick();
 }
 
@@ -109,23 +123,17 @@ function randomPick() {
   show(i);
 }
 
-fileSelect.onchange = () => load(fileSelect.value);
+fileSelect.onchange = () => {
+  searchInput.value = "";
+  load(fileSelect.value);
+};
 decayInput.oninput = randomPick;
 randomBtn.onclick = randomPick;
 title.onclick = randomPick;
 prevBtn.onclick = () => show(index - 1);
 nextBtn.onclick = () => show(index + 1);
 indexInput.oninput = () => show(+indexInput.value - 1);
-searchInput.oninput = () => {
-  if (!fuse) return;
-  const result = fuse.search(searchInput.value);
-  if (!result.length) {
-    content.innerHTML = "";
-    bootstrapAlert({ body: "No match", color: "danger", replace: true });
-    return;
-  }
-  show(result[0].refIndex);
-};
+searchInput.oninput = applyFilter;
 copyBtn.onclick = async () => {
   await navigator.clipboard.writeText(view[index] || "");
   bootstrapAlert({ body: "Copied", color: "success", replace: true });
