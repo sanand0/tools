@@ -1,5 +1,6 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
+import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7/+esm";
 
 const files = [
   {
@@ -12,11 +13,11 @@ const files = [
   },
   {
     url: "https://notes.s-anand.net/explore.md",
-    name: "Explore",
+    name: "🔒 Explore",
   },
   {
     url: "https://notes.s-anand.net/jobs-people.md",
-    name: "Jobs - People",
+    name: "🔒 Jobs - People",
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/claude-code-uses.md",
@@ -39,6 +40,7 @@ const copyBtn = document.getElementById("copy-btn");
 const starBtn = document.getElementById("star-btn");
 const decayInput = document.getElementById("decay-input");
 const indexInput = document.getElementById("index-input");
+const searchInput = document.getElementById("search-input");
 const prevBtn = document.getElementById("prev-btn");
 const nextBtn = document.getElementById("next-btn");
 const title = document.getElementById("title");
@@ -46,9 +48,10 @@ let items = [];
 let view = [];
 let index = 0;
 let starOnly = false;
+let fuse;
 
 files.forEach((f) =>
-  fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="${f.url}">${f.name}</option>`)
+  fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="${f.url}">${f.name}</option>`),
 );
 
 async function load(url) {
@@ -76,11 +79,26 @@ function weight(i) {
 }
 
 function applyFilter() {
-  view = starOnly ? items.filter((t) => t.includes("⭐")) : items.slice();
-  if (!view.length) {
+  const base = starOnly ? items.filter((t) => t.includes("⭐")) : items;
+  if (!base.length) {
     content.innerHTML = "";
     indexInput.value = "";
     bootstrapAlert({ body: "No ⭐ items", color: "danger", replace: true });
+    return;
+  }
+  fuse = new Fuse(base, { ignoreLocation: true });
+  const term = searchInput.value.trim();
+  view = term ? fuse.search(term, { limit: 5 }).map((r) => r.item) : base.slice();
+  if (!view.length) {
+    content.innerHTML = "";
+    indexInput.value = "";
+    bootstrapAlert({ body: "No match", color: "danger", replace: true });
+    return;
+  }
+  if (term) {
+    index = 0;
+    content.innerHTML = marked.parse(view.join("\n"));
+    indexInput.value = "";
     return;
   }
   randomPick();
@@ -105,13 +123,17 @@ function randomPick() {
   show(i);
 }
 
-fileSelect.onchange = () => load(fileSelect.value);
+fileSelect.onchange = () => {
+  searchInput.value = "";
+  load(fileSelect.value);
+};
 decayInput.oninput = randomPick;
 randomBtn.onclick = randomPick;
 title.onclick = randomPick;
 prevBtn.onclick = () => show(index - 1);
 nextBtn.onclick = () => show(index + 1);
 indexInput.oninput = () => show(+indexInput.value - 1);
+searchInput.oninput = applyFilter;
 copyBtn.onclick = async () => {
   await navigator.clipboard.writeText(view[index] || "");
   bootstrapAlert({ body: "Copied", color: "success", replace: true });
