@@ -33,6 +33,8 @@ const ui = {
   format: document.getElementById("output-format"),
   compression: document.getElementById("output-compression"),
   background: document.getElementById("background"),
+  usePrev: document.getElementById("use-prev"),
+  keepBase: document.getElementById("keep-base"),
 };
 
 ui.configBtn.addEventListener("click", async () => {
@@ -240,9 +242,9 @@ async function run() {
   while (index < panels.length && state === "running") {
     const { caption, prompt } = panels[index];
     const refs = [];
-    if (baseFile) refs.push(URL.createObjectURL(baseFile));
-    else if (baseUrl) refs.push(baseUrl);
-    if (index) refs.push(cards[index - 1].querySelector("img")?.src);
+    if (baseFile && (ui.keepBase.checked || index === 0)) refs.push(URL.createObjectURL(baseFile));
+    else if (baseUrl && (ui.keepBase.checked || index === 0)) refs.push(baseUrl);
+    if (index && ui.usePrev.checked) refs.push(cards[index - 1].querySelector("img")?.src);
     const fullPrompt = ctx ? `${ctx} ${prompt}` : prompt;
     const t0 = performance.now();
     const card = cards[index];
