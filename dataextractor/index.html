@@ -21,9 +21,22 @@
     </div>
   </nav>
   <div class="container">
+    <p class="text-secondary">Upload a chart or table image to extract structured data.</p>
     <form id="dataextractor-form" class="mb-3">
       <div class="mb-3">
         <input id="image-input" type="file" accept="image/*" class="form-control" />
+      </div>
+      <div class="mb-3">
+        <label for="system-prompt" class="form-label">System Prompt</label>
+        <textarea id="system-prompt" class="form-control" rows="3"></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="cols-input" class="form-label">Columns</label>
+        <input id="cols-input" class="form-control" />
+      </div>
+      <div class="mb-3">
+        <label for="model-select" class="form-label">Model</label>
+        <select id="model-select" class="form-select"></select>
       </div>
       <div class="d-flex gap-2">
         <button type="submit" class="btn btn-primary flex-grow-1">Extract</button>
@@ -32,6 +45,7 @@
     </form>
     <div id="loading" class="d-none mb-3 text-center">
       <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+      <div id="progress" class="small mt-2 text-secondary"></div>
     </div>
     <div id="output" class="mb-3"></div>
     <button id="download-btn" class="btn btn-success d-none"><i class="bi bi-download"></i> Download CSV</button>
