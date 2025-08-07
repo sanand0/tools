@@ -1,34 +1,27 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { loadFrom } from "../common/testutils.js";
+import { test, expect } from "@playwright/test";
 
-describe("Unicoder tests", async () => {
-  let window, document, inputElement, outputElement, copyButton;
+const url = new URL("index.html", import.meta.url).href;
 
-  beforeEach(async () => {
-    ({ window, document } = await loadFrom(import.meta.dirname));
-    inputElement = document.getElementById("markdown-input");
-    outputElement = document.getElementById("output");
-    copyButton = document.getElementById("copy-button");
-  });
+test.use({ permissions: ["clipboard-read", "clipboard-write"] });
 
-  function setValueAndTriggerInput(value) {
-    inputElement.value = value;
-    inputElement.dispatchEvent(new window.Event("input", { bubbles: true }));
-  }
+test.beforeEach(async ({ page }) => {
+  await page.goto(url);
+});
 
-  it("should encode markdown to unicode correctly", () => {
-    setValueAndTriggerInput("**bold** _italic_ `code`");
-    expect(outputElement.textContent.trim()).toBe("𝗯𝗼𝗹𝗱 𝘪𝘵𝘢𝘭𝘪𝘤 𝚌𝚘𝚍𝚎");
-  });
+const fill = async (page, text) => {
+  await page.fill("#markdown-input", text);
+};
 
-  it("should copy formatted output to clipboard when Copy button is clicked", async () => {
-    setValueAndTriggerInput("**test content**");
-    copyButton.click();
+test("encodes markdown to unicode", async ({ page }) => {
+  await fill(page, "**bold** _italic_ `code`");
+  await expect(page.locator("#output")).toHaveText("𝗯𝗼𝗹𝗱 𝘪𝘵𝘢𝘭𝘪𝘤 𝚌𝚘𝚍𝚎");
+});
 
-    // Wait for clipboard operation and verify clipboard content
-    expect(await window.navigator.clipboard.readText()).toBe("𝘁𝗲𝘀𝘁 𝗰𝗼𝗻𝘁𝗲𝗻𝘁\n");
-    // Verify button shows success state
-    expect(copyButton.textContent).toBe("Copied!");
-    expect(copyButton.classList.contains("btn-success")).toBe(true);
-  });
+test("copies formatted output", async ({ page }) => {
+  await fill(page, "**test content**");
+  await page.click("#copy-button");
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe("𝘁𝗲𝘀𝘁 𝗰𝗼𝗻𝘁𝗲𝗻𝘁\n");
+  const btn = page.locator("#copy-button");
+  await expect(btn).toHaveText("Copied!");
+  await expect(btn).toHaveClass(/btn-success/);
 });
