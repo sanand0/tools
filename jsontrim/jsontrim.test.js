@@ -1,123 +1,72 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { loadFrom, sleep } from "../common/testutils.js";
+import { test, expect } from "@playwright/test";
 
-describe("JSON Trim tests", async () => {
-  let window, document, inputJson, outputJson, maxLength, trimButton, copyButton, errorContainer;
+const url = new URL("index.html", import.meta.url).href;
 
-  beforeEach(async () => {
-    ({ window, document } = await loadFrom(import.meta.dirname));
-    inputJson = document.getElementById("inputJson");
-    outputJson = document.getElementById("outputJson");
-    maxLength = document.getElementById("maxLength");
-    trimButton = document.getElementById("trimButton");
-    copyButton = document.getElementById("copyButton");
-    errorContainer = document.getElementById("error-container");
-  });
+test.use({ permissions: ["clipboard-read", "clipboard-write"] });
 
-  it("should trim strings in JSON to the specified maxLength", async () => {
-    const json = { name: "John Doe", description: "A long description that needs trimming." };
-    inputJson.value = JSON.stringify(json);
-    maxLength.value = "10";
-    trimButton.click();
+test.beforeEach(async ({ page }) => {
+  await page.goto(url);
+});
 
-    const expectedOutput = { name: "John Doe", description: "A long des" };
-    expect(JSON.parse(outputJson.value)).toEqual(expectedOutput);
-    expect(copyButton.disabled).toBe(false);
-    expect(errorContainer.innerHTML).toBe("");
-  });
+const trim = async (page, json, len) => {
+  await page.fill("#inputJson", JSON.stringify(json));
+  await page.fill("#maxLength", String(len));
+  await page.click("#trimButton");
+};
 
-  it("should handle nested objects and arrays", async () => {
-    const json = {
-      user: { name: "Jane Smith", bio: "Loves coding and long walks" },
-      tags: ["developer", "javascript", "web enthusiast"],
-    };
-    inputJson.value = JSON.stringify(json);
-    maxLength.value = "8";
-    trimButton.click();
+test("trims strings to max length", async ({ page }) => {
+  await trim(page, { name: "John Doe", description: "A long description that needs trimming." }, 10);
+  await expect(page.locator("#outputJson")).toHaveValue('{"name":"John Doe","description":"A long des"}');
+  await expect(page.locator("#copyButton")).toBeEnabled();
+  await expect(page.locator("#error-container")).toBeEmpty();
+});
 
-    const expectedOutput = {
-      user: { name: "Jane Smi", bio: "Loves co" },
-      tags: ["develope", "javascri", "web enth"],
-    };
-    expect(JSON.parse(outputJson.value)).toEqual(expectedOutput);
-  });
+test("handles nested objects and arrays", async ({ page }) => {
+  const json = {
+    user: { name: "Jane Smith", bio: "Loves coding and long walks" },
+    tags: ["developer", "javascript", "web enthusiast"],
+  };
+  await trim(page, json, 8);
+  await expect(page.locator("#outputJson")).toHaveValue(
+    '{"user":{"name":"Jane Smi","bio":"Loves co"},"tags":["develope","javascri","web enth"]}',
+  );
+});
 
-  it("should not trim numbers or booleans", async () => {
-    const json = { id: 1234567890, active: true, value: 123.456789 };
-    inputJson.value = JSON.stringify(json);
-    maxLength.value = "5";
-    trimButton.click();
+test("does not trim numbers or booleans", async ({ page }) => {
+  const json = { id: 1234567890, active: true, value: 123.456789 };
+  await trim(page, json, 5);
+  await expect(page.locator("#outputJson")).toHaveValue(JSON.stringify(json));
+});
 
-    // Numbers and booleans should remain unchanged
-    expect(JSON.parse(outputJson.value)).toEqual(json);
-  });
+test("shows error for invalid JSON", async ({ page }) => {
+  await page.fill("#inputJson", "invalid json");
+  await page.fill("#maxLength", "5");
+  await page.click("#trimButton");
+  await expect(page.locator("#outputJson")).toHaveValue("");
+  await expect(page.locator("#copyButton")).toBeDisabled();
+  await expect(page.locator("#error-container")).toContainText("Invalid JSON input");
+});
 
-  it("should show an error for invalid JSON input", async () => {
-    inputJson.value = "invalid json";
-    maxLength.value = "5";
-    trimButton.click();
+test("shows error if max length < 1", async ({ page }) => {
+  await trim(page, { name: "Test" }, 0);
+  await expect(page.locator("#outputJson")).toHaveValue("");
+  await expect(page.locator("#copyButton")).toBeDisabled();
+  await expect(page.locator("#error-container")).toContainText("Maximum length must be at least 1");
+});
 
-    expect(outputJson.value).toBe("");
-    expect(copyButton.disabled).toBe(true);
-    expect(errorContainer.querySelector(".alert-danger")).not.toBeNull();
-    expect(errorContainer.textContent).toContain("Invalid JSON input");
-  });
+test("copies trimmed JSON", async ({ page }) => {
+  await trim(page, { message: "Hello World, this is a test for copy." }, 15);
+  await page.click("#copyButton");
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe('{"message":"Hello World, th"}');
+  await expect(page.locator("#copyButton")).toHaveText(/Copied!/);
+});
 
-  it("should show an error if maxLength is less than 1", async () => {
-    const json = { name: "Test" };
-    inputJson.value = JSON.stringify(json);
-    maxLength.value = "0";
-    trimButton.click();
-
-    expect(outputJson.value).toBe(""); // Output might not be cleared depending on implementation
-    expect(copyButton.disabled).toBe(true); // Or check initial state if it doesn't change
-    expect(errorContainer.querySelector(".alert-danger")).not.toBeNull();
-    expect(errorContainer.textContent).toContain("Maximum length must be at least 1");
-  });
-
-  it("should copy trimmed JSON to clipboard", async () => {
-    const json = { message: "Hello World, this is a test for copy." };
-    inputJson.value = JSON.stringify(json);
-    maxLength.value = "15";
-    trimButton.click();
-
-    copyButton.click();
-    expect(JSON.parse(await window.navigator.clipboard.readText())).toEqual({ message: "Hello World, th" });
-
-    // Check for copy confirmation message (optional, based on UI)
-    await sleep(100);
-    expect(copyButton.innerHTML).toContain("Copied!");
-    // Wait for button text to revert
-    await sleep(2100);
-    expect(copyButton.innerHTML).not.toContain("Copied!");
-  });
-
-  it("should load JSON from localStorage on load and save on input", async () => {
-    // Test saving to localStorage
-    const testJson = '{ "test": "save" }';
-    inputJson.value = testJson;
-    inputJson.dispatchEvent(new window.Event("input", { bubbles: true }));
-    expect(window.localStorage.getItem("jsonTrimmer.input")).toBe(testJson);
-
-    // Test loading from localStorage
-    // Create a new instance to simulate fresh load
-    // Correctly load the page first
-    const { window: newWindow, document: newDocument } = await loadFrom(import.meta.dirname);
-
-    // Manually set localStorage for the new window *before* the load event logic would typically run
-    newWindow.localStorage.setItem("jsonTrimmer.input", '{ "loaded": "yes" }');
-
-    // Manually trigger the load event logic from script.js for the new window
-    // The script assigns to a global const inputJson, so we need to get it from the newDocument
-    const newInputJson = newDocument.getElementById("inputJson");
-    expect(newInputJson).not.toBeNull(); // Ensure element exists
-
-    // Simulate the event listener's effect
-    const savedJson = newWindow.localStorage.getItem("jsonTrimmer.input");
-    if (savedJson && newInputJson) {
-      newInputJson.value = savedJson;
-    }
-
-    expect(newInputJson.value).toBe('{ "loaded": "yes" }');
-  });
+test("persists input via localStorage", async ({ page }) => {
+  const text = '{ "test": "save" }';
+  await page.fill("#inputJson", text);
+  await page.dispatchEvent("#inputJson", "input");
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("jsonTrimmer.input"))).toBe(text);
+  await page.evaluate(() => localStorage.setItem("jsonTrimmer.input", '{ "loaded": "yes" }'));
+  await page.reload();
+  await expect(page.locator("#inputJson")).toHaveValue('{ "loaded": "yes" }');
 });

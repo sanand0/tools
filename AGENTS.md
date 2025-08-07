@@ -30,19 +30,10 @@ Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1
 
 ## Writing tests
 
-- Use [vitest](http://npmjs.com/package/vitest) and [happy-dom](https://www.npmjs.com/package/happy-dom) for front-end testing.
-- Avoid `vitest.config.*`; default ESM import works, launch via `"test": "npx -y vitest run"` in `package.json`. Add `happy-dom` as a `devDependency`. Add `npm test` to `prepublishOnly`
-- Treat tests as lightweight integration, not unit. Load the full HTML + scripts and verify real DOM mutations; ensures refactors don't silently break UI wiring.
-- Share one `Browser` per test suite to cut startup time: `new Browser({console, settings})`. Log browser `console.*` output.
-- Mount local HTML. `settings.fetch.virtualServers = [{url:"https://test/", directory: <root>}]`. Use `page.goto("https://test/...")` to load files without a dev-server.
-- Create a fresh `page = browser.newPage()` for each test to isolate `window`, `document`, etc.
-- `await page.waitUntilComplete()` after `page.goto()` ensures all inline & async scripts executed before assertions.
-- Fake timers for deterministic testing.
-  - Call `vi.useFakeTimers()` in `beforeAll`, `vi.useRealTimers()` in `afterAll`.
-  - Re-bind `window.setTimeout = setTimeout` so app code sees the mocked clock.
-  - Drive async paths with `vi.advanceTimersByTime(ms)` instead of `await sleep`.
-- Stub external APIs with `vi.fn()` - e.g. `window.fetch = vi.fn(() => Promise.resolve({ok:true,...}))` avoids network and lets you assert payloads.
-- Spy on side-effects - `vi.spyOn(console, "error")`, clipboard reads, etc.; always `mockRestore()` afterwards to prevent bleed-through.
-- Build specialised browsers (`new Browser({device:{prefersColorScheme:"dark"}})`) to test colour-scheme logic.
-- Drive UI through real DOM events. `element.click()` / `dispatchEvent(new window.Event("input",{bubbles:true}))` instead of directly calling handlers; matches user behaviour.
+- Use [Playwright](https://playwright.dev/) for front-end testing.
+- Launch via `npm test` which runs `playwright test` with ESM files.
+- Treat tests as lightweight integration: load `index.html` and assert real DOM updates.
+- Share setup in `test.beforeEach` and enable clipboard with `test.use({ permissions:["clipboard-read","clipboard-write"] })`.
+- Stub external requests with `page.route` to serve fixtures.
+- Drive UI through DOM events (`element.click()`, `dispatchEvent(new Event("input",{bubbles:true}))`).
 - Add timeouts per test case, e.g. `{ timeout: 10_000 }`, for long-running tests.
