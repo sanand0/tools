@@ -12,6 +12,10 @@ const files = [
     name: "Things I learned",
   },
   {
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/questions.md",
+    name: "Questions to ask",
+  },
+  {
     url: "https://notes.s-anand.net/explore.md",
     name: "🔒 Explore",
   },
@@ -51,7 +55,7 @@ let starOnly = false;
 let fuse;
 
 files.forEach((f) =>
-  fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="${f.url}">${f.name}</option>`),
+  fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="${f.url}">${f.name}</option>`)
 );
 
 async function load(url) {
@@ -62,10 +66,13 @@ async function load(url) {
       if (r.ok) return r.text();
       throw new Error(`Load failed: ${r.status}`);
     });
-    items = marked
-      .lexer(text)
-      .filter((t) => t.type === "list")
-      .flatMap((l) => l.items.map((i) => i.raw.trim()));
+    const toks = marked.lexer(text);
+    items.length = 0; // clear in place
+    let header = "";
+    for (const tok of toks) {
+      if (tok.type === "heading") header = tok.text.trim();
+      else if (tok.type === "list") for (const li of tok.items) items.push(`${li.raw.trim()}\n\n\n  🏷️ *${header}*`);
+    }
     applyFilter();
   } catch (e) {
     content.innerHTML = "";
