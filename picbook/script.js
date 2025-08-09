@@ -71,13 +71,24 @@ function collectOptions() {
 }
 
 const buildPrompt = (ctx, hasRef, sendPrev) => {
-  let s = `You are a picture book script author.\n\n<CONTEXT>${ctx}</CONTEXT>\n\nWrite the script for each panel in a separate line like this:\n\nPanel caption to display [Image generation prompt for LLM]\nPane; caption to display [Image generation prompt for LLM]\n...\n\nMinimize text in images. (LLMs are not good at writing text.)\n`;
-  if (hasRef) s += "Use the provided image as context.\n";
-  if (sendPrev) s += "The provided image will also be sent as reference to the LLM each time.\n";
-  return (
-    s +
-    "The prompts will be sent to an LLM, line-by-line, along with the caption and previous image, to generate the next image."
-  );
+  let s = `You are a picture book script author.
+
+<CONTEXT>${ctx}</CONTEXT>
+
+Write the script for each panel in a separate line like this:
+
+John reflects his first job interview. [A young man in a formal outfit sitting nervously in a chair during an interview.]
+He now has a successful career. [A man now older, surrounded by books and computer code, looking contemplative and wise.]
+{Panel caption to display} [{Image generation prompt for LLM}]
+... etc.
+
+Image generation prompt rules:
+- This is the ONLY information sent to the LLM to draw each panel.
+  Include relevant storyline context and info about previous/next panel if it will help.
+- Minimize text in images. (LLMs are not good at writing text.)
+`;
+  if (hasRef || sendPrev) s += "- Ask the LLM to use provided image as reference.\n";
+  return s;
 };
 
 function updateProgress(current, total) {
@@ -162,7 +173,7 @@ async function createPanels() {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-5-mini",
         stream: true,
         messages: [
           { role: "system", content: sys },
@@ -171,7 +182,7 @@ async function createPanels() {
       }),
     })) {
       if (error) throw error;
-      ui.panels.value = content ?? "";
+      ui.panels.value = (content ?? "").replace(/\n+/g, "\n");
       ui.panels.scrollTop = ui.panels.scrollHeight;
     }
   } catch (err) {
@@ -294,20 +305,18 @@ async function run() {
   ui.progressRow.classList.remove("d-none");
   ui.zipBtn.classList.remove("d-none");
   const opts = collectOptions();
-  const ctx = ui.context.value.trim();
   while (index < panels.length && state === "running") {
     const { caption, prompt } = panels[index];
     const refs = [];
     if (baseFile && (ui.keepBase.checked || index === 0)) refs.push(URL.createObjectURL(baseFile));
     else if (baseUrl && (ui.keepBase.checked || index === 0)) refs.push(baseUrl);
     if (index && ui.usePrev.checked) refs.push(cards[index - 1].querySelector("img")?.src);
-    const fullPrompt = ctx ? `${ctx} ${prompt}` : prompt;
     const t0 = performance.now();
     const card = cards[index];
     const body = card.querySelector(".card-body");
     setSpinner(card, true);
     try {
-      const resp = await requestImage(fullPrompt, refs, opts);
+      const resp = await requestImage(prompt, refs, opts);
       if (!resp || !resp.ok) throw new Error(await resp.text());
       const data = await resp.json();
       const b64 = data.data?.[0]?.b64_json;
