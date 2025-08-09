@@ -16,7 +16,7 @@ if (fs.existsSync(path.join(root, "vendor")))
     {
       url: "https://llmfoundry.straive.com/-/proxy/https://www.hntoplinks.com/",
       directory: path.join(root, "vendor/www.hntoplinks.com"),
-    }
+    },
   );
 
 const browser = new Browser({

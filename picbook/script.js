@@ -15,7 +15,9 @@ saveform("#picbook-form", { exclude: '[type="file"]' });
 const ui = {
   form: document.getElementById("picbook-form"),
   context: document.getElementById("context"),
+  story: document.getElementById("story"),
   panels: document.getElementById("panels"),
+  createBtn: document.getElementById("create-btn"),
   startBtn: document.getElementById("start-btn"),
   pauseBtn: document.getElementById("pause-btn"),
   zipBtn: document.getElementById("zip-btn"),
@@ -67,6 +69,27 @@ function collectOptions() {
   if (ui.background.checked) opts.background = "transparent";
   return opts;
 }
+
+const buildPrompt = (ctx, hasRef, sendPrev) => {
+  let s = `You are a picture book script author.
+
+<CONTEXT>${ctx}</CONTEXT>
+
+Write the script for each panel in a separate line like this:
+
+John reflects his first job interview. [A young man in a formal outfit sitting nervously in a chair during an interview.]
+He now has a successful career. [A man now older, surrounded by books and computer code, looking contemplative and wise.]
+{Panel caption to display} [{Image generation prompt for LLM}]
+... etc.
+
+Image generation prompt rules:
+- This is the ONLY information sent to the LLM to draw each panel.
+  Include relevant storyline context and info about previous/next panel if it will help.
+- Minimize text in images. (LLMs are not good at writing text.)
+`;
+  if (hasRef || sendPrev) s += "- Ask the LLM to use provided image as reference.\n";
+  return s;
+};
 
 function updateProgress(current, total) {
   const elapsed = (Date.now() - startTime) / 1000;
@@ -123,8 +146,52 @@ ui.url.oninput = () => {
   ui.preview.classList.remove("d-none");
 };
 
+ui.createBtn.onclick = createPanels;
+
 ui.zipBtn.onclick = downloadZip;
 ui.printBtn.onclick = () => window.print();
+
+async function createPanels() {
+  const story = ui.story.value.trim();
+  if (!story) {
+    bootstrapAlert({ title: "Story missing", color: "warning" });
+    return;
+  }
+  const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
+  if (!apiKey) return;
+  const ctx = ui.context.value.trim();
+  const sys = buildPrompt(ctx, !!(baseFile || baseUrl), ui.usePrev.checked);
+  ui.panels.value = "";
+  ui.createBtn.disabled = true;
+  ui.createBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Creating';
+  try {
+    const { asyncLLM } = await import("https://cdn.jsdelivr.net/npm/asyncllm@2");
+    for await (const { content, error } of asyncLLM(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-5-mini",
+        stream: true,
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: story },
+        ],
+      }),
+    })) {
+      if (error) throw error;
+      ui.panels.value = (content ?? "").replace(/\n+/g, "\n");
+      ui.panels.scrollTop = ui.panels.scrollHeight;
+    }
+  } catch (err) {
+    bootstrapAlert({ title: "Panel generation failed", body: err.message, color: "danger" });
+  } finally {
+    ui.createBtn.disabled = false;
+    ui.createBtn.innerHTML = '<i class="bi bi-magic me-1"></i>Create panels';
+  }
+}
 
 function createCard(caption, ratioClass, ratioStyle) {
   ui.log.insertAdjacentHTML(
@@ -238,20 +305,18 @@ async function run() {
   ui.progressRow.classList.remove("d-none");
   ui.zipBtn.classList.remove("d-none");
   const opts = collectOptions();
-  const ctx = ui.context.value.trim();
   while (index < panels.length && state === "running") {
     const { caption, prompt } = panels[index];
     const refs = [];
     if (baseFile && (ui.keepBase.checked || index === 0)) refs.push(URL.createObjectURL(baseFile));
     else if (baseUrl && (ui.keepBase.checked || index === 0)) refs.push(baseUrl);
     if (index && ui.usePrev.checked) refs.push(cards[index - 1].querySelector("img")?.src);
-    const fullPrompt = ctx ? `${ctx} ${prompt}` : prompt;
     const t0 = performance.now();
     const card = cards[index];
     const body = card.querySelector(".card-body");
     setSpinner(card, true);
     try {
-      const resp = await requestImage(fullPrompt, refs, opts);
+      const resp = await requestImage(prompt, refs, opts);
       if (!resp || !resp.ok) throw new Error(await resp.text());
       const data = await resp.json();
       const b64 = data.data?.[0]?.b64_json;
