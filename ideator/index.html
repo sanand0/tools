@@ -49,8 +49,8 @@
         </div>
         <div class="card">
           <div class="card-body">
-            <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
-              <input id="goal-input" list="goal-list" class="form-control form-control-sm flex-grow-1" placeholder="Goal" value="Innovative web app" />
+            <div class="mb-3">
+              <input id="goal-input" list="goal-list" class="form-control form-control-sm flex-grow-1 mb-3" placeholder="Goal" value="Innovative web app" />
               <datalist id="goal-list">
                 <option>Innovative web app</option>
                 <option>Strategic business plan</option>
@@ -61,10 +61,12 @@
                 <option>Persuasive startup pitch</option>
                 <option>Insightful policy proposal</option>
               </datalist>
-              <button id="add-btn" class="btn btn-secondary btn-sm" title="Add concept"><i class="bi bi-plus"></i></button>
-              <button id="ideate-btn" class="btn btn-success btn-sm" title="Ideate"><i class="bi bi-lightbulb"></i></button>
             </div>
             <div id="notes"></div>
+            <div class="d-flex justify-content-between">
+              <button id="ideate-btn" class="btn btn-success btn-sm" title="Ideate"><i class="bi bi-lightbulb"></i> <span class="d-none d-sm-inline">Ideate</span></button>
+              <button id="add-btn" class="btn btn-secondary btn-sm" title="Add concept"><i class="bi bi-plus"></i> <span class="d-none d-sm-inline">Add concept</span></button>
+            </div>
           </div>
         </div>
       </div>
