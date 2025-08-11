@@ -15,6 +15,13 @@
       "created": "2025-07-18T00:00:00+00:00"
     },
     {
+      "icon": "bi-lightbulb",
+      "title": "Ideator",
+      "description": "Fuse random notes into an LLM-generated idea.",
+      "url": "ideator",
+      "created": "2025-08-11T00:00:00+00:00"
+    },
+    {
       "icon": "bi-mic",
       "title": "Podcast Generator",
       "description": "Generate podcasts from text using LLMs.",

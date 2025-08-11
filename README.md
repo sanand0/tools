@@ -8,6 +8,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 
 - **[Unicoder](./unicoder/)**: Converts standard Markdown syntax into text styled with special Unicode characters to create "fancy text" for platforms without rich text support.
 - **[Recall](./recall/)**: Randomly recall list items from Markdown.
+- **[Ideator](./ideator/)**: Fuse random notes into an LLM-generated idea.
 - **[Podcast](./podcast/)**: Automates the creation of a two-person podcast episode, from script generation to audio synthesis, using Large Language Models (LLMs).
 - **[Image Generator](./imagegen/)**: Chat to generate or update images.
 - **[Postergen](./postergen/)**: Create posters and social media banners based on templates
