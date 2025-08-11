@@ -55,4 +55,10 @@ export async function fetchNotes(url) {
   return items;
 }
 
-export const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+export const randomItem = (arr, exclude = []) => {
+  let tries = 5;
+  let item;
+  do item = arr[Math.floor(Math.random() * arr.length)];
+  while (exclude.includes(item) && tries--);
+  return item;
+};

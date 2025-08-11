@@ -17,7 +17,7 @@
     {
       "icon": "bi-lightbulb",
       "title": "Ideator",
-      "description": "Fuse random notes into an LLM-generated idea.",
+      "description": "Fuse notes into a ChatGPT ideation prompt.",
       "url": "ideator",
       "created": "2025-08-11T00:00:00+00:00"
     },

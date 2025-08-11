@@ -1,11 +1,12 @@
 # Ideator
 
-Ideator combines two random notes and asks an LLM to fuse them into a new idea.
+Ideator combines notes and opens ChatGPT with a prompt to fuse them into a new idea.
 
 ![Screenshot](screenshot.webp)
 
 ## Features
 
-- Pick notes from preset Markdown files or supply your own
-- Reload for new random notes
-- Generate and evaluate ideas with streaming LLM calls
+- Pick notes from preset Markdown files
+- Reload each note individually
+- Add more notes to mix in
+- Open ChatGPT with a fused prompt
