@@ -1,12 +1,10 @@
 # Ideator
 
-Ideator combines notes and opens ChatGPT with a prompt to fuse them into a new idea.
-
-![Screenshot](screenshot.webp)
+Ideator fuses notes into a single idea via ChatGPT.
 
 ## Features
 
-- Pick notes from preset Markdown files
-- Reload each note individually
-- Add more notes to mix in
-- Open ChatGPT with a fused prompt
+- Pick or randomize Markdown files
+- Reload or delete individual notes
+- Add more notes and set a goal (default: Innovative web app)
+- Opens ChatGPT (gpt-5-thinking) with a fused prompt

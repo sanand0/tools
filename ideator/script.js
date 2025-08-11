@@ -17,22 +17,28 @@ function name(url) {
 }
 
 async function addNote() {
-  const card = document.createElement("div");
-  card.className = "card mb-3 note-card";
-  card.innerHTML = `
-    <div class="card-body">
-      <div class="d-flex gap-2 mb-2">
+  notesDiv.insertAdjacentHTML(
+    "beforeend",
+    `<div class="card mb-3 note-card">
+      <div class="card-header d-flex gap-2">
         <select class="form-select form-select-sm w-auto note-file">
           <option value="">Random</option>
           ${files.map((f) => `<option value="${f.url}">${f.name}</option>`).join("")}
         </select>
-        <button class="btn btn-outline-secondary btn-sm note-reload"><i class="bi bi-shuffle"></i></button>
+        <button class="btn btn-outline-secondary btn-sm note-reload" title="Reload"><i class="bi bi-shuffle"></i></button>
+        <button class="btn btn-outline-danger btn-sm note-delete" title="Delete"><i class="bi bi-x"></i></button>
       </div>
-      <h5 class="card-title"></h5>
-      <div class="note-content"></div>
-    </div>`;
-  notesDiv.append(card);
+      <div class="card-body">
+        <h5 class="card-title"></h5>
+        <div class="note-content"></div>
+      </div>
+    </div>`,
+  );
+  const card = notesDiv.lastElementChild;
   card.querySelector(".note-reload").onclick = () => reload(card);
+  card.querySelector(".note-file").onchange = () => reload(card);
+  card.querySelector(".note-delete").onclick = () => card.remove();
+  if (notesDiv.children.length === 1) card.querySelector(".note-delete").classList.add("d-none");
   await reload(card);
 }
 
@@ -61,9 +67,9 @@ async function reload(card) {
 function ideate() {
   const notes = [...notesDiv.querySelectorAll(".note-card")].map((c) => c.note).filter(Boolean);
   if (!notes.length) return bootstrapAlert({ title: "Error", body: "No notes", color: "danger", replace: true });
-  const goal = goalInput.value.trim() || "Idea";
-  const user = [`<GOAL>${goal}</GOAL>`, ...notes.map((n) => `<CONCEPT>${n}</CONCEPT>`)].join("\n");
-  const url = `https://chatgpt.com/?model=gpt-5&q=${encodeURIComponent(`${SYSTEM_PROMPT}\n\n${user}`)}`;
+  const goal = goalInput.value.trim() || "Innovative web app";
+  const user = [`<GOAL>\n${goal}\n</GOAL>`, ...notes.map((n) => `<CONCEPT>\n${n}\n</CONCEPT>`)].join("\n");
+  const url = `https://chatgpt.com/?model=gpt-5-thinking&q=${encodeURIComponent(`${SYSTEM_PROMPT}\n\n${user}`)}`;
   window.open(url, "_blank");
 }
 
