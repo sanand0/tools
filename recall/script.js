@@ -1,41 +1,7 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7/+esm";
-
-const files = [
-  {
-    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/llms.md",
-    name: "LLMs",
-  },
-  {
-    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/til.md",
-    name: "Things I learned",
-  },
-  {
-    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/questions.md",
-    name: "Questions to ask",
-  },
-  {
-    url: "https://notes.s-anand.net/explore.md",
-    name: "🔒 Explore",
-  },
-  {
-    url: "https://notes.s-anand.net/jobs-people.md",
-    name: "🔒 Jobs - People",
-  },
-  {
-    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/claude-code-uses.md",
-    name: "Claude Code Uses",
-  },
-  {
-    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/core-concepts.md",
-    name: "Core concepts",
-  },
-  {
-    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/oblique-strategies.md",
-    name: "Oblique strategies",
-  },
-];
+import { files, fetchNotes } from "./notes.js";
 
 const content = document.getElementById("content");
 const fileSelect = document.getElementById("file-select");
@@ -60,19 +26,10 @@ files.forEach((f) =>
 
 async function load(url) {
   content.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
-  const options = url.match(/notes.s-anand.net/) ? { credentials: "include" } : {};
   try {
-    const text = await fetch(url, options).then((r) => {
-      if (r.ok) return r.text();
-      throw new Error(`Load failed: ${r.status}`);
-    });
-    const toks = marked.lexer(text);
+    const list = await fetchNotes(url);
     items.length = 0; // clear in place
-    let header = "";
-    for (const tok of toks) {
-      if (tok.type === "heading") header = tok.text.trim();
-      else if (tok.type === "list") for (const li of tok.items) items.push(`${li.raw.trim()}\n\n\n  🏷️ *${header}*`);
-    }
+    items.push(...list);
     applyFilter();
   } catch (e) {
     content.innerHTML = "";

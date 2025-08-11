@@ -22,7 +22,7 @@
 - Import utilities from common/ for CSV and errors (googletasks/, json2csv/, excel2jsonl/, joincsv/)
 - Include a navbar and apply add a `bootstrap-dark-theme` (most tools)
 - Lint with `npm run lint`; take full-page screenshots with `npm run screenshot -- ${tool}/ ${tool}/screenshot.webp`
-- Test with `npm test`. To test a single tool, run `npm test -- ${tool}/${tool}.test.js`
+- Test with `npm test`. To test a single tool, run `npm test -- ${tool}`
 - Never commit generated images. Codex PRs ignore binary files.
 - Prefer `asyncllm` for all LLM calls: `import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2"` then `for await (const { content, error } of asyncLLM(...)) {}` where `content` has the FULL (not incremental) content
 
