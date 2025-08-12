@@ -1,3 +1,4 @@
+import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import { files, fetchNotes, randomItem } from "../recall/notes.js";
 
@@ -38,7 +39,7 @@ const addBtn = document.getElementById("add-btn");
 const ideateBtn = document.getElementById("ideate-btn");
 const notesDiv = document.getElementById("notes");
 const promptEl = document.getElementById("prompt-template");
-promptEl.textContent = promptTemplate;
+promptEl.value = promptTemplate;
 
 addBtn.onclick = addNote;
 ideateBtn.onclick = ideate;
@@ -85,10 +86,7 @@ async function reload(card) {
       .filter(Boolean);
     card.note = randomItem(items, used);
     title.textContent = files.find((f) => f.url === url)?.name || "Unknown";
-    content.innerHTML = /* html */ '<div class="form-control note-text" contenteditable></div>';
-    const text = content.firstElementChild;
-    text.textContent = card.note;
-    text.oninput = (e) => (card.note = e.target.innerText);
+    content.innerHTML = /* html */ `<div class="form-control note-text" contenteditable>${marked.parse(card.note)}</div>`;
     card.fileUrl = url;
   } catch (e) {
     content.innerHTML = "";
@@ -97,10 +95,10 @@ async function reload(card) {
 }
 
 function ideate() {
-  const notes = [...notesDiv.querySelectorAll(".note-card")].map((c) => c.note).filter(Boolean);
+  const notes = [...notesDiv.querySelectorAll(".note-card")].map((c) => c.note.trim()).filter(Boolean);
   if (!notes.length) return bootstrapAlert({ title: "Error", body: "No notes", color: "danger", replace: true });
   const goal = goalInput.value.trim() || "Innovative web app";
-  const prompt = promptTemplate
+  const prompt = promptEl.value
     .replace("__GOAL__", goal)
     .replace("__NOTES__", notes.map((n) => `<CONCEPT>\n${n}\n</CONCEPT>`).join("\n\n"));
   window.open(`https://chatgpt.com/?model=gpt-5-thinking&q=${encodeURIComponent(prompt)}`, "_blank");
