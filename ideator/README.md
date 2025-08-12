@@ -8,3 +8,5 @@ Ideator fuses notes into a single idea via ChatGPT.
 - Reload or delete individual notes
 - Add more notes and set a goal (default: Innovative web app)
 - Opens ChatGPT (gpt-5-thinking) with a fused prompt
+- Edit notes before ideating
+- View and copy the prompt template
