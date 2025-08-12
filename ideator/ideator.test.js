@@ -19,7 +19,7 @@ vi.mock("../recall/notes.js", () => ({
 beforeEach(() => {
   vi.resetModules();
   document.body.innerHTML =
-    '<input id="goal-input"><button id="add-btn"></button><button id="ideate-btn"></button><div id="notes"></div><pre id="prompt-template"></pre>';
+    '<input id="goal-input"><button id="add-btn"></button><button id="ideate-btn"></button><div id="notes"></div><div id="prompt-template"></div>';
   window.open = vi.fn();
 });
 
@@ -41,7 +41,7 @@ describe("ideator", () => {
     await import("./script.js");
     const card = document.querySelector(".note-card");
     const text = card.querySelector(".note-text");
-    text.value = "Edited";
+    text.textContent = "Edited";
     text.dispatchEvent(new window.Event("input"));
     document.getElementById("ideate-btn").click();
     const url = new URL(window.open.mock.calls[0][0]);

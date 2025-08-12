@@ -37,8 +37,8 @@ const goalInput = document.getElementById("goal-input");
 const addBtn = document.getElementById("add-btn");
 const ideateBtn = document.getElementById("ideate-btn");
 const notesDiv = document.getElementById("notes");
-const promptPre = document.getElementById("prompt-template");
-promptPre.textContent = promptTemplate;
+const promptEl = document.getElementById("prompt-template");
+promptEl.textContent = promptTemplate;
 
 addBtn.onclick = addNote;
 ideateBtn.onclick = ideate;
@@ -85,8 +85,10 @@ async function reload(card) {
       .filter(Boolean);
     card.note = randomItem(items, used);
     title.textContent = files.find((f) => f.url === url)?.name || "Unknown";
-    content.innerHTML = /* html */ `<textarea class="form-control note-text" rows="4">${card.note}</textarea>`;
-    content.firstElementChild.oninput = (e) => (card.note = e.target.value);
+    content.innerHTML = /* html */ '<div class="form-control note-text" contenteditable></div>';
+    const text = content.firstElementChild;
+    text.textContent = card.note;
+    text.oninput = (e) => (card.note = e.target.innerText);
     card.fileUrl = url;
   } catch (e) {
     content.innerHTML = "";
