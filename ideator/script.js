@@ -1,11 +1,44 @@
-import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import { files, fetchNotes, randomItem } from "../recall/notes.js";
 
+const promptTemplate = `You are a radical concept synthesizer hired to astound even experts.
+
+Generate a big, useful, non-obvious idea aligned with "__GOAL__" fusing provided <CONCEPT>s with concrete next steps.
+
+__NOTES__
+
+THINK:
+
+1. Generate 5+ candidate ideas (searching online for context if useful) using these lenses:
+   - Inversion
+   - Mechanism-transplant
+   - Constraint-violation
+   - Scale-jump
+   - Oblique strategies
+   - Any other radical angle
+2. Score each for
+   - Novelty: 1=common; 3=unusual; 5=not seen in field
+   - Utility: 1=nice-to-have; 3=team-level impact; 5=moves a key metric in ≤90 days
+3. Pick top score. Tie → lower complexity.
+
+OUTPUT:
+
+- INSIGHT: 1-2 sentences.
+- HOW TO BUILD: Explain how it works.
+- HOW TO TEST: 3 bullets, doable in ≤30 days.
+- WHAT'S SUPRISING: What convention does this challenge?
+- CRITIQUE: 2 sentences: biggest risk & mitigation
+
+STYLE:
+
+- Plain English; no hype; easy to understand. Define new terms in parentheses.
+`;
 const goalInput = document.getElementById("goal-input");
 const addBtn = document.getElementById("add-btn");
 const ideateBtn = document.getElementById("ideate-btn");
 const notesDiv = document.getElementById("notes");
+const promptPre = document.getElementById("prompt-template");
+promptPre.textContent = promptTemplate;
 
 addBtn.onclick = addNote;
 ideateBtn.onclick = ideate;
@@ -52,7 +85,8 @@ async function reload(card) {
       .filter(Boolean);
     card.note = randomItem(items, used);
     title.textContent = files.find((f) => f.url === url)?.name || "Unknown";
-    content.innerHTML = marked.parse(card.note);
+    content.innerHTML = /* html */ `<textarea class="form-control note-text" rows="4">${card.note}</textarea>`;
+    content.firstElementChild.oninput = (e) => (card.note = e.target.value);
     card.fileUrl = url;
   } catch (e) {
     content.innerHTML = "";
@@ -64,38 +98,8 @@ function ideate() {
   const notes = [...notesDiv.querySelectorAll(".note-card")].map((c) => c.note).filter(Boolean);
   if (!notes.length) return bootstrapAlert({ title: "Error", body: "No notes", color: "danger", replace: true });
   const goal = goalInput.value.trim() || "Innovative web app";
-  const prompt = `You are a radical concept synthesizer hired to astound even experts.
-
-Generate a big, useful, non-obvious idea aligned with "${goal}" fusing provided <CONCEPT>s with concrete next steps.
-
-${notes.map((n) => `<CONCEPT>\n${n}\n</CONCEPT>`).join("\n\n")}
-
-THINK:
-
-1. Generate 5+ candidate ideas (searching online for context if useful) using these lenses:
-   - Inversion
-   - Mechanism-transplant
-   - Constraint-violation
-   - Scale-jump
-   - Oblique strategies
-   - Any other radical angle
-2. Score each for
-   - Novelty: 1=common; 3=unusual; 5=not seen in field
-   - Utility: 1=nice-to-have; 3=team-level impact; 5=moves a key metric in ≤90 days
-3. Pick top score. Tie → lower complexity.
-
-OUTPUT:
-
-- INSIGHT: 1-2 sentences.
-- HOW TO BUILD: Explain how it works.
-- HOW TO TEST: 3 bullets, doable in ≤30 days.
-- WHAT'S SUPRISING: What convention does this challenge?
-- CRITIQUE: 2 sentences: biggest risk & mitigation
-
-STYLE:
-
-- Plain English; no hype; easy to understand. Define new terms in parentheses.
-`;
-
+  const prompt = promptTemplate
+    .replace("__GOAL__", goal)
+    .replace("__NOTES__", notes.map((n) => `<CONCEPT>\n${n}\n</CONCEPT>`).join("\n\n"));
   window.open(`https://chatgpt.com/?model=gpt-5-thinking&q=${encodeURIComponent(prompt)}`, "_blank");
 }
