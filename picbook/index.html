@@ -38,8 +38,8 @@
     <form id="picbook-form" class="bg-white rounded-3 shadow-sm p-3 mb-3">
       <div class="row g-3">
         <div class="col-lg-4">
-          <label for="context" class="form-label">Context</label>
-          <textarea id="context" rows="2" class="form-control" placeholder="Common guidance for all images, e.g. Draw anime style with bright colors"></textarea>
+          <label for="context" class="form-label">Objective</label>
+          <textarea id="context" rows="2" class="form-control" placeholder="E.g. 'Draw a 10 panel anime'"></textarea>
           <input type="file" id="upload-input" accept="image/*" class="form-control mt-2" />
           <img id="preview-image" class="img-fluid rounded mt-2 d-none" alt="Preview" />
           <input type="text" id="image-url" placeholder="Reference image URL" class="form-control mt-2" />
@@ -102,8 +102,14 @@
           <div class="d-flex justify-content-end mt-2">
             <button id="create-btn" type="button" class="btn btn-outline-primary"><i class="bi bi-magic me-1"></i>Create panels</button>
           </div>
-          <label for="panels" class="form-label mt-3">Panels</label>
-          <textarea id="panels" rows="10" class="form-control" placeholder="Panel caption to display [Image generation prompt for LLM]"></textarea>
+          <label for="panels" class="form-label mt-3">Panel captions &amp; prompts</label>
+          <textarea id="panels" rows="10" class="form-control" placeholder="caption: text to display
+prompt: LLM image generation prompt
+
+caption: ...
+prompt: ...
+
+..."></textarea>
           <div class="d-flex justify-content-end gap-2 mt-2">
             <button id="start-btn" class="btn btn-primary" type="submit"><i class="bi bi-play-fill me-1"></i>Draw</button>
             <button id="openai-config-btn" type="button" class="btn btn-outline-secondary"><i class="bi bi-gear me-1"></i>Configure OpenAI</button>

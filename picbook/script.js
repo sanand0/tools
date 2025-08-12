@@ -75,17 +75,22 @@ const buildPrompt = (ctx, hasRef, sendPrev) => {
 
 <CONTEXT>${ctx}</CONTEXT>
 
-Write the script for each panel in a separate line like this:
+Write the script for each panel in a list in this format:
 
-John reflects his first job interview. [A young man in a formal outfit sitting nervously in a chair during an interview.]
-He now has a successful career. [A man now older, surrounded by books and computer code, looking contemplative and wise.]
-{Panel caption to display} [{Image generation prompt for LLM}]
-... etc.
+Caption: John reflects his first job interview.
+Prompt: A young man in a formal outfit sitting nervously in a chair during an interview.
 
-Image generation prompt rules:
-- This is the ONLY information sent to the LLM to draw each panel.
-  Include relevant storyline context and info about previous/next panel if it will help.
-- Minimize text in images. (LLMs are not good at writing text.)
+Caption: He now has a successful career.
+Prompt: A man now older, surrounded by books and computer code, looking contemplative and wise.
+...
+
+Each captions must be concise, in a single line, under 15 words.
+When joined, the captions must read as a clear, meaningful storyline.
+
+Each prompts must be detailed, in a single line.
+- Include ALL relevant context from the storyline, previous/next panel, etc if it will help.
+  This is the ONLY information sent to the LLM to draw each panel.
+- Minimize/avoid text in images. (LLMs are not good at writing text.)
 `;
   if (hasRef || sendPrev) s += "- Ask the LLM to use provided image as reference.\n";
   return s;
@@ -182,7 +187,7 @@ async function createPanels() {
       }),
     })) {
       if (error) throw error;
-      ui.panels.value = (content ?? "").replace(/\n+/g, "\n");
+      ui.panels.value = content ?? "";
       ui.panels.scrollTop = ui.panels.scrollHeight;
     }
   } catch (err) {
@@ -277,17 +282,30 @@ async function run() {
     bootstrapAlert({ title: "Panels missing", color: "warning" });
     return;
   }
-  const panels = lines.map((l) => {
-    const i = l.indexOf("[");
-    const j = l.indexOf("]", i + 1);
-    if (i >= 0 && j > i + 1)
-      return {
-        caption: l.slice(0, i).trim(),
-        prompt: l.slice(i + 1, j).trim(),
-      };
-    const line = l.trim();
-    return { caption: line, prompt: line };
-  });
+  // Parse only the new format: lines with "Caption: ..." and "Prompt: ..."
+  const panels = [];
+  let caption = "",
+    prompt = "";
+  for (const l of lines) {
+    const match = l.match(/^(caption|prompt)\s*:\s*(.+)$/i);
+    if (!match) continue;
+    if (match[1].toLowerCase() === "caption") {
+      if (caption && prompt) panels.push({ caption, prompt });
+      caption = match[2].trim();
+      prompt = "";
+    } else {
+      prompt = match[2].trim();
+      if (caption) {
+        panels.push({ caption, prompt });
+        caption = "";
+        prompt = "";
+      }
+    }
+  }
+  if (!panels.length) {
+    bootstrapAlert({ title: "Panels missing", color: "warning" });
+    return;
+  }
   if (state === "idle") {
     ui.log.innerHTML = "";
     const ratio = {
