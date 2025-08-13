@@ -7,6 +7,7 @@ const content = document.getElementById("content");
 const fileSelect = document.getElementById("file-select");
 const randomBtn = document.getElementById("random-btn");
 const copyBtn = document.getElementById("copy-btn");
+const quizBtn = document.getElementById("quiz-btn");
 const starBtn = document.getElementById("star-btn");
 const decayInput = document.getElementById("decay-input");
 const indexInput = document.getElementById("index-input");
@@ -101,6 +102,13 @@ searchInput.oninput = applyFilter;
 copyBtn.onclick = async () => {
   await navigator.clipboard.writeText(view[index] || "");
   bootstrapAlert({ body: "Copied", color: "success", replace: true });
+};
+
+quizBtn.onclick = () => {
+  const note = view[index];
+  if (!note) return bootstrapAlert({ body: "No note", color: "danger", replace: true });
+  const q = `${note}\n\nQuiz me so I can learn this better. Search online for more information if required.`;
+  window.open(`https://chatgpt.com/?model=gpt-5-thinking&q=${encodeURIComponent(q)}`, "_blank");
 };
 
 starBtn.onclick = () => {
