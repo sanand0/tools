@@ -56,7 +56,6 @@ function convert() {
   try {
     const rows = dsvFormat("\t").parse(text);
     output.value = converters[formatSelect.value](rows);
-    bootstrapAlert("Conversion successful!", "success");
   } catch (error) {
     output.value = "";
     bootstrapAlert(error.message, "danger");
@@ -81,7 +80,6 @@ downloadBtn.addEventListener("click", () => {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-  bootstrapAlert("File downloaded!", "success");
 });
 
 updateDownloadButton();
