@@ -222,10 +222,6 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
   <script type="module">
     import saveform from 'https://cdn.jsdelivr.net/npm/saveform@1.2';
-    import {
-      objectUrl,
-      downloadBlob
-    } from "../common/download.js";
     document.addEventListener('DOMContentLoaded', () => {
       saveform('#podcast-claude-form', {
         exclude: '[type="file"]'
@@ -470,13 +466,17 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
           const blob = new Blob(audioBuffers, {
             type: 'audio/ogg; codecs=opus'
           });
-          podcastAudio.src = objectUrl(blob);
+          podcastAudio.src = URL.createObjectURL(blob);
           // Show audio player and download button
           audioContainer.classList.remove('d-none');
           downloadAudioBtn.classList.remove('d-none');
           // Set up download button
-          downloadAudioBtn.onclick = () =>
-            downloadBlob(blob, `podcast_${new Date().toISOString().split('T')[0]}.ogg`);
+          downloadAudioBtn.onclick = () => {
+            const link = document.createElement('a');
+            link.href = podcastAudio.src;
+            link.download = `podcast_${new Date().toISOString().split('T')[0]}.ogg`;
+            link.click();
+          };
         } catch (error) {
           showAlert(`Error generating audio: ${error.message}`);
           console.error('Audio generation error:', error);

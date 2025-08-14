@@ -1,7 +1,6 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 import { openaiHelp } from "../common/aiconfig.js";
-import { objectUrl, downloadBlob } from "../common/download.js";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -216,14 +215,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       // Combine all audio buffers into a single blob
       const blob = new Blob(audioBuffers, { type: "audio/ogg; codecs=opus" });
-      podcastAudio.src = objectUrl(blob);
+      podcastAudio.src = URL.createObjectURL(blob);
 
       // Show audio player and download button
       audioContainer.classList.remove("d-none");
       downloadAudioBtn.classList.remove("d-none");
 
       // Set up download button
-      downloadAudioBtn.onclick = () => downloadBlob(blob, `podcast_${new Date().toISOString().split("T")[0]}.ogg`);
+      downloadAudioBtn.onclick = () => {
+        const link = document.createElement("a");
+        link.href = podcastAudio.src;
+        link.download = `podcast_${new Date().toISOString().split("T")[0]}.ogg`;
+        link.click();
+      };
     } catch (error) {
       showAlert(`Error generating audio: ${error.message}`);
       console.error("Audio generation error:", error);

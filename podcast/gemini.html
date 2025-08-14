@@ -182,10 +182,6 @@
   </form>
   <script type="module">
     import saveform from 'https://cdn.jsdelivr.net/npm/saveform@1.2';
-    import {
-      objectUrl,
-      downloadBlob
-    } from "../common/download.js";
     // Import asyncLLM from CDN
     // Note: In a real app, you might want a fallback or to bundle this.
     let asyncLLM;
@@ -559,7 +555,7 @@ ${v2Name}: …`.replace(/\$WEEK/g, week);
           currentAudioBlob = new Blob(audioBuffers, {
             type: 'audio/ogg; codecs=opus'
           });
-          podcastPlayerEl.src = objectUrl(currentAudioBlob);
+          podcastPlayerEl.src = URL.createObjectURL(currentAudioBlob);
           audioPlayerContainerEl.style.display = 'block';
           showAlert('Audio generated successfully!', 'success');
           updateProgressBar(100, "Completed!");
@@ -579,11 +575,15 @@ ${v2Name}: …`.replace(/\$WEEK/g, week);
 
     function handleDownloadAudio() {
       if (currentAudioBlob) {
-        downloadBlob(
-          currentAudioBlob,
-          `podcast_audio_${new Date().toISOString().slice(0, 10)}.ogg`
-        );
-        // No need to revoke if player is using it.
+        const url = URL.createObjectURL(currentAudioBlob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `podcast_audio_${new Date().toISOString().slice(0, 10)}.ogg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // No need to revoke if player is using it: URL.revokeObjectURL(url);
         // Player uses its own object URL. If this is a new one just for download, then revoke.
         // The player uses podcastPlayerEl.src which holds the URL.
         // Let's assume the player's URL is sufficient and no new one is made here unless blob is re-fetched.
