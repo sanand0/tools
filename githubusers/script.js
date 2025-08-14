@@ -1,4 +1,5 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { downloadBlob } from "../common/download.js";
 const form = document.getElementById("urlForm");
 const alertsDiv = document.getElementById("alerts");
 const results = document.getElementById("results");
@@ -225,15 +226,7 @@ downloadCsvBtn.addEventListener("click", () => {
     return;
   }
   const csv = convertToCSV(userDataStorage);
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-  link.setAttribute("href", url);
-  link.setAttribute("download", "github_users.csv");
-  link.style.visibility = "hidden";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  downloadBlob(new Blob([csv], { type: "text/csv;charset=utf-8;" }), "github_users.csv");
   showAlert("CSV downloaded.", "success", true);
 });
 

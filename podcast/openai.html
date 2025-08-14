@@ -125,6 +125,10 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
       asyncLLM
     } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
     import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+    import {
+      objectUrl,
+      downloadBlob
+    } from "../common/download.js";
     const $ = id => document.getElementById(id);
     const showAlert = msg => {
       $('alertArea').innerHTML = `<div class="alert alert-danger">${msg}</div>`;
@@ -208,14 +212,8 @@ Features: Offers clear analogies, gentle humor, and thoughtful follow-ups to que
         const blob = new Blob(buffers, {
           type: 'audio/ogg; codecs=opus'
         });
-        const url = URL.createObjectURL(blob);
-        $('player').src = url;
-        $('dlAudio').onclick = () => {
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'podcast.ogg';
-          a.click();
-        };
+        $('player').src = objectUrl(blob);
+        $('dlAudio').onclick = () => downloadBlob(blob, 'podcast.ogg');
       } catch (e) {
         showAlert(e);
       }

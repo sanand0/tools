@@ -1,6 +1,7 @@
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 import { openaiHelp } from "../common/aiconfig.js";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
+import { objectUrl } from "../common/download.js";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -236,7 +237,7 @@ ui.upload.addEventListener("change", () => {
   baseImage = file;
   selectedUrl = "";
   ui.url.value = "";
-  ui.preview.src = URL.createObjectURL(file);
+  ui.preview.src = objectUrl(file);
   ui.preview.classList.remove("d-none");
 });
 

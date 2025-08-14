@@ -3,6 +3,7 @@ import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provide
 import { openaiHelp } from "../common/aiconfig.js";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3/+esm";
+import { objectUrl, downloadBlob } from "../common/download.js";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -132,7 +133,7 @@ ui.upload.onchange = () => {
   baseFile = file;
   baseUrl = "";
   ui.url.value = "";
-  ui.preview.src = URL.createObjectURL(file);
+  ui.preview.src = objectUrl(file);
   ui.preview.classList.remove("d-none");
 };
 
@@ -229,11 +230,7 @@ async function downloadZip() {
     zip.file(`${String(cards.indexOf(card) + 1).padStart(3, "0")}-${slug(img.alt)}.${ext}`, blob);
   }
   const content = await zip.generateAsync({ type: "blob" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(content);
-  a.download = "picbook.zip";
-  a.click();
-  URL.revokeObjectURL(a.href);
+  downloadBlob(content, "picbook.zip");
 }
 
 async function requestImage(prompt, refs, opts) {
@@ -326,7 +323,7 @@ async function run() {
   while (index < panels.length && state === "running") {
     const { caption, prompt } = panels[index];
     const refs = [];
-    if (baseFile && (ui.keepBase.checked || index === 0)) refs.push(URL.createObjectURL(baseFile));
+    if (baseFile && (ui.keepBase.checked || index === 0)) refs.push(objectUrl(baseFile));
     else if (baseUrl && (ui.keepBase.checked || index === 0)) refs.push(baseUrl);
     if (index && ui.usePrev.checked) refs.push(cards[index - 1].querySelector("img")?.src);
     const t0 = performance.now();

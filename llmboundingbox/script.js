@@ -3,6 +3,7 @@ import { anthropic } from "https://cdn.jsdelivr.net/npm/asyncllm@1/dist/anthropi
 import JSZip from "https://cdn.jsdelivr.net/npm/jszip@3/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { objectUrl, downloadBlob } from "../common/download.js";
 
 const openai = (d) => d;
 saveform("#llmboundingbox-form");
@@ -156,7 +157,7 @@ function createImageFromFile(file) {
     const image = new Image();
     image.onload = () => resolve(image);
     image.onerror = reject;
-    image.src = URL.createObjectURL(file);
+    image.src = objectUrl(file);
   });
 }
 
@@ -284,11 +285,7 @@ async function downloadResults() {
   }
 
   const content = await zip.generateAsync({ type: "blob" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(content);
-  link.download = "detection-results.zip";
-  link.click();
-  URL.revokeObjectURL(link.href);
+  downloadBlob(content, "detection-results.zip");
 }
 
 // Event listeners

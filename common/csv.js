@@ -1,4 +1,5 @@
 import { csvFormat, csvParse, tsvFormat } from "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm";
+import { downloadBlob } from "./download.js";
 
 function flattenObject(obj, prefix = "") {
   return Object.entries(obj).reduce((acc, [key, value]) => {
@@ -39,11 +40,10 @@ function csvToTable(element, csv, columns, rowClassFn) {
 }
 
 function downloadCsv(csv, filename = "data.csv") {
+  if (!csv?.trim()) return;
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   if (navigator.msSaveBlob) return navigator.msSaveBlob(blob, filename);
-  const url = URL.createObjectURL(blob);
-  Object.assign(document.createElement("a"), { href: url, download: filename }).click();
-  URL.revokeObjectURL(url);
+  downloadBlob(blob, filename);
 }
 
 export { flattenObject, objectsToCsv, objectsToTsv, csvToTable, downloadCsv };

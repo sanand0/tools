@@ -2,6 +2,7 @@ import { dsvFormat } from "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { copyText } from "../common/clipboard-utils.js";
+import { downloadBlob } from "../common/download.js";
 
 const input = document.getElementById("input");
 const output = document.getElementById("output");
@@ -73,13 +74,7 @@ copyBtn.addEventListener("click", async () => {
 
 downloadBtn.addEventListener("click", () => {
   const ext = { jsonl: "jsonl", yaml: "yaml", xml: "xml", toml: "toml" }[formatSelect.value];
-  const blob = new Blob([output.value], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  document.body.insertAdjacentHTML("beforeend", `<a href="${url}" download="data.${ext}"></a>`);
-  const a = document.body.lastElementChild;
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  downloadBlob(new Blob([output.value], { type: "text/plain" }), `data.${ext}`);
 });
 
 updateDownloadButton();
