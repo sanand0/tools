@@ -169,9 +169,9 @@
     },
     {
       "icon": "bi-file-excel",
-      "title": "Excel to JSONL",
-      "description": "Convert Excel data to JSONL format.",
-      "url": "excel2jsonl",
+      "title": "Excel Converter",
+      "description": "Convert Excel data to JSONL, YAML, XML, or TOML.",
+      "url": "excelconvert",
       "created": "2024-11-01T20:02:17+08:00"
     },
     {

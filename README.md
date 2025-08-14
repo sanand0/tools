@@ -30,7 +30,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[Google Fit](./googlefit/)**: Allows you to view and summarize your Google Fit activity data obtained from Google Takeout.
 - **[JSON Trim](./jsontrim/)**: Recursively traverses a JSON object or array and truncates string values that exceed a user-specified maximum length.
 - **[MD to CSV](./md2csv/)**: Extract the first Markdown table and download it as CSV. Useful to extract from ChatGPT.
-- **[Excel to JSONL](./excel2jsonl/)**: Converts Excel files (.xlsx, .xls) into JSONL (JSON Lines) format.
+- **[Excel Converter](./excelconvert/)**: Convert Excel data to JSONL, YAML, XML, or TOML.
 - **[Transcribe](./transcribe/)**: Provides real-time speech-to-text transcription using the browser's built-in SpeechRecognition API, capturing audio from the microphone.
 - **[SpeakMD](./speakmd/)**: Converts Markdown into conversational text suitable for audio narration. Useful to read out copied ChatGPT output.
 - **[RevealJS](./revealjs/)**: Provides a simple web interface to convert Markdown text into a Reveal.js HTML slideshow.

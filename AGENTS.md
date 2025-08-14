@@ -19,7 +19,7 @@
 - Use saveform to persist forms (githubsummary/, googlefit/, googletasks/, picbook/)
 - Use bootstrap-llm-provider for API keys (imagegen/, speakmd/, podcast/, picbook/)
 - Stream LLM calls with asyncllm (podcast/, speakmd/, githubsummary/, llmboundingbox/)
-- Import utilities from common/ for CSV and errors (googletasks/, json2csv/, excel2jsonl/, joincsv/)
+- Import utilities from common/ for CSV and errors (googletasks/, json2csv/, excelconvert/, joincsv/)
 - Include a navbar and apply add a `bootstrap-dark-theme` (most tools)
 - Lint with `npm run lint`; take full-page screenshots with `npm run screenshot -- ${tool}/ ${tool}/screenshot.webp`
 - Test with `npm test`. To test a single tool, run `npm test -- ${tool}`
