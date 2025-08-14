@@ -1,6 +1,6 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
-import { files, fetchNotes, randomItem } from "../recall/notes.js";
+import { files, fetchAll, filterNotes, randomItem } from "../recall/notes.js";
 
 const promptTemplate = `You are a radical concept synthesizer hired to astound even experts.
 
@@ -55,8 +55,10 @@ async function addNote() {
           <option value="">Random</option>
           ${files.map((f) => `<option value="${f.url}">${f.name}</option>`).join("")}
         </select>
+        <input type="search" class="form-control form-control-sm w-auto note-search" placeholder="Search" />
+        <button class="btn btn-outline-warning btn-sm note-star" title="Star"><i class="bi bi-star"></i></button>
         <button class="btn btn-outline-secondary btn-sm note-reload" title="Reload"><i class="bi bi-shuffle"></i></button>
-        <button class="btn btn-outline-danger btn-sm note-delete" title="Delete"><i class="bi bi-x"></i></button>
+        <button class="btn btn-outline-danger btn-sm ms-auto note-delete" title="Delete"><i class="bi bi-x"></i></button>
       </div>
       <div class="card-body">
         <h5 class="card-title"></h5>
@@ -68,6 +70,14 @@ async function addNote() {
   card.querySelector(".note-reload").onclick = () => reload(card);
   card.querySelector(".note-file").onchange = () => reload(card);
   card.querySelector(".note-delete").onclick = () => card.remove();
+  card.querySelector(".note-star").onclick = () => {
+    card.star = !card.star;
+    const btn = card.querySelector(".note-star");
+    btn.className = `btn btn-${card.star ? "warning" : "outline-warning"} btn-sm note-star`;
+    btn.innerHTML = /* html */ `<i class="bi bi-${card.star ? "star-fill" : "star"}"></i>`;
+    update(card);
+  };
+  card.querySelector(".note-search").oninput = () => update(card);
   if (notesDiv.children.length === 1) card.querySelector(".note-delete").classList.add("d-none");
   await reload(card);
 }
@@ -76,22 +86,36 @@ async function reload(card) {
   const select = card.querySelector(".note-file");
   const title = card.querySelector(".card-title");
   const content = card.querySelector(".note-content");
+  const search = card.querySelector(".note-search");
   content.innerHTML = /* html */ `<div class="text-center"><div class="spinner-border" role="status"></div></div>`;
-  const url = select.value || randomItem(files).url;
-  try {
-    const items = await fetchNotes(url);
-    const used = [...notesDiv.querySelectorAll(".note-card")]
-      .filter((c) => c !== card)
-      .map((c) => c.note)
-      .filter(Boolean);
-    card.note = randomItem(items, used);
-    title.textContent = files.find((f) => f.url === url)?.name || "Unknown";
-    content.innerHTML = /* html */ `<div class="form-control note-text" contenteditable>${marked.parse(card.note)}</div>`;
-    card.fileUrl = url;
-  } catch (e) {
+  const url = select.value;
+  const urls = url ? [url] : files.map((f) => f.url);
+  card.items = await fetchAll(urls);
+  card.star = false;
+  card.querySelector(".note-star").className = "btn btn-outline-warning btn-sm note-star";
+  card.querySelector(".note-star").innerHTML = /* html */ `<i class="bi bi-star"></i>`;
+  search.value = "";
+  title.textContent = url ? files.find((f) => f.url === url)?.name : "All";
+  update(card);
+}
+
+function update(card) {
+  const content = card.querySelector(".note-content");
+  const term = card.querySelector(".note-search").value;
+  const list = filterNotes(card.items || [], term, card.star);
+  if (!list.length) {
     content.innerHTML = "";
-    bootstrapAlert({ title: "Error", body: e.message, color: "danger", replace: true });
+    bootstrapAlert({ body: card.star ? "No ⭐ items" : "No match", color: "danger", replace: true });
+    return;
   }
+  const used = [...notesDiv.querySelectorAll(".note-card")]
+    .filter((c) => c !== card)
+    .map((c) => c.note)
+    .filter(Boolean);
+  card.note = term.trim() ? list[0] : randomItem(list, used);
+  content.innerHTML = /* html */ `<div class="form-control note-text" contenteditable>${marked.parse(card.note)}</div>`;
+  const text = content.querySelector(".note-text");
+  text.oninput = () => (card.note = text.innerText);
 }
 
 function ideate() {

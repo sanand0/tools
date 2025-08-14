@@ -1,4 +1,6 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
+import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7/+esm";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 
 export const files = [
   {
@@ -36,8 +38,10 @@ export const files = [
 ];
 
 const cache = new Map();
+const error = new Map();
 
 export async function fetchNotes(url) {
+  if (error.has(url)) return [];
   if (cache.has(url)) return cache.get(url);
   const options = url.match(/notes\.s-anand\.net/) ? { credentials: "include" } : {};
   const text = await fetch(url, options).then((r) => {
@@ -53,6 +57,27 @@ export async function fetchNotes(url) {
   }
   cache.set(url, items);
   return items;
+}
+
+export async function fetchAll(urls) {
+  const res = await Promise.allSettled(urls.map(fetchNotes));
+  const out = [];
+  res.forEach((r, i) => {
+    if (r.status === "fulfilled") out.push(...r.value);
+    else {
+      error.set(urls[i], true);
+      bootstrapAlert({ title: "Error", body: `${files[i].name}: ${r.reason.message}`, color: "danger" });
+    }
+  });
+  return out;
+}
+
+export function filterNotes(items, term, starOnly) {
+  const base = starOnly ? items.filter((t) => t.includes("⭐")) : items;
+  if (!base.length) return [];
+  const fuse = new Fuse(base, { ignoreLocation: true });
+  const q = term.trim();
+  return q ? fuse.search(q, { limit: 5 }).map((r) => r.item) : base;
 }
 
 export const randomItem = (arr, exclude = []) => {
