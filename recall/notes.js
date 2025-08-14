@@ -38,8 +38,10 @@ export const files = [
 ];
 
 const cache = new Map();
+const error = new Map();
 
 export async function fetchNotes(url) {
+  if (error.has(url)) return [];
   if (cache.has(url)) return cache.get(url);
   const options = url.match(/notes\.s-anand\.net/) ? { credentials: "include" } : {};
   const text = await fetch(url, options).then((r) => {
@@ -60,16 +62,13 @@ export async function fetchNotes(url) {
 export async function fetchAll(urls) {
   const res = await Promise.allSettled(urls.map(fetchNotes));
   const out = [];
-  res.forEach((r, i) =>
-    r.status === "fulfilled"
-      ? out.push(...r.value)
-      : bootstrapAlert({
-          title: "Error",
-          body: `${files[i].name}: ${r.reason.message}`,
-          color: "danger",
-          replace: false,
-        }),
-  );
+  res.forEach((r, i) => {
+    if (r.status === "fulfilled") out.push(...r.value);
+    else {
+      error.set(urls[i], true);
+      bootstrapAlert({ title: "Error", body: `${files[i].name}: ${r.reason.message}`, color: "danger" });
+    }
+  });
   return out;
 }
 

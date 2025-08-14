@@ -58,7 +58,7 @@ async function addNote() {
         <input type="search" class="form-control form-control-sm w-auto note-search" placeholder="Search" />
         <button class="btn btn-outline-warning btn-sm note-star" title="Star"><i class="bi bi-star"></i></button>
         <button class="btn btn-outline-secondary btn-sm note-reload" title="Reload"><i class="bi bi-shuffle"></i></button>
-        <button class="btn btn-outline-danger btn-sm note-delete" title="Delete"><i class="bi bi-x"></i></button>
+        <button class="btn btn-outline-danger btn-sm ms-auto note-delete" title="Delete"><i class="bi bi-x"></i></button>
       </div>
       <div class="card-body">
         <h5 class="card-title"></h5>
