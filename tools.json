@@ -245,6 +245,13 @@
       "created": "2024-11-02T00:01:59+08:00"
     },
     {
+      "icon": "bi-person-lines-fill",
+      "title": "Persona Generator",
+      "description": "Create marketing personas and surveys from a scenario.",
+      "url": "personagen",
+      "created": "2025-08-12T05:21:05+00:00"
+    },
+    {
       "icon": "bi-table",
       "title": "Data Extractor",
       "description": "Extract chart and table data from images into CSV.",
