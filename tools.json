@@ -252,6 +252,13 @@
       "created": "2025-08-06T03:54:17+00:00"
     },
     {
+      "icon": "bi-pencil-square",
+      "title": "LLM Document Editor",
+      "description": "Apply LLM-generated diffs to a document.",
+      "url": "llmedit",
+      "created": "2025-08-14T03:45:15+00:00"
+    },
+    {
       "icon": "bi-markdown-fill",
       "title": "Render Markdown",
       "description": "Render Markdown to HTML using the GitHub Markdown API.",
