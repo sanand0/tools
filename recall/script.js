@@ -1,7 +1,6 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
-import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7/+esm";
-import { files, fetchNotes } from "./notes.js";
+import { files, fetchAll, filterNotes } from "./notes.js";
 
 const content = document.getElementById("content");
 const fileSelect = document.getElementById("file-select");
@@ -19,23 +18,20 @@ let items = [];
 let view = [];
 let index = 0;
 let starOnly = false;
-let fuse;
 
+fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="">All</option>`);
 files.forEach((f) =>
   fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="${f.url}">${f.name}</option>`),
 );
+fileSelect.value = "";
 
 async function load(url) {
   content.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
-  try {
-    const list = await fetchNotes(url);
-    items.length = 0; // clear in place
-    items.push(...list);
-    applyFilter();
-  } catch (e) {
-    content.innerHTML = "";
-    bootstrapAlert({ title: "Error", body: e.message, color: "danger", replace: true });
-  }
+  const urls = url ? [url] : files.map((f) => f.url);
+  const list = await fetchAll(urls);
+  items.length = 0;
+  items.push(...list);
+  applyFilter();
 }
 
 function weight(i) {
@@ -44,23 +40,20 @@ function weight(i) {
 }
 
 function applyFilter() {
-  const base = starOnly ? items.filter((t) => t.includes("⭐")) : items;
-  if (!base.length) {
+  if (!items.length) {
     content.innerHTML = "";
     indexInput.value = "";
-    bootstrapAlert({ body: "No ⭐ items", color: "danger", replace: true });
+    bootstrapAlert({ body: "No notes", color: "danger", replace: true });
     return;
   }
-  fuse = new Fuse(base, { ignoreLocation: true });
-  const term = searchInput.value.trim();
-  view = term ? fuse.search(term, { limit: 5 }).map((r) => r.item) : base.slice();
+  view = filterNotes(items, searchInput.value, starOnly);
   if (!view.length) {
     content.innerHTML = "";
     indexInput.value = "";
-    bootstrapAlert({ body: "No match", color: "danger", replace: true });
+    bootstrapAlert({ body: starOnly ? "No ⭐ items" : "No match", color: "danger", replace: true });
     return;
   }
-  if (term) {
+  if (searchInput.value.trim()) {
     index = 0;
     content.innerHTML = marked.parse(view.join("\n"));
     indexInput.value = "";
@@ -118,4 +111,4 @@ starBtn.onclick = () => {
   applyFilter();
 };
 
-load(files[0].url);
+load();

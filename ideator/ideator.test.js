@@ -7,12 +7,14 @@ global.window = window;
 global.document = document;
 
 vi.mock("https://cdn.jsdelivr.net/npm/bootstrap-alert@1", () => ({ bootstrapAlert: vi.fn() }));
+vi.mock("https://cdn.jsdelivr.net/npm/marked/+esm", () => ({ marked: { parse: (s) => s } }));
 vi.mock("../recall/notes.js", () => ({
   files: [
     { url: "a", name: "A" },
     { url: "b", name: "B" },
   ],
-  fetchNotes: async () => ["- A", "- B"],
+  fetchAll: async () => ["- A", "- B"],
+  filterNotes: (items) => items,
   randomItem: (arr, exclude = []) => arr.find((i) => !exclude.includes(i)),
 }));
 
