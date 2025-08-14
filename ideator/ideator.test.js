@@ -7,13 +7,24 @@ global.window = window;
 global.document = document;
 
 vi.mock("https://cdn.jsdelivr.net/npm/bootstrap-alert@1", () => ({ bootstrapAlert: vi.fn() }));
+vi.mock("https://cdn.jsdelivr.net/npm/marked/+esm", () => ({ marked: { parse: (s) => s } }));
+vi.mock("https://cdn.jsdelivr.net/npm/fuse.js@7/+esm", () => ({
+  default: class {
+    constructor(arr) {
+      this.arr = arr;
+    }
+    search(term) {
+      return this.arr.filter((i) => i.note.includes(term)).map((item) => ({ item }));
+    }
+  },
+}));
 vi.mock("../recall/notes.js", () => ({
   files: [
     { url: "a", name: "A" },
     { url: "b", name: "B" },
   ],
-  fetchNotes: async () => ["- A", "- B"],
-  randomItem: (arr, exclude = []) => arr.find((i) => !exclude.includes(i)),
+  fetchNotes: async () => ["⭐ A", "B"],
+  randomItem: (arr) => arr[0],
 }));
 
 beforeEach(() => {
@@ -46,5 +57,22 @@ describe("ideator", () => {
     document.getElementById("ideate-btn").click();
     const url = new URL(window.open.mock.calls[0][0]);
     expect(url.searchParams.get("q")).toContain("Edited");
+  });
+
+  it("searches notes", async () => {
+    await import("./script.js");
+    const card = document.querySelector(".note-card");
+    const search = card.querySelector(".note-search");
+    search.value = "B";
+    search.dispatchEvent(new window.Event("input"));
+    await Promise.resolve();
+    expect(typeof card.note).toBe("string");
+  });
+
+  it("filters starred notes", async () => {
+    await import("./script.js");
+    const card = document.querySelector(".note-card");
+    card.querySelector(".note-star").click();
+    expect(card.note).toContain("⭐");
   });
 });

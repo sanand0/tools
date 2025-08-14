@@ -1,5 +1,6 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
+import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7/+esm";
 import { files, fetchNotes, randomItem } from "../recall/notes.js";
 
 const promptTemplate = `You are a radical concept synthesizer hired to astound even experts.
@@ -50,11 +51,13 @@ async function addNote() {
   notesDiv.insertAdjacentHTML(
     "beforeend",
     /* html */ `<div class="card mb-3 note-card">
-      <div class="card-header d-flex gap-2">
+      <div class="card-header d-flex gap-2 flex-wrap">
         <select class="form-select form-select-sm w-auto note-file">
           <option value="">Random</option>
           ${files.map((f) => `<option value="${f.url}">${f.name}</option>`).join("")}
         </select>
+        <input type="search" class="form-control form-control-sm w-auto note-search" placeholder="Search" style="max-width: 10rem" />
+        <button class="btn btn-outline-warning btn-sm note-star" title="Star"><i class="bi bi-star"></i></button>
         <button class="btn btn-outline-secondary btn-sm note-reload" title="Reload"><i class="bi bi-shuffle"></i></button>
         <button class="btn btn-outline-danger btn-sm note-delete" title="Delete"><i class="bi bi-x"></i></button>
       </div>
@@ -65,8 +68,24 @@ async function addNote() {
     </div>`,
   );
   const card = notesDiv.lastElementChild;
+  const search = card.querySelector(".note-search");
+  const starBtn = card.querySelector(".note-star");
+  const select = card.querySelector(".note-file");
   card.querySelector(".note-reload").onclick = () => reload(card);
-  card.querySelector(".note-file").onchange = () => reload(card);
+  select.onchange = () => {
+    search.value = "";
+    card.starOnly = false;
+    starBtn.className = "btn btn-outline-warning btn-sm note-star";
+    starBtn.innerHTML = '<i class="bi bi-star"></i>';
+    reload(card);
+  };
+  search.oninput = () => pick(card);
+  starBtn.onclick = () => {
+    card.starOnly = !card.starOnly;
+    starBtn.className = `btn btn-${card.starOnly ? "warning" : "outline-warning"} btn-sm note-star`;
+    starBtn.innerHTML = `<i class="bi bi-${card.starOnly ? "star-fill" : "star"}"></i>`;
+    pick(card);
+  };
   card.querySelector(".note-delete").onclick = () => card.remove();
   if (notesDiv.children.length === 1) card.querySelector(".note-delete").classList.add("d-none");
   await reload(card);
@@ -74,24 +93,58 @@ async function addNote() {
 
 async function reload(card) {
   const select = card.querySelector(".note-file");
-  const title = card.querySelector(".card-title");
   const content = card.querySelector(".note-content");
   content.innerHTML = /* html */ `<div class="text-center"><div class="spinner-border" role="status"></div></div>`;
-  const url = select.value || randomItem(files).url;
+  const url = select.value;
   try {
-    const items = await fetchNotes(url);
-    const used = [...notesDiv.querySelectorAll(".note-card")]
-      .filter((c) => c !== card)
-      .map((c) => c.note)
-      .filter(Boolean);
-    card.note = randomItem(items, used);
-    title.textContent = files.find((f) => f.url === url)?.name || "Unknown";
-    content.innerHTML = /* html */ `<div class="form-control note-text" contenteditable>${marked.parse(card.note)}</div>`;
-    card.fileUrl = url;
+    const lists = url
+      ? [[url, await fetchNotes(url)]]
+      : await Promise.all(files.map(async (f) => [f.url, await fetchNotes(f.url)]));
+    card.items = lists.flatMap(([u, arr]) => arr.map((note) => ({ note, url: u })));
+    card.fileUrl = url || "";
+    pick(card);
   } catch (e) {
     content.innerHTML = "";
     bootstrapAlert({ title: "Error", body: e.message, color: "danger", replace: true });
   }
+}
+
+function pick(card) {
+  const title = card.querySelector(".card-title");
+  const content = card.querySelector(".note-content");
+  const base = card.starOnly ? card.items.filter((i) => i.note.includes("⭐")) : card.items;
+  if (!base.length) {
+    content.innerHTML = "";
+    bootstrapAlert({ body: "No ⭐ items", color: "danger", replace: true });
+    return;
+  }
+  const term = card.querySelector(".note-search").value.trim();
+  let list = base;
+  if (term) {
+    list = new Fuse(base, { ignoreLocation: true, keys: ["note"] }).search(term, { limit: 5 }).map((r) => r.item);
+    if (!list.length) {
+      content.innerHTML = "";
+      bootstrapAlert({ body: "No match", color: "danger", replace: true });
+      return;
+    }
+  }
+  const used = [...notesDiv.querySelectorAll(".note-card")]
+    .filter((c) => c !== card)
+    .map((c) => c.note)
+    .filter(Boolean);
+  const filtered = list.filter((o) => !used.includes(o.note));
+  const note = randomItem(filtered.map((o) => o.note));
+  if (!note) {
+    content.innerHTML = "";
+    bootstrapAlert({ body: "No match", color: "danger", replace: true });
+    return;
+  }
+  const obj = filtered.find((o) => o.note === note);
+  card.note = obj.note;
+  card.fileUrl = obj.url;
+  title.textContent = files.find((f) => f.url === card.fileUrl)?.name || "Unknown";
+  content.innerHTML = /* html */ `<div class="form-control note-text" contenteditable>${marked.parse(card.note)}</div>`;
+  content.firstElementChild.oninput = (e) => (card.note = e.target.textContent);
 }
 
 function ideate() {
