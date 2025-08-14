@@ -1,7 +1,6 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
-import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7/+esm";
-import { files, fetchNotes, randomItem } from "../recall/notes.js";
+import { files, fetchNotes, randomItem, filterNotes } from "../recall/notes.js";
 
 const promptTemplate = `You are a radical concept synthesizer hired to astound even experts.
 
@@ -112,34 +111,26 @@ async function reload(card) {
 function pick(card) {
   const title = card.querySelector(".card-title");
   const content = card.querySelector(".note-content");
-  const base = card.starOnly ? card.items.filter((i) => i.note.includes("⭐")) : card.items;
-  if (!base.length) {
+  const term = card.querySelector(".note-search").value;
+  let list = filterNotes(card.items, term, card.starOnly, "note");
+  if (!list.length) {
     content.innerHTML = "";
-    bootstrapAlert({ body: "No ⭐ items", color: "danger", replace: true });
+    const msg = term.trim() ? "No match" : "No ⭐ items";
+    bootstrapAlert({ body: msg, color: "danger", replace: true });
     return;
-  }
-  const term = card.querySelector(".note-search").value.trim();
-  let list = base;
-  if (term) {
-    list = new Fuse(base, { ignoreLocation: true, keys: ["note"] }).search(term, { limit: 5 }).map((r) => r.item);
-    if (!list.length) {
-      content.innerHTML = "";
-      bootstrapAlert({ body: "No match", color: "danger", replace: true });
-      return;
-    }
   }
   const used = [...notesDiv.querySelectorAll(".note-card")]
     .filter((c) => c !== card)
     .map((c) => c.note)
     .filter(Boolean);
-  const filtered = list.filter((o) => !used.includes(o.note));
-  const note = randomItem(filtered.map((o) => o.note));
+  list = list.filter((o) => !used.includes(o.note));
+  const note = randomItem(list.map((o) => o.note));
   if (!note) {
     content.innerHTML = "";
     bootstrapAlert({ body: "No match", color: "danger", replace: true });
     return;
   }
-  const obj = filtered.find((o) => o.note === note);
+  const obj = list.find((o) => o.note === note);
   card.note = obj.note;
   card.fileUrl = obj.url;
   title.textContent = files.find((f) => f.url === card.fileUrl)?.name || "Unknown";

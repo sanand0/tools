@@ -8,16 +8,6 @@ global.document = document;
 
 vi.mock("https://cdn.jsdelivr.net/npm/bootstrap-alert@1", () => ({ bootstrapAlert: vi.fn() }));
 vi.mock("https://cdn.jsdelivr.net/npm/marked/+esm", () => ({ marked: { parse: (s) => s } }));
-vi.mock("https://cdn.jsdelivr.net/npm/fuse.js@7/+esm", () => ({
-  default: class {
-    constructor(arr) {
-      this.arr = arr;
-    }
-    search(term) {
-      return this.arr.filter((i) => i.note.includes(term)).map((item) => ({ item }));
-    }
-  },
-}));
 vi.mock("../recall/notes.js", () => ({
   files: [
     { url: "a", name: "A" },
@@ -25,6 +15,11 @@ vi.mock("../recall/notes.js", () => ({
   ],
   fetchNotes: async () => ["⭐ A", "B"],
   randomItem: (arr) => arr[0],
+  filterNotes: (list, term = "", starOnly = false, key = "note") => {
+    const base = starOnly ? list.filter((o) => (key ? o[key] : o).includes("⭐")) : list;
+    if (!term.trim()) return base.slice();
+    return base.filter((o) => (key ? o[key] : o).includes(term));
+  },
 }));
 
 beforeEach(() => {

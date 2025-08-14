@@ -1,7 +1,6 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
-import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7/+esm";
-import { files, fetchNotes } from "./notes.js";
+import { files, fetchNotes, filterNotes } from "./notes.js";
 
 const content = document.getElementById("content");
 const fileSelect = document.getElementById("file-select");
@@ -19,7 +18,6 @@ let items = [];
 let view = [];
 let index = 0;
 let starOnly = false;
-let fuse;
 
 files.forEach((f) =>
   fileSelect.insertAdjacentHTML("beforeend", /* html */ `<option value="${f.url}">${f.name}</option>`),
@@ -44,23 +42,16 @@ function weight(i) {
 }
 
 function applyFilter() {
-  const base = starOnly ? items.filter((t) => t.includes("⭐")) : items;
-  if (!base.length) {
-    content.innerHTML = "";
-    indexInput.value = "";
-    bootstrapAlert({ body: "No ⭐ items", color: "danger", replace: true });
-    return;
-  }
-  fuse = new Fuse(base, { ignoreLocation: true });
-  const term = searchInput.value.trim();
-  view = term ? fuse.search(term, { limit: 5 }).map((r) => r.item) : base.slice();
+  const term = searchInput.value;
+  view = filterNotes(items, term, starOnly);
   if (!view.length) {
     content.innerHTML = "";
     indexInput.value = "";
-    bootstrapAlert({ body: "No match", color: "danger", replace: true });
+    const msg = term.trim() ? "No match" : "No ⭐ items";
+    bootstrapAlert({ body: msg, color: "danger", replace: true });
     return;
   }
-  if (term) {
+  if (term.trim()) {
     index = 0;
     content.innerHTML = marked.parse(view.join("\n"));
     indexInput.value = "";

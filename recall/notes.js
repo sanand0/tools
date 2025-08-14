@@ -1,4 +1,5 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
+import Fuse from "https://cdn.jsdelivr.net/npm/fuse.js@7/+esm";
 
 export const files = [
   {
@@ -53,6 +54,16 @@ export async function fetchNotes(url) {
   }
   cache.set(url, items);
   return items;
+}
+
+export function filterNotes(list, term = "", starOnly = false, key) {
+  const base = starOnly ? list.filter((o) => (key ? o[key] : o).includes("⭐")) : list;
+  term = term.trim();
+  if (!base.length) return [];
+  if (!term) return base.slice();
+  return new Fuse(base, { ignoreLocation: true, keys: key ? [key] : undefined })
+    .search(term, { limit: 5 })
+    .map((r) => r.item);
 }
 
 export const randomItem = (arr, exclude = []) => {
