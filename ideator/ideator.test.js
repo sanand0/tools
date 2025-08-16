@@ -49,4 +49,15 @@ describe("ideator", () => {
     const url = new URL(window.open.mock.calls[0][0]);
     expect(url.searchParams.get("q")).toContain("Edited");
   });
+
+  it("keeps star after reload", async () => {
+    await import("./script.js");
+    const card = document.querySelector(".note-card");
+    card.querySelector(".note-star").click();
+    await card.querySelector(".note-reload").onclick();
+    const btn = card.querySelector(".note-star");
+    expect(card.star).toBe(true);
+    expect(btn.className).toContain("btn-warning");
+    expect(btn.innerHTML).toContain("bi-star-fill");
+  });
 });
