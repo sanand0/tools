@@ -91,9 +91,10 @@ async function reload(card) {
   const url = select.value;
   const urls = url ? [url] : files.map((f) => f.url);
   card.items = await fetchAll(urls);
-  card.star = false;
-  card.querySelector(".note-star").className = "btn btn-outline-warning btn-sm note-star";
-  card.querySelector(".note-star").innerHTML = /* html */ `<i class="bi bi-star"></i>`;
+  if (card.star === undefined) card.star = false;
+  const starBtn = card.querySelector(".note-star");
+  starBtn.className = `btn btn-${card.star ? "warning" : "outline-warning"} btn-sm note-star`;
+  starBtn.innerHTML = /* html */ `<i class="bi bi-${card.star ? "star-fill" : "star"}"></i>`;
   search.value = "";
   title.textContent = url ? files.find((f) => f.url === url)?.name : "All";
   update(card);
