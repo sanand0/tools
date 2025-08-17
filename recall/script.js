@@ -1,6 +1,6 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
-import { files, fetchAll, filterNotes } from "./notes.js";
+import { files, fetchAll, filterNotes, renderStar } from "./notes.js";
 
 const content = document.getElementById("content");
 const fileSelect = document.getElementById("file-select");
@@ -106,8 +106,7 @@ quizBtn.onclick = () => {
 
 starBtn.onclick = () => {
   starOnly = !starOnly;
-  starBtn.className = `btn btn-${starOnly ? "warning" : "outline-warning"} btn-sm`;
-  starBtn.innerHTML = /* html */ `<i class="bi bi-${starOnly ? "star-fill" : "star"}"></i>`;
+  renderStar(starBtn, starOnly);
   applyFilter();
 };
 

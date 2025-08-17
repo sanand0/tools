@@ -1,6 +1,6 @@
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
-import { files, fetchAll, filterNotes, randomItem } from "../recall/notes.js";
+import { files, fetchAll, filterNotes, randomItem, renderStar } from "../recall/notes.js";
 
 const promptTemplate = `You are a radical concept synthesizer hired to astound even experts.
 
@@ -73,8 +73,7 @@ async function addNote() {
   card.querySelector(".note-star").onclick = () => {
     card.star = !card.star;
     const btn = card.querySelector(".note-star");
-    btn.className = `btn btn-${card.star ? "warning" : "outline-warning"} btn-sm note-star`;
-    btn.innerHTML = /* html */ `<i class="bi bi-${card.star ? "star-fill" : "star"}"></i>`;
+    renderStar(btn, card.star);
     update(card);
   };
   card.querySelector(".note-search").oninput = () => update(card);
@@ -92,9 +91,7 @@ async function reload(card) {
   const urls = url ? [url] : files.map((f) => f.url);
   card.items = await fetchAll(urls);
   if (card.star === undefined) card.star = false;
-  const starBtn = card.querySelector(".note-star");
-  starBtn.className = `btn btn-${card.star ? "warning" : "outline-warning"} btn-sm note-star`;
-  starBtn.innerHTML = /* html */ `<i class="bi bi-${card.star ? "star-fill" : "star"}"></i>`;
+  renderStar(card.querySelector(".note-star"), card.star);
   search.value = "";
   title.textContent = url ? files.find((f) => f.url === url)?.name : "All";
   update(card);

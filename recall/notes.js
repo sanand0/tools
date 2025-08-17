@@ -87,3 +87,13 @@ export const randomItem = (arr, exclude = []) => {
   while (exclude.includes(item) && tries--);
   return item;
 };
+
+export const renderStar = (btn, on) => {
+  "use strict";
+  if (!btn) return on; // idempotent
+  const hasNoteClass = btn.classList.contains("note-star");
+  const extra = hasNoteClass ? " note-star" : "";
+  btn.className = `btn btn-${on ? "warning" : "outline-warning"} btn-sm${extra}`;
+  btn.innerHTML = /* html */ `<i class="bi bi-${on ? "star-fill" : "star"}"></i>`;
+  return on;
+};

@@ -16,6 +16,12 @@ vi.mock("../recall/notes.js", () => ({
   fetchAll: async () => ["- A", "- B"],
   filterNotes: (items) => items,
   randomItem: (arr, exclude = []) => arr.find((i) => !exclude.includes(i)),
+  renderStar: (btn, on) => {
+    if (!btn) return on;
+    btn.className = `btn btn-${on ? "warning" : "outline-warning"} btn-sm note-star`;
+    btn.innerHTML = `<i class="bi bi-${on ? "star-fill" : "star"}"></i>`;
+    return on;
+  },
 }));
 
 beforeEach(() => {
