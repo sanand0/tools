@@ -27,8 +27,7 @@ export function whatsappMessages() {
       if (!message.time) {
         const auto = [...el.querySelectorAll('[dir="auto"]')].at(-1);
         if (auto) message.time = updateTime(lastTime, auto.textContent);
-        // This can happen for pinned messages
-        else console.log("MISSING TIME", el, message);
+        // Else it's a pinned message. Ignore it.
       }
     }
     lastTime = message.time;
@@ -84,8 +83,45 @@ function updateTime(lastTime, time) {
   return date.toISOString();
 }
 
-export async function scrape() {
-  const messages = whatsappMessages();
-  const text = JSON.stringify(messages, null, 2);
-  await navigator.clipboard.writeText(text);
+const messagesById = {};
+let captureTimer;
+
+function mergeMessages(arr) {
+  for (const msg of arr) {
+    const existing = messagesById[msg.messageId] || {};
+    for (const [k, v] of Object.entries(msg)) {
+      const old = existing[k];
+      if (typeof v === "string") {
+        if ((v?.length || 0) > (old?.length || 0)) existing[k] = v;
+      } else if (!old) existing[k] = v;
+    }
+    messagesById[msg.messageId] = existing;
+  }
+}
+
+export function scrape() {
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    '<button id="copy-btn" style="position:fixed;top:10px;right:10px;padding:10px;z-index:999;background-color:#fff;color:#000;">Copy 0 messsages</button>',
+  );
+  const btn = document.getElementById("copy-btn");
+
+  const update = () => {
+    mergeMessages(whatsappMessages());
+    btn.textContent = `Copy ${Object.values(messagesById).filter((m) => m.text).length} messages`;
+  };
+
+  update();
+  captureTimer = setInterval(update, 500);
+
+  btn.addEventListener("click", async () => {
+    clearInterval(captureTimer);
+    btn.remove();
+    const list = Object.values(messagesById).sort((a, b) => {
+      const ta = a.time ? new Date(a.time).getTime() : 0;
+      const tb = b.time ? new Date(b.time).getTime() : 0;
+      return ta - tb;
+    });
+    await navigator.clipboard.writeText(JSON.stringify(list, null, 2));
+  });
 }
