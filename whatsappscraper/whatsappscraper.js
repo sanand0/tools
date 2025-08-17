@@ -84,8 +84,47 @@ function updateTime(lastTime, time) {
   return date.toISOString();
 }
 
-export async function scrape() {
-  const messages = whatsappMessages();
-  const text = JSON.stringify(messages, null, 2);
-  await navigator.clipboard.writeText(text);
+const messagesById = {};
+let captureTimer;
+
+function mergeMessages(arr) {
+  for (const msg of arr) {
+    const existing = messagesById[msg.messageId] || {};
+    for (const [k, v] of Object.entries(msg)) {
+      const old = existing[k];
+      if (typeof v === "string") {
+        if ((v?.length || 0) > (old?.length || 0)) existing[k] = v;
+      } else if (!old) existing[k] = v;
+    }
+    messagesById[msg.messageId] = existing;
+  }
+}
+
+export function scrape() {
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    '<div id="copy-wrap" style="position:fixed;top:0;right:0"><button id="copy-btn">Copy</button><span id="msg-count" class="ms-2">0</span></div>',
+  );
+  const wrap = document.getElementById("copy-wrap");
+  const btn = document.getElementById("copy-btn");
+  const countEl = document.getElementById("msg-count");
+
+  const update = () => {
+    mergeMessages(whatsappMessages());
+    countEl.textContent = Object.values(messagesById).filter((m) => m.text).length;
+  };
+
+  update();
+  captureTimer = setInterval(update, 500);
+
+  btn.addEventListener("click", async () => {
+    clearInterval(captureTimer);
+    wrap.remove();
+    const list = Object.values(messagesById).sort((a, b) => {
+      const ta = a.time ? new Date(a.time).getTime() : 0;
+      const tb = b.time ? new Date(b.time).getTime() : 0;
+      return ta - tb;
+    });
+    await navigator.clipboard.writeText(JSON.stringify(list, null, 2));
+  });
 }
