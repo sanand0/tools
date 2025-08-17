@@ -27,8 +27,7 @@ export function whatsappMessages() {
       if (!message.time) {
         const auto = [...el.querySelectorAll('[dir="auto"]')].at(-1);
         if (auto) message.time = updateTime(lastTime, auto.textContent);
-        // This can happen for pinned messages
-        else console.log("MISSING TIME", el, message);
+        // Else it's a pinned message. Ignore it.
       }
     }
     lastTime = message.time;
@@ -103,15 +102,13 @@ function mergeMessages(arr) {
 export function scrape() {
   document.body.insertAdjacentHTML(
     "beforeend",
-    '<div id="copy-wrap" style="position:fixed;top:0;right:0"><button id="copy-btn">Copy</button><span id="msg-count" class="ms-2">0</span></div>',
+    '<button id="copy-btn" style="position:fixed;top:10px;right:10px;padding:10px;z-index:999;background-color:#fff;color:#000;">Copy 0 messsages</button>',
   );
-  const wrap = document.getElementById("copy-wrap");
   const btn = document.getElementById("copy-btn");
-  const countEl = document.getElementById("msg-count");
 
   const update = () => {
     mergeMessages(whatsappMessages());
-    countEl.textContent = Object.values(messagesById).filter((m) => m.text).length;
+    btn.textContent = `Copy ${Object.values(messagesById).filter((m) => m.text).length} messages`;
   };
 
   update();
@@ -119,7 +116,7 @@ export function scrape() {
 
   btn.addEventListener("click", async () => {
     clearInterval(captureTimer);
-    wrap.remove();
+    btn.remove();
     const list = Object.values(messagesById).sort((a, b) => {
       const ta = a.time ? new Date(a.time).getTime() : 0;
       const tb = b.time ? new Date(b.time).getTime() : 0;

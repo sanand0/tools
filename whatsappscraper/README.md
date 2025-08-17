@@ -36,29 +36,24 @@ The collected data is structured as a JSON array of message objects, which is th
 
 ## How It Works
 
-1.  **Installation (Setting up the Bookmarklet):**
-
-    - Open the `index.html` file from this tool's directory in your browser.
-    - Drag the "💬 WhatsApp Scraper" button displayed on that page to your browser's bookmarks bar. This creates the bookmarklet.
-
-2.  **Scraping Process:**
-
-    - Go to [web.whatsapp.com](https://web.whatsapp.com/) and open the specific chat conversation you want to scrape.
-    - **Crucially, scroll up within the chat panel to load all the messages you intend to capture.** The scraper can only access messages that are currently rendered in the WhatsApp Web interface.
-    - Once the desired messages are visible, click the "💬 WhatsApp Scraper" bookmarklet from your browser's bookmarks bar.
-
-3.  **Data Extraction:**
-
-    - The bookmarklet executes JavaScript code in the context of the WhatsApp Web page.
-    - This script queries the Document Object Model (DOM) to find HTML elements corresponding to messages.
-    - It parses attributes and text content from these elements to extract message details (author, text, time, quotes, reactions).
-    - Helper functions are used to process timestamps and other specific data points.
-
-4.  **Output:**
-    - The extracted messages are formatted into a JSON string.
-    - This JSON string is automatically copied to your clipboard.
-    - An alert message will confirm the number of messages copied.
-    - If `navigator.clipboard.writeText` fails, it uses a fallback method (creating a temporary textarea) to copy the data.
+1. **Installation (Setting up the Bookmarklet):**
+   - Open the `index.html` file from this tool's directory in your browser.
+   - Drag the "💬 WhatsApp Scraper" button displayed on that page to your browser's bookmarks bar. This creates the bookmarklet.
+2. **Scraping Process:**
+   - Go to [web.whatsapp.com](https://web.whatsapp.com/) and open the specific chat conversation you want to scrape.
+   - Click the "💬 WhatsApp Scraper" bookmarklet from your browser's bookmarks bar. This displays a "Copy ... messages" button on the top right of WhatsApp.
+   - **Crucially, scroll within the chat panel to load all the messages you intend to capture.** The scraper can only access messages that are currently rendered in the WhatsApp Web interface.
+   - Click on the "Copy ... messages" button to copy the captured messages as JSON.
+3. **Data Extraction:**
+   - The bookmarklet executes JavaScript code in the context of the WhatsApp Web page.
+   - This script queries the Document Object Model (DOM) to find HTML elements corresponding to messages.
+   - It parses attributes and text content from these elements to extract message details (author, text, time, quotes, reactions).
+   - Helper functions are used to process timestamps and other specific data points.
+4. **Output:**
+   - The extracted messages are formatted into a JSON string.
+   - This JSON string is automatically copied to your clipboard.
+   - An alert message will confirm the number of messages copied.
+   - If `navigator.clipboard.writeText` fails, it uses a fallback method (creating a temporary textarea) to copy the data.
 
 ## Technical Details
 
