@@ -43,15 +43,13 @@ const error = new Map();
 export async function fetchNotes(url) {
   if (error.has(url)) return [];
   if (cache.has(url)) return cache.get(url);
-  const options = url.match(/notes\.s-anand\.net/) ? { credentials: "include" } : {};
-  const text = await fetch(url, options).then((r) => {
-    if (r.ok) return r.text();
-    throw new Error(`Load failed: ${r.status}`);
-  });
-  const toks = marked.lexer(text);
+  const opts = url.includes("notes.s-anand.net") ? { credentials: "include" } : undefined;
+  const text = await fetch(url, opts).then((r) =>
+    r.ok ? r.text() : Promise.reject(new Error(`Load failed: ${r.status}`)),
+  );
   const items = [];
   let header = "";
-  for (const tok of toks) {
+  for (const tok of marked.lexer(text)) {
     if (tok.type === "heading") header = tok.text.trim();
     else if (tok.type === "list") for (const li of tok.items) items.push(`${li.raw.trim()}\n\n\n  🏷️ *${header}*`);
   }
@@ -65,8 +63,12 @@ export async function fetchAll(urls) {
   res.forEach((r, i) => {
     if (r.status === "fulfilled") out.push(...r.value);
     else {
-      error.set(urls[i], true);
-      bootstrapAlert({ title: "Error", body: `${files[i].name}: ${r.reason.message}`, color: "danger" });
+      const url = urls[i];
+      error.set(url, true);
+      const file = files.find((f) => f.url === url);
+      const name = file?.name || url;
+      if (!name.startsWith("🔒"))
+        bootstrapAlert({ title: "Error", body: `${name}: ${r.reason.message}`, color: "danger" });
     }
   });
   return out;
@@ -75,9 +77,8 @@ export async function fetchAll(urls) {
 export function filterNotes(items, term, starOnly) {
   const base = starOnly ? items.filter((t) => t.includes("⭐")) : items;
   if (!base.length) return [];
-  const fuse = new Fuse(base, { ignoreLocation: true });
   const q = term.trim();
-  return q ? fuse.search(q, { limit: 5 }).map((r) => r.item) : base;
+  return q ? new Fuse(base, { ignoreLocation: true }).search(q, { limit: 5 }).map((r) => r.item) : base;
 }
 
 export const randomItem = (arr, exclude = []) => {
@@ -91,9 +92,8 @@ export const randomItem = (arr, exclude = []) => {
 export const renderStar = (btn, on) => {
   "use strict";
   if (!btn) return on; // idempotent
-  const hasNoteClass = btn.classList.contains("note-star");
-  const extra = hasNoteClass ? " note-star" : "";
-  btn.className = `btn btn-${on ? "warning" : "outline-warning"} btn-sm${extra}`;
+  btn.classList.toggle("btn-warning", on);
+  btn.classList.toggle("btn-outline-warning", !on);
   btn.innerHTML = /* html */ `<i class="bi bi-${on ? "star-fill" : "star"}"></i>`;
   return on;
 };

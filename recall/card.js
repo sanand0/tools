@@ -8,110 +8,110 @@ export async function createCard(parent, opts = {}) {
     "beforeend",
     /* html */ `
     <div class="card mb-3 note-card">
-      <div class="card-header d-flex flex-wrap align-items-center gap-2">
-        <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
-          <select class="form-select form-select-sm w-50 w-md-auto note-file"></select>
-          <input type="search" class="form-control form-control-sm w-50 w-md-auto note-search" placeholder="Search" />
+      <div class="card-header">
+        <div class="row">
+          <div class="col-md-4">
+            <select class="form-select form-select-sm note-file mb-2"></select>
+          </div>
+          <div class="col-md-8 d-flex">
+            <input type="search" class="form-control form-control-sm note-search mb-2 me-auto" placeholder="Search" />
+            <button class="btn btn-outline-warning btn-sm note-star text-nowrap ms-2 mb-2" title="Star"><i class="bi bi-star"></i></button>
+            <button class="btn btn-secondary btn-sm note-copy text-nowrap ms-2 mb-2" title="Copy"><i class="bi bi-clipboard"></i> <span class="d-none d-sm-inline">Copy</span></button>
+            <button class="btn btn-success btn-sm note-quiz text-nowrap ms-2 mb-2" title="Quiz"><i class="bi bi-question-circle"></i> <span class="d-none d-sm-inline">Quiz</span></button>
+            <button class="btn btn-outline-danger btn-sm note-delete text-nowrap ms-2 mb-2" title="Delete"><i class="bi bi-x"></i></button>
+          </div>
         </div>
-        <div class="d-flex flex-wrap gap-2 ms-auto">
-          <button class="btn btn-outline-warning btn-sm note-star" title="Star"><i class="bi bi-star"></i></button>
-          <button class="btn btn-secondary btn-sm note-copy" title="Copy"><i class="bi bi-clipboard"></i> <span class="d-none d-sm-inline">Copy</span></button>
-          <button class="btn btn-success btn-sm note-quiz" title="Quiz"><i class="bi bi-question-circle"></i> <span class="d-none d-sm-inline">Quiz</span></button>
-          <button class="btn btn-outline-danger btn-sm note-delete" title="Delete"><i class="bi bi-x"></i></button>
+        <div class="d-flex text-end">
+          <button class="btn btn-outline-primary btn-sm note-prev me-2" title="Previous"><i class="bi bi-arrow-left"></i></button>
+          <button class="btn btn-primary btn-sm note-random me-2" title="Random"><i class="bi bi-shuffle"></i> <span class="d-none d-sm-inline">Random</span></button>
+          <button class="btn btn-outline-primary btn-sm note-next me-auto" title="Next"><i class="bi bi-arrow-right"></i></button>
+          <label class="d-flex align-items-center">
+            <span class="d-none d-md-block me-2">Decay</span>
+            <input type="number" class="form-control form-control-sm w-auto note-decay d-none d-sm-block me-2" min="0" max="1" step="0.01" value="0.02" style="max-width:7rem" />
+          </label>
+          <label class="d-flex align-items-center">
+            <span class="d-none d-md-block me-2">#</span>
+            <input type="number" class="form-control form-control-sm w-auto note-index d-none d-sm-block" min="1" style="max-width:6rem" />
+          </label>
         </div>
       </div>
       <div class="card-body">
         <h5 class="card-title"></h5>
         <div class="note-content"></div>
       </div>
-      <div class="card-footer d-flex flex-wrap align-items-center gap-2">
-        <div class="d-flex flex-wrap gap-2">
-          <button class="btn btn-outline-primary btn-sm note-prev" title="Previous"><i class="bi bi-arrow-left"></i></button>
-          <button class="btn btn-primary btn-sm note-random" title="Random"><i class="bi bi-shuffle"></i> <span class="d-none d-sm-inline">Random</span></button>
-          <button class="btn btn-outline-primary btn-sm note-next" title="Next"><i class="bi bi-arrow-right"></i></button>
-        </div>
-        <div class="d-flex flex-wrap gap-2 ms-auto">
-          <input type="number" class="form-control form-control-sm w-auto note-decay d-none d-md-block" min="0" max="1" step="0.01" value="0.02" style="max-width:7rem" />
-          <input type="number" class="form-control form-control-sm w-auto note-index d-none d-md-block" min="1" style="max-width:6rem" />
-        </div>
-      </div>
     </div>
   `,
   );
   const card = parent.lastElementChild;
-  const fileSel = card.querySelector(".note-file");
-  const searchInput = card.querySelector(".note-search");
-  const starBtn = card.querySelector(".note-star");
-  const copyBtn = card.querySelector(".note-copy");
-  const quizBtn = card.querySelector(".note-quiz");
-  const delBtn = card.querySelector(".note-delete");
-  const prevBtn = card.querySelector(".note-prev");
-  const randBtn = card.querySelector(".note-random");
-  const nextBtn = card.querySelector(".note-next");
-  const decayInput = card.querySelector(".note-decay");
-  const indexInput = card.querySelector(".note-index");
-  const title = card.querySelector(".card-title");
-  const content = card.querySelector(".note-content");
-  files.forEach((f) => fileSel.insertAdjacentHTML("beforeend", `<option value="${f.url}">${f.name}</option>`));
-  fileSel.insertAdjacentHTML("afterbegin", `<option value="">Random</option>`);
-  if (!deletable) delBtn.classList.add("d-none");
-  delBtn.onclick = () => card.remove();
+  // Map DOM → ui.* for readability
+  const ui = Object.fromEntries(
+    [
+      ["fileSel", ".note-file"],
+      ["searchInput", ".note-search"],
+      ["starBtn", ".note-star"],
+      ["copyBtn", ".note-copy"],
+      ["quizBtn", ".note-quiz"],
+      ["delBtn", ".note-delete"],
+      ["prevBtn", ".note-prev"],
+      ["randBtn", ".note-random"],
+      ["nextBtn", ".note-next"],
+      ["decayInput", ".note-decay"],
+      ["indexInput", ".note-index"],
+      ["title", ".card-title"],
+      ["content", ".note-content"],
+    ].map(([k, s]) => [k, card.querySelector(s)]),
+  );
+  files.forEach((f) => ui.fileSel.insertAdjacentHTML("beforeend", `<option value="${f.url}">${f.name}</option>`));
+  ui.fileSel.insertAdjacentHTML("afterbegin", `<option value="">Random</option>`);
+  ui.fileSel.value = ""; // default to Random
+  if (!deletable) ui.delBtn.classList.add("d-none");
+  ui.delBtn.onclick = () => card.remove();
   let items = [],
     view = [],
     index = 0;
   card.star = false;
 
   async function load() {
-    content.innerHTML = `<div class="text-center"><div class="spinner-border" role="status"></div></div>`;
-    const url = fileSel.value;
-    const urls = url ? [url] : files.map((f) => f.url);
-    items = await fetchAll(urls);
-    searchInput.value = "";
+    ui.content.innerHTML = `<div class="text-center"><div class="spinner-border" role="status"></div></div>`;
+    const url = ui.fileSel.value;
+    items = await fetchAll(url ? [url] : files.map((f) => f.url));
+    ui.searchInput.value = "";
     index = 0;
     applyFilter();
-    title.textContent = url ? files.find((f) => f.url === url)?.name : "All";
+    ui.title.textContent = url ? files.find((f) => f.url === url)?.name : "All";
   }
 
-  const weight = (i) => (1 - +decayInput.value) ** i;
+  const weight = (i) => (1 - +ui.decayInput.value) ** i;
 
   function applyFilter() {
-    if (!items.length) {
-      content.innerHTML = "";
-      indexInput.value = "";
-      bootstrapAlert({ body: "No notes", color: "danger", replace: true });
-      return;
-    }
-    view = filterNotes(items, searchInput.value, card.star);
-    if (!view.length) {
-      content.innerHTML = "";
-      indexInput.value = "";
-      bootstrapAlert({ body: card.star ? "No ⭐ items" : "No match", color: "danger", replace: true });
-      return;
-    }
-    const term = searchInput.value.trim();
-    if (showAllOnSearch && term) {
-      content.innerHTML = marked.parse(view.join("\n"));
-      indexInput.value = "";
-      return;
-    }
-    if (term) {
-      show(0);
-      return;
-    }
+    if (!items.length) return clearAndAlert("No notes");
+    view = filterNotes(items, ui.searchInput.value, card.star);
+    if (!view.length) return clearAndAlert(card.star ? "No ⭐ items" : "No match");
+    const term = ui.searchInput.value.trim();
+    if (showAllOnSearch && term) return showAll(view);
+    if (term) return show(0);
     randomPick();
   }
 
+  const clearAndAlert = (msg) => {
+    ui.content.innerHTML = "";
+    ui.indexInput.value = "";
+    bootstrapAlert({ body: msg, color: "danger", replace: true });
+  };
+  const showAll = (arr) => {
+    ui.content.innerHTML = marked.parse(arr.join("\n"));
+    ui.indexInput.value = "";
+  };
+
   function show(i) {
-    if (i < 0 || i >= view.length) {
-      bootstrapAlert({ body: "Index out of range", color: "danger", replace: true });
-      return;
-    }
+    if (i < 0 || i >= view.length)
+      return bootstrapAlert({ body: "Index out of range", color: "danger", replace: true });
     index = i;
     const note = view[i];
     card.note = note;
-    content.innerHTML = `<div class="form-control note-text" contenteditable>${marked.parse(note)}</div>`;
-    indexInput.value = i + 1;
-    content.querySelector(".note-text").oninput = (e) => (card.note = e.target.innerText);
+    ui.content.innerHTML = `<div class="form-control note-text" contenteditable>${marked.parse(note)}</div>`;
+    ui.indexInput.value = i + 1;
+    ui.content.querySelector(".note-text").oninput = (e) => (card.note = e.target.innerText);
   }
 
   function randomPick() {
@@ -130,18 +130,18 @@ export async function createCard(parent, opts = {}) {
     show(0);
   }
 
-  fileSel.onchange = load;
-  searchInput.oninput = applyFilter;
-  decayInput.oninput = randomPick;
-  randBtn.onclick = randomPick;
-  prevBtn.onclick = () => show(index - 1);
-  nextBtn.onclick = () => show(index + 1);
-  indexInput.oninput = () => show(+indexInput.value - 1);
-  copyBtn.onclick = async () => {
+  ui.fileSel.onchange = load;
+  ui.searchInput.oninput = applyFilter;
+  ui.decayInput.oninput = randomPick;
+  ui.randBtn.onclick = randomPick;
+  ui.prevBtn.onclick = () => show(index - 1);
+  ui.nextBtn.onclick = () => show(index + 1);
+  ui.indexInput.oninput = () => show(+ui.indexInput.value - 1);
+  ui.copyBtn.onclick = async () => {
     await navigator.clipboard.writeText(card.note || "");
     bootstrapAlert({ body: "Copied", color: "success", replace: true });
   };
-  quizBtn.onclick = () => {
+  ui.quizBtn.onclick = () => {
     if (!card.note) {
       bootstrapAlert({ body: "No note", color: "danger", replace: true });
       return;
@@ -149,9 +149,9 @@ export async function createCard(parent, opts = {}) {
     const q = `${card.note}\n\nQuiz me so I can learn this better. Search online for more information if required.`;
     window.open(`https://chatgpt.com/?model=gpt-5-thinking&q=${encodeURIComponent(q)}`, "_blank");
   };
-  starBtn.onclick = () => {
+  ui.starBtn.onclick = () => {
     card.star = !card.star;
-    renderStar(starBtn, card.star);
+    renderStar(ui.starBtn, card.star);
     applyFilter();
   };
 

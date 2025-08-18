@@ -34,16 +34,15 @@ STYLE:
 - Plain English; no hype; easy to understand. Define new terms in parentheses.
 `;
 const goalInput = document.getElementById("goal-input");
-const addBtn = document.getElementById("add-btn");
-const ideateBtn = document.getElementById("ideate-btn");
-const copyBtn = document.getElementById("copy-btn");
 const notesDiv = document.getElementById("notes");
 const promptEl = document.getElementById("prompt-template");
 promptEl.value = promptTemplate;
 
-addBtn.onclick = addNote;
-ideateBtn.onclick = ideate;
-copyBtn.onclick = copyPrompt;
+[
+  ["add-btn", addNote],
+  ["ideate-btn", ideate],
+  ["copy-btn", copyPrompt],
+].forEach(([id, fn]) => (document.getElementById(id).onclick = fn));
 
 await Promise.all([addNote(), addNote()]);
 
@@ -79,16 +78,18 @@ function getPrompt() {
 }
 
 /** @returns {void} */
+const withPrompt = (fn) => {
+  const p = getPrompt();
+  if (p) fn(p);
+};
 function ideate() {
-  const prompt = getPrompt();
-  if (!prompt) return;
-  window.open(`https://chatgpt.com/?model=gpt-5-thinking&q=${encodeURIComponent(prompt)}`, "_blank");
+  withPrompt((p) => window.open(`https://chatgpt.com/?model=gpt-5-thinking&q=${encodeURIComponent(p)}`, "_blank"));
 }
 
 /** @returns {Promise<void>} */
 async function copyPrompt() {
-  const prompt = getPrompt();
-  if (!prompt) return;
-  await navigator.clipboard.writeText(prompt);
-  bootstrapAlert({ body: "Copied", color: "success", replace: true });
+  withPrompt(async (p) => {
+    await navigator.clipboard.writeText(p);
+    bootstrapAlert({ body: "Copied", color: "success", replace: true });
+  });
 }
