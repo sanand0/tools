@@ -1,0 +1,23 @@
+{
+  "exams": [
+    {
+      "id": "sample-student",
+      "title": "Sample Student Exam",
+      "windowStart": "2000-01-01T00:00:00Z",
+      "windowEnd": "2099-12-31T23:59:59Z",
+      "durationMin": 5,
+      "eligibleEmails": [],
+      "evaluationMode": "student",
+      "llmModel": "gpt-4o-mini",
+      "evalBatchSize": 1,
+      "rubricVersion": "v1",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Explain gravity.",
+          "rubricJson": "{\"categories\":[{\"id\":\"clarity\",\"weight\":1,\"instructions\":\"Be clear\"}]}"
+        }
+      ]
+    }
+  ]
+}

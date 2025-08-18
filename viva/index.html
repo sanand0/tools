@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viva</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%230d6efd' d='M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3 11-3-2-3 2V5l3 2 3-2z'/%3E%3C/svg%3E" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet" />
+</head>
+
+<body class="bg-light">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href=".">Viva</a>
+      <div class="nav-item dropdown ms-auto">
+        <button class="dark-theme-toggle btn btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-label="Toggle theme">
+          <i class="bi bi-circle-half"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><button class="dropdown-item" data-bs-theme-value="light"><i class="bi bi-sun-fill me-2"></i>Light</button></li>
+          <li><button class="dropdown-item" data-bs-theme-value="dark"><i class="bi bi-moon-stars-fill me-2"></i>Dark</button></li>
+          <li><button class="dropdown-item" data-bs-theme-value="auto"><i class="bi bi-circle-half me-2"></i>Auto</button></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="container py-4" id="app">
+    <div id="exam-list"></div>
+    <div id="mic-card" class="d-none mb-4">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="h5">Mic check</h2>
+          <p class="mb-2">Record 10 seconds to ensure audio works.</p>
+          <button id="mic-start" class="btn btn-primary me-2">Start test</button>
+          <audio id="mic-audio" controls class="d-none w-100 my-2"></audio>
+          <button id="mic-continue" class="btn btn-success" disabled>Continue</button>
+        </div>
+      </div>
+    </div>
+    <div id="exam-runner" class="d-none">
+      <div id="question-prompt" class="mb-3"></div>
+      <button id="record-btn" class="btn btn-primary mb-2">Record</button>
+      <audio id="player" controls class="w-100 mb-2"></audio>
+      <button id="toggle-transcript" class="btn btn-secondary btn-sm mb-2">Show transcript</button>
+      <div id="transcript" class="border rounded p-2 mb-2 d-none"></div>
+      <div id="question-status" class="mb-2"></div>
+      <button id="next-btn" class="btn btn-outline-primary me-2">Next</button>
+      <button id="submit-btn" class="btn btn-success">Submit</button>
+      <div id="results" class="mt-3"></div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" type="module" defer></script>
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>
