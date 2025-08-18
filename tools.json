@@ -126,6 +126,13 @@
       "created": "2024-11-07T23:22:11+08:00"
     },
     {
+      "icon": "bi-github",
+      "title": "GitHub AI Coders",
+      "description": "Summarize merged PRs from AI coding tools.",
+      "url": "githubaicoders",
+      "created": "2025-08-13T00:00:00+00:00"
+    },
+    {
       "icon": "bi-bounding-box",
       "title": "Unicode Characters",
       "description": "Find non-ASCII Unicode characters in the clipboard.",
