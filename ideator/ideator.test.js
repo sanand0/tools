@@ -60,7 +60,7 @@ describe("ideator", () => {
     await import("./script.js");
     const card = document.querySelector(".note-card");
     card.querySelector(".note-star").click();
-    await card.querySelector(".note-reload").onclick();
+    card.querySelector(".note-random").click();
     const btn = card.querySelector(".note-star");
     expect(card.star).toBe(true);
     expect(btn.className).toContain("btn-warning");
