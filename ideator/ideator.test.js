@@ -27,8 +27,12 @@ vi.mock("../recall/notes.js", () => ({
 beforeEach(() => {
   vi.resetModules();
   document.body.innerHTML =
-    '<input id="goal-input"><button id="add-btn"></button><button id="ideate-btn"></button><div id="notes"></div><div id="prompt-template"></div>';
+    '<input id="goal-input"><button id="add-btn"></button><button id="ideate-btn"></button><button id="copy-btn"></button><div id="notes"></div><div id="prompt-template"></div>';
   window.open = vi.fn();
+  Object.defineProperty(global, "navigator", {
+    value: { clipboard: { writeText: vi.fn(() => Promise.resolve()) } },
+    configurable: true,
+  });
 });
 
 describe("ideator", () => {
@@ -60,10 +64,16 @@ describe("ideator", () => {
     await import("./script.js");
     const card = document.querySelector(".note-card");
     card.querySelector(".note-star").click();
-    await card.querySelector(".note-reload").onclick();
+    card.querySelector(".note-random").click();
     const btn = card.querySelector(".note-star");
     expect(card.star).toBe(true);
     expect(btn.className).toContain("btn-warning");
     expect(btn.innerHTML).toContain("bi-star-fill");
+  });
+
+  it("copies prompt", async () => {
+    await import("./script.js");
+    document.getElementById("copy-btn").click();
+    expect(navigator.clipboard.writeText).toHaveBeenCalled();
   });
 });
