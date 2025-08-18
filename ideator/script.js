@@ -36,15 +36,18 @@ STYLE:
 const goalInput = document.getElementById("goal-input");
 const addBtn = document.getElementById("add-btn");
 const ideateBtn = document.getElementById("ideate-btn");
+const copyBtn = document.getElementById("copy-btn");
 const notesDiv = document.getElementById("notes");
 const promptEl = document.getElementById("prompt-template");
 promptEl.value = promptTemplate;
 
 addBtn.onclick = addNote;
 ideateBtn.onclick = ideate;
+copyBtn.onclick = copyPrompt;
 
 await Promise.all([addNote(), addNote()]);
 
+/** @returns {Promise<void>} */
 async function addNote() {
   let card;
   const exclude = () =>
@@ -62,12 +65,30 @@ async function addNote() {
   if (notesDiv.children.length === 1) del.classList.add("d-none");
 }
 
-function ideate() {
+/** @returns {string|undefined} */
+function getPrompt() {
   const notes = [...notesDiv.querySelectorAll(".note-card")].map((c) => c.note.trim()).filter(Boolean);
-  if (!notes.length) return bootstrapAlert({ title: "Error", body: "No notes", color: "danger", replace: true });
+  if (!notes.length) {
+    bootstrapAlert({ title: "Error", body: "No notes", color: "danger", replace: true });
+    return;
+  }
   const goal = goalInput.value.trim() || "Innovative web app";
-  const prompt = promptEl.value
+  return promptEl.value
     .replace("__GOAL__", goal)
     .replace("__NOTES__", notes.map((n) => `<CONCEPT>\n${n}\n</CONCEPT>`).join("\n\n"));
+}
+
+/** @returns {void} */
+function ideate() {
+  const prompt = getPrompt();
+  if (!prompt) return;
   window.open(`https://chatgpt.com/?model=gpt-5-thinking&q=${encodeURIComponent(prompt)}`, "_blank");
+}
+
+/** @returns {Promise<void>} */
+async function copyPrompt() {
+  const prompt = getPrompt();
+  if (!prompt) return;
+  await navigator.clipboard.writeText(prompt);
+  bootstrapAlert({ body: "Copied", color: "success", replace: true });
 }

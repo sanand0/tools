@@ -9,9 +9,9 @@ export async function createCard(parent, opts = {}) {
     /* html */ `
     <div class="card mb-3 note-card">
       <div class="card-header d-flex flex-wrap align-items-center gap-2">
-        <div class="d-flex flex-wrap gap-2">
-          <select class="form-select form-select-sm w-auto note-file"></select>
-          <input type="search" class="form-control form-control-sm w-auto note-search" placeholder="Search" />
+        <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
+          <select class="form-select form-select-sm w-50 w-md-auto note-file"></select>
+          <input type="search" class="form-control form-control-sm w-50 w-md-auto note-search" placeholder="Search" />
         </div>
         <div class="d-flex flex-wrap gap-2 ms-auto">
           <button class="btn btn-outline-warning btn-sm note-star" title="Star"><i class="bi bi-star"></i></button>
