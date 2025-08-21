@@ -54,6 +54,14 @@ function timeAgo(time) {
   const d = Math.floor(h / 24);
   return `${d}d ago`;
 }
+function getDomain(u) {
+  if (!u) return "";
+  try {
+    return new URL(u).hostname.replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
 function toggleSpinner(show) {
   spinner.classList[show ? "remove" : "add"]("d-none");
 }
@@ -90,6 +98,7 @@ function addComment(postId, parentId, text) {
 function addPost(title, url, text) {
   if (!state.user) return showError("Sign in to submit");
   if (!title.trim()) return showError("Title required");
+  if (url && !getDomain(url)) return showError("Invalid URL");
   postSeq++;
   data.posts.push({ id: postSeq, title, url, text, user: state.user, time: Date.now(), score: 0 });
   data.users[state.user].karma++;
@@ -104,10 +113,11 @@ function render() {
 function renderList() {
   const posts = [...data.posts].sort((a, b) => b.score - a.score || b.time - a.time);
   const visible = posts.slice(0, state.page * 10);
-  let html = '<div class="mb-2 text-end"><button id="open-submit" class="btn btn-success btn-sm">Submit</button></div><ol class="list-group list-group-numbered">';
+  let html =
+    '<div class="mb-2 text-end"><button id="open-submit" class="btn btn-success btn-sm">Submit</button></div><ol class="list-group list-group-numbered">';
   visible.forEach((p) => {
     const comments = getPostComments(p.id);
-    const domain = p.url ? new URL(p.url).hostname.replace(/^www\./, "") : "";
+    const domain = getDomain(p.url);
     const last = timeAgo(lastUpdated(p));
     html += `
       <li class="list-group-item">
@@ -150,7 +160,10 @@ function renderList() {
   );
   main.querySelectorAll(".up-post").forEach((el) =>
     el.addEventListener("click", () => {
-      upvote(data.posts.find((p) => p.id === Number(el.dataset.id)), "post");
+      upvote(
+        data.posts.find((p) => p.id === Number(el.dataset.id)),
+        "post",
+      );
     }),
   );
   const more = document.getElementById("more-btn");
@@ -167,7 +180,8 @@ function renderComments(postId, parentId) {
   const list = data.comments.filter((c) => c.postId === postId && c.parentId === parentId);
   if (!list.length) return "";
   return `<ul class="list-unstyled ms-${parentId ? 3 : 0}">${list
-    .map((c) => `
+    .map(
+      (c) => `
       <li id="c${c.id}">
         <div class="small mb-1">
           <button class="btn btn-sm btn-outline-secondary up-comment" data-id="${c.id}">▲</button> ${c.score}
@@ -181,7 +195,8 @@ function renderComments(postId, parentId) {
           <button class="btn btn-primary btn-sm do-reply" data-id="${c.id}">Post</button>
         </div>
         ${renderComments(postId, c.id)}
-      </li>`)
+      </li>`,
+    )
     .join("")}</ul>`;
 }
 function renderThread() {
@@ -211,7 +226,10 @@ function renderThread() {
   );
   main.querySelectorAll(".up-comment").forEach((el) =>
     el.addEventListener("click", () => {
-      upvote(data.comments.find((c) => c.id === Number(el.dataset.id)), "comment");
+      upvote(
+        data.comments.find((c) => c.id === Number(el.dataset.id)),
+        "comment",
+      );
     }),
   );
   main.querySelectorAll(".reply-link").forEach((el) =>
@@ -263,7 +281,10 @@ function renderProfile() {
     .map((p) => `<li class="list-group-item"><a href="#" class="open-thread" data-id="${p.id}">${p.title}</a></li>`)
     .join("")}</ul>`;
   html += `<h5>Comments</h5><ul class="list-group">${comments
-    .map((c) => `<li class="list-group-item small"><a href="#" class="open-thread" data-id="${c.postId}">${c.text}</a></li>`)
+    .map(
+      (c) =>
+        `<li class="list-group-item small"><a href="#" class="open-thread" data-id="${c.postId}">${c.text}</a></li>`,
+    )
     .join("")}</ul>`;
   main.replaceChildren();
   main.insertAdjacentHTML("afterbegin", html);
