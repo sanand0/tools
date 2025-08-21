@@ -26,6 +26,7 @@ assets=(
   "https://cdn.jsdelivr.net/npm/saveform@1.2" "$vendor/npm/saveform@1.2"
   "https://cdn.jsdelivr.net/npm/marked@4.3.0" "$vendor/npm/marked@4.3.0"
   "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm" "$vendor/npm/d3-dsv@3/+esm"
+  "https://cdn.jsdelivr.net/npm/fake-indexeddb@5/+esm" "$vendor/npm/fake-indexeddb@5/+esm"
   "https://news.ycombinator.com/" "$vendor/news.ycombinator.com/index.html"
   "https://www.hntoplinks.com/week" "$vendor/www.hntoplinks.com/week"
 )

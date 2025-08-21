@@ -2,6 +2,7 @@ import { Browser } from "happy-dom";
 import path from "path";
 import fs from "node:fs";
 import { fileURLToPath } from "url";
+import "fake-indexeddb/auto";
 
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
@@ -39,6 +40,17 @@ export async function load(page, url) {
 
 export async function loadFrom(dirPath, file = "index.html") {
   const page = browser.newPage();
+  Object.assign(page.mainFrame.window, {
+    indexedDB,
+    IDBKeyRange,
+    IDBDatabase,
+    IDBObjectStore,
+    IDBTransaction,
+    IDBRequest,
+    IDBCursor,
+    IDBOpenDBRequest,
+    IDBIndex,
+  });
   return await load(page, `https://test/${path.basename(dirPath)}/${file}`);
 }
 

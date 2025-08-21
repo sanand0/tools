@@ -10,6 +10,7 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
+    "fake-indexeddb": "^5.0.2",
     "happy-dom": "^17.6.3",
     "playwright": "^1.54.1",
     "sharp": "^0.34.3",
