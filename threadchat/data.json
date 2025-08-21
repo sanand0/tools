@@ -1,0 +1,37 @@
+{
+  "users": {
+    "alice": { "password": "alice", "created": 1697040000000 },
+    "bob": { "password": "bob", "created": 1697041000000 }
+  },
+  "posts": [
+    {
+      "id": 1,
+      "title": "Welcome to ThreadChat",
+      "url": "",
+      "text": "Share links and ask questions. Join the conversation!",
+      "author": "alice",
+      "time": 1697042000000,
+      "score": 5,
+      "comments": [
+        {
+          "id": 1,
+          "author": "bob",
+          "text": "Excited to try this!",
+          "time": 1697042600000,
+          "score": 2,
+          "comments": []
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Example link post",
+      "url": "https://example.com",
+      "text": "",
+      "author": "bob",
+      "time": 1697043000000,
+      "score": 3,
+      "comments": []
+    }
+  ]
+}
