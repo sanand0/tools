@@ -252,6 +252,13 @@
       "created": "2025-08-06T03:54:17+00:00"
     },
     {
+      "icon": "bi-chat-dots",
+      "title": "FireThread",
+      "description": "Threaded discussion with Firebase auth and storage.",
+      "url": "firethread",
+      "created": "2025-08-21T00:00:00+00:00"
+    },
+    {
       "icon": "bi-markdown-fill",
       "title": "Render Markdown",
       "description": "Render Markdown to HTML using the GitHub Markdown API.",
