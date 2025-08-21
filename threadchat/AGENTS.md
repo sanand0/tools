@@ -2,25 +2,42 @@
 
 Client‑only Hacker News–style app. Fake auth + in-memory JS object storage. Reuse repo patterns; keep code short and readable. Prefer a beautiful, polished UI over strict HN mimicry.
 
-## Must Reuse
+Think about features that will increase engagement.
 
-See other tools for reference:
+# Coding rules
 
-- UI: Bootstrap 5 + bootstrap‑icons, data‑URI favicon, apply `bootstrap-dark-theme` on a top‑level wrapper
-- UX: show spinners during async work; errors via `bootstrapAlert({ title, body, color })`
-- DOM: `insertAdjacentHTML` / `replaceChildren` (avoid `createElement`)
-- Forms: `saveform` for persistence
+- Write concise, readable code
+- Deduplicate with functions or loops
+- Avoid try blocks unless necessary
+- Validate early using if-return
+- Keep config in files like config.json
+- Keep files under ~500 lines
+- Use ESM modules, not TypeScript
+- Minimize libraries; use modern JavaScript
+- Use hyphenated HTML IDs/classes
+- Avoid braces for one-line if/for
+- Show errors via bootstrap-alert (unicode/, picbook/, googlesuggest/, transcribe/)
+- Show a spinner while fetching data
+- Insert HTML using insertAdjacentHTML or replaceChildren (googlefit/, unicoder/, llmboundingbox/, picbook/)
+- Use Bootstrap classes; minimal custom CSS
+- Embed a favicon via data URI (index.html, googlefit/, picbook/, whatsnear/)
+- Load script.js as `<script type="module" src="script.js"></script>` (most tools)
+- Use saveform to persist forms (githubsummary/, googlefit/, googletasks/, picbook/)
+- Use bootstrap-llm-provider for API keys (imagegen/, speakmd/, podcast/, picbook/)
+- Stream LLM calls with asyncllm (podcast/, speakmd/, githubsummary/, llmboundingbox/)
+- Import utilities from common/ for CSV and errors (googletasks/, json2csv/, excelconvert/, joincsv/)
+- Include a navbar and apply add a `bootstrap-dark-theme` (most tools)
+- Lint with `npm run lint`; take full-page screenshots with `npm run screenshot -- ${tool}/ ${tool}/screenshot.webp`
+- Test with `npm test`. To test a single tool, run `npm test -- ${tool}`
+- Never commit generated images. Codex PRs ignore binary files.
+- Prefer `asyncllm` for all LLM calls: `import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2"` then `for await (const { content, error } of asyncLLM(...)) {}` where `content` has the FULL (not incremental) content
+
+Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1.13.1, a base64 favicon, a container with headers and forms, and a `<script type="module" src="script.js"></script>` that manipulates the DOM with Bootstrap classes.
 
 Sample CDN imports:
 
 - `import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1"`
 - `import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2"`
-
-## Files
-
-- `index.html` — shell with navbar (Top, New, Ask, Show, Submit) and auth area
-- `script.js` — startup, hash‑routing, event wiring, sign‑up/in/out, session helpers, small HTML template helpers
-- `threadchat.test.js` — integration tests (happy‑dom)
 
 ## UI Notes
 
@@ -33,17 +50,6 @@ Sample CDN imports:
 - Thread: nested comments with inline reply; allow collapse/expand; show last updated from the latest of post time or latest comment.
 - Profile: created, karma, recent submissions and comments; compute all figures live from in-memory data.db
 
-## Tests (vitest + happy‑dom)
+## NO TESTS
 
-- Use `common/testutils.js` (one Browser per suite, new page per test)
-- Fake timers; rebind `window.setTimeout = setTimeout`
-- Cover: auth flow via modals, submit + vote (dedupe vote), nested replies, karma on profile; dynamic comment counts and last‑updated calculation
-- Run linting
-- Run tests and ensure that they pass
-
-## Pitfalls to Avoid
-
-- No classes, no `document.createElement`, no `console.error` (show alerts)
-- Enforce unique usernames; enforce one‑vote per item per user
-- Keep files < ~500 lines; validate early with if‑return; use hyphenated IDs/classes
-- Do not hardcode counts or timestamps; compute comment counts and last updated from live queries each render
+Drop tests
