@@ -49,6 +49,7 @@ function seed() {
   db.posts.push(p1);
 }
 seed();
+if (currentUser && !db.users.some((u) => u.id === currentUser.id)) db.users.push(currentUser);
 
 function saveSession() {
   currentUser
@@ -92,7 +93,10 @@ function lastUpdated(p) {
   rec(p.comments);
   return Math.max(...t);
 }
-const userName = (id) => db.users.find((u) => u.id === id).name;
+const userName = (id) => {
+  const u = db.users.find((u) => u.id === id);
+  return u ? u.name : "?";
+};
 
 async function renderPosts() {
   showLoading();
@@ -153,6 +157,7 @@ function findComment(cs, id) {
   }
 }
 function addComment(postId, parentId, text) {
+  if (!currentUser) return;
   const p = db.posts.find((x) => x.id === postId);
   if (!p) return;
   const c = { id: uuid(), user: currentUser.id, text, time: now(), score: 0, voters: [], replies: [] };
@@ -160,6 +165,7 @@ function addComment(postId, parentId, text) {
   else findComment(p.comments, parentId).replies.push(c);
 }
 function addPost(title, url, text) {
+  if (!currentUser) return;
   db.posts.push({
     id: uuid(),
     user: currentUser.id,
