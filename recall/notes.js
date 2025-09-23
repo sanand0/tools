@@ -32,8 +32,8 @@ export const files = [
     name: "Core concepts",
   },
   {
-    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/oblique-strategies.md",
-    name: "Oblique strategies",
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/creative-ideas.md",
+    name: "Creative ideas",
   },
 ];
 
