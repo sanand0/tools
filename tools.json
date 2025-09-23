@@ -175,6 +175,13 @@
       "created": "2024-11-01T20:02:17+08:00"
     },
     {
+      "icon": "bi-soundwave",
+      "title": "Voice Notes",
+      "description": "Record voice audio, transcribe with Gemini 2.5 Flash, and manage Markdown-ready notes.",
+      "url": "voicenotes",
+      "created": "2025-09-16T09:08:47+05:30"
+    },
+    {
       "icon": "bi-mic",
       "title": "Transcribe Audio",
       "description": "Transcribe audio from the speakers and microphone.",
@@ -262,6 +269,12 @@
       "title": "YouTube Thumbnails",
       "description": "Get YouTube video thumbnails.",
       "url": "https://tools.simonwillison.net/youtube-thumbnails"
+    },
+    {
+      "icon": "bi-robot",
+      "title": "Voicebot",
+      "description": "Talk to GPT Realtime with live audio.",
+      "url": "voicebot"
     }
   ]
 }
