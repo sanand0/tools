@@ -5,10 +5,37 @@ import { openrouterHelp } from "../common/aiconfig.js";
 import { copyText } from "../common/clipboard-utils.js";
 
 const DEFAULT_BASE_URLS = ["https://openrouter.ai/api/v1", "https://aipipe.org/openrouter/v1"];
-const MODEL = "gpt-4o-mini";
-const SYSTEM_PROMPT = `You are a music curator who builds themed playlists based on a short brief.
-Return only a JSON array of 10 diverse song titles with artist names, formatted as "Song Title — Artist".
-Do not add numbering, commentary, or extra fields.`;
+const DEFAULT_MODEL = "gpt-5-nano";
+const MODEL_OPTIONS = [
+  { value: "gpt-5-nano", label: "gpt-5-nano (fast)" },
+  { value: "gpt-5-mini", label: "gpt-5-mini" },
+  { value: "gpt-5", label: "gpt-5" },
+  { value: "gpt-4.1-nano", label: "gpt-4.1-nano" },
+  { value: "gpt-4.1-mini", label: "gpt-4.1-mini" },
+  { value: "gpt-4.1", label: "gpt-4.1" },
+];
+const RESPONSE_FORMAT = {
+  type: "json_schema",
+  json_schema: {
+    name: "playlist_songs",
+    schema: {
+      type: "object",
+      properties: {
+        songs: {
+          type: "array",
+          items: { type: "string" },
+          minItems: 1,
+        },
+      },
+      required: ["songs"],
+      additionalProperties: false,
+    },
+  },
+};
+const SYSTEM_PROMPT = `You are a music curator crafting themed playlists from a short brief.
+Treat any songs the listener mentions as reference points only.
+Suggest ten fresh songs that match the described vibe and never repeat the listener's examples.
+Respond strictly with a JSON object of the form {"songs":["Song Title — Artist", ...]} containing exactly ten entries.`;
 
 /** @typedef {"up" | "down" | null} Rating */
 /** @typedef {{ title: string, rating: Rating }} PlaylistItem */
@@ -20,6 +47,7 @@ const ui = {
   refineBtn: /** @type {HTMLButtonElement} */ (document.getElementById("refine-btn")),
   copyBtn: /** @type {HTMLButtonElement} */ (document.getElementById("copy-btn")),
   configBtn: /** @type {HTMLButtonElement} */ (document.getElementById("openai-config-btn")),
+  modelSelect: /** @type {HTMLSelectElement} */ (document.getElementById("model-select")),
   statusText: document.getElementById("status-text"),
   spinner: document.getElementById("loading-indicator"),
   playlist: document.getElementById("playlist"),
@@ -31,6 +59,7 @@ const defaultCopyLabel = ui.copyBtn.innerHTML;
 const state = {
   playlist: /** @type {PlaylistItem[]} */ ([]),
   preferences: "",
+  model: DEFAULT_MODEL,
 };
 
 let openaiConfigLoader;
@@ -81,11 +110,13 @@ function setLoading(busy, message) {
  * @param {string} raw
  * @returns {string[]}
  */
-function parsePlaylist(raw) {
+function extractSongs(raw) {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) return parsed.map((item) => String(item).trim()).filter(Boolean);
+    if (parsed && typeof parsed === "object" && Array.isArray(parsed.songs))
+      return parsed.songs.map((item) => String(item).trim()).filter(Boolean);
   } catch {
     // Fallback to line splitting
   }
@@ -108,13 +139,13 @@ function buildUserPrompt(withFeedback) {
 
   const base = `Preferences:\n${prefs}\n\n`;
   if (!withFeedback || !state.playlist.length)
-    return `${base}Return a JSON array as specified. Ensure a cohesive flow from track to track.`;
+    return `${base}Recommend ten new songs similar to the references. Avoid repeating any mentioned titles.`;
 
   const likedBlock = liked.length ? liked.map((item) => `- ${item.title}`).join("\n") : "- (none)";
   const dislikedBlock = disliked.length ? disliked.map((item) => `- ${item.title}`).join("\n") : "- (none)";
   const previousBlock = previous.length ? previous.join("\n") : "- (none)";
 
-  return `${base}Songs the listener loved:\n${likedBlock}\n\nSongs the listener disliked:\n${dislikedBlock}\n\nPrevious playlist:\n${previousBlock}\n\nGenerate a refreshed JSON array. Keep loved songs exactly as provided. Avoid disliked songs. Fill the remaining slots with complementary picks that match the brief.`;
+  return `${base}Songs the listener loved:\n${likedBlock}\n\nSongs the listener disliked:\n${dislikedBlock}\n\nPrevious playlist:\n${previousBlock}\n\nReturn ten songs in the required JSON object. Preserve the loved songs exactly as provided, exclude disliked songs, and fill the remaining spots with complementary picks that match the brief without repeating the listener's examples.`;
 }
 
 /**
@@ -249,9 +280,10 @@ async function generatePlaylist(withFeedback) {
   const { apiKey, baseUrl } = credentials;
   const endpoint = `${baseUrl.replace(/\/$/, "")}/chat/completions`;
   const body = {
-    model: MODEL,
+    model: state.model,
     stream: true,
     temperature: withFeedback ? 0.4 : 0.6,
+    response_format: RESPONSE_FORMAT,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: buildUserPrompt(withFeedback) },
@@ -271,7 +303,7 @@ async function generatePlaylist(withFeedback) {
       if (error) throw error;
       if (content) raw = content;
     }
-    const songs = parsePlaylist(raw);
+    const songs = extractSongs(raw);
     if (!songs.length) throw new Error("The model did not return any songs. Try adjusting your prompt or model.");
     applyPlaylist(songs);
   } catch (error) {
@@ -298,6 +330,19 @@ ui.refineBtn.addEventListener("click", () => generatePlaylist(true));
 ui.preferences.addEventListener("input", () => {
   ui.generateBtn.disabled = !ui.preferences.value.trim();
 });
+
+if (ui.modelSelect) {
+  render(
+    html`${MODEL_OPTIONS.map((option) => html`<option value="${option.value}">${option.label}</option>`)}`,
+    ui.modelSelect,
+  );
+  ui.modelSelect.value = DEFAULT_MODEL;
+  ui.modelSelect.addEventListener("change", () => {
+    const selected = ui.modelSelect.value;
+    const allowed = MODEL_OPTIONS.some((option) => option.value === selected);
+    state.model = allowed ? selected : DEFAULT_MODEL;
+  });
+}
 
 ui.copyBtn.addEventListener("click", async () => {
   if (!state.playlist.length) return;
