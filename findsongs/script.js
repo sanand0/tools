@@ -24,7 +24,8 @@ const RESPONSE_FORMAT = {
         songs: {
           type: "array",
           items: { type: "string" },
-          minItems: 1,
+          minItems: 20,
+          maxItems: 20,
         },
       },
       required: ["songs"],
@@ -32,10 +33,10 @@ const RESPONSE_FORMAT = {
     },
   },
 };
-const SYSTEM_PROMPT = `You are a music curator crafting themed playlists from a short brief.
-Treat any songs the listener mentions as reference points only.
-Suggest ten fresh songs that match the described vibe and never repeat the listener's examples.
-Respond strictly with a JSON object of the form {"songs":["Song Title — Artist", ...]} containing exactly ten entries.`;
+const SYSTEM_PROMPT = `You are a music curator who replies with structured JSON playlists.
+Every song must follow the exact format "Title - Album - Artist (Year)".
+Only suggest songs that have not been mentioned by the listener.
+Always respond with a JSON object {"songs": ["Title - Album - Artist (Year)", ...]} containing twenty entries.`;
 
 /** @typedef {"up" | "down" | null} Rating */
 /** @typedef {{ title: string, rating: Rating }} PlaylistItem */
@@ -129,51 +130,39 @@ function extractSongs(raw) {
 /**
  * @param {boolean} withFeedback
  */
-function buildUserPrompt(withFeedback) {
-  const prefs = state.preferences;
+function buildUserPrompt() {
   const liked = state.playlist.filter((item) => item.rating === "up");
   const disliked = state.playlist.filter((item) => item.rating === "down");
-  const previous = state.playlist.map(
-    (item, index) => `${index + 1}. ${item.title}${item.rating ? ` (${item.rating})` : ""}`,
-  );
+  const unrated = state.playlist.filter((item) => item.rating === null);
 
-  const base = `Preferences:\n${prefs}\n\n`;
-  if (!withFeedback || !state.playlist.length)
-    return `${base}Recommend ten new songs similar to the references. Avoid repeating any mentioned titles.`;
+  const formatBlock = (items) => (items.length ? items.map((item) => `- ${item.title}`).join("\n") : "- (none)");
 
-  const likedBlock = liked.length ? liked.map((item) => `- ${item.title}`).join("\n") : "- (none)";
-  const dislikedBlock = disliked.length ? disliked.map((item) => `- ${item.title}`).join("\n") : "- (none)";
-  const previousBlock = previous.length ? previous.join("\n") : "- (none)";
-
-  return `${base}Songs the listener loved:\n${likedBlock}\n\nSongs the listener disliked:\n${dislikedBlock}\n\nPrevious playlist:\n${previousBlock}\n\nReturn ten songs in the required JSON object. Preserve the loved songs exactly as provided, exclude disliked songs, and fill the remaining spots with complementary picks that match the brief without repeating the listener's examples.`;
+  return `Preferences:\n${state.preferences || "- (none)"}\n\nSongs the listener liked:\n${formatBlock(liked)}\n\nSongs the listener disliked:\n${formatBlock(disliked)}\n\nSongs the listener did not rate:\n${formatBlock(unrated)}\n\nRecommend 20 additional songs that fit the preferences, lean toward the liked selections, and avoid the disliked ones. Only include new songs that are not listed above. Respond with the required JSON object.`;
 }
 
 /**
  * @param {string[]} songs
  */
 function applyPlaylist(songs) {
-  const seen = new Set();
-  const normalize = (title) => title.toLowerCase();
-  const next = [];
-
-  for (const item of state.playlist) {
-    if (item.rating && !seen.has(normalize(item.title))) {
-      seen.add(normalize(item.title));
-      next.push({ title: item.title, rating: item.rating });
-    }
-  }
+  const normalize = (title) => title.trim().toLowerCase();
+  const seen = new Set(state.playlist.map((item) => normalize(item.title)));
+  const additions = [];
 
   for (const title of songs) {
     const trimmed = title.trim();
     if (!trimmed) continue;
     const key = normalize(trimmed);
     if (seen.has(key)) continue;
-    const previous = state.playlist.find((item) => normalize(item.title) === key);
-    next.push({ title: trimmed, rating: previous?.rating ?? null });
+    additions.push({ title: trimmed, rating: null });
     seen.add(key);
   }
 
-  state.playlist = next;
+  if (!additions.length && state.playlist.length) {
+    renderPlaylist();
+    return;
+  }
+
+  state.playlist = [...additions, ...state.playlist];
   renderPlaylist();
 }
 
@@ -244,8 +233,8 @@ function toggleRating(index, rating) {
  * @param {PlaylistItem} item
  */
 function openOnYouTube(item) {
-  const query = encodeURIComponent(item.title.replace(/["']/g, ""));
-  window.open(`https://www.youtube.com/results?search_query=${query}`, "_blank", "noopener");
+  const query = encodeURIComponent(`site:youtube.com/watch ${item.title}`);
+  window.open(`https://www.google.com/search?btnI=1&pws=0&q=${query}`, "_blank", "noopener");
 }
 
 /**
@@ -282,11 +271,10 @@ async function generatePlaylist(withFeedback) {
   const body = {
     model: state.model,
     stream: true,
-    temperature: withFeedback ? 0.4 : 0.6,
     response_format: RESPONSE_FORMAT,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: buildUserPrompt(withFeedback) },
+      { role: "user", content: buildUserPrompt() },
     ],
   };
 

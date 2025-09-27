@@ -66,13 +66,27 @@ describe("findsongs playlist", () => {
     expect(calls).toHaveLength(1);
     const body = JSON.parse(calls[0].init.body);
     expect(body.model).toBe("gpt-5-nano");
+    expect("temperature" in body).toBe(false);
     expect(body.response_format).toMatchObject({ type: "json_schema" });
     expect(body.response_format.json_schema.schema.required).toContain("songs");
+    expect(body.messages[0].content).toContain("Title - Album - Artist (Year)");
+    expect(body.messages[1].content).toContain("Preferences:\nUpbeat pop songs for running.");
+    expect(body.messages[1].content).toContain("Songs the listener liked:\n- (none)");
+    expect(body.messages[1].content).toContain("Songs the listener did not rate:\n- (none)");
+    expect(body.messages[1].content).toContain("20 additional songs");
     await expectEventually(() => {
       expect(playlistContainer.querySelectorAll(".playlist-item").length).toBe(2);
     });
     const items = playlistContainer.querySelectorAll(".playlist-item");
     expect(items[0].querySelector(".playlist-title").textContent).toContain("Song Alpha — Artist");
+    const openSpy = vi.spyOn(window, "open").mockImplementation(() => {});
+    items[0].querySelector(".playlist-title").click();
+    expect(openSpy).toHaveBeenCalledWith(
+      "https://www.google.com/search?btnI=1&pws=0&q=site%3Ayoutube.com%2Fwatch%20Song%20Alpha%20%E2%80%94%20Artist",
+      "_blank",
+      "noopener",
+    );
+    openSpy.mockRestore();
     expect(generateBtn.disabled).toBe(false);
     expect(refineBtn.disabled).toBe(false);
   });
@@ -108,13 +122,22 @@ describe("findsongs playlist", () => {
       expect(bodies[0].model).toBe("gpt-5");
       expect(bodies[1].model).toBe("gpt-5");
       expect(bodies[0].response_format.json_schema.schema.required).toContain("songs");
-      expect(JSON.stringify(bodies[1].messages)).toContain("Song A — Artist");
-      expect(JSON.stringify(bodies[1].messages)).toContain("Song B — Artist");
+      const [, userMessage] = bodies[1].messages;
+      expect(userMessage.content).toContain("Songs the listener liked:\n- Song A — Artist");
+      expect(userMessage.content).toContain("Songs the listener disliked:\n- Song B — Artist");
+      expect(userMessage.content).toContain("Songs the listener did not rate:\n- Song C — Artist");
       const titleButtons = Array.from(playlistContainer.querySelectorAll(".playlist-title"));
-      expect(titleButtons.length).toBeGreaterThan(0);
-      expect(titleButtons[0].textContent.trim()).toBe("Song A — Artist");
+      expect(titleButtons.length).toBe(6);
+      expect(titleButtons[0].textContent.trim()).toBe("Song D — Artist");
+      expect(titleButtons[1].textContent.trim()).toBe("Song E — Artist");
+      expect(titleButtons[2].textContent.trim()).toBe("Song F — Artist");
+      expect(titleButtons[3].textContent.trim()).toBe("Song A — Artist");
     });
-    expect(playlistContainer.querySelector('.rating-btn[data-action="up"]').classList).toContain("active");
+    const likedRow = Array.from(playlistContainer.querySelectorAll(".playlist-item")).find((item) =>
+      item.querySelector(".playlist-title")?.textContent.trim() === "Song A — Artist",
+    );
+    expect(likedRow).toBeDefined();
+    expect(likedRow.querySelector('.rating-btn[data-action="up"]').classList).toContain("active");
   });
 
   it("copies the playlist to clipboard", async () => {
