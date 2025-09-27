@@ -67,6 +67,7 @@ describe("findsongs playlist", () => {
     expect(body.model).toBe("gpt-5-nano");
     expect("temperature" in body).toBe(false);
     expect(body.response_format).toMatchObject({ type: "json_schema" });
+    expect(body.response_format.json_schema.strict).toBe(true);
     expect(body.response_format.json_schema.schema.required).toContain("songs");
     expect(body.messages[0].content).toContain("Title - Album - Artist (Year)");
     expect(body.messages[1].content).toContain("Preferences:\nUpbeat pop songs for running.");
@@ -81,7 +82,7 @@ describe("findsongs playlist", () => {
     const openSpy = vi.spyOn(window, "open").mockImplementation(() => {});
     items[0].querySelector(".playlist-title").click();
     expect(openSpy).toHaveBeenCalledWith(
-      "https://www.google.com/search?btnI=1&pws=0&q=site%3Ayoutube.com%2Fwatch%20Song%20Alpha%20%E2%80%94%20Artist",
+      "https://www.youtube.com/results?search_query=Song%20Alpha%20%E2%80%94%20Artist",
       "_blank",
       "noopener",
     );

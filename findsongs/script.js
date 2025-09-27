@@ -16,9 +16,9 @@ const MODEL_OPTIONS = [
 ];
 const RESPONSE_FORMAT = {
   type: "json_schema",
-  strict: true,
   json_schema: {
     name: "playlist_songs",
+    strict: true,
     schema: {
       type: "object",
       properties: {
@@ -61,32 +61,10 @@ const defaultCopyLabel = ui.copyBtn.innerHTML;
 const state = {
   playlist: /** @type {PlaylistItem[]} */ ([]),
   preferences: "",
-  model: DEFAULT_MODEL,
 };
-
-let openaiConfigLoader;
-
-async function loadOpenAIConfig() {
-  if (typeof window.__testOpenAIConfig === "function") return window.__testOpenAIConfig;
-  if (!openaiConfigLoader)
-    openaiConfigLoader = import("https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1").then(
-      (mod) => mod.openaiConfig,
-    );
-  return openaiConfigLoader;
-}
 
 const loadingTemplate = (message) =>
   html`<div class="list-group-item text-center text-secondary py-4">${message}</div>`;
-
-/**
- * @returns {Promise<{ apiKey: string; baseUrl: string } | null>}
- */
-async function requestCredentials() {
-  const openaiConfig = await loadOpenAIConfig();
-  const result = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openrouterHelp });
-  if (!result?.apiKey) return null;
-  return result;
-}
 
 /**
  * @param {boolean} busy
@@ -112,14 +90,10 @@ function setLoading(busy, message) {
  * @param {string} raw
  * @returns {string[]}
  */
-function parseSongs(raw) {
-  const parsed = JSON.parse(raw);
-  if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.songs))
-    throw new Error("The model did not return any songs. Try adjusting your prompt or model.");
-  const songs = parsed.songs.map((item) => String(item).trim()).filter(Boolean);
-  if (!songs.length) throw new Error("The model did not return any songs. Try adjusting your prompt or model.");
-  return songs;
-}
+const parseSongs = (raw) =>
+  JSON.parse(raw)
+    .songs.map((item) => String(item).trim())
+    .filter(Boolean);
 
 /**
  * @param {boolean} withFeedback
@@ -227,8 +201,8 @@ function toggleRating(index, rating) {
  * @param {PlaylistItem} item
  */
 function openOnYouTube(item) {
-  const query = encodeURIComponent(`site:youtube.com/watch ${item.title}`);
-  window.open(`https://www.google.com/search?btnI=1&pws=0&q=${query}`, "_blank", "noopener");
+  const query = encodeURIComponent(item.title);
+  window.open(`https://www.youtube.com/results?search_query=${query}`, "_blank", "noopener");
 }
 
 /**
@@ -242,16 +216,23 @@ async function generatePlaylist(withFeedback) {
   const loadingMessage = withFeedback ? "Refreshing playlist…" : "Generating playlist…";
   setLoading(true, loadingMessage);
 
-  const credentials = await requestCredentials();
-  if (!credentials) {
+  const openaiConfig =
+    typeof window.__testOpenAIConfig === "function"
+      ? window.__testOpenAIConfig
+      : (await import("https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1")).openaiConfig;
+  const credentials = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openrouterHelp });
+  if (!credentials?.apiKey) {
     setLoading(false, "");
     return;
   }
 
   const { apiKey, baseUrl } = credentials;
   const endpoint = `${baseUrl.replace(/\/$/, "")}/chat/completions`;
+  const selectedModel = MODEL_OPTIONS.some((option) => option.value === ui.modelSelect?.value)
+    ? ui.modelSelect.value
+    : DEFAULT_MODEL;
   const body = {
-    model: state.model,
+    model: selectedModel,
     response_format: RESPONSE_FORMAT,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -305,18 +286,12 @@ ui.preferences.addEventListener("input", () => {
   ui.generateBtn.disabled = !ui.preferences.value.trim();
 });
 
-if (ui.modelSelect) {
+if (ui.modelSelect)
   render(
     html`${MODEL_OPTIONS.map((option) => html`<option value="${option.value}">${option.label}</option>`)}`,
     ui.modelSelect,
   );
-  ui.modelSelect.value = DEFAULT_MODEL;
-  ui.modelSelect.addEventListener("change", () => {
-    const selected = ui.modelSelect.value;
-    const allowed = MODEL_OPTIONS.some((option) => option.value === selected);
-    state.model = allowed ? selected : DEFAULT_MODEL;
-  });
-}
+if (ui.modelSelect) ui.modelSelect.value = DEFAULT_MODEL;
 
 ui.copyBtn.addEventListener("click", async () => {
   if (!state.playlist.length) return;
@@ -336,7 +311,10 @@ ui.copyBtn.addEventListener("click", async () => {
 });
 
 ui.configBtn.addEventListener("click", async () => {
-  const openaiConfig = await loadOpenAIConfig();
+  const openaiConfig =
+    typeof window.__testOpenAIConfig === "function"
+      ? window.__testOpenAIConfig
+      : (await import("https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1")).openaiConfig;
   await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true, help: openrouterHelp });
 });
 
