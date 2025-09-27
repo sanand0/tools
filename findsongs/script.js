@@ -16,6 +16,7 @@ const MODEL_OPTIONS = [
 ];
 const RESPONSE_FORMAT = {
   type: "json_schema",
+  strict: true,
   json_schema: {
     name: "playlist_songs",
     schema: {
@@ -111,20 +112,13 @@ function setLoading(busy, message) {
  * @param {string} raw
  * @returns {string[]}
  */
-function extractSongs(raw) {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) return parsed.map((item) => String(item).trim()).filter(Boolean);
-    if (parsed && typeof parsed === "object" && Array.isArray(parsed.songs))
-      return parsed.songs.map((item) => String(item).trim()).filter(Boolean);
-  } catch {
-    // Fallback to line splitting
-  }
-  return raw
-    .split(/\r?\n|,/) // handle common separators
-    .map((line) => line.replace(/^[-\d.]\s*/, "").trim())
-    .filter(Boolean);
+function parseSongs(raw) {
+  const parsed = JSON.parse(raw);
+  if (!parsed || typeof parsed !== "object" || !Array.isArray(parsed.songs))
+    throw new Error("The model did not return any songs. Try adjusting your prompt or model.");
+  const songs = parsed.songs.map((item) => String(item).trim()).filter(Boolean);
+  if (!songs.length) throw new Error("The model did not return any songs. Try adjusting your prompt or model.");
+  return songs;
 }
 
 /**
@@ -238,18 +232,6 @@ function openOnYouTube(item) {
 }
 
 /**
- * @returns {AsyncGenerator<{ content?: string; error?: Error }>}
- */
-async function* callLLM(url, init) {
-  if (typeof window.__testAsyncLLM === "function") {
-    for await (const chunk of window.__testAsyncLLM(url, init)) yield chunk;
-    return;
-  }
-  const { asyncLLM } = await import("https://cdn.jsdelivr.net/npm/asyncllm@2");
-  for await (const chunk of asyncLLM(url, init)) yield chunk;
-}
-
-/**
  * @param {boolean} withFeedback
  */
 async function generatePlaylist(withFeedback) {
@@ -270,7 +252,6 @@ async function generatePlaylist(withFeedback) {
   const endpoint = `${baseUrl.replace(/\/$/, "")}/chat/completions`;
   const body = {
     model: state.model,
-    stream: true,
     response_format: RESPONSE_FORMAT,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -278,27 +259,32 @@ async function generatePlaylist(withFeedback) {
     ],
   };
 
-  let raw = "";
   try {
-    for await (const { content, error } of callLLM(endpoint, {
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(body),
-    })) {
-      if (error) throw error;
-      if (content) raw = content;
-    }
-    const songs = extractSongs(raw);
-    if (!songs.length) throw new Error("The model did not return any songs. Try adjusting your prompt or model.");
+    });
+    if (!response.ok) throw new Error("The playlist request failed. Please try again.");
+    const payload = await response.json();
+    const raw = payload?.choices?.[0]?.message?.content;
+    if (!raw) throw new Error("The model did not return any songs. Try adjusting your prompt or model.");
+    const songs = parseSongs(raw);
     applyPlaylist(songs);
   } catch (error) {
+    const friendlyMessage =
+      error instanceof SyntaxError
+        ? "We couldn't parse the playlist response. Please try again."
+        : error instanceof Error
+          ? error.message
+          : String(error);
     bootstrapAlert({
       container: ui.alertContainer ?? undefined,
       title: "Playlist error",
-      body: error instanceof Error ? error.message : String(error),
+      body: friendlyMessage,
       color: "danger",
       replace: true,
     });

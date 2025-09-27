@@ -31,25 +31,25 @@ describe("findsongs playlist", () => {
     playlistContainer = document.getElementById("playlist");
     copyBtn = document.getElementById("copy-btn");
     modelSelect = document.getElementById("model-select");
-    window.__testRequests = [];
-    window.__setLLM = (fn) => {
-      window.__testAsyncLLM = fn;
-    };
+    window.fetch = vi.fn();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
-    if (window?.__setLLM) delete window.__setLLM;
-    if (window?.__testAsyncLLM) delete window.__testAsyncLLM;
     if (window?.__testOpenAIConfig) delete window.__testOpenAIConfig;
+    if (window?.fetch) delete window.fetch;
   });
 
   it("generates playlist items from LLM output", async () => {
-    const calls = [];
-    window.__setLLM(async function* (url, init) {
-      calls.push({ url, init });
-      await Promise.resolve();
-      yield { content: '{"songs":["Song Alpha — Artist","Song Beta — Artist"]}' };
+    const requests = [];
+    window.fetch.mockImplementation(async (url, init) => {
+      requests.push({ url, init });
+      return {
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: '{"songs":["Song Alpha — Artist","Song Beta — Artist"]}' } }],
+        }),
+      };
     });
 
     preferencesInput.value = "Upbeat pop songs for running.";
@@ -60,11 +60,10 @@ describe("findsongs playlist", () => {
     expect(refineBtn.disabled).toBe(true);
     expect(playlistContainer.textContent.trim()).toBe("Generating playlist…");
 
-    await flush();
-    await flush();
-
-    expect(calls).toHaveLength(1);
-    const body = JSON.parse(calls[0].init.body);
+    await expectEventually(() => {
+      expect(window.fetch).toHaveBeenCalledTimes(1);
+    });
+    const body = JSON.parse(requests[0].init.body);
     expect(body.model).toBe("gpt-5-nano");
     expect("temperature" in body).toBe(false);
     expect(body.response_format).toMatchObject({ type: "json_schema" });
@@ -92,15 +91,24 @@ describe("findsongs playlist", () => {
   });
 
   it("retains rated songs after refining the playlist", async () => {
-    const sequence = [
-      '{"songs":["Song A — Artist","Song B — Artist","Song C — Artist"]}',
-      '{"songs":["Song D — Artist","Song E — Artist","Song F — Artist"]}',
+    const mockReplies = [
+      {
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: '{"songs":["Song A — Artist","Song B — Artist","Song C — Artist"]}' } }],
+        }),
+      },
+      {
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: '{"songs":["Song D — Artist","Song E — Artist","Song F — Artist"]}' } }],
+        }),
+      },
     ];
-    let callIndex = 0;
     const bodies = [];
-    window.__setLLM(async function* (_url, init) {
+    window.fetch.mockImplementation(async (_url, init) => {
       bodies.push(JSON.parse(init.body));
-      yield { content: sequence[callIndex++] };
+      return mockReplies[bodies.length - 1];
     });
 
     preferencesInput.value = "Indie folk with storytelling lyrics.";
@@ -118,7 +126,7 @@ describe("findsongs playlist", () => {
 
     refineBtn.click();
     await expectEventually(() => {
-      expect(bodies).toHaveLength(2);
+      expect(window.fetch).toHaveBeenCalledTimes(2);
       expect(bodies[0].model).toBe("gpt-5");
       expect(bodies[1].model).toBe("gpt-5");
       expect(bodies[0].response_format.json_schema.schema.required).toContain("songs");
@@ -133,16 +141,19 @@ describe("findsongs playlist", () => {
       expect(titleButtons[2].textContent.trim()).toBe("Song F — Artist");
       expect(titleButtons[3].textContent.trim()).toBe("Song A — Artist");
     });
-    const likedRow = Array.from(playlistContainer.querySelectorAll(".playlist-item")).find((item) =>
-      item.querySelector(".playlist-title")?.textContent.trim() === "Song A — Artist",
+    const likedRow = Array.from(playlistContainer.querySelectorAll(".playlist-item")).find(
+      (item) => item.querySelector(".playlist-title")?.textContent.trim() === "Song A — Artist",
     );
     expect(likedRow).toBeDefined();
     expect(likedRow.querySelector('.rating-btn[data-action="up"]').classList).toContain("active");
   });
 
   it("copies the playlist to clipboard", async () => {
-    window.__setLLM(async function* () {
-      yield { content: '{"songs":["Song One","Song Two"]}' };
+    window.fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        choices: [{ message: { content: '{"songs":["Song One","Song Two"]}' } }],
+      }),
     });
     preferencesInput.value = "Acoustic covers.";
     preferencesInput.dispatchEvent(new window.Event("input", { bubbles: true }));
