@@ -27,16 +27,16 @@ jobs:
       # Checkout the repository
       - uses: actions/checkout@v4
 
-      # main branch deploys at root
-      # Other branches deployed at $GITHUB_REF_NAME/ in addition. Only latest pushed branch
+      # main branch deployed at /
+      # Other latest pushed branch is also deployed at wip/
       - run: |
           git fetch origin main
           rm -rf public
           mkdir -p public
           git archive origin/main | tar -x -C public
           if [[ "$GITHUB_REF_NAME" != "main" ]]; then
-            mkdir -p public/$GITHUB_REF_NAME
-            git archive HEAD | tar -x -C public/$GITHUB_REF_NAME
+            mkdir -p public/wip
+            git archive HEAD | tar -x -C public/wip
           fi
 
       # Deploy public/
