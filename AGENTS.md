@@ -21,9 +21,9 @@
 - Stream LLM calls with asyncllm (podcast/, speakmd/, githubsummary/, llmboundingbox/)
 - Import utilities from common/ for CSV and errors (googletasks/, json2csv/, excelconvert/, joincsv/)
 - Include a navbar and apply add a `bootstrap-dark-theme` (most tools)
-- Lint with `npm run lint`; take full-page screenshots with `npm run screenshot -- ${tool}/ ${tool}/screenshot.webp`
+- Lint with `npm run lint`
 - Test with `npm test`. To test a single tool, run `npm test -- ${tool}`
-- Never commit generated images. Codex PRs ignore binary files.
+- NEVER generate binary files (e.g. screenshots). Codex PRs ignore binary files.
 - Prefer `asyncllm` for all LLM calls: `import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2"` then `for await (const { content, error } of asyncLLM(...)) {}` where `content` has the FULL (not incremental) content
 
 Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1.13.1, a base64 favicon, a container with headers and forms, and a `<script type="module" src="script.js"></script>` that manipulates the DOM with Bootstrap classes.
