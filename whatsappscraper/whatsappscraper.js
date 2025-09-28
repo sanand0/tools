@@ -9,6 +9,11 @@ export function whatsappMessages() {
     isSystemMessage = isSystemMessage === "true";
     let isRecalled = !!el.querySelector('[data-icon="recalled"]');
     const message = { messageId, authorPhone, isSystemMessage, isRecalled, userId };
+    // System messages are associated with the user's phone which is misleading
+    if (isSystemMessage) delete message.authorPhone;
+    // Non-recalled system messages are typically:
+    //  - user (joined via an invite link | joined from the community | was added | changed to new mobile)
+    //  - admin (added | removed) user
     if (isSystemMessage && !isRecalled) message.text = el.outerText;
     if (!isSystemMessage && !isRecalled) {
       // TODO: Image links
@@ -60,8 +65,10 @@ export function whatsappMessages() {
     if (reactions)
       message.reactions = reactions
         .getAttribute("aria-label")
+        .replace(/view reactions/i, "")
         .replace(/^reactions? */i, "")
-        .replace(/ *in total$/i, "");
+        .replace(/ *in total/i, "")
+        .replace(/[, \.]+$/, "");
     messages.push(message);
   }
   return messages;
