@@ -109,7 +109,7 @@ export async function createCard(parent, opts = {}) {
     index = i;
     const note = view[i];
     card.note = note;
-    ui.content.innerHTML = `<div class="form-control note-text" contenteditable>${marked.parse(note)}</div>`;
+    ui.content.innerHTML = `<div class="form-control note-text">${marked.parse(note)}</div>`;
     ui.indexInput.value = i + 1;
     ui.content.querySelector(".note-text").oninput = (e) => (card.note = e.target.innerText);
   }
