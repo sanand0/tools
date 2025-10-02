@@ -26,31 +26,58 @@ describe("bootstrap theme picker page", () => {
     expect(encoded).toBe(expected);
   });
 
-  it("updates css variables when users tweak colors", async () => {
+  it("shows a single picker per token and updates the UI instantly", async () => {
     const { window, document: doc } = await loadFrom(toolDir);
     doc.documentElement.style.cssText = "";
     window.bootstrapThemePicker.open();
     const modal = doc.getElementById("bootstrap-theme-picker");
     expect(modal).toBeTruthy();
+    if (!modal) throw new Error("modal missing");
+
+    const colorInputs = modal.querySelectorAll('input[data-role="color"]');
+    expect(colorInputs.length).toBe(7);
+    colorInputs.forEach((input) => expect(input.getAttribute("type")).toBe("color"));
 
     const select = /** @type {HTMLSelectElement | null} */ (doc.getElementById("theme-select"));
     expect(select).toBeTruthy();
     if (!select) throw new Error("theme select missing");
+    const originalPrimary = window
+      .getComputedStyle(doc.documentElement)
+      .getPropertyValue("--bs-primary")
+      .trim()
+      .toLowerCase();
     select.value = select.options[1]?.value ?? "";
     select.dispatchEvent(new window.Event("change", { bubbles: true }));
 
-    const root = doc.documentElement;
-    const afterPreset = root.style.getPropertyValue("--bs-primary");
-    expect(afterPreset).toBeTruthy();
+    const updatedPrimary = window
+      .getComputedStyle(doc.documentElement)
+      .getPropertyValue("--bs-primary")
+      .trim()
+      .toLowerCase();
+    expect(updatedPrimary).not.toBe(originalPrimary);
 
-    const primaryText = /** @type {HTMLInputElement | null} */ (
-      doc.querySelector('input[data-token="primary"][data-role="text"]')
+    const previewButton = /** @type {HTMLButtonElement | null} */ (modal.querySelector(".btn.btn-primary"));
+    expect(previewButton).toBeTruthy();
+    if (!previewButton) throw new Error("preview button missing");
+    const normalize = (value) => value.trim().toLowerCase();
+    const presetColor = normalize(window.getComputedStyle(previewButton).backgroundColor);
+    expect(presetColor).toBe(normalize(updatedPrimary));
+
+    const sampleButton = doc.createElement("button");
+    sampleButton.className = "btn btn-primary";
+    doc.body.append(sampleButton);
+
+    const primaryInput = /** @type {HTMLInputElement | null} */ (
+      modal.querySelector('input[data-role="color"][data-token="primary"]')
     );
-    expect(primaryText).toBeTruthy();
-    if (!primaryText) throw new Error("primary text input missing");
-    primaryText.value = "#123456";
-    primaryText.dispatchEvent(new window.Event("input", { bubbles: true }));
+    expect(primaryInput).toBeTruthy();
+    if (!primaryInput) throw new Error("primary input missing");
+    primaryInput.value = "#123456";
+    primaryInput.dispatchEvent(new window.Event("input", { bubbles: true }));
 
-    expect(root.style.getPropertyValue("--bs-primary")).toBe("#123456");
+    expect(window.getComputedStyle(doc.documentElement).getPropertyValue("--bs-primary").trim().toLowerCase()).toBe(
+      "#123456",
+    );
+    expect(window.getComputedStyle(sampleButton).backgroundColor.toLowerCase()).toBe("#123456");
   });
 });
