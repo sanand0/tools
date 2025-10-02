@@ -41,6 +41,29 @@ describe("bootstrap theme picker page", () => {
     const select = /** @type {HTMLSelectElement | null} */ (doc.getElementById("theme-select"));
     expect(select).toBeTruthy();
     if (!select) throw new Error("theme select missing");
+    const labels = Array.from(select.options)
+      .map((option) => option.textContent?.trim())
+      .filter(Boolean);
+    const names = labels.map((label) => label.split(" · ")[0]);
+    const mustHave = [
+      "Use current colors",
+      "Flatly",
+      "Cosmo",
+      "Cerulean",
+      "Lux",
+      "Darkly",
+      "Materia",
+      "Sandstone",
+      "Superhero",
+      "Sketchy",
+      "Pulse",
+      "Minty",
+      "Slate",
+      "Tailwind Warm",
+      "Material Indigo",
+    ];
+    mustHave.forEach((label) => expect(names).toContain(label));
+    expect(labels.length).toBeGreaterThanOrEqual(15);
     const originalPrimary = window
       .getComputedStyle(doc.documentElement)
       .getPropertyValue("--bs-primary")

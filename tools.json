@@ -71,6 +71,13 @@
       "created": "2025-07-23T00:00:00+00:00"
     },
     {
+      "icon": "bi-palette-fill",
+      "title": "Bootstrap Theme Picker",
+      "description": "Bookmarklet to preview and swap Bootstrap color palettes live on any page.",
+      "url": "bootstrappicker",
+      "created": "2025-09-21T00:00:00+00:00"
+    },
+    {
       "icon": "bi-markdown",
       "title": "Page to Markdown",
       "description": "Bookmarklet to copy a web page or selection as Markdown.",
