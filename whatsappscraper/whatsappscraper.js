@@ -68,7 +68,7 @@ export function whatsappMessages() {
         .replace(/view reactions/i, "")
         .replace(/^reactions? */i, "")
         .replace(/ *in total/i, "")
-        .replace(/[, \.]+$/, "");
+        .replace(/[, .]+$/, "");
     messages.push(message);
   }
   return messages;

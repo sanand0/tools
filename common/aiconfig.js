@@ -19,3 +19,11 @@ export const openrouterHelp = /* html */ `
 export const llmfoundryHelp = /* html */ `
   <p>Get the API key from <a href="https://llmfoundry.straive.com/code" target="_blank">LLM Foundry</a></p>
 `;
+
+export const geminiHelp = /* html */ `
+<div class="small mb-4">
+  <div class="text-secondary mb-2">Keys are never uploaded to a server. <a href="https://github.com/sanand0/tools" target="_blank">See code</a>.</div>
+  <div><a href="https://aistudio.google.com/app/apikey" target="_blank">Google</a>: Use <code>https://generativelanguage.googleapis.com/v1beta</code></div>
+  <div><a href="https://llmfoundry.straive.com/code" target="_blank">LLM Foundry</a>: Use <code>https://llmfoundry.straive.com/gemini/v1beta</code></div>
+</div>
+`;

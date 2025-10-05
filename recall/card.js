@@ -74,7 +74,7 @@ export async function createCard(parent, opts = {}) {
   async function load() {
     ui.content.innerHTML = `<div class="text-center"><div class="spinner-border" role="status"></div></div>`;
     const url = ui.fileSel.value;
-    items = await fetchAll(url ? [url] : files.map((f) => f.url));
+    items = await fetchAll(url ? [url] : files.filter((f) => f.preload).map((f) => f.url));
     ui.searchInput.value = "";
     index = 0;
     applyFilter();

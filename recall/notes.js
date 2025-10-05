@@ -6,10 +6,22 @@ export const files = [
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/llms.md",
     name: "LLMs",
+    preload: true,
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/til.md",
     name: "Things I learned",
+    preload: true,
+  },
+  {
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/core-concepts.md",
+    name: "Core concepts",
+    preload: true,
+  },
+  {
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/creative-ideas.md",
+    name: "Creative ideas",
+    preload: true,
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/questions.md",
@@ -26,14 +38,6 @@ export const files = [
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/claude-code-uses.md",
     name: "Claude Code Uses",
-  },
-  {
-    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/core-concepts.md",
-    name: "Core concepts",
-  },
-  {
-    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/creative-ideas.md",
-    name: "Creative ideas",
   },
 ];
 

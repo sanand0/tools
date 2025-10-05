@@ -46,12 +46,12 @@ async function loadConfig() {
 }
 
 // Firebase
-let app, analytics, auth, db;
+let app, auth, db;
 async function init() {
   showLoading(notesBox);
   const cfg = await loadConfig();
   app = initializeApp(cfg);
-  analytics = getAnalytics(app); // measurementId optional
+  getAnalytics(app); // measurementId optional
   auth = getAuth(app);
   db = getFirestore(app);
   // Inline auth change for clarity
