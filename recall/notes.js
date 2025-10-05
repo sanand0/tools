@@ -21,7 +21,10 @@ export const files = [
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/creative-ideas.md",
     name: "Creative ideas",
-    preload: true,
+  },
+  {
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/ai-capabilities.md",
+    name: "AI Capabilities",
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/questions.md",
