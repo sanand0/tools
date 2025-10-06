@@ -23,12 +23,20 @@ export const files = [
     name: "Creative ideas",
   },
   {
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/apps.md",
+    name: "Apps to build",
+  },
+  {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/ai-capabilities.md",
     name: "AI Capabilities",
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/questions.md",
     name: "Questions to ask",
+  },
+  {
+    url: "https://notes.s-anand.net/transcripts.md",
+    name: "🔒 Transcript notes",
   },
   {
     url: "https://notes.s-anand.net/explore.md",

@@ -92,6 +92,13 @@
       "created": "2025-04-28T11:32:38+08:00"
     },
     {
+      "icon": "bi-graph-up-arrow",
+      "title": "Trending Repositories",
+      "description": "Scan weekly trending GitHub repos with status and language filters.",
+      "url": "trending-repos",
+      "created": "2025-10-06T00:00:00+00:00"
+    },
+    {
       "icon": "bi-check2-square",
       "title": "Google Tasks",
       "description": "Download all your Google Tasks as CSV or Markdown and delete completed tasks.",
