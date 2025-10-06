@@ -2,6 +2,8 @@ import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import { files, fetchAll, filterNotes, renderStar } from "./notes.js";
 
+const DEFAULT_DECAY = 0.02;
+
 export async function createCard(parent, opts = {}) {
   const { deletable = false, exclude = () => [], showAllOnSearch = false } = opts;
   parent.insertAdjacentHTML(
@@ -74,6 +76,8 @@ export async function createCard(parent, opts = {}) {
   async function load() {
     ui.content.innerHTML = `<div class="text-center"><div class="spinner-border" role="status"></div></div>`;
     const url = ui.fileSel.value;
+    const file = files.find((f) => f.url === url);
+    ui.decayInput.value = file?.decay ?? DEFAULT_DECAY;
     items = await fetchAll(url ? [url] : files.filter((f) => f.preload).map((f) => f.url));
     ui.searchInput.value = "";
     index = 0;

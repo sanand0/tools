@@ -17,10 +17,12 @@ export const files = [
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/core-concepts.md",
     name: "Core concepts",
     preload: true,
+    decay: 0,
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/creative-ideas.md",
     name: "Creative ideas",
+    decay: 0,
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/apps.md",
@@ -29,14 +31,17 @@ export const files = [
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/ai-capabilities.md",
     name: "AI Capabilities",
+    decay: 0,
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/questions.md",
     name: "Questions to ask",
+    decay: 0,
   },
   {
     url: "https://notes.s-anand.net/transcripts.md",
     name: "🔒 Transcript notes",
+    decay: 0,
   },
   {
     url: "https://notes.s-anand.net/explore.md",
@@ -49,6 +54,7 @@ export const files = [
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/claude-code-uses.md",
     name: "Claude Code Uses",
+    decay: 0,
   },
 ];
 
