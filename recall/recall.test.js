@@ -11,7 +11,7 @@ vi.mock("https://cdn.jsdelivr.net/npm/marked/+esm", () => ({ marked: { parse: (s
 vi.mock("./notes.js", () => ({
   files: [
     { url: "a", name: "A" },
-    { url: "b", name: "B" },
+    { url: "b", name: "B", decay: 0 },
   ],
   fetchAll: async () => ["- A", "- B"],
   filterNotes: (items) => items,
@@ -52,5 +52,18 @@ describe("recall card", () => {
     expect(card.star).toBe(true);
     expect(btn.className).toContain("btn-warning");
     expect(btn.innerHTML).toContain("bi-star-fill");
+  });
+
+  it("applies file-specific decay", async () => {
+    await import("./script.js");
+    const card = document.querySelector(".note-card");
+    const decay = card.querySelector(".note-decay");
+    expect(decay.value).toBe("0.02");
+    const sel = card.querySelector(".note-file");
+    sel.value = "b";
+    sel.dispatchEvent(new window.Event("change"));
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(decay.value).toBe("0");
   });
 });
