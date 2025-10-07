@@ -7,11 +7,13 @@ export const files = [
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/llms.md",
     name: "LLMs",
     preload: true,
+    decay: 0.02,
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/til.md",
     name: "Things I learned",
     preload: true,
+    decay: 0.02,
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/core-concepts.md",
@@ -46,10 +48,12 @@ export const files = [
   {
     url: "https://notes.s-anand.net/explore.md",
     name: "🔒 Explore",
+    decay: 0.02,
   },
   {
     url: "https://notes.s-anand.net/jobs-people.md",
     name: "🔒 Jobs - People",
+    decay: 0.02,
   },
   {
     url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/claude-code-uses.md",
