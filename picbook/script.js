@@ -245,7 +245,7 @@ async function requestImage(prompt, refs, opts) {
   }
   if (refs.length) {
     const form = new FormData();
-    form.append("model", "gpt-image-1");
+    form.append("model", "gpt-image-1-mini");
     form.append("prompt", prompt);
     form.append("n", "1");
     Object.entries(opts).forEach(([k, v]) => form.append(k, v));
@@ -266,7 +266,7 @@ async function requestImage(prompt, refs, opts) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({ model: "gpt-image-1", prompt, n: 1, ...opts }),
+    body: JSON.stringify({ model: "gpt-image-1-mini", prompt, n: 1, ...opts }),
   });
 }
 

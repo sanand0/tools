@@ -157,7 +157,7 @@ async function makeRequest(prompt, opts) {
   if (endpoint === "edits") {
     const blob = baseImage || (await fetch(selectedUrl).then((r) => r.blob()));
     const form = new FormData();
-    form.append("model", "gpt-image-1");
+    form.append("model", "gpt-image-1-mini");
     form.append("prompt", prompt);
     form.append("n", "1");
     Object.entries(opts).forEach(([k, v]) => form.append(k, v));
@@ -174,7 +174,7 @@ async function makeRequest(prompt, opts) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({ model: "gpt-image-1", prompt, n: 1, ...opts }),
+    body: JSON.stringify({ model: "gpt-image-1-mini", prompt, n: 1, ...opts }),
   });
 }
 
