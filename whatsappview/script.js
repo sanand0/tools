@@ -25,7 +25,9 @@ $form?.addEventListener("submit", (e) => {
 copyBtn?.addEventListener("click", async () => {
   if (!currentThreads.length) return;
   const ok = await copyText(messagesToMarkdown(currentThreads));
-  copyBtn.innerHTML = ok ? '<i class="bi bi-clipboard-check"></i> Copied!' : '<i class="bi bi-clipboard-x"></i> Copy failed';
+  copyBtn.innerHTML = ok
+    ? '<i class="bi bi-clipboard-check"></i> Copied!'
+    : '<i class="bi bi-clipboard-x"></i> Copy failed';
   setTimeout(() => (copyBtn.innerHTML = defaultCopyLabel), 2000);
 });
 
@@ -152,5 +154,5 @@ function messagesToMarkdown(threads) {
 }
 
 function escapeMarkdown(text) {
-  return String(text).replace(/([\\`*_{}\[\]()#+\-!.>])/g, "\\$1");
+  return String(text).replace(/([\\`*_{}[\]()#+\-!.>])/g, "\\$1");
 }

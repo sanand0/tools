@@ -448,7 +448,7 @@ function applyChanges(responseContent, { enhance = false, apiKey, baseUrl } = {}
         }
         imagePromises.push(imagePromise.then(async (src) => ($el.src = src))); // Add to promises array
       } else if (prop === "styles") {
-        if (typeof value === "string") $el.style.cssText = value
+        if (typeof value === "string") $el.style.cssText = value;
         else Object.assign($el.style, value);
       } else if (!prop.startsWith("@")) $el.style[prop] = value;
     }

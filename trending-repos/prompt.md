@@ -5,13 +5,14 @@ This is created weekly by https://raw.githubusercontent.com/sanand0/til/refs/hea
 Columns are: status, language, stars, currentStars, date, repo name, description, notes
 
 The first column indicating status.
-  🟣 - To be evaluated.
-  🟢 - Used.
-  ⏺️ - Interesting.
-  🔴 - Unused.
-  🔵 - Deferred.
+🟣 - To be evaluated.
+🟢 - Used.
+⏺️ - Interesting.
+🔴 - Unused.
+🔵 - Deferred.
 
 Show a reponsive table view (occupying full width: container-fluid) with compact rows for quick scanning.
+
 - Use the actual emoji status indicators (🟣🟢⏺️🔴🔵)
 - Show date like 13 Aug 2025. Ensure it does not wrap
 - Clicking on the row opens the GitHub page in a new window

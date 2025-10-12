@@ -1,19 +1,8 @@
 # Coding rules
 
-- Write concise, readable code
-- Deduplicate with functions or loops
-- Avoid try blocks unless necessary
-- Validate early using if-return
-- Keep config in files like config.json
-- Keep files under ~500 lines
-- Use ESM modules, not TypeScript
-- Minimize libraries; use modern JavaScript
-- Use hyphenated HTML IDs/classes
-- Avoid braces for one-line if/for
 - Show errors via bootstrap-alert (unicode/, picbook/, googlesuggest/, transcribe/)
 - Show a spinner while fetching data
 - Insert HTML using insertAdjacentHTML or replaceChildren (googlefit/, unicoder/, llmboundingbox/, picbook/)
-- Use Bootstrap classes; minimal custom CSS
 - Embed a favicon via data URI (index.html, googlefit/, picbook/, whatsnear/)
 - Load script.js as `<script type="module" src="script.js"></script>` (most tools)
 - Use saveform to persist forms (githubsummary/, googlefit/, googletasks/, picbook/)
@@ -23,7 +12,7 @@
 - Include a navbar and apply add a `bootstrap-dark-theme` (most tools)
 - Lint with `npm run lint`
 - Test with `npm test`. To test a single tool, run `npm test -- ${tool}`
-- NEVER generate binary files (e.g. screenshots). Codex PRs ignore binary files.
+- NEVER generate binary files (e.g. screenshots). Codex PRs do not allow binary files.
 - Prefer `asyncllm` for all LLM calls: `import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2"` then `for await (const { content, error } of asyncLLM(...)) {}` where `content` has the FULL (not incremental) content
 
 Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1.13.1, a base64 favicon, a container with headers and forms, and a `<script type="module" src="script.js"></script>` that manipulates the DOM with Bootstrap classes.

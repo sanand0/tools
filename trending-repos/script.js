@@ -213,7 +213,7 @@ function renderApp() {
         <div class="spinner-border text-primary mb-3" role="status" aria-hidden="true"></div>
         <p class="mb-0">Fetching the latest weekly trending repositories…</p>
       </section>`,
-      app
+      app,
     );
     return;
   }
@@ -234,7 +234,7 @@ function renderApp() {
           Retry
         </button>
       </section>`,
-      app
+      app,
     );
     return;
   }
@@ -351,7 +351,7 @@ function renderApp() {
                         <td class="text-end">${row.currentStars.toLocaleString()}</td>
                         <td class="text-end">${row.stars.toLocaleString()}</td>
                         <td class="text-end text-nowrap">${formatDateLabel(row.date)}</td>
-                      </tr>`
+                      </tr>`,
                   )
                 : html`<tr>
                     <td colspan=${columns.length} class="text-center py-5 text-secondary">
@@ -363,6 +363,6 @@ function renderApp() {
         </div>
       </section>
     `,
-    app
+    app,
   );
 }

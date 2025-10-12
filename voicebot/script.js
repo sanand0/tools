@@ -37,7 +37,9 @@ async function requestCredentials(show = false) {
   const overrides = getOverrides();
   if (overrides.openaiConfig) return overrides.openaiConfig();
   if (!openaiConfigLoader)
-    openaiConfigLoader = import("https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1").then((mod) => mod.openaiConfig);
+    openaiConfigLoader = import("https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1").then(
+      (mod) => mod.openaiConfig,
+    );
   const openaiConfig = await openaiConfigLoader;
   return openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show, help: openaiHelp });
 }

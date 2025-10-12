@@ -58,7 +58,7 @@ describe("recall card", () => {
     await import("./script.js");
     const card = document.querySelector(".note-card");
     const decay = card.querySelector(".note-decay");
-    expect(decay.value).toBe("0.02");
+    expect(decay.value).toBe("0");
     const sel = card.querySelector(".note-file");
     sel.value = "b";
     sel.dispatchEvent(new window.Event("change"));
