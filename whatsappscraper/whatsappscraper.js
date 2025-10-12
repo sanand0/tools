@@ -1,8 +1,19 @@
-export function whatsappMessages() {
+const defaultState = createScraperState();
+
+export function createScraperState(seed) {
+  const messagesById = Object.create(null);
+  if (seed) for (const [key, value] of Object.entries(seed)) messagesById[key] = value;
+  return { messagesById, captureTimer: null };
+}
+
+export function whatsappMessages(rootDocument = document) {
   const messages = [];
   let lastAuthor;
   let lastTime;
-  for (const el of document.querySelectorAll('#main [role="row"]')) {
+  for (const el of rootDocument.querySelectorAll('#main [role="row"]')) {
+    let rawText;
+    let usedFallback = false;
+    let hasGif = false;
     let [isSystemMessage, userId, _userDomain, messageId, authorPhone, _authorDomain] = el
       .querySelector("[data-id]")
       .dataset.id.split(/[_@]/);
@@ -18,13 +29,21 @@ export function whatsappMessages() {
     if (!isSystemMessage && !isRecalled) {
       // TODO: Image links
       // TODO: Forwarded flag
-      message.text = el.querySelector(".selectable-text")?.outerText;
+      const selectable = el.querySelector(".selectable-text");
+      rawText = selectable?.outerText;
+      hasGif = !!el.querySelector('[aria-label="Play GIF" i]');
       message.author = el.querySelector('[role=""] [dir]')?.textContent;
 
       // If it's a system message, e.g. adding/deleting a user, deleting a message, etc. use raw text
-      if (!message.text) message.text = el.textContent;
+      if (!rawText) {
+        if (hasGif) rawText = "(media-gif)";
+        else {
+          rawText = el.textContent;
+          usedFallback = true;
+        }
+      }
       // If it's not a system message and the author is missing, it must be the last author
-      else if (!message.author) message.author = lastAuthor;
+      if (!message.author && rawText) message.author = lastAuthor;
 
       // Time is often available in data-pre-plain-text="[10:33 am, 8/5/2025] +91 99999 99999: "
       message.time = extractDate(el.querySelector("[data-pre-plain-text]")?.dataset.prePlainText);
@@ -52,9 +71,9 @@ export function whatsappMessages() {
       // Find previous message
       if (message.quoteText)
         for (let j = messages.length - 1; j >= 0; j--) {
-          const quoteText = message.quoteText.replace(/\s+/gs, " ");
+          const quoteText = message.quoteText.replace(/\s+/gs, " ").trim();
           if (message.quoteAuthor == messages[j].author && messages[j].text)
-            if (messages[j].text.replace(/\s+/gs, " ").startsWith(quoteText)) {
+            if (messages[j].text.replace(/\s+/gs, " ").trim().startsWith(quoteText)) {
               // NOTE: If the previous message was edited, we won't find it.
               message.quoteMessageId = messages[j].messageId;
               break;
@@ -69,6 +88,17 @@ export function whatsappMessages() {
         .replace(/^reactions? */i, "")
         .replace(/ *in total/i, "")
         .replace(/[, .]+$/, "");
+    if (!isSystemMessage && !isRecalled) {
+      const cleaned = cleanMessageText(rawText, {
+        author: message.author,
+        quoteAuthor: message.quoteAuthor,
+        quoteText: message.quoteText,
+        usedFallback,
+        hasGif,
+      });
+      if (cleaned) message.text = cleaned;
+      else delete message.text;
+    }
     messages.push(message);
   }
   return messages;
@@ -90,45 +120,96 @@ function updateTime(lastTime, time) {
   return date.toISOString();
 }
 
-const messagesById = {};
-let captureTimer;
-
-function mergeMessages(arr) {
+export function mergeMessages(arr, state = defaultState) {
   for (const msg of arr) {
-    const existing = messagesById[msg.messageId] || {};
+    const existing = state.messagesById[msg.messageId] || {};
     for (const [k, v] of Object.entries(msg)) {
       const old = existing[k];
       if (typeof v === "string") {
         if ((v?.length || 0) > (old?.length || 0)) existing[k] = v;
       } else if (!old) existing[k] = v;
     }
-    messagesById[msg.messageId] = existing;
+    state.messagesById[msg.messageId] = existing;
   }
 }
 
-export function scrape() {
-  document.body.insertAdjacentHTML(
+export function scrape({
+  document: rootDocument = document,
+  navigator: nav = typeof navigator === "undefined" ? undefined : navigator,
+  state = defaultState,
+  setIntervalFn = setInterval,
+  clearIntervalFn = clearInterval,
+} = {}) {
+  rootDocument.body.insertAdjacentHTML(
     "beforeend",
     '<button id="copy-btn" style="position:fixed;top:10px;right:10px;padding:10px;z-index:999;background-color:#fff;color:#000;">Copy 0 messsages</button>',
   );
-  const btn = document.getElementById("copy-btn");
+  const btn = rootDocument.getElementById("copy-btn");
 
   const update = () => {
-    mergeMessages(whatsappMessages());
-    btn.textContent = `Copy ${Object.values(messagesById).filter((m) => m.text).length} messages`;
+    mergeMessages(whatsappMessages(rootDocument), state);
+    btn.textContent = `Copy ${Object.values(state.messagesById).filter((m) => m.text).length} messages`;
   };
 
   update();
-  captureTimer = setInterval(update, 500);
+  state.captureTimer = setIntervalFn(update, 500);
 
   btn.addEventListener("click", async () => {
-    clearInterval(captureTimer);
+    clearIntervalFn(state.captureTimer);
+    state.captureTimer = null;
     btn.remove();
-    const list = Object.values(messagesById).sort((a, b) => {
+    const list = Object.values(state.messagesById).sort((a, b) => {
       const ta = a.time ? new Date(a.time).getTime() : 0;
       const tb = b.time ? new Date(b.time).getTime() : 0;
       return ta - tb;
     });
-    await navigator.clipboard.writeText(JSON.stringify(list, null, 2));
+    await nav?.clipboard?.writeText?.(JSON.stringify(list, null, 2));
   });
+}
+
+function cleanMessageText(text, { author, quoteAuthor, quoteText, usedFallback, hasGif } = {}) {
+  if (typeof text !== "string") return text;
+  let cleaned = text;
+
+  if (quoteText) {
+    const normalizedQuote = quoteText.replace(/\s+/g, " ").trim();
+    const variants = [quoteText, normalizedQuote, normalizedQuote.replace(/^"|"$/g, "")];
+    for (const variant of variants) {
+      if (!variant) continue;
+      const escaped = escapeRegExp(variant);
+      if (escaped) cleaned = cleaned.replace(new RegExp(escaped, "gi"), "");
+    }
+  }
+
+  if (usedFallback && author) {
+    const escapedAuthor = escapeRegExp(author);
+    cleaned = cleaned.replace(new RegExp(`^${escapedAuthor}\\s*`, "i"), "");
+  }
+  if (usedFallback && quoteAuthor) {
+    const escapedQuoteAuthor = escapeRegExp(quoteAuthor);
+    cleaned = cleaned.replace(new RegExp(escapedQuoteAuthor, "gi"), "");
+  }
+  if (usedFallback) {
+    cleaned = cleaned.replace(/\bMaybe\b/gi, "");
+    cleaned = cleaned.replace(/\+?\d[\d\s-]{5,}/g, "");
+  }
+
+  cleaned = cleaned
+    .replace(/Your browser doesn't support video playback\.?/gi, "")
+    .replace(/\btenor\b/gi, "")
+    .replace(/\bforward-[\w-]+\b/gi, "")
+    .replace(/\b\d{1,2}:\d{2}\s*(?:am|pm)\b/gi, "");
+
+  if (hasGif || /media-gif/i.test(cleaned)) cleaned = "(media-gif)";
+
+  cleaned = cleaned.replace(/[“”]/g, '"');
+  cleaned = cleaned.replace(/\s+/g, " ").trim();
+  cleaned = cleaned.replace(/^["']+|["']+$/g, "").trim();
+
+  if (!cleaned) return hasGif ? "(media-gif)" : null;
+  return cleaned;
+}
+
+function escapeRegExp(string) {
+  return string ? string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") : "";
 }
