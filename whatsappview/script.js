@@ -73,14 +73,14 @@ function renderThreads(threads) {
       let threadHtml = `
           <div class="thread mb-3">
             <div class="d-flex justify-content-between align-items-start">
-              <div class="message-content d-flex">
-                <strong class="author">${thread.author}</strong>
-                <span class="message-text ms-2">${thread.text}</span>
+                <div class="message-content d-flex">
+                  <strong class="author">${thread.author}</strong>
+                  <span class="message-text ms-2">${thread.text}${thread.reactions ? ` [${thread.reactions}]` : ""}</span>
+                </div>
+                <div class="message-meta text-end text-muted small text-nowrap">
+                  ${showDate ? `${date}` : ""} ${time}
+                </div>
               </div>
-              <div class="message-meta text-end text-muted small text-nowrap">
-                ${showDate ? `${date}` : ""} ${time}
-              </div>
-            </div>
         `;
 
       // Add replies if they exist
@@ -111,7 +111,7 @@ function renderThreads(threads) {
               <div class="reply d-flex justify-content-between align-items-start mb-2">
                 <div class="message-content">
                   <strong class="author">${reply.author}</strong>
-                  <span class="message-text ms-2">${reply.text}</span>
+                  <span class="message-text ms-2">${reply.text}${reply.reactions ? ` [${reply.reactions}]` : ""}</span>
                 </div>
                 <div class="message-meta text-end text-muted small text-nowrap">
                   ${showReplyDate ? `${replyDate}` : ""} ${replyTime}
@@ -146,7 +146,9 @@ function messagesToMarkdown(threads) {
     const when = [date, time].filter(Boolean).join(" ").trim() || "unknown time";
     const author = escapeMarkdown(message.author || "Unknown");
     const text = escapeMarkdown(message.text).replace(/\s+/g, " ").trim();
-    lines.push(`${"  ".repeat(depth)}- **${author}**: ${text} (${when})`);
+    let line = `${"  ".repeat(depth)}- **${author}**: ${text} (${when})`;
+    if (message.reactions) line += ` [${escapeMarkdown(message.reactions)}]`;
+    lines.push(line);
     if (message.replies) for (const reply of message.replies) walk(reply, depth + 1);
   };
   for (const thread of threads) walk(thread, 0);
