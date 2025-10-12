@@ -26,10 +26,15 @@
       <textarea id="json" class="form-control font-monospace" rows="10" placeholder="Paste WhatsApp messages JSON array here..."></textarea>
     </div>
 
-    <button type="submit" class="btn btn-primary mb-4">
-      <i class="bi bi-arrow-repeat"></i> Parse Messages
-      <span id="spinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status"></span>
-    </button>
+    <div class="d-flex gap-2 mb-4">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-arrow-repeat"></i> Parse Messages
+        <span id="spinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status"></span>
+      </button>
+      <button type="button" id="copyMarkdown" class="btn btn-outline-secondary" disabled>
+        <i class="bi bi-clipboard"></i> Copy Markdown
+      </button>
+    </div>
 
     <div id="errorAlert" class="alert alert-danger d-none" role="alert">
       <i class="bi bi-exclamation-triangle"></i> <span id="errorText"></span>

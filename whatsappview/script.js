@@ -1,12 +1,32 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { copyText } from "../common/clipboard-utils.js";
+
 const $form = document.querySelector("#form");
+const $json = document.querySelector("#json");
+const $threads = document.querySelector("#threadContainer");
+const copyBtn = document.querySelector("#copyMarkdown");
+const defaultCopyLabel = copyBtn?.innerHTML ?? "";
+let currentThreads = [];
+
 if ($form) saveform("#form");
 
-$form.addEventListener("submit", (e) => {
+$form?.addEventListener("submit", (e) => {
   e.preventDefault();
-  const messages = JSON.parse(document.querySelector("#json").value);
+  copyBtn.disabled = true;
+  copyBtn.innerHTML = defaultCopyLabel;
+
+  let messages = JSON.parse($json.value || "[]");
   const threads = threadMessages(messages);
-  document.querySelector("#threadContainer").innerHTML = renderThreads(threads);
+  currentThreads = threads;
+  $threads.innerHTML = renderThreads(threads);
+  copyBtn.disabled = !threads.length;
+});
+
+copyBtn?.addEventListener("click", async () => {
+  if (!currentThreads.length) return;
+  const ok = await copyText(messagesToMarkdown(currentThreads));
+  copyBtn.innerHTML = ok ? '<i class="bi bi-clipboard-check"></i> Copied!' : '<i class="bi bi-clipboard-x"></i> Copy failed';
+  setTimeout(() => (copyBtn.innerHTML = defaultCopyLabel), 2000);
 });
 
 function threadMessages(messages) {
@@ -30,7 +50,6 @@ function renderThreads(threads) {
   return threads
     .filter((d) => d.text && d.time)
     .map((thread) => {
-      // Format the date and time
       const dateTime = new Date(thread.time);
       const date = dateTime.toLocaleDateString("en-US", {
         day: "numeric",
@@ -106,4 +125,32 @@ function renderThreads(threads) {
       return threadHtml;
     })
     .join("");
+}
+
+function messagesToMarkdown(threads) {
+  const formatDateParts = (value) => {
+    const dateTime = value ? new Date(value) : null;
+    if (!dateTime || Number.isNaN(dateTime.getTime())) return { date: "", time: "" };
+    return {
+      date: dateTime.toLocaleDateString("en-US", { day: "numeric", month: "short" }),
+      time: dateTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }).toLowerCase(),
+    };
+  };
+
+  const lines = [];
+  const walk = (message, depth) => {
+    if (!message.text || !message.time) return;
+    const { date, time } = formatDateParts(message.time);
+    const when = [date, time].filter(Boolean).join(" ").trim() || "unknown time";
+    const author = escapeMarkdown(message.author || "Unknown");
+    const text = escapeMarkdown(message.text).replace(/\s+/g, " ").trim();
+    lines.push(`${"  ".repeat(depth)}- **${author}**: ${text} (${when})`);
+    if (message.replies) for (const reply of message.replies) walk(reply, depth + 1);
+  };
+  for (const thread of threads) walk(thread, 0);
+  return lines.join("\n");
+}
+
+function escapeMarkdown(text) {
+  return String(text).replace(/([\\`*_{}\[\]()#+\-!.>])/g, "\\$1");
 }
