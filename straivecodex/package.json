@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "npx -y esbuild straivecodex.js --bundle --minify --format=iife --global-name=straivecodex --outfile=straivecodex.min.js"
+  }
+}
