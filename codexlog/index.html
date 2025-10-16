@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Codex Session Log Converter</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3QgeD0iMyIgeT0iNSIgd2lkdGg9IjI2IiBoZWlnaHQ9IjIyIiByeD0iMyIgZmlsbD0iIzE1MmM0ZiIvPjxwYXRoIGQ9Ik05IDcuNWEuNS41IDAgMCAxIC41LS41aDEzYTEgMSAwIDAgMSAxIDF2MTZhMSAxIDAgMCAxLTEgMUg5LjVBMSAxIDAgMCAxIDggMjIuNVY3LjV6IiBmaWxsPSIjZmZmIi8+PHBhdGggZD0iTTEyLjUgMTRhLjUuNSAwIDAgMSAuNS0uNWg1YTIuNSAyLjUgMCAwIDEgMCA1aC01YS41LjUgMCAwIDEtLjUtLjV2LTMuek0xMi41IDE4YS41LjUgMCAwIDEgLjUtLjVoNGEuNS41IDAgMCAxIDAgMUgxM2EuNS41IDAgMCAxLS41LS41di0uNXoiIGZpbGw9IiMxNTJjNGYiLz48cGF0aCBkPSJNOSAzYTIgMiAwIDAgMSAyLTJoNGEyIDIgMCAwIDEgMiAyaC0uNXYxSDkuNXYtMWgtLjVaTTcuNSA3YS41LjUgMCAwIDEgLjUtLjVoLjV2MTfoLTVhMSAxIDAgMCAxLTEtMVY4YS41LjUgMCAwIDEgMSAwIDEuNSAxLjUgMCAwIDAgMS41LTEuNXoiIGZpbGw9IiMxMDIwMzQiLz48L3N2Zz4=" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous" />
+  <style>
+    .drop-zone {
+      position: relative;
+      border: 2px dashed var(--bs-border-color);
+      border-radius: 0.75rem;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .drop-zone.dragover {
+      border-color: var(--bs-primary);
+      background-color: rgba(var(--bs-primary-rgb), 0.1);
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    #markdownPreview {
+      min-height: 280px;
+      max-height: 640px;
+      overflow: auto;
+    }
+
+    #markdownPreview pre {
+      background-color: rgba(var(--bs-body-color-rgb), 0.05);
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+    }
+
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-journal-text me-2"></i>
+        Codex Log Converter
+      </a>
+      <div class="bootstrap-dark-theme"></div>
+    </div>
+  </nav>
+  <main class="container pb-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <p class="text-secondary">
+          Drop a <code>.jsonl</code> session log from <code>~/.codex/sessions/yyyy/mm/dd/</code> to turn it into a Markdown recap that preserves reasoning and tool calls.
+        </p>
+        <div id="alertContainer" class="mb-3"></div>
+        <div id="dropZone" class="drop-zone mb-3">
+          <input id="fileInput" type="file" accept=".jsonl,application/jsonl,application/octet-stream" />
+          <div class="d-flex flex-column align-items-center gap-2">
+            <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+            <div>
+              <strong>Drag &amp; drop</strong> a Codex session log here
+              <div class="text-secondary small">or click to choose a file</div>
+            </div>
+          </div>
+        </div>
+        <div id="loadingSpinner" class="text-center my-3 d-none">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Converting...</span>
+          </div>
+          <p class="small text-secondary mt-2">Parsing log &amp; generating Markdown…</p>
+        </div>
+        <div class="d-flex gap-2 mb-3">
+          <button id="copyButton" type="button" class="btn btn-outline-primary flex-grow-1" disabled>
+            <i class="bi bi-clipboard me-1"></i>Copy Markdown
+          </button>
+          <button id="downloadButton" type="button" class="btn btn-outline-success flex-grow-1" disabled>
+            <i class="bi bi-download me-1"></i>Download .md
+          </button>
+        </div>
+        <div id="markdownPreview" class="border rounded-3 bg-body-secondary p-3">
+          <p class="text-secondary m-0">Converted Markdown preview will appear here…</p>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>

@@ -57,6 +57,13 @@
       "created": "2025-07-17T22:24:13+08:00"
     },
     {
+      "icon": "bi-journal-text",
+      "title": "Codex Log Converter",
+      "description": "Turn Codex CLI session JSONL logs into Markdown recaps.",
+      "url": "codexlog",
+      "created": "2025-10-19T00:00:00+00:00"
+    },
+    {
       "icon": "bi-braces",
       "title": "JSON to CSV",
       "description": "Convert arrays of JSON objects to CSV format.",
