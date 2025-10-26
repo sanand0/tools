@@ -1,0 +1,11 @@
+{
+  "name": "xscraper",
+  "private": true,
+  "scripts": {
+    "build": "npx -y esbuild xscraper.js --bundle --minify --format=iife --global-name=xscraper --outfile=xscraper.min.js",
+    "verify": "node verify.mjs"
+  },
+  "devDependencies": {
+    "chrome-remote-interface": "^0.33.0"
+  }
+}

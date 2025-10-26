@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Thread Fixture</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+
+<body>
+  <main>
+    <!-- Main tweet -->
+    <article role="article">
+      <div data-testid="User-Name">
+        <a role="link" href="/emollick"><span>Ethan Mollick</span></a>
+        <span>@emollick</span>
+      </div>
+      <a role="link" href="/emollick/status/123">
+        <time datetime="2025-10-20T12:34:56.000Z"></time>
+      </a>
+      <div data-testid="tweetText">Main tweet about learning and AI.</div>
+      <!-- An aggregate aria-label with multiple metrics -->
+      <div aria-label="8 replies, 1 repost, 81 likes, 14 bookmarks, 16342 views"></div>
+      <div>
+        <div data-testid="reply"><span>12</span></div>
+        <div data-testid="like"><span>2.3K</span></div>
+        <div data-testid="views"><span>101.5K</span></div>
+      </div>
+    </article>
+
+    <!-- Promoted Tweet (ad) should be ignored -->
+    <article role="article">
+      <div data-testid="socialContext">Promoted</div>
+      <div data-testid="User-Name">
+        <a role="link" href="/adacct"><span>Ad Account</span></a>
+        <span>@adacct</span>
+      </div>
+      <a role="link" href="/adacct/status/555">
+        <time datetime="2025-10-20T13:00:00.000Z"></time>
+      </a>
+      <div data-testid="tweetText">Buy things!</div>
+      <div>
+        <div data-testid="reply"><span>1</span></div>
+        <div data-testid="like"><span>5</span></div>
+        <div data-testid="views"><span>100</span></div>
+      </div>
+    </article>
+
+    <!-- An article without a time (should be dropped) -->
+    <article role="article">
+      <div data-testid="User-Name">
+        <a role="link" href="/no-time"><span>No Time</span></a>
+        <span>@notime</span>
+      </div>
+      <a role="link" href="/no-time/status/999"></a>
+      <div data-testid="tweetText">This should be ignored because no date.</div>
+      <div aria-label="1 reply, 2 likes"></div>
+    </article>
+
+    <!-- Reply 1 -->
+    <article role="article">
+      <div data-testid="User-Name">
+        <a role="link" href="/alice"><span>Alice</span></a>
+        <span>@alice</span>
+      </div>
+      <a role="link" href="/alice/status/124">
+        <time datetime="2025-10-20T13:10:00.000Z"></time>
+      </a>
+      <div data-testid="tweetText">This is insightful!</div>
+      <div>
+        <div data-testid="reply"><span>3</span></div>
+        <div data-testid="like"><span>12</span></div>
+        <div data-testid="views"><span>1,200</span></div>
+      </div>
+    </article>
+
+    <!-- Reply 2 -->
+    <article role="article">
+      <div data-testid="User-Name">
+        <a role="link" href="/bob"><span>Bob</span></a>
+        <span>@bob</span>
+      </div>
+      <a role="link" href="/bob/status/125">
+        <time datetime="2025-10-20T13:20:00.000Z"></time>
+      </a>
+      <div data-testid="tweetText">Agree, plus here is a link.</div>
+      <div>
+        <div data-testid="reply"><span>0</span></div>
+        <div data-testid="like"><span>1</span></div>
+        <div data-testid="views"><span>900</span></div>
+      </div>
+    </article>
+  </main>
+</body>
+
+</html>

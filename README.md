@@ -19,6 +19,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[GitHub Stars](./githubstars/)**: Updates GitHub repository links in Markdown text, replacing link text with the repository's name, star count, and last pushed date.
 - **[Google Tasks](./googletasks/)**: Download all your Google Tasks as CSV or Markdown and delete completed tasks
 - **[WhatsApp Scraper](./whatsappscraper/)**: A browser bookmarklet that allows users to scrape messages from an active WhatsApp Web chat session into JSON format.
+- **[X Thread Scraper](./xscraper/)**: Bookmarklet to copy a tweet and all its replies into JSON (ads dropped), including metrics and computed buzz/keep scores.
 - **[Straive Intelligence](./straiveintelligence/)**: Bookmarklet to convert ChatGPT into a Straive-style user interface
 - **[GitHub Summary](./githubsummary/)**: Generates a blog-post-style summary of a GitHub user's activity within a specified date range.
 - **[Join CSV Tables](./joincsv/)**: Join multiple tables on the first column.

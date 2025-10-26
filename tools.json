@@ -8,6 +8,13 @@
       "created": "2025-05-20T18:56:01+08:00"
     },
     {
+      "icon": "bi-twitter-x",
+      "title": "X Thread Scraper",
+      "description": "Bookmarklet to copy a tweet and all its replies as JSON (with buzz/keep).",
+      "url": "xscraper",
+      "created": "2025-10-26T00:00:00+00:00"
+    },
+    {
       "icon": "bi-clock-history",
       "title": "Recall",
       "description": "Randomly recall list items from Markdown.",
