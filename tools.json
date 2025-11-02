@@ -307,6 +307,12 @@
       "url": "https://tools.simonwillison.net/render-markdown"
     },
     {
+      "icon": "bi-terminal",
+      "title": "Terminal to HTML",
+      "description": "Convert terminal session text to HTML with ANSI colors.",
+      "url": "https://tools.simonwillison.net/terminal-to-html"
+    },
+    {
       "icon": "bi-youtube",
       "title": "YouTube Thumbnails",
       "description": "Get YouTube video thumbnails.",

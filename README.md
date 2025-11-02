@@ -46,6 +46,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 Tools from others:
 
 - **[Render Markdown](https://tools.simonwillison.net/render-markdown)**: Render Markdown to HTML using the GitHub Markdown API.
+- **[Terminal to HTML](https://tools.simonwillison.net/terminal-to-html)**: Convert terminal session text to HTML with ANSI colors.
 - **[YouTube Thumbnails](https://tools.simonwillison.net/youtube-thumbnails)**: Get YouTube video thumbnails.
 
 ## Local Development
