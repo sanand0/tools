@@ -86,7 +86,7 @@ function addBuzzKeep(items, opts = {}) {
 
   function expDecay(ageHours, halfLifeHours) {
     if (!isFinite(ageHours) || halfLifeHours <= 0) return 1;
-    return Math.exp(-Math.log(2) * ageHours / halfLifeHours);
+    return Math.exp((-Math.log(2) * ageHours) / halfLifeHours);
   }
 
   // Wilson lower bound for a "success rate" k/n (robust vs small n)
@@ -95,26 +95,28 @@ function addBuzzKeep(items, opts = {}) {
     const phat = Math.min(k / n, 1);
     const denom = 1 + (zScore * zScore) / n;
     const inner = (phat * (1 - phat) + (zScore * zScore) / (4 * n)) / n;
-    const num = phat + (zScore * zScore) / (2 * n)
-      - zScore * Math.sqrt(Math.max(inner, 0));
+    const num = phat + (zScore * zScore) / (2 * n) - zScore * Math.sqrt(Math.max(inner, 0));
     return Math.max(num / denom, 0);
   }
 
   function zscore(arr) {
     const filtered = arr.filter(Number.isFinite);
     const mean = filtered.reduce((s, x) => s + x, 0) / (filtered.length || 1);
-    const sd = Math.sqrt(
-      filtered.reduce((s, x) => s + (x - mean) * (x - mean), 0)
-        / (filtered.length || 1),
-    ) || 1;
+    const sd = Math.sqrt(filtered.reduce((s, x) => s + (x - mean) * (x - mean), 0) / (filtered.length || 1)) || 1;
     return arr.map((x) => (Number.isFinite(x) ? (x - mean) / sd : 0));
   }
 
   function correlation(x, y) {
     const n = Math.min(x.length, y.length);
-    let sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0, count = 0;
+    let sx = 0,
+      sy = 0,
+      sxx = 0,
+      syy = 0,
+      sxy = 0,
+      count = 0;
     for (let i = 0; i < n; i++) {
-      const xi = x[i], yi = y[i];
+      const xi = x[i],
+        yi = y[i];
       if (!Number.isFinite(xi) || !Number.isFinite(yi)) continue;
       sx += xi;
       sy += yi;
@@ -124,7 +126,8 @@ function addBuzzKeep(items, opts = {}) {
       count++;
     }
     if (count === 0) return 0;
-    const mx = sx / count, my = sy / count;
+    const mx = sx / count,
+      my = sy / count;
     const vx = sxx / count - mx * mx;
     const vy = syy / count - my * my;
     const cov = sxy / count - mx * my;
@@ -153,9 +156,7 @@ function addBuzzKeep(items, opts = {}) {
     const bookmarks = Number(o.bookmarks) || 0;
 
     const date = o.date ? new Date(o.date) : null;
-    const ageHours = date instanceof Date && !isNaN(date)
-      ? Math.max(0, hoursBetween(nowDate, date))
-      : 0;
+    const ageHours = date instanceof Date && !isNaN(date) ? Math.max(0, hoursBetween(nowDate, date)) : 0;
 
     // Wilson lower bounds on per-view rates
     const wlb_likes = wilsonLowerBound(likes, views);
@@ -164,13 +165,11 @@ function addBuzzKeep(items, opts = {}) {
     const wlb_bookmarks = wilsonLowerBound(bookmarks, views);
 
     // Buzz = virality (reposts & likes) with slower decay
-    const buzzBase = (buzzWeights.reposts || 0) * wlb_reposts
-      + (buzzWeights.likes || 0) * wlb_likes;
+    const buzzBase = (buzzWeights.reposts || 0) * wlb_reposts + (buzzWeights.likes || 0) * wlb_likes;
     const buzzRaw = buzzBase * expDecay(ageHours, halfLifeBuzzHours);
 
     // Keep = save-worthy depth (bookmarks & replies) with moderate decay
-    const keepBase = (keepWeights.bookmarks || 0) * wlb_bookmarks
-      + (keepWeights.replies || 0) * wlb_replies;
+    const keepBase = (keepWeights.bookmarks || 0) * wlb_bookmarks + (keepWeights.replies || 0) * wlb_replies;
     const keepRaw = keepBase * expDecay(ageHours, halfLifeKeepHours);
 
     return {

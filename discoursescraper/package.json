@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "npx -y esbuild discoursescraper.js --bundle --minify --format=iife --global-name=discoursescraper --outfile=discoursescraper.min.js"
+  }
+}
