@@ -6,13 +6,13 @@ import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 const $ = (s, el = document) => el.querySelector(s);
 
 const DATA_URL = "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/trending-repos.tsv";
-const STATUS_ORDER = ["🟣", "🟢", "⏺️", "🔴", "🔵"];
+const STATUS_ORDER = ["🟣", "🟢", "⏺️", "🔵", "🔴"];
 const STATUS_LABELS = {
   "🟣": "Evaluate",
-  "🟢": "Used",
-  "⏺️": "Interesting",
-  "🔴": "Unused",
-  "🔵": "Deferred",
+  "🟢": "Use",
+  "⏺️": "Try",
+  "🔵": "Not yet",
+  "🔴": "Skip",
 };
 
 const state = {
