@@ -14,14 +14,12 @@ export function whatsappMessages(rootDocument = document) {
     let rawText;
     let usedFallback = false;
     let hasGif = false;
-    let [isSystemMessage, userId, _userDomain, messageId, authorPhone, _authorDomain] = el
+    let [isSystemMessage, userId, _userDomain, messageId, _internalId, _authorDomain] = el
       .querySelector("[data-id]")
       .dataset.id.split(/[_@]/);
     isSystemMessage = isSystemMessage === "true";
     let isRecalled = !!el.querySelector('[data-icon="recalled"]');
-    const message = { messageId, authorPhone, isSystemMessage, isRecalled, userId };
-    // System messages are associated with the user's phone which is misleading
-    if (isSystemMessage) delete message.authorPhone;
+    const message = { messageId, isSystemMessage, isRecalled, userId };
     // Non-recalled system messages are typically:
     //  - user (joined via an invite link | joined from the community | was added | changed to new mobile)
     //  - admin (added | removed) user
@@ -46,8 +44,11 @@ export function whatsappMessages(rootDocument = document) {
       // If it's not a system message and there's no author section, it must be a continuation from last author
       if (!authorSection && !message.author && rawText) message.author = lastAuthor;
 
-      // Time is often available in data-pre-plain-text="[10:33 am, 8/5/2025] +91 99999 99999: "
-      message.time = extractDate(el.querySelector("[data-pre-plain-text]")?.dataset.prePlainText);
+      // Time and authorPhone are available in data-pre-plain-text="[10:33 am, 8/5/2025] +91 99999 99999: "
+      const prePlainText = el.querySelector("[data-pre-plain-text]")?.dataset.prePlainText;
+      const { date, phone } = extractDateAndPhone(prePlainText);
+      message.time = date;
+      if (phone) message.authorPhone = phone;
       // If not, the hh:mm am/pm is available in the last dir="auto"
       if (!message.time) {
         const auto = [...el.querySelectorAll('[dir="auto"]')].at(-1);
@@ -105,9 +106,16 @@ export function whatsappMessages(rootDocument = document) {
   return messages;
 }
 
-function extractDate(dateString) {
-  const match = dateString?.match?.(/\[(\d{1,2}:\d{2}\s?[ap]m),\s?(\d{1,2})\/(\d{1,2})\/(\d{4})\]/);
-  return match ? new Date(`${match[4]}-${match[3]}-${match[2]} ${match[1]}`) : null;
+function extractDateAndPhone(prePlainText) {
+  const result = { date: null, phone: null };
+  if (!prePlainText) return result;
+  // Format: "[10:33 am, 8/5/2025] +91 99999 99999: "
+  const match = prePlainText.match(/\[(\d{1,2}:\d{2}\s?[ap]m),\s?(\d{1,2})\/(\d{1,2})\/(\d{4})\]\s*(.+?):\s*$/);
+  if (match) {
+    result.date = new Date(`${match[4]}-${match[3]}-${match[2]} ${match[1]}`);
+    result.phone = match[5].trim();
+  }
+  return result;
 }
 
 // If lastTime an ISO string and time is like "10:18 pm", return lastTime updated with time as ISO
