@@ -118,6 +118,65 @@ describe("whatsappscraper", () => {
     });
   });
 
+  it("inherits lastAuthor when message has NO author section (continuation)", async () => {
+    const { Window } = await import("happy-dom");
+    const win = new Window();
+    win.document.body.innerHTML = `
+        <div id="main">
+          <div role="row">
+            <div data-id="false_120363403498637789@g.us_MSG1_1234567890@lid">
+              <div data-pre-plain-text="[9:12 am, 10/12/2025] +91 12345 67890: ">
+                <div class="selectable-text">First message</div>
+                <div role=""><span dir="ltr">Known Author</span></div>
+              </div>
+            </div>
+          </div>
+          <div role="row">
+            <div data-id="false_120363403498637789@g.us_MSG2_1234567890@lid">
+              <div data-pre-plain-text="[9:13 am, 10/12/2025] +91 12345 67890: ">
+                <div class="selectable-text">Continuation message</div>
+              </div>
+            </div>
+          </div>
+        </div>
+    `;
+    const messages = whatsappMessages(win.document);
+    expect(messages).toHaveLength(2);
+    expect(messages[0].author).toBe("Known Author");
+    expect(messages[1].author).toBe("Known Author"); // Should inherit
+  });
+
+  it("does NOT inherit lastAuthor when message has author section but no dir element (phone number only)", async () => {
+    const { Window } = await import("happy-dom");
+    const win = new Window();
+    win.document.body.innerHTML = `
+        <div id="main">
+          <div role="row">
+            <div data-id="false_120363403498637789@g.us_MSG1_1234567890@lid">
+              <div data-pre-plain-text="[9:12 am, 10/12/2025] +91 12345 67890: ">
+                <div class="selectable-text">First message</div>
+                <div role=""><span dir="ltr">Known Author</span></div>
+              </div>
+            </div>
+          </div>
+          <div role="row">
+            <div data-id="false_120363403498637789@g.us_MSG2_9999999999@lid">
+              <div data-pre-plain-text="[9:14 am, 10/12/2025] +91 99100 35571: ">
+                <div class="selectable-text">Message from unknown contact</div>
+                <div role="">
+                  <span class="_ahx_">+91 99100 35571</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    `;
+    const messages = whatsappMessages(win.document);
+    expect(messages).toHaveLength(2);
+    expect(messages[0].author).toBe("Known Author");
+    expect(messages[1].author).toBeUndefined(); // Should NOT inherit
+  });
+
   it("scrape keeps the live state in sync and copies the transcript", { timeout: 10_000 }, async () => {
     const state = createScraperState();
     let resolveClipboard;

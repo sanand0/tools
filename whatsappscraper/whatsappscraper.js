@@ -32,7 +32,8 @@ export function whatsappMessages(rootDocument = document) {
       const selectable = el.querySelector(".selectable-text");
       rawText = selectable?.outerText;
       hasGif = !!el.querySelector('[aria-label="Play GIF" i]');
-      message.author = el.querySelector('[role=""] [dir]')?.textContent;
+      const authorSection = el.querySelector('[role=""]');
+      message.author = authorSection?.querySelector("[dir]")?.textContent;
 
       // If it's a system message, e.g. adding/deleting a user, deleting a message, etc. use raw text
       if (!rawText) {
@@ -42,8 +43,8 @@ export function whatsappMessages(rootDocument = document) {
           usedFallback = true;
         }
       }
-      // If it's not a system message and the author is missing, it must be the last author
-      if (!message.author && rawText) message.author = lastAuthor;
+      // If it's not a system message and there's no author section, it must be a continuation from last author
+      if (!authorSection && !message.author && rawText) message.author = lastAuthor;
 
       // Time is often available in data-pre-plain-text="[10:33 am, 8/5/2025] +91 99999 99999: "
       message.time = extractDate(el.querySelector("[data-pre-plain-text]")?.dataset.prePlainText);
@@ -142,7 +143,7 @@ export function scrape({
 } = {}) {
   rootDocument.body.insertAdjacentHTML(
     "beforeend",
-    '<button id="copy-btn" style="position:fixed;top:10px;right:10px;padding:10px;z-index:999;background-color:#fff;color:#000;">Copy 0 messsages</button>',
+    '<button id="copy-btn" style="position:fixed;top:10px;right:10px;padding:10px;z-index:999;background-color:#fff;color:#000;">Copy 0 messages</button>',
   );
   const btn = rootDocument.getElementById("copy-btn");
 
