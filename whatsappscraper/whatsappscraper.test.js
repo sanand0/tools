@@ -36,7 +36,7 @@ describe("whatsappscraper", () => {
 
     expect(messages[0]).toMatchObject({
       messageId: "AC186CE91CBE1B7EA49A2127E5DDE29D",
-      authorPhone: "100000000000",
+      authorPhone: "+00 10000 00000",
       isSystemMessage: false,
       isRecalled: false,
       userId: "120363403498637789",
@@ -53,10 +53,10 @@ describe("whatsappscraper", () => {
     secondExpected.setHours(21, 34, 0, 0);
     expect(messages[1]).toMatchObject({
       messageId: "3EB036C7035BE6F5227333",
-      authorPhone: "100000000001",
       author: "Member Alpha",
       reactions: "👍, ❤ 4",
     });
+    expect(messages[1].authorPhone).toBeUndefined(); // No data-pre-plain-text
     expect(messages[1].time).toBe(secondExpected.toISOString());
 
     expect(messages[2]).toMatchObject({
@@ -70,7 +70,7 @@ describe("whatsappscraper", () => {
 
     expect(messages[3]).toMatchObject({
       messageId: "3EB0E63CFC6AC65FD9BF6E",
-      authorPhone: "100000000001",
+      authorPhone: "+00 10000 00001",
       quoteAuthor: "Member Alpha",
       quoteAuthorPhone: "001000000000",
       quoteMessageId: "AC186CE91CBE1B7EA49A2127E5DDE29D",
@@ -79,11 +79,11 @@ describe("whatsappscraper", () => {
 
     expect(messages[4]).toMatchObject({
       messageId: "GIFMSG1",
-      authorPhone: "100000000002",
       quoteAuthor: "Member Gamma",
       quoteAuthorPhone: "001000000003",
       text: "(media-gif)",
     });
+    expect(messages[4].authorPhone).toBeUndefined(); // No data-pre-plain-text
     expect(messages[4].text).toBe("(media-gif)");
     expect(messages[4].quoteText.trim()).toMatch(/^"Corn fields look impressive on camera/);
   });
@@ -143,7 +143,9 @@ describe("whatsappscraper", () => {
     const messages = whatsappMessages(win.document);
     expect(messages).toHaveLength(2);
     expect(messages[0].author).toBe("Known Author");
+    expect(messages[0].authorPhone).toBe("+91 12345 67890");
     expect(messages[1].author).toBe("Known Author"); // Should inherit
+    expect(messages[1].authorPhone).toBe("+91 12345 67890");
   });
 
   it("does NOT inherit lastAuthor when message has author section but no dir element (phone number only)", async () => {
@@ -174,7 +176,9 @@ describe("whatsappscraper", () => {
     const messages = whatsappMessages(win.document);
     expect(messages).toHaveLength(2);
     expect(messages[0].author).toBe("Known Author");
+    expect(messages[0].authorPhone).toBe("+91 12345 67890");
     expect(messages[1].author).toBeUndefined(); // Should NOT inherit
+    expect(messages[1].authorPhone).toBe("+91 99100 35571"); // But phone is extracted from data-pre-plain-text
   });
 
   it("scrape keeps the live state in sync and copies the transcript", { timeout: 10_000 }, async () => {
@@ -217,6 +221,7 @@ describe("whatsappscraper", () => {
     expect(state.messagesById.NEWMSGID).toMatchObject({
       text: "New insight on dairy trade.",
       author: "Sayali",
+      authorPhone: "+91 12345 67890",
     });
 
     const refreshedButton = document.getElementById("copy-btn");
@@ -235,6 +240,7 @@ describe("whatsappscraper", () => {
     expect(newEntry).toMatchObject({
       messageId: "NEWMSGID",
       author: "Sayali",
+      authorPhone: "+91 12345 67890",
     });
 
     expect(document.getElementById("copy-btn")).toBeNull();
