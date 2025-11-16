@@ -32,7 +32,7 @@ describe("whatsappscraper", () => {
 
   it("extracts rich message data from DOM conversation", () => {
     const messages = whatsappMessages(document);
-    expect(messages).toHaveLength(5);
+    expect(messages).toHaveLength(6);
 
     expect(messages[0]).toMatchObject({
       messageId: "AC186CE91CBE1B7EA49A2127E5DDE29D",
@@ -68,24 +68,38 @@ describe("whatsappscraper", () => {
     expect(messages[2].authorPhone).toBeUndefined();
     expect(messages[2].text).toContain("changed to a new mobile number");
 
+    // This message has no explicit author and follows a system message
+    // It should inherit the author from the last non-system message (Member Alpha)
+    const noAuthorExpected = new Date(messages[1].time);
+    noAuthorExpected.setHours(21, 45, 0, 0);
     expect(messages[3]).toMatchObject({
+      messageId: "NOAUTHORMSG",
+      authorPhone: "100000000001",
+      isSystemMessage: false,
+      isRecalled: false,
+      author: "Member Alpha",
+    });
+    expect(messages[3].text.trim()).toMatch(/^This message has no explicit author/i);
+    expect(messages[3].time).toBe(noAuthorExpected.toISOString());
+
+    expect(messages[4]).toMatchObject({
       messageId: "3EB0E63CFC6AC65FD9BF6E",
       authorPhone: "100000000001",
       quoteAuthor: "Member Alpha",
       quoteAuthorPhone: "001000000000",
       quoteMessageId: "AC186CE91CBE1B7EA49A2127E5DDE29D",
     });
-    expect(messages[3].quoteText.trim()).toMatch(/^As far as US dairy argument/i);
+    expect(messages[4].quoteText.trim()).toMatch(/^As far as US dairy argument/i);
 
-    expect(messages[4]).toMatchObject({
+    expect(messages[5]).toMatchObject({
       messageId: "GIFMSG1",
       authorPhone: "100000000002",
       quoteAuthor: "Member Gamma",
       quoteAuthorPhone: "001000000003",
       text: "(media-gif)",
     });
-    expect(messages[4].text).toBe("(media-gif)");
-    expect(messages[4].quoteText.trim()).toMatch(/^"Corn fields look impressive on camera/);
+    expect(messages[5].text).toBe("(media-gif)");
+    expect(messages[5].quoteText.trim()).toMatch(/^"Corn fields look impressive on camera/);
   });
 
   it("prefers richer fields when merging message updates", () => {
@@ -139,7 +153,7 @@ describe("whatsappscraper", () => {
     const main = document.getElementById("main");
     const button = document.getElementById("copy-btn");
     expect(button).not.toBeNull();
-    expect(button.textContent).toBe("Copy 5 messages");
+    expect(button.textContent).toBe("Copy 6 messages");
 
     const newRow = document.createElement("div");
     newRow.setAttribute("role", "row");
@@ -161,7 +175,7 @@ describe("whatsappscraper", () => {
     });
 
     const refreshedButton = document.getElementById("copy-btn");
-    expect(refreshedButton.textContent).toBe("Copy 6 messages");
+    expect(refreshedButton.textContent).toBe("Copy 7 messages");
 
     refreshedButton.click();
     expect(writeText).toHaveBeenCalledTimes(1);
@@ -171,7 +185,7 @@ describe("whatsappscraper", () => {
 
     const payload = writeText.mock.calls[0][0];
     const parsed = JSON.parse(payload);
-    expect(parsed).toHaveLength(6);
+    expect(parsed).toHaveLength(7);
     const newEntry = parsed.find((msg) => msg.messageId === "NEWMSGID");
     expect(newEntry).toMatchObject({
       messageId: "NEWMSGID",

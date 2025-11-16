@@ -54,9 +54,6 @@ export function whatsappMessages(rootDocument = document) {
         // Else it's a pinned message. Ignore it.
       }
     }
-    lastTime = message.time;
-    lastAuthor = message.author;
-
     // Get quote information if it exists
     const quote = el.querySelector('[aria-label="Quoted message" i]');
     if (quote) {
@@ -99,6 +96,10 @@ export function whatsappMessages(rootDocument = document) {
       if (cleaned) message.text = cleaned;
       else delete message.text;
     }
+    // Only update lastTime and lastAuthor if they have valid values
+    // This preserves the previous author/time when system or recalled messages are encountered
+    if (message.time) lastTime = message.time;
+    if (message.author) lastAuthor = message.author;
     messages.push(message);
   }
   return messages;
@@ -142,7 +143,7 @@ export function scrape({
 } = {}) {
   rootDocument.body.insertAdjacentHTML(
     "beforeend",
-    '<button id="copy-btn" style="position:fixed;top:10px;right:10px;padding:10px;z-index:999;background-color:#fff;color:#000;">Copy 0 messsages</button>',
+    '<button id="copy-btn" style="position:fixed;top:10px;right:10px;padding:10px;z-index:999;background-color:#fff;color:#000;">Copy 0 messages</button>',
   );
   const btn = rootDocument.getElementById("copy-btn");
 
