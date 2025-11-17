@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Slides - Speech to Presentation</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIGZpbGw9IiMxOTg3NTQiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJNMTAgOGgxMnY0SDEwem0wIDZoOHY0aC04em0wIDZoMTB2NGgtMTB6Ii8+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTI0IDE0bC00IDQgNCA0eiIvPjwvc3ZnPg==" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous" />
+  <style>
+    .recording-btn.recording {
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+      }
+    }
+
+    .slide-preview {
+      background: #1e1e1e;
+      border: 2px solid var(--bs-border-color);
+      border-radius: 8px;
+      min-height: 200px;
+      padding: 1rem;
+      font-size: 0.9rem;
+      overflow: auto;
+      max-height: 400px;
+    }
+
+    .transcript-box {
+      background: var(--bs-body-bg);
+      border: 1px solid var(--bs-border-color);
+      border-radius: 8px;
+      min-height: 100px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding: 0.75rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+
+    .status-disconnected {
+      background: var(--bs-danger);
+    }
+
+    .status-connecting {
+      background: var(--bs-warning);
+      animation: blink 1s infinite;
+    }
+
+    .status-connected {
+      background: var(--bs-success);
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="."> <i class="bi bi-easel me-2"></i>Live Slides </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <div class="nav-item dropdown ms-auto">
+          <button class="dark-theme-toggle btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-circle-half"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li>
+              <button class="dropdown-item" data-bs-theme-value="light">
+                <i class="me-2 bi bi-sun-fill"></i> Light
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item" data-bs-theme-value="dark">
+                <i class="me-2 bi bi-moon-stars-fill"></i> Dark
+              </button>
+            </li>
+            <li>
+              <button class="dropdown-item" data-bs-theme-value="auto">
+                <i class="me-2 bi bi-circle-half"></i> Auto
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <div class="row">
+      <div class="col-lg-4">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-key me-2"></i>Configuration</h5>
+          </div>
+          <div class="card-body">
+            <form id="config-form">
+              <div class="mb-3">
+                <label for="api-key" class="form-label">OpenAI API Key</label>
+                <input type="password" class="form-control" id="api-key" placeholder="sk-..." required />
+                <div class="form-text">Your key is stored locally in your browser.</div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="card mb-4">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Status</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-2">
+              <span class="status-indicator status-disconnected" id="status-indicator"></span>
+              <span id="connection-status">Disconnected</span>
+            </div>
+            <div class="mb-2">
+              <small class="text-muted">Slides: <span id="slide-count">0</span></small>
+            </div>
+            <div>
+              <small class="text-muted">Current: <span id="current-slide-num">-</span></small>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-mic me-2"></i>Controls</h5>
+          </div>
+          <div class="card-body text-center">
+            <button class="btn btn-lg btn-outline-danger recording-btn mb-3" id="record-btn" disabled>
+              <i class="bi bi-record-circle me-2"></i>
+              <span>Start Recording</span>
+            </button>
+            <div class="btn-group w-100" role="group">
+              <button class="btn btn-outline-secondary" id="prev-slide-btn" disabled>
+                <i class="bi bi-chevron-left"></i> Prev
+              </button>
+              <button class="btn btn-outline-secondary" id="next-slide-btn" disabled>
+                Next <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-easel3 me-2"></i>Current Slide Preview</h5>
+            <button class="btn btn-sm btn-outline-primary" id="open-presentation-btn" disabled>
+              <i class="bi bi-window-plus me-1"></i> Open Presentation
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="slide-preview" id="slide-preview">
+              <p class="text-muted text-center">
+                No slides yet. Start recording to generate slides from your speech.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Live Transcript</h5>
+          </div>
+          <div class="card-body">
+            <div class="transcript-box" id="transcript-box">
+              <span class="text-muted">Waiting for speech...</span>
+            </div>
+            <div class="mt-2">
+              <small class="text-muted">Buffer: <span id="buffer-status">Empty</span></small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@gramex/ui@0.3/dist/dark-theme.js" type="module"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>
