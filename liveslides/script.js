@@ -173,11 +173,8 @@ function setupDataChannel() {
     const sessionConfig = {
       type: "session.update",
       session: {
-        modalities: ["text", "audio"],
+        modalities: ["text"], // Text output only - audio input still works!
         instructions: instructions,
-        voice: "alloy",
-        input_audio_format: "pcm16",
-        output_audio_format: "pcm16",
         turn_detection: {
           type: "server_vad",
           threshold: 0.5,
