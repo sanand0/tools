@@ -128,6 +128,28 @@
                 <input type="password" class="form-control" id="api-key" placeholder="sk-..." required />
                 <div class="form-text">Your key is stored locally in your browser.</div>
               </div>
+              <div class="mb-3">
+                <label for="presentation-theme" class="form-label">Presentation Theme</label>
+                <select class="form-select" id="presentation-theme">
+                  <option value="black">Black (default)</option>
+                  <option value="white">White</option>
+                  <option value="league">League</option>
+                  <option value="beige">Beige</option>
+                  <option value="sky">Sky</option>
+                  <option value="night">Night</option>
+                  <option value="serif">Serif</option>
+                  <option value="simple">Simple</option>
+                  <option value="solarized">Solarized</option>
+                  <option value="moon">Moon</option>
+                  <option value="dracula">Dracula</option>
+                  <option value="blood">Blood</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="slide-instructions" class="form-label">Slide Generation Instructions</label>
+                <textarea class="form-control font-monospace" id="slide-instructions" rows="6" style="font-size: 0.85rem;"></textarea>
+                <div class="form-text">Instructions for how the AI should generate slides. Edit before starting.</div>
+              </div>
             </form>
           </div>
         </div>
@@ -175,9 +197,14 @@
         <div class="card mb-4">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0"><i class="bi bi-easel3 me-2"></i>Current Slide Preview</h5>
-            <button class="btn btn-sm btn-outline-primary" id="open-presentation-btn" disabled>
-              <i class="bi bi-window-plus me-1"></i> Open Presentation
-            </button>
+            <div class="btn-group">
+              <button class="btn btn-sm btn-outline-primary" id="open-presentation-btn" disabled>
+                <i class="bi bi-window-plus me-1"></i> Open
+              </button>
+              <button class="btn btn-sm btn-outline-success" id="download-presentation-btn" disabled>
+                <i class="bi bi-download me-1"></i> Download
+              </button>
+            </div>
           </div>
           <div class="card-body">
             <div class="slide-preview" id="slide-preview">

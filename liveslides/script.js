@@ -7,6 +7,7 @@ const $recordBtn = document.getElementById("record-btn");
 const $prevSlideBtn = document.getElementById("prev-slide-btn");
 const $nextSlideBtn = document.getElementById("next-slide-btn");
 const $openPresentationBtn = document.getElementById("open-presentation-btn");
+const $downloadPresentationBtn = document.getElementById("download-presentation-btn");
 const $statusIndicator = document.getElementById("status-indicator");
 const $connectionStatus = document.getElementById("connection-status");
 const $slideCount = document.getElementById("slide-count");
@@ -14,6 +15,8 @@ const $currentSlideNum = document.getElementById("current-slide-num");
 const $slidePreview = document.getElementById("slide-preview");
 const $transcriptBox = document.getElementById("transcript-box");
 const $bufferStatus = document.getElementById("buffer-status");
+const $slideInstructions = document.getElementById("slide-instructions");
+const $presentationTheme = document.getElementById("presentation-theme");
 
 // State
 let isRecording = false;
@@ -23,16 +26,31 @@ let mediaStream = null;
 let presentationWindow = null;
 let slides = [];
 let currentSlideIndex = -1;
-let transcriptBuffer = "";
-let lastProcessedLength = 0;
+let currentResponseText = "";
 
-// Minimum characters before considering creating a new slide
-const MIN_BUFFER_FOR_SLIDE = 150;
-// Patterns that indicate end of a logical statement
-const STATEMENT_END_PATTERNS = [". ", "? ", "! ", ".\n", "?\n", "!\n"];
+// Default instructions for McKinsey-style slides
+const DEFAULT_INSTRUCTIONS = `You are an expert presentation assistant. As you listen to the speaker, generate presentation slides in real-time with McKinsey-style action titles.
 
-// Initialize saveform for persisting API key
+Guidelines:
+- Each slide should have an ACTION-ORIENTED title that conveys the main insight or recommendation
+- Titles should be clear, concise statements (not questions or topic labels)
+- Support the title with relevant content: bullet points, paragraphs, quotes, or data
+- Create a new slide when the speaker moves to a new topic or key point
+- Keep slides focused and avoid information overload
+- Format content appropriately (lists for multiple points, paragraphs for explanations)
+
+Output each slide in this JSON format:
+{"title": "Action-oriented title here", "content": "Formatted content here (use markdown for lists, emphasis, etc.)"}
+
+Generate slides progressively as the speaker talks. When you detect a logical topic shift or complete thought, output the next slide.`;
+
+// Initialize saveform for persisting API key and settings
 saveform("#config-form");
+
+// Set default instructions if not already set
+if (!$slideInstructions.value.trim()) {
+  $slideInstructions.value = DEFAULT_INSTRUCTIONS;
+}
 
 // Enable record button when API key is entered
 $apiKey.addEventListener("input", () => {
@@ -64,6 +82,9 @@ $nextSlideBtn.addEventListener("click", () => navigateSlide(1));
 // Open presentation window
 $openPresentationBtn.addEventListener("click", openPresentationWindow);
 
+// Download presentation
+$downloadPresentationBtn.addEventListener("click", downloadPresentation);
+
 async function startRecording() {
   const apiKey = $apiKey.value.trim();
   if (!apiKey) {
@@ -73,6 +94,10 @@ async function startRecording() {
 
   try {
     updateStatus("connecting", "Connecting...");
+
+    // Disable editing of instructions during recording
+    $slideInstructions.disabled = true;
+    $presentationTheme.disabled = true;
 
     // Get microphone access
     mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -120,6 +145,9 @@ async function startRecording() {
 
     updateStatus("connected", "Connected");
 
+    // Enable download button
+    $downloadPresentationBtn.disabled = false;
+
     // Open presentation window if not already open
     if (!presentationWindow || presentationWindow.closed) {
       openPresentationWindow();
@@ -139,25 +167,35 @@ async function startRecording() {
 function setupDataChannel() {
   dataChannel.addEventListener("open", () => {
     console.log("Data channel opened");
-    // Configure session for transcription
+
+    // Configure session for slide generation
+    const instructions = $slideInstructions.value.trim() || DEFAULT_INSTRUCTIONS;
     const sessionConfig = {
       type: "session.update",
       session: {
         modalities: ["text", "audio"],
-        instructions:
-          "You are a helpful assistant. Listen to the user's speech and provide transcription. Focus on accurate transcription of what is being said.",
-        input_audio_transcription: {
-          model: "whisper-1",
-        },
+        instructions: instructions,
+        voice: "alloy",
+        input_audio_format: "pcm16",
+        output_audio_format: "pcm16",
         turn_detection: {
           type: "server_vad",
           threshold: 0.5,
           prefix_padding_ms: 300,
-          silence_duration_ms: 500,
+          silence_duration_ms: 1000,
         },
       },
     };
     dataChannel.send(JSON.stringify(sessionConfig));
+
+    // Start a conversation by requesting a response
+    const responseCreate = {
+      type: "response.create",
+      response: {
+        modalities: ["text"],
+      },
+    };
+    dataChannel.send(JSON.stringify(responseCreate));
   });
 
   dataChannel.addEventListener("message", (event) => {
@@ -186,18 +224,9 @@ function handleRealtimeEvent(event) {
   console.log("Received event:", event.type, event);
 
   switch (event.type) {
-    case "conversation.item.input_audio_transcription.completed":
-      // Handle completed transcription
-      if (event.transcript) {
-        addToTranscript(event.transcript);
-      }
-      break;
-
-    case "conversation.item.input_audio_transcription.delta":
-      // Handle incremental transcription (if available)
-      if (event.delta) {
-        updateTranscriptDelta(event.delta);
-      }
+    case "session.created":
+    case "session.updated":
+      console.log("Session ready");
       break;
 
     case "input_audio_buffer.speech_started":
@@ -208,8 +237,31 @@ function handleRealtimeEvent(event) {
       $bufferStatus.textContent = "Processing...";
       break;
 
-    case "response.audio_transcript.delta":
-      // Model's text response (we can ignore for transcription purposes)
+    case "conversation.item.created":
+      console.log("Conversation item created:", event);
+      break;
+
+    case "response.text.delta":
+      // Model is generating text response with slide content
+      if (event.delta) {
+        currentResponseText += event.delta;
+        updateTranscriptDisplay();
+      }
+      break;
+
+    case "response.text.done":
+      // Model finished generating text - try to parse slides
+      if (event.text) {
+        currentResponseText = event.text;
+        parseAndAddSlides(event.text);
+        // Request next response
+        requestNextResponse();
+      }
+      break;
+
+    case "response.done":
+      console.log("Response complete");
+      $bufferStatus.textContent = "Ready";
       break;
 
     case "error":
@@ -223,57 +275,53 @@ function handleRealtimeEvent(event) {
   }
 }
 
-function addToTranscript(text) {
-  transcriptBuffer += text + " ";
-  updateTranscriptDisplay();
-  checkForNewSlide();
-}
+function requestNextResponse() {
+  if (!dataChannel || dataChannel.readyState !== "open") return;
 
-function updateTranscriptDelta(delta) {
-  transcriptBuffer += delta;
-  updateTranscriptDisplay();
-  checkForNewSlide();
+  const responseCreate = {
+    type: "response.create",
+    response: {
+      modalities: ["text"],
+    },
+  };
+  dataChannel.send(JSON.stringify(responseCreate));
 }
 
 function updateTranscriptDisplay() {
-  $transcriptBox.textContent = transcriptBuffer || "Waiting for speech...";
+  $transcriptBox.textContent = currentResponseText || "Waiting for speech...";
   $transcriptBox.scrollTop = $transcriptBox.scrollHeight;
-  $bufferStatus.textContent = `${transcriptBuffer.length} characters`;
 }
 
-function checkForNewSlide() {
-  const newContent = transcriptBuffer.slice(lastProcessedLength);
+function parseAndAddSlides(text) {
+  // Try to extract JSON slide objects from the response
+  const jsonMatches = text.matchAll(/\{[^}]*"title"[^}]*"content"[^}]*\}/g);
 
-  // Check if we have enough content and a logical ending
-  if (newContent.length >= MIN_BUFFER_FOR_SLIDE) {
-    const hasStatementEnd = STATEMENT_END_PATTERNS.some((pattern) => newContent.includes(pattern));
-
-    if (hasStatementEnd) {
-      // Find the last statement ending
-      let lastEndIndex = -1;
-      for (const pattern of STATEMENT_END_PATTERNS) {
-        const idx = newContent.lastIndexOf(pattern);
-        if (idx > lastEndIndex) {
-          lastEndIndex = idx + pattern.length;
+  for (const match of jsonMatches) {
+    try {
+      const slideData = JSON.parse(match[0]);
+      if (slideData.title && slideData.content) {
+        // Check if this is a new slide (not duplicate)
+        const isDuplicate = slides.some((s) => s.title === slideData.title && s.content === slideData.content);
+        if (!isDuplicate) {
+          createNewSlide(slideData.title, slideData.content);
         }
       }
+    } catch (error) {
+      console.error("Error parsing slide JSON:", error);
+    }
+  }
 
-      if (lastEndIndex > 0) {
-        const slideContent = newContent.slice(0, lastEndIndex).trim();
-        if (slideContent.length > 50) {
-          // Minimum meaningful content
-          createNewSlide(slideContent);
-          lastProcessedLength = transcriptBuffer.length - (newContent.length - lastEndIndex);
-        }
-      }
+  // If no JSON found, try to parse as regular text and create a single slide
+  if (slides.length === 0 && text.length > 50) {
+    const lines = text.split("\n").filter((l) => l.trim());
+    if (lines.length > 0) {
+      const title = generateSlideTitle(text);
+      createNewSlide(title, text);
     }
   }
 }
 
-function createNewSlide(content) {
-  // Generate a summary/title for the slide
-  const title = generateSlideTitle(content);
-
+function createNewSlide(title, content) {
   const slide = {
     title: title,
     content: content,
@@ -317,7 +365,7 @@ function updateSlidePreview() {
   $slidePreview.innerHTML = `
     <h4 class="text-primary">${escapeHtml(slide.title)}</h4>
     <hr>
-    <p>${escapeHtml(slide.content)}</p>
+    <div>${formatSlideContent(slide.content)}</div>
   `;
 }
 
@@ -368,10 +416,14 @@ function openPresentationWindow() {
 }
 
 function createPresentationHTML() {
+  const theme = $presentationTheme.value || "black";
   const slidesHTML =
     slides.length > 0
       ? slides
-          .map((slide) => `<section><h2>${escapeHtml(slide.title)}</h2><p>${escapeHtml(slide.content)}</p></section>`)
+          .map(
+            (slide) =>
+              `<section><h2>${escapeHtml(slide.title)}</h2><div>${formatSlideContent(slide.content)}</div></section>`,
+          )
           .join("\n")
       : "<section><h2>Live Slides</h2><p>Waiting for speech...</p></section>";
 
@@ -381,10 +433,12 @@ function createPresentationHTML() {
   <title>Live Presentation</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reset.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/black.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/${theme}.css">
   <style>
     .reveal h2 { font-size: 1.8em; margin-bottom: 0.5em; }
-    .reveal p { font-size: 1.2em; line-height: 1.5; }
+    .reveal p { font-size: 1.2em; line-height: 1.5; text-align: left; }
+    .reveal ul, .reveal ol { font-size: 1.1em; text-align: left; }
+    .reveal li { margin-bottom: 0.5em; }
   </style>
 </head>
 <body>
@@ -415,7 +469,7 @@ function createPresentationHTML() {
     window.addSlide = function(title, content) {
       const container = document.getElementById('slides-container');
       const section = document.createElement('section');
-      section.innerHTML = '<h2>' + title + '</h2><p>' + content + '</p>';
+      section.innerHTML = '<h2>' + title + '</h2><div>' + content + '</div>';
       container.appendChild(section);
       Reveal.sync();
       Reveal.slide(Reveal.getTotalSlides() - 1);
@@ -429,6 +483,37 @@ function createPresentationHTML() {
 </html>`;
 }
 
+function formatSlideContent(content) {
+  // Simple markdown-like formatting
+  let formatted = escapeHtml(content);
+
+  // Convert bullet points (- item or * item)
+  formatted = formatted.replace(/^[*-]\s+(.+)$/gm, "<li>$1</li>");
+  if (formatted.includes("<li>")) {
+    formatted = "<ul>" + formatted + "</ul>";
+  }
+
+  // Convert numbered lists (1. item)
+  formatted = formatted.replace(/^\d+\.\s+(.+)$/gm, "<li>$1</li>");
+
+  // Convert **bold**
+  formatted = formatted.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+  // Convert *italic*
+  formatted = formatted.replace(/\*(.+?)\*/g, "<em>$1</em>");
+
+  // Convert line breaks to paragraphs
+  if (!formatted.includes("<ul>") && !formatted.includes("<li>")) {
+    formatted = formatted
+      .split("\n\n")
+      .filter((p) => p.trim())
+      .map((p) => `<p>${p.trim()}</p>`)
+      .join("");
+  }
+
+  return formatted;
+}
+
 function updatePresentationWindow() {
   if (!presentationWindow || presentationWindow.closed) {
     return;
@@ -436,7 +521,7 @@ function updatePresentationWindow() {
 
   const slide = slides[slides.length - 1];
   try {
-    presentationWindow.addSlide(escapeHtml(slide.title), escapeHtml(slide.content));
+    presentationWindow.addSlide(escapeHtml(slide.title), formatSlideContent(slide.content));
   } catch (error) {
     console.error("Error updating presentation:", error);
   }
@@ -474,6 +559,10 @@ function stopRecording() {
     mediaStream = null;
   }
 
+  // Re-enable editing of instructions
+  $slideInstructions.disabled = false;
+  $presentationTheme.disabled = false;
+
   // Update UI
   $recordBtn.classList.remove("btn-danger", "recording");
   $recordBtn.classList.add("btn-outline-danger");
@@ -482,6 +571,27 @@ function stopRecording() {
 
   updateStatus("disconnected", "Disconnected");
   $bufferStatus.textContent = "Paused";
+}
+
+function downloadPresentation() {
+  if (slides.length === 0) {
+    bootstrapAlert({ title: "No Slides", body: "Generate some slides before downloading.", color: "warning" });
+    return;
+  }
+
+  const presentationHTML = createPresentationHTML();
+  const blob = new Blob([presentationHTML], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `live-slides-${new Date().toISOString().slice(0, 10)}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  bootstrapAlert({ title: "Downloaded", body: "Presentation saved successfully!", color: "success" });
 }
 
 function cleanup() {
