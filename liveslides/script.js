@@ -188,14 +188,8 @@ function setupDataChannel() {
     };
     dataChannel.send(JSON.stringify(sessionConfig));
 
-    // Start a conversation by requesting a response
-    const responseCreate = {
-      type: "response.create",
-      response: {
-        modalities: ["text"],
-      },
-    };
-    dataChannel.send(JSON.stringify(responseCreate));
+    // Note: We don't manually create responses - server_vad handles this automatically
+    // when it detects speech has stopped
   });
 
   dataChannel.addEventListener("message", (event) => {
@@ -254,8 +248,8 @@ function handleRealtimeEvent(event) {
       if (event.text) {
         currentResponseText = event.text;
         parseAndAddSlides(event.text);
-        // Request next response
-        requestNextResponse();
+        // Clear response text for next turn
+        currentResponseText = "";
       }
       break;
 
@@ -273,18 +267,6 @@ function handleRealtimeEvent(event) {
       });
       break;
   }
-}
-
-function requestNextResponse() {
-  if (!dataChannel || dataChannel.readyState !== "open") return;
-
-  const responseCreate = {
-    type: "response.create",
-    response: {
-      modalities: ["text"],
-    },
-  };
-  dataChannel.send(JSON.stringify(responseCreate));
 }
 
 function updateTranscriptDisplay() {
