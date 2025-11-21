@@ -1,13 +1,11 @@
 const defaultState = createScraperState();
 
-// Extract text from an element, replacing emoji <img> tags with their alt text
+// Extract text from an element, replacing data-plain-text elements with their values
 function getTextWithEmojis(element) {
   if (!element) return undefined;
   const clone = element.cloneNode(true);
-  for (const img of clone.querySelectorAll("img.emoji")) {
-    const emoji = img.getAttribute("data-plain-text") || img.alt || "";
-    img.replaceWith(emoji);
-  }
+  for (const el of clone.querySelectorAll("[data-plain-text]")) el.replaceWith(el.dataset.plainText);
+  for (const img of clone.querySelectorAll("img.emoji[alt]")) img.replaceWith(img.alt);
   return clone.textContent;
 }
 
