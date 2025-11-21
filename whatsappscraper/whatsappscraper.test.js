@@ -148,6 +148,38 @@ describe("whatsappscraper", () => {
     expect(messages[1].authorPhone).toBe("+91 12345 67890");
   });
 
+  it("extracts emojis from img tags in message text and quote text", async () => {
+    const { Window } = await import("happy-dom");
+    const win = new Window();
+    win.document.body.innerHTML = `
+        <div id="main">
+          <div role="row">
+            <div data-id="false_120363049558306142@g.us_3A1F09F1FDDD0934B858_149275984019540@lid">
+              <div data-pre-plain-text="[1:14 pm, 12/11/2025] +1 (937) 708-1307: ">
+                <div class="selectable-text">
+                  <span>I would fund that startup <img crossorigin="anonymous" alt="😂" draggable="false" class="b82 emoji wa _ao3e selectable-text copyable-text" data-plain-text="😂" tabindex="-1" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-position: -40px -60px;"></span>
+                </div>
+                <div role=""><span dir="ltr">Pratik Desai</span></div>
+                <div aria-label="Quoted message">
+                  <div role="">
+                    <span class="_ahx_">+91 96202 12419</span>
+                    <span aria-label="Contact Name">Test Contact</span>
+                  </div>
+                  <div class="quoted-mention">AI Insurance? <img crossorigin="anonymous" alt="🤔" draggable="false" class="b96 emoji wa _ao3e" tabindex="-1" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" style="background-position: -40px -60px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    `;
+    const messages = whatsappMessages(win.document);
+    expect(messages).toHaveLength(1);
+    expect(messages[0].text).toBe("I would fund that startup 😂");
+    expect(messages[0].quoteText).toBe("AI Insurance? 🤔");
+    expect(messages[0].author).toBe("Pratik Desai");
+    expect(messages[0].authorPhone).toBe("+1 (937) 708-1307");
+  });
+
   it("does NOT inherit lastAuthor when message has author section but no dir element (phone number only)", async () => {
     const { Window } = await import("happy-dom");
     const win = new Window();
