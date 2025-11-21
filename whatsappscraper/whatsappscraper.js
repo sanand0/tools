@@ -1,5 +1,14 @@
 const defaultState = createScraperState();
 
+// Extract text from an element, replacing data-plain-text elements with their values
+function getTextWithEmojis(element) {
+  if (!element) return undefined;
+  const clone = element.cloneNode(true);
+  for (const el of clone.querySelectorAll("[data-plain-text]")) el.replaceWith(el.dataset.plainText);
+  for (const img of clone.querySelectorAll("img.emoji[alt]")) img.replaceWith(img.alt);
+  return clone.textContent;
+}
+
 export function createScraperState(seed) {
   const messagesById = Object.create(null);
   if (seed) for (const [key, value] of Object.entries(seed)) messagesById[key] = value;
@@ -28,7 +37,7 @@ export function whatsappMessages(rootDocument = document) {
       // TODO: Image links
       // TODO: Forwarded flag
       const selectable = el.querySelector(".selectable-text");
-      rawText = selectable?.outerText;
+      rawText = getTextWithEmojis(selectable);
       hasGif = !!el.querySelector('[aria-label="Play GIF" i]');
       const authorSection = el.querySelector('[role=""]');
       message.author = authorSection?.querySelector("[dir]")?.textContent;
@@ -69,7 +78,7 @@ export function whatsappMessages(rootDocument = document) {
         message.quoteAuthorPhone = quoteAuthorNoLabel.replace(/[^0-9]+/g, "");
         message.quoteAuthor = quoteAuthorLabel;
       } else message.quoteAuthor = quoteAuthorNoLabel;
-      message.quoteText = quote.querySelector(".quoted-mention")?.outerText;
+      message.quoteText = getTextWithEmojis(quote.querySelector(".quoted-mention"));
       // Find previous message
       if (message.quoteText)
         for (let j = messages.length - 1; j >= 0; j--) {

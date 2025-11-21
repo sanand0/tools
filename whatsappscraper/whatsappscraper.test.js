@@ -148,6 +148,48 @@ describe("whatsappscraper", () => {
     expect(messages[1].authorPhone).toBe("+91 12345 67890");
   });
 
+  it("extracts data-plain-text from any element", async () => {
+    const { Window } = await import("happy-dom");
+    const win = new Window();
+    win.document.body.innerHTML = `
+        <div id="main">
+          <div role="row">
+            <div data-id="false_123@g.us_MSG1_456@lid">
+              <div data-pre-plain-text="[1:14 pm, 12/11/2025] +1 234: ">
+                <div class="selectable-text">
+                  <span>Hello <span data-plain-text="🌍">globe</span> world <img data-plain-text="😂" src="x"></span>
+                </div>
+                <div role=""><span dir="ltr">Author</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+    `;
+    const messages = whatsappMessages(win.document);
+    expect(messages[0].text).toBe("Hello 🌍 world 😂");
+  });
+
+  it("falls back to img.emoji alt when data-plain-text is missing", async () => {
+    const { Window } = await import("happy-dom");
+    const win = new Window();
+    win.document.body.innerHTML = `
+        <div id="main">
+          <div role="row">
+            <div data-id="false_123@g.us_MSG2_456@lid">
+              <div data-pre-plain-text="[1:15 pm, 12/11/2025] +1 234: ">
+                <div class="selectable-text">
+                  <span>Thinking <img class="emoji" alt="🤔" src="x"></span>
+                </div>
+                <div role=""><span dir="ltr">Author</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+    `;
+    const messages = whatsappMessages(win.document);
+    expect(messages[0].text).toBe("Thinking 🤔");
+  });
+
   it("does NOT inherit lastAuthor when message has author section but no dir element (phone number only)", async () => {
     const { Window } = await import("happy-dom");
     const win = new Window();
