@@ -3,6 +3,7 @@ import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html@3";
 import { openaiHelp } from "../common/aiconfig.js";
+import { createActivityClient } from "./activity.js";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -11,28 +12,6 @@ const DEFAULT_BASE_URLS = [
   "https://llmfoundry.straive.com/openai/v1",
 ];
 
-// GitHub API field mappings
-const GITHUB_FIELDS = {
-  ForkEvent: ["type", "repo.name", "payload.forkee.full_name", "created_at"],
-  IssueCommentEvent: ["type", "payload.action", "repo.name", "payload.comment.body", "created_at"],
-  IssuesEvent: ["type", "payload.action", "repo.name", "payload.issue.title", "payload.issue.body", "created_at"],
-  PullRequestEvent: ["type", "payload.action", "repo.name", "payload.pull_request.title", "created_at"],
-  PullRequestReviewEvent: ["type", "payload.review.state", "repo.name", "payload.pull_request.title", "created_at"],
-  PullRequestReviewCommentEvent: ["type", "repo.name", "payload.comment.body", "created_at"],
-  PushEvent: ["type", "repo.name", "payload.ref", "payload.commits[*].message", "created_at"],
-  ReleaseEvent: [
-    "type",
-    "payload.action",
-    "repo.name",
-    "payload.release.tag_name",
-    "short_description_html",
-    "created_at",
-  ],
-  CreateEvent: ["type", "payload.ref_type", "repo.name", "payload.ref", "created_at"],
-  DeleteEvent: ["type", "payload.ref_type", "repo.name", "payload.ref", "created_at"],
-  WatchEvent: ["type", "payload.action", "repo.name", "created_at"],
-};
-
 // IndexedDB cache management
 const DB_NAME = "github-cache";
 const DB_VERSION = 1;
@@ -40,7 +19,14 @@ const STORE_NAME = "urls";
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 let db = null;
-let fetchedEvents = [];
+let activityClient;
+let fetchedActivity = { activity: [], repos: [] };
+let fetchedContext = {};
+const progressState = {
+  repos: { current: 0, total: 0 },
+  commits: { current: 0, total: 0 },
+  currentRepo: "",
+};
 
 const openaiConfigBtn = document.getElementById("openai-config-btn");
 openaiConfigBtn.addEventListener("click", async () => {
@@ -113,7 +99,7 @@ function createProgressBar(id, label) {
   const container = document.getElementById("progress-container");
   const html = `
                 <div class="mb-3">
-                    <label class="form-label">${label}</label>
+                    <label class="form-label" id="${id}-label">${label}</label>
                     <div class="progress">
                         <div id="${id}" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
                     </div>
@@ -124,13 +110,74 @@ function createProgressBar(id, label) {
 
 function updateProgress(id, current, total) {
   const progressBar = document.getElementById(id);
-  const percent = Math.round((current / total) * 100);
+  const safeTotal = Math.max(total || 0, 1);
+  const percent = Math.round((current / safeTotal) * 100);
   progressBar.style.width = `${percent}%`;
   progressBar.textContent = `${percent}%`;
 }
 
+function resetProgressState() {
+  progressState.repos.current = 0;
+  progressState.repos.total = 0;
+  progressState.commits.current = 0;
+  progressState.commits.total = 0;
+  progressState.currentRepo = "";
+}
+
+function createActivityProgressBars() {
+  resetProgressState();
+  createProgressBar("repos-progress", "Discovering contributed repositories");
+  createProgressBar("commits-progress", "Fetching commits");
+}
+
+function handleActivityProgress(update) {
+  if (update.stage === "repos") {
+    if (typeof update.total === "number") progressState.repos.total = update.total;
+    if (typeof update.current === "number") progressState.repos.current = update.current;
+    if (update.repo) {
+      const label = document.getElementById("repos-progress-label");
+      if (label) {
+        const repoUrl = `https://github.com/${update.repo}`;
+        label.innerHTML = `Discovering contributed repositories — <a href="${repoUrl}" target="_blank" rel="noopener noreferrer">${update.repo}</a>`;
+      }
+    }
+    updateProgress("repos-progress", progressState.repos.current, progressState.repos.total);
+  }
+
+  if (update.stage === "commits") {
+    if (update.repo && update.repo !== progressState.currentRepo) {
+      progressState.currentRepo = update.repo;
+      progressState.commits.current = 0;
+    }
+    if (typeof update.total === "number") progressState.commits.total = update.total;
+    if (typeof update.current === "number") progressState.commits.current = update.current;
+    const label = document.getElementById("commits-progress-label");
+    if (label && progressState.currentRepo) {
+      const repoUrl = `https://github.com/${progressState.currentRepo}`;
+      label.innerHTML = `Fetching commits — <a href="${repoUrl}" target="_blank" rel="noopener noreferrer">${progressState.currentRepo}</a>`;
+    }
+    updateProgress("commits-progress", progressState.commits.current, progressState.commits.total);
+  }
+
+  if (update.url) showCurrentUrl(update.url);
+}
+
+const buildGitHubHeaders = (token) => {
+  const headers = { Accept: "application/vnd.github+json", "Content-Type": "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+};
+
+activityClient = createActivityClient({ onRequest: showCurrentUrl });
+window.githubActivityClient = activityClient;
+
 function showCurrentUrl(url) {
-  document.getElementById("current-url").textContent = `Fetching: ${url}`;
+  const el = document.getElementById("current-url");
+  if (!url) {
+    el.textContent = "";
+    return;
+  }
+  el.textContent = `Fetching: ${url}`;
 }
 
 function showError(message) {
@@ -138,34 +185,19 @@ function showError(message) {
   document.getElementById("error-message").textContent = message;
 }
 
-// JMESPath-like object navigation
-function getNestedValue(obj, path) {
-  const parts = path.split(".");
-  let current = obj;
-
-  for (const part of parts) {
-    if (part.includes("[*]")) {
-      const [key, rest] = part.split("[*]");
-      current = current[key];
-      if (Array.isArray(current)) {
-        return current.map((item) => (rest ? getNestedValue(item, rest.slice(1)) : item)).flat();
-      }
-      return [];
-    } else if (part.includes("[") && part.includes("]")) {
-      const [key, index] = part.split("[");
-      const idx = parseInt(index.replace("]", ""));
-      current = current[key][idx];
-    } else {
-      current = current?.[part];
-    }
-
-    if (current === undefined) return null;
-  }
-
-  return current;
+function setContextTextarea(contextObj) {
+  const textarea = document.getElementById("context-textarea");
+  textarea.value = JSON.stringify(contextObj, null, 2);
 }
 
-function renderEventsTable(events) {
+function getContextFromTextarea() {
+  const textarea = document.getElementById("context-textarea");
+  const value = textarea.value.trim();
+  if (!value) return {};
+  return JSON.parse(value);
+}
+
+function renderActivityTable(activity) {
   const container = document.getElementById("events-table-section");
   const dateFormatter = new Intl.DateTimeFormat(undefined, {
     weekday: "short",
@@ -175,124 +207,65 @@ function renderEventsTable(events) {
     minute: "numeric",
   });
 
-  const table = html`
-    <table class="table table-striped table-sm">
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Type</th>
-          <th>Repo</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${events.map((event) => {
-          let description = "";
-          let eventUrl = `https://github.com/${event.repo.name}`;
-          let hasSpecificUrl = false;
-          switch (event.type) {
-            case "PushEvent":
-              description = event.payload.commits.map((c) => c.message.split("\n")[0]).join(", ");
-              if (event.payload.commits.length > 0) {
-                eventUrl = `https://github.com/${event.repo.name}/commit/${event.payload.head}`;
-                hasSpecificUrl = true;
-              }
-              break;
-            case "PullRequestEvent":
-              description = `#${event.payload.number} ${event.payload.pull_request.title}`;
-              eventUrl = event.payload.pull_request.html_url;
-              hasSpecificUrl = true;
-              break;
-            case "DeleteEvent":
-              description = `${event.payload.ref_type} ${event.payload.ref}`;
-              break;
-            case "CreateEvent":
-              description = `${event.payload.ref_type} ${event.payload.ref || event.repo.name}`;
-              break;
-            case "IssueCommentEvent":
-              description = `#${event.payload.issue.number} ${event.payload.issue.title}`;
-              eventUrl = event.payload.comment.html_url;
-              hasSpecificUrl = true;
-              break;
-            case "IssuesEvent":
-              description = `#${event.payload.issue.number} ${event.payload.issue.title}`;
-              eventUrl = event.payload.issue.html_url;
-              hasSpecificUrl = true;
-              break;
-            case "ReleaseEvent":
-              description = event.payload.release.name || event.payload.release.tag_name;
-              eventUrl = event.payload.release.html_url;
-              hasSpecificUrl = true;
-              break;
-            default:
-              description = "";
-          }
-          return html`
-            <tr>
-              <td class="text-nowrap">${dateFormatter.format(new Date(event.created_at))}</td>
-              <td>${event.type.replace("Event", "")}</td>
-              <td><a href="https://github.com/${event.repo.name}" target="_blank">${event.repo.name}</a></td>
-              <td>
-                ${hasSpecificUrl
-                  ? html`<a href=${eventUrl} class="btn btn-sm btn-outline-primary" target="_blank">🔗</a>`
-                  : ""}
-                ${description}
-              </td>
-            </tr>
-          `;
-        })}
-      </tbody>
-    </table>
-  `;
-  render(table, container);
-}
-
-// Fetch GitHub events
-async function fetchEvents(user, headers, since) {
-  let url = `https://api.github.com/users/${user}/events/public`;
-  const events = [];
-
-  createProgressBar("events-progress", "Fetching GitHub Events");
-  let pageCount = 0;
-
-  while (url) {
-    showCurrentUrl(url);
-    pageCount++;
-    updateProgress("events-progress", pageCount, pageCount + 1);
-
-    const response = await fetch(url, { headers });
-    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    const page = await response.json();
-
-    events.push(...page);
-    renderEventsTable(events);
-
-    // Stop if all events on this page are before our start date
-    const sinceDate = new Date(since);
-    if (page.every((ev) => new Date(ev.created_at) < sinceDate)) break;
-
-    // Get next page URL from Link header (simplified)
-    url = null; // GitHub API doesn't provide easy pagination in JSON response
-    if (page.length === 30) {
-      // Standard page size
-      url = `https://api.github.com/users/${user}/events/public?page=${pageCount + 1}`;
-    }
+  if (!activity.length) {
+    container.textContent = "No commits found for this period.";
+    return;
   }
 
-  updateProgress("events-progress", 1, 1);
-  return events;
+  render(
+    html`
+      <table class="table table-striped table-sm">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Repo</th>
+            <th>Commit</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${activity.map(
+            (commit) => html`
+              <tr>
+                <td class="text-nowrap">${dateFormatter.format(new Date(commit.created_at))}</td>
+                <td>
+                  <a href="https://github.com/${commit["repo.name"]}" target="_blank">${commit["repo.name"]}</a>
+                </td>
+                <td>
+                  ${commit.url
+                    ? html`<a href=${commit.url} class="btn btn-sm btn-outline-primary" target="_blank">🔗</a>`
+                    : ""}
+                  ${commit.message?.split("\n")[0] || ""}
+                </td>
+              </tr>
+            `,
+          )}
+        </tbody>
+      </table>
+    `,
+    container,
+  );
 }
+
+const fetchActivity = async (user, since, until, headers) => {
+  createActivityProgressBars();
+  const result = await activityClient.fetchGitHubActivity(user, since, until, headers, {
+    onProgress: handleActivityProgress,
+    onCommit: (activity) => renderActivityTable(activity),
+  });
+  renderActivityTable(result.activity);
+  return result;
+};
 
 // Fetch repository details
 async function fetchRepoDetails(repos, headers) {
   const details = {};
   const repoList = [...new Set(repos)];
 
-  createProgressBar("repos-progress", "Fetching Repository Details");
+  createProgressBar("repo-details-progress", "Fetching Repository Details");
 
   for (let i = 0; i < repoList.length; i++) {
     const repo = repoList[i];
-    updateProgress("repos-progress", i, repoList.length);
+    updateProgress("repo-details-progress", i, repoList.length);
 
     try {
       showCurrentUrl(`https://api.github.com/repos/${repo}`);
@@ -303,6 +276,7 @@ async function fetchRepoDetails(repos, headers) {
       try {
         const readmeResp = await fetchWithCache(`https://api.github.com/repos/${repo}/readme`, { headers });
         readme = atob(readmeResp.content || "");
+        if (readme.length > 2000) readme = `${readme.slice(0, 2000)}\n... [README truncated]`;
       } catch {
         // README might not exist
       }
@@ -317,70 +291,8 @@ async function fetchRepoDetails(repos, headers) {
     }
   }
 
-  updateProgress("repos-progress", repoList.length, repoList.length);
+  updateProgress("repo-details-progress", repoList.length, repoList.length);
   return details;
-}
-
-// Fetch GitHub activity
-async function fetchGitHubActivity(events, since, until, headers) {
-  const activity = [];
-  const repos = new Set();
-
-  createProgressBar("activity-progress", "Processing Events");
-
-  const sinceDate = new Date(since);
-  const untilDate = new Date(until);
-
-  for (let i = 0; i < events.length; i++) {
-    const ev = events[i];
-    updateProgress("activity-progress", i, events.length);
-
-    const ts = new Date(ev.created_at);
-    if (!(sinceDate <= ts && ts < untilDate)) continue;
-
-    const repo = ev.repo.name;
-    repos.add(repo);
-
-    if (GITHUB_FIELDS[ev.type]) {
-      const info = {};
-      for (const path of GITHUB_FIELDS[ev.type]) {
-        const val = getNestedValue(ev, path);
-        info[path] = Array.isArray(val) ? val.join(", ") : val;
-      }
-      activity.push(info);
-    }
-
-    // Handle push events specially
-    if (ev.type === "PushEvent") {
-      for (const commit of ev.payload.commits || []) {
-        try {
-          const url = `https://api.github.com/repos/${repo}/commits/${commit.sha}`;
-          showCurrentUrl(url);
-          const commitData = await fetchWithCache(url, { headers });
-
-          activity.push({
-            type: "commit",
-            "repo.name": repo,
-            created_at: commitData.commit.author.date,
-            sha: commit.sha,
-            message: commitData.commit.message,
-            files: (commitData.files || []).map((f) => ({
-              filename: f.filename,
-              additions: f.additions,
-              deletions: f.deletions,
-              changes: f.changes,
-              patch: f.patch || "",
-            })),
-          });
-        } catch (e) {
-          console.warn(`Error fetching commit ${commit.sha}:`, e);
-        }
-      }
-    }
-  }
-
-  updateProgress("activity-progress", events.length, events.length);
-  return { activity, repos: [...repos] };
 }
 
 // Generate summary using OpenAI
@@ -423,20 +335,28 @@ document.getElementById("github-form").addEventListener("submit", async (e) => {
 
   const username = document.getElementById("username").value;
   const since = document.getElementById("since").value;
+  const until = document.getElementById("until").value;
   const githubToken = document.getElementById("github-token").value;
 
   document.getElementById("progress-section").style.display = "block";
   document.getElementById("error-section").style.display = "none";
   document.getElementById("results-section").style.display = "none";
   document.getElementById("progress-container").innerHTML = "";
+  document.getElementById("events-table-section").textContent = "";
+  fetchedContext = {};
 
-  const headers = { "Content-Type": "application/json" };
-  if (githubToken) headers.Authorization = `Bearer ${githubToken}`;
+  const headers = buildGitHubHeaders(githubToken);
 
   try {
     if (document.getElementById("clear-cache").value) await clearCache();
-    fetchedEvents = await fetchEvents(username, headers, since);
-    document.getElementById("generate-summary-btn").disabled = false;
+    fetchedActivity = await fetchActivity(username, since, until, headers);
+    fetchedContext = await fetchRepoDetails(fetchedActivity.repos, headers);
+    setContextTextarea(fetchedContext);
+    document.getElementById("generate-summary-btn").disabled = fetchedActivity.activity.length === 0;
+    if (!fetchedActivity.activity.length) {
+      showError("No commits found for this period.");
+    }
+    showCurrentUrl("");
   } catch (error) {
     showError(error.message);
   }
@@ -468,20 +388,36 @@ document.getElementById("generate-summary-btn").addEventListener("click", async 
   document.getElementById("progress-section").style.display = "block";
 
   try {
-    // Fetch GitHub data
-    const headers = { "Content-Type": "application/json" };
-    if (config.githubToken) headers.Authorization = `Bearer ${config.githubToken}`;
+    if (!fetchedActivity.activity.length) {
+      showError("No activity fetched yet. Run Get events first.");
+      return;
+    }
 
-    const { activity, repos } = await fetchGitHubActivity(fetchedEvents, config.since, config.until, headers);
+    if (!Object.keys(fetchedContext).length) {
+      const headers = buildGitHubHeaders(config.githubToken);
+      fetchedContext = await fetchRepoDetails(fetchedActivity.repos, headers);
+      setContextTextarea(fetchedContext);
+    }
 
-    const context = await fetchRepoDetails(repos, headers);
+    let contextForSummary = fetchedContext;
+    try {
+      contextForSummary = getContextFromTextarea();
+    } catch (err) {
+      showError(`Context JSON is invalid: ${err.message}`);
+      return;
+    }
 
     // Show results section
     document.getElementById("results-section").style.display = "block";
 
     // Generate summary
     const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
-    await generateSummary({ activity, repos, context }, config.systemPrompt, apiKey, baseUrl);
+    await generateSummary(
+      { activity: fetchedActivity.activity, repos: fetchedActivity.repos, context: contextForSummary },
+      config.systemPrompt,
+      apiKey,
+      baseUrl,
+    );
   } catch (error) {
     showError(error.message);
   }

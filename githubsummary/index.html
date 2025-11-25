@@ -228,6 +228,16 @@ Make it engaging and easy to follow just by listening.</textarea>
           <div id="current-url" class="mt-2 text-muted small"></div>
         </div>
 
+        <div class="mt-4">
+          <button class="btn btn-outline-secondary mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#context-collapse" aria-expanded="false" aria-controls="context-collapse">
+            Context (editable)
+          </button>
+          <div class="collapse" id="context-collapse">
+            <label for="context-textarea" class="form-label small text-muted">Context sent to Generate Summary (editable JSON)</label>
+            <textarea id="context-textarea" class="form-control" rows="10" spellcheck="false"></textarea>
+          </div>
+        </div>
+
         <div id="error-section" class="mt-4" style="display: none">
           <div class="alert alert-danger" role="alert">
             <h5 class="alert-heading">Error</h5>
