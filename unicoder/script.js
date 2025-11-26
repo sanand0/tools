@@ -90,17 +90,6 @@ const detectStyle = (char) => {
   return range?.style ?? null;
 };
 
-/**
- * Convert Unicode text back to ASCII, preserving structure
- * @param {string} text - Unicode-styled text
- * @returns {string} ASCII text
- */
-const fromUnicodeStyle = (text) => {
-  return text
-    .split("")
-    .map((char) => toAscii(char))
-    .join("");
-};
 
 // ============================================================================
 // Markdown to Unicode Conversion
@@ -226,10 +215,9 @@ const convertUnicodeToMarkdown = (unicodeText) => {
 /**
  * Convert a code block (multiple lines of code)
  */
-const convertCodeBlock = (text) => {
-  const converted = [...text].map((c) => (detectStyle(c) === "mono" ? toAscii(c) : c)).join("");
-  return { markdown: "```\n" + converted + "\n```" };
-};
+const convertCodeBlock = (text) => ({
+  markdown: "```\n" + [...text].map((c) => (detectStyle(c) === "mono" ? toAscii(c) : c)).join("") + "\n```",
+});
 
 /**
  * Convert a single line of text
@@ -339,10 +327,10 @@ const copyToClipboard = (text, button) => {
 // Event Handlers
 // ============================================================================
 
-const renderOutput = (outputId, content) => {
-  const output = document.getElementById(outputId);
-  output.replaceChildren();
-  output.insertAdjacentHTML("beforeend", `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${content}</div>`);
+const renderOutput = (id, content) => {
+  const el = document.getElementById(id);
+  el.replaceChildren();
+  el.insertAdjacentHTML("beforeend", `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${content}</div>`);
 };
 
 const updateMarkdownOutput = () => {
@@ -355,9 +343,8 @@ const updateUnicodeOutput = () => {
   renderOutput("markdown-output", convertUnicodeToMarkdown(document.getElementById("unicode-input").value));
 };
 
-const handleCopy = (outputId, buttonId) => () => {
+const handleCopy = (outputId, buttonId) => () =>
   copyToClipboard(document.getElementById(outputId).innerText, document.getElementById(buttonId));
-};
 
 // ============================================================================
 // Initialize
@@ -400,14 +387,5 @@ This is \`"inline" code\`
 
 // Export functions for testing
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = {
-    convertMarkdownToUnicode,
-    convertUnicodeToMarkdown,
-    toBold,
-    toItalic,
-    toMonospace,
-    toAscii,
-    detectStyle,
-    fromUnicodeStyle,
-  };
+  module.exports = { convertMarkdownToUnicode, convertUnicodeToMarkdown, toBold, toItalic, toMonospace, toAscii, detectStyle };
 }
