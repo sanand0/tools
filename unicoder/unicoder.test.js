@@ -21,12 +21,15 @@ describe("Unicoder tests", async () => {
 
   const sampleMarkdown = `# Heading 1
 
-This is **bold** and _italic_ text.
+This is **"bold" text** and _italic_ text.
 
 > Blockquote line
 
 \`\`\`
-code block
+// This is fenced code
+function hello() {
+  return "world";
+}
 \`\`\`
 
 This is \`inline code\`
@@ -46,7 +49,7 @@ This is \`inline code\`
     expect(text).toContain("𝗯𝗼𝗹𝗱");
     expect(text).toContain("𝘪𝘵𝘢𝘭𝘪𝘤");
     expect(text).toContain("𝘉𝘭𝘰𝘤𝘬𝘲𝘶𝘰𝘵𝘦 𝘭𝘪𝘯𝘦");
-    expect(text).toContain("𝚌𝚘𝚍𝚎 𝚋𝚕𝚘𝚌𝚔");
+    expect(text).toContain("𝚃𝚑𝚒𝚜 𝚒𝚜 𝚏𝚎𝚗𝚌𝚎𝚍 𝚌𝚘𝚍𝚎");
     expect(text).toContain("𝚒𝚗𝚕𝚒𝚗𝚎 𝚌𝚘𝚍𝚎");
     expect(text).toContain("Link text (https://example.com)");
     expect(text).toContain("Alt text for image");
@@ -60,15 +63,38 @@ This is \`inline code\`
 
     const decoded = markdownOutput.textContent.trim();
     expect(decoded).toContain("# Heading 1");
-    expect(decoded).toContain("**bold**");
+    expect(decoded).toContain("**\"bold\" text**");
     expect(decoded).toContain("_italic_");
     expect(decoded).toContain("> Blockquote line");
-    expect(decoded).toContain("```\ncode block\n```");
-    expect(decoded).toContain("`inline` `code`");
+    expect(decoded).toContain("```\n// This is fenced code\nfunction hello() {\n  return \"world\";\n}\n```");
+    expect(decoded).toContain("`inline code`");
     expect(decoded).toContain("[Link text](https://example.com)");
     expect(decoded).toContain("Alt text for image");
     expect(decoded).toContain("- Item one");
     expect(decoded).toContain("- Item two");
+  });
+
+  it("decodes inline bold text without promoting to heading", () => {
+    const unicode = "\"𝗯𝗼𝗹𝗱\" 𝘁𝗲𝘅𝘁 here";
+    triggerInput(unicodeInput, unicode);
+
+    expect(markdownOutput.textContent.trim()).toBe('**"bold" text** here');
+  });
+
+  it("reconstructs blockquotes without splitting words", () => {
+    triggerInput(unicodeInput, "𝘛𝘩𝘪𝘴 𝘪𝘴 𝘢 𝘣𝘭𝘰𝘤𝘬𝘲𝘶𝘰𝘵𝘦\n");
+
+    expect(markdownOutput.textContent.trim()).toBe("> This is a blockquote");
+  });
+
+  it("restores fenced code blocks", () => {
+    const unicode = `// 𝚃𝚑𝚒𝚜 𝚒𝚜 𝚏𝚎𝚗𝚌𝚎𝚍 𝚌𝚘𝚍𝚎\n𝚏𝚞𝚗𝚌𝚝𝚒𝚘𝚗 𝚑𝚎𝚕𝚕𝚘() {\n  𝚛𝚎𝚝𝚞𝚛𝚗 "𝚠𝚘𝚛𝚕𝚍";\n}`;
+
+    triggerInput(unicodeInput, unicode);
+
+    expect(markdownOutput.textContent.trim()).toBe(
+      "```\n// This is fenced code\nfunction hello() {\n  return \"world\";\n}\n```",
+    );
   });
 
   it("copies formatted unicode output", async () => {

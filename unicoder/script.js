@@ -17,6 +17,8 @@ const styleRanges = {
   code: [range("A", "Z", 120367), range("a", "z", 120361), range("0", "9", 120764)],
 };
 
+const codeCharPattern = /[\u{1D670}-\u{1D7FF}]/u;
+
 const encodeWithRanges = (text, ranges) =>
   [...text]
     .map((char) => {
@@ -105,7 +107,7 @@ const convertMarkdownToUnicode = (markdown) => {
     renderer.heading = (text) => `${styles.heading(raw(text))}\n\n`;
     renderer.strong = (text) => styles.bold(raw(text));
     renderer.em = (text) => styles.italic(raw(text));
-    renderer.blockquote = (text) => `${styles.blockquote(raw(text).replace(/<p>/g, "").replace(/<\/p>/g, ""))}\n\n`;
+    renderer.blockquote = (text) => `${styles.blockquote(raw(text).replace(/<p>/g, "").replace(/<\/p>/g, ""))}\n`;
     renderer.code = (code) => `${styles.code(raw(code))}\n\n`;
     renderer.codespan = (code) => styles.code(raw(code));
     renderer.link = (href, title, text) => styles.link(raw(text), href);
@@ -143,32 +145,88 @@ const decodeSegments = (text) => {
   return segments;
 };
 
-const wrapSegments = (segments) =>
-  segments
-    .map(({ style, text }) => {
-      if (style === "bold") return `**${text}**`;
-      if (style === "italic") return `_${text}_`;
-      if (style === "code") return `\`${text}\``;
-      return text;
-    })
-    .join("");
+const wrapSegments = (segments) => {
+  const normalized = [];
+  for (let i = 0; i < segments.length; i += 1) {
+    const segment = segments[i];
+    if (segment.style === "plain" && segments[i + 1] && segments[i + 1].style !== "plain") {
+      const trailing = segment.text.match(/^(.*?)([\p{P}\p{S}]+)$/u);
+      if (trailing && trailing[2]) {
+        if (trailing[1]) normalized.push({ ...segment, text: trailing[1] });
+        normalized.push({ ...segments[i + 1], text: trailing[2] + segments[i + 1].text });
+        i += 1;
+        continue;
+      }
+    }
+    if (segment.style === "plain" && /^[\s\p{P}\p{S}]+$/u.test(segment.text)) {
+      const prev = normalized.at(-1);
+      const next = segments[i + 1];
+      if (prev && prev.style !== "plain") {
+        prev.text += segment.text;
+        continue;
+      }
+      if (next && next.style !== "plain") {
+        normalized.push({ ...next, text: segment.text + next.text });
+        i += 1;
+        continue;
+      }
+    }
+    normalized.push({ ...segment });
+  }
+
+  const parts = [];
+  for (let i = 0; i < normalized.length; i += 1) {
+    const { style, text } = normalized[i];
+    if (style === "code") {
+      let combined = text;
+      let j = i + 1;
+      while (j < normalized.length) {
+        const next = normalized[j];
+        if (next.style === "code") {
+          combined += next.text;
+          j += 1;
+          continue;
+        }
+        if (next.style === "plain" && !next.text.trim()) {
+          combined += next.text;
+          j += 1;
+          continue;
+        }
+        break;
+      }
+      parts.push(`\`${combined}\``);
+      i = j - 1;
+      continue;
+    }
+    if (style === "bold" || style === "italic") {
+      let combined = text;
+      let j = i + 1;
+      while (j < normalized.length) {
+        const next = normalized[j];
+        if (next.style === style) {
+          combined += next.text;
+          j += 1;
+          continue;
+        }
+        if (next.style === "plain" && /^[\s\p{P}\p{S}]+$/u.test(next.text)) {
+          combined += next.text;
+          j += 1;
+          continue;
+        }
+        break;
+      }
+      parts.push(style === "bold" ? `**${combined}**` : `_${combined}_`);
+      i = j - 1;
+      continue;
+    }
+    parts.push(text);
+  }
+  return parts.join("");
+};
 
 const decodePlain = (text) => decodeSegments(text).map(({ text: value }) => value).join("");
 
-const isStyledLine = (line, style) => {
-  let hasTarget = false;
-  for (const char of line) {
-    const detected = decodeChar(char).style;
-    if (detected === style) {
-      hasTarget = true;
-      continue;
-    }
-    if (detected !== "plain") return false;
-  }
-  return hasTarget;
-};
-
-const isPureStyleLine = (line, style) => {
+const isStyleLine = (line, style, allowedPlain = /[^\S\r\n]/u) => {
   let hasTarget = false;
   for (const char of line) {
     if (!char.trim()) continue;
@@ -177,9 +235,29 @@ const isPureStyleLine = (line, style) => {
       hasTarget = true;
       continue;
     }
+    if (allowedPlain && allowedPlain.test(char)) continue;
     return false;
   }
   return hasTarget;
+};
+
+const isPureStyleLine = (line, style) => isStyleLine(line, style, null);
+
+const codeLineInfo = (line) => {
+  const segments = decodeSegments(line);
+  const hasOtherStyle = segments.some(({ style }) => style !== "plain" && style !== "code");
+  const hasPlainLetters = segments.some(
+    ({ style, text }) => style === "plain" && /[\p{L}\p{N}]/u.test(text),
+  );
+  const hasCode = codeCharPattern.test(line) || segments.some(({ style }) => style === "code");
+  const isPunctuationOnly =
+    segments.length === 0 ||
+    segments.every(
+      ({ style, text }) =>
+        style === "plain" && (!text.trim() || /^[\p{P}\p{S}\s]+$/u.test(text)),
+    );
+
+  return { hasCode, hasOtherStyle, hasPlainLetters, isPunctuationOnly };
 };
 
 const previousLineBlank = (lines, index) => index === 0 || !lines[index - 1].trim();
@@ -208,11 +286,18 @@ const convertUnicodeToMarkdown = (unicodeText) => {
       continue;
     }
 
-    if (isPureStyleLine(trimmed, "code")) {
+    const codeInfo = codeLineInfo(line);
+    if (codeInfo.hasCode && !codeInfo.hasOtherStyle && !codeInfo.hasPlainLetters) {
       const codeLines = [];
-      while (index < lines.length && isPureStyleLine(lines[index].trim(), "code")) {
-        codeLines.push(decodePlain(lines[index].trim()));
+      while (index < lines.length) {
+        const currentInfo = codeLineInfo(lines[index]);
+        if (currentInfo.hasOtherStyle || currentInfo.hasPlainLetters) break;
+        if (!currentInfo.hasCode && !currentInfo.isPunctuationOnly) break;
+        codeLines.push(decodePlain(lines[index]));
         index += 1;
+      }
+      while (codeLines.length && !codeLines.at(-1).trim()) {
+        codeLines.pop();
       }
       markdownLines.push("```");
       markdownLines.push(...codeLines);
@@ -221,12 +306,12 @@ const convertUnicodeToMarkdown = (unicodeText) => {
       continue;
     }
 
-    if (isStyledLine(trimmed, "bold") && previousLineBlank(lines, index)) {
+    if (isStyleLine(trimmed, "bold", /[\s0-9]/u) && previousLineBlank(lines, index)) {
       markdownLines.push(`# ${decodePlain(trimmed)}`);
       continue;
     }
 
-    if (isPureStyleLine(trimmed, "italic") && previousLineBlank(lines, index)) {
+    if (isStyleLine(trimmed, "italic", /[\s\p{P}\p{S}]/u) && previousLineBlank(lines, index)) {
       markdownLines.push(`> ${decodePlain(trimmed)}`);
       continue;
     }
