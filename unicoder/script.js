@@ -61,52 +61,33 @@ const toMonospace = (text) =>
 // Reverse Conversion: Unicode → ASCII
 // ============================================================================
 
+// Character range mappings for detection and conversion
+const CHAR_RANGES = [
+  { start: 0x1d5d4, end: 0x1d5ed, offset: UNICODE_OFFSETS.BOLD_UPPER, style: "bold" },
+  { start: 0x1d5ee, end: 0x1d607, offset: UNICODE_OFFSETS.BOLD_LOWER, style: "bold" },
+  { start: 0x1d608, end: 0x1d621, offset: UNICODE_OFFSETS.ITALIC_UPPER, style: "italic" },
+  { start: 0x1d622, end: 0x1d63b, offset: UNICODE_OFFSETS.ITALIC_LOWER, style: "italic" },
+  { start: 0x1d670, end: 0x1d689, offset: UNICODE_OFFSETS.MONO_UPPER, style: "mono" },
+  { start: 0x1d68a, end: 0x1d6a3, offset: UNICODE_OFFSETS.MONO_LOWER, style: "mono" },
+  { start: 0x1d7f6, end: 0x1d7ff, offset: UNICODE_OFFSETS.MONO_DIGIT, style: "mono" },
+];
+
 /**
  * Convert Unicode-styled character back to ASCII
- * @param {string} char - Single Unicode character
- * @returns {string} ASCII character or original if not a styled character
  */
 const toAscii = (char) => {
   const code = char.codePointAt(0);
-
-  // Sans-serif bold uppercase (A-Z)
-  if (code >= 0x1d5d4 && code <= 0x1d5ed) return String.fromCharCode(code - UNICODE_OFFSETS.BOLD_UPPER);
-  // Sans-serif bold lowercase (a-z)
-  if (code >= 0x1d5ee && code <= 0x1d607) return String.fromCharCode(code - UNICODE_OFFSETS.BOLD_LOWER);
-
-  // Sans-serif italic uppercase (A-Z)
-  if (code >= 0x1d608 && code <= 0x1d621) return String.fromCharCode(code - UNICODE_OFFSETS.ITALIC_UPPER);
-  // Sans-serif italic lowercase (a-z)
-  if (code >= 0x1d622 && code <= 0x1d63b) return String.fromCharCode(code - UNICODE_OFFSETS.ITALIC_LOWER);
-
-  // Monospace uppercase (A-Z)
-  if (code >= 0x1d670 && code <= 0x1d689) return String.fromCharCode(code - UNICODE_OFFSETS.MONO_UPPER);
-  // Monospace lowercase (a-z)
-  if (code >= 0x1d68a && code <= 0x1d6a3) return String.fromCharCode(code - UNICODE_OFFSETS.MONO_LOWER);
-  // Monospace digits (0-9)
-  if (code >= 0x1d7f6 && code <= 0x1d7ff) return String.fromCharCode(code - UNICODE_OFFSETS.MONO_DIGIT);
-
-  return char;
+  const range = CHAR_RANGES.find((r) => code >= r.start && code <= r.end);
+  return range ? String.fromCharCode(code - range.offset) : char;
 };
 
 /**
  * Detect the Unicode style of a character
- * @param {string} char - Single character
- * @returns {string|null} Style name ('bold', 'italic', 'mono') or null
  */
 const detectStyle = (char) => {
   const code = char.codePointAt(0);
-
-  // Bold (sans-serif bold)
-  if ((code >= 0x1d5d4 && code <= 0x1d5ed) || (code >= 0x1d5ee && code <= 0x1d607)) return "bold";
-
-  // Italic (sans-serif italic)
-  if ((code >= 0x1d608 && code <= 0x1d621) || (code >= 0x1d622 && code <= 0x1d63b)) return "italic";
-
-  // Monospace
-  if ((code >= 0x1d670 && code <= 0x1d689) || (code >= 0x1d68a && code <= 0x1d6a3) || (code >= 0x1d7f6 && code <= 0x1d7ff)) return "mono";
-
-  return null;
+  const range = CHAR_RANGES.find((r) => code >= r.start && code <= r.end);
+  return range?.style ?? null;
 };
 
 /**
@@ -176,7 +157,7 @@ const convertMarkdownToUnicode = (markdown) => {
 
     return marked.parse(markdown, options);
   } catch (error) {
-    showError(error.message);
+    setError(error.message);
     return "Failed to parse Markdown.";
   }
 };
@@ -187,66 +168,104 @@ const convertMarkdownToUnicode = (markdown) => {
 
 /**
  * Convert Unicode-styled text back to Markdown
- * @param {string} unicodeText - Unicode-styled input text
- * @returns {string} Markdown output
  */
 const convertUnicodeToMarkdown = (unicodeText) => {
   if (!unicodeText.trim()) return "";
 
   try {
-    let result = "";
-    let currentStyle = null;
-    let currentSegment = "";
+    // Pre-process: detect multi-line code blocks (lines with monospace characters)
+    const lines = unicodeText.split("\n");
+    const processedLines = [];
+    let codeBlockLines = [];
+    let inCodeBlock = false;
 
-    // Process character by character (using for...of to handle surrogate pairs correctly)
-    for (const char of unicodeText) {
-      const style = detectStyle(char);
+    for (const line of lines) {
+      const monoChars = [...line].filter((c) => detectStyle(c) === "mono").length;
+      const totalChars = [...line].filter((c) => c.trim()).length;
+      const isCodeLine = monoChars > 0 && totalChars > 0 && monoChars / totalChars > 0.3;
+      const isShortLine = totalChars <= 3; // Lines like }, ], etc.
 
-      // If style changed, flush the current segment
-      if (style !== currentStyle) {
-        if (currentSegment) {
-          result += formatSegment(currentSegment, currentStyle);
-          currentSegment = "";
+      if (isCodeLine || (inCodeBlock && isShortLine)) {
+        codeBlockLines.push(line);
+        inCodeBlock = true;
+      } else {
+        if (inCodeBlock && codeBlockLines.length >= 2) {
+          processedLines.push(convertCodeBlock(codeBlockLines.join("\n")));
+          codeBlockLines = [];
+        } else if (codeBlockLines.length > 0) {
+          processedLines.push(...codeBlockLines);
+          codeBlockLines = [];
         }
-        currentStyle = style;
+        processedLines.push(line);
+        inCodeBlock = false;
       }
-
-      // Add character to current segment (convert to ASCII if styled)
-      currentSegment += style ? toAscii(char) : char;
     }
 
-    // Flush remaining segment
-    if (currentSegment) {
-      result += formatSegment(currentSegment, currentStyle);
+    // Handle remaining code block
+    if (codeBlockLines.length >= 2) {
+      processedLines.push(convertCodeBlock(codeBlockLines.join("\n")));
+    } else if (codeBlockLines.length > 0) {
+      processedLines.push(...codeBlockLines);
     }
 
-    // Post-process: merge segments and convert bullets to lists
-    return convertBulletsToLists(mergeStyledSegments(result));
+    // Process non-code-block lines normally
+    const result = processedLines
+      .map((line, i) => {
+        if (typeof line === "object") return line.markdown; // Already processed code block
+        return convertLine(line);
+      })
+      .join("\n");
+
+    return convertBulletsToLists(result);
   } catch (error) {
-    showError(error.message);
+    setError(error.message);
     return "Failed to convert Unicode text.";
   }
 };
 
 /**
+ * Convert a code block (multiple lines of code)
+ */
+const convertCodeBlock = (text) => {
+  const converted = [...text].map((c) => (detectStyle(c) === "mono" ? toAscii(c) : c)).join("");
+  return { markdown: "```\n" + converted + "\n```" };
+};
+
+/**
+ * Convert a single line of text
+ */
+const convertLine = (text) => {
+  let result = "";
+  let currentStyle = null;
+  let currentSegment = "";
+
+  for (const char of text) {
+    const style = detectStyle(char);
+
+    if (style !== currentStyle) {
+      if (currentSegment) {
+        result += formatSegment(currentSegment, currentStyle);
+        currentSegment = "";
+      }
+      currentStyle = style;
+    }
+
+    currentSegment += style ? toAscii(char) : char;
+  }
+
+  if (currentSegment) {
+    result += formatSegment(currentSegment, currentStyle);
+  }
+
+  return mergeStyledSegments(result);
+};
+
+/**
  * Format a text segment with appropriate Markdown syntax
- * @param {string} text - Text segment
- * @param {string|null} style - Style type ('bold', 'italic', 'mono', or null)
- * @returns {string} Formatted text
  */
 const formatSegment = (text, style) => {
   if (!style) return text;
-
-  const formatters = {
-    bold: (t) => `**${t}**`,
-    italic: (t) => `*${t}*`,
-    mono: (t) => {
-      // Multi-line code becomes fenced, single-line stays inline
-      const lines = t.split("\n").filter((l) => l.trim());
-      return lines.length >= 2 ? `\`\`\`\n${t}\n\`\`\`` : `\`${t}\``;
-    },
-  };
-
+  const formatters = { bold: (t) => `**${t}**`, italic: (t) => `*${t}*`, mono: (t) => `\`${t}\`` };
   return formatters[style]?.(text) ?? text;
 };
 
@@ -282,26 +301,23 @@ const convertBulletsToLists = (markdown) => markdown.replace(/^• /gm, "- ");
 // ============================================================================
 
 /**
- * Show error message
+ * Show or hide error message
  */
-const showError = (message) => {
-  const errorContainer = document.getElementById("error-container");
-  errorContainer.textContent = `Error: ${message}`;
-  errorContainer.classList.remove("d-none");
-};
-
-/**
- * Hide error message
- */
-const hideError = () => {
-  document.getElementById("error-container").classList.add("d-none");
+const setError = (message = null) => {
+  const el = document.getElementById("error-container");
+  if (message) {
+    el.textContent = `Error: ${message}`;
+    el.classList.remove("d-none");
+  } else {
+    el.classList.add("d-none");
+  }
 };
 
 /**
  * Copy text to clipboard with button feedback
  */
 const copyToClipboard = (text, button) => {
-  if (!text.trim()) return showError("Nothing to copy");
+  if (!text.trim()) return setError("Nothing to copy");
 
   const { innerHTML, className } = button;
 
@@ -316,7 +332,7 @@ const copyToClipboard = (text, button) => {
         button.className = className;
       }, 2000);
     })
-    .catch((error) => showError("Failed to copy: " + error.message));
+    .catch((error) => setError("Failed to copy: " + error.message));
 };
 
 // ============================================================================
@@ -330,12 +346,12 @@ const renderOutput = (outputId, content) => {
 };
 
 const updateMarkdownOutput = () => {
-  hideError();
+  setError();
   renderOutput("unicode-output", convertMarkdownToUnicode(document.getElementById("markdown-input").value));
 };
 
 const updateUnicodeOutput = () => {
-  hideError();
+  setError();
   renderOutput("markdown-output", convertUnicodeToMarkdown(document.getElementById("unicode-input").value));
 };
 
