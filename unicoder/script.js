@@ -3,70 +3,281 @@ saveform("#unicoder-form");
 
 const raw = (s) => new DOMParser().parseFromString(s, "text/html").documentElement.textContent;
 
-// Unicode character mapping functions
-const styles = {
-  // Convert to sans-serif bold (for headings and bold text)
-  heading: (s) =>
-    s
-      .split("")
-      .map((c) => {
-        if (c >= "A" && c <= "Z") return String.fromCodePoint(c.charCodeAt(0) + 120211);
-        if (c >= "a" && c <= "z") return String.fromCodePoint(c.charCodeAt(0) + 120205);
-        return c;
-      })
-      .join(""),
+// ============================================================================
+// Unicode Character Mapping Constants
+// ============================================================================
 
-  // Same as heading - sans-serif bold
-  bold: (s) =>
-    s
-      .split("")
-      .map((c) => {
-        if (c >= "A" && c <= "Z") return String.fromCodePoint(c.charCodeAt(0) + 120211);
-        if (c >= "a" && c <= "z") return String.fromCodePoint(c.charCodeAt(0) + 120205);
-        return c;
-      })
-      .join(""),
+// Offsets for Unicode Mathematical Alphanumeric Symbols
+const UNICODE_OFFSETS = {
+  // Sans-serif bold (for headings and bold)
+  BOLD_UPPER: 120211, // A-Z
+  BOLD_LOWER: 120205, // a-z
 
-  // Convert to sans-serif italic (for italic text and blockquotes)
-  italic: (s) =>
-    s
-      .split("")
-      .map((c) => {
-        if (c >= "A" && c <= "Z") return String.fromCodePoint(c.charCodeAt(0) + 120263);
-        if (c >= "a" && c <= "z") return String.fromCodePoint(c.charCodeAt(0) + 120257);
-        return c;
-      })
-      .join(""),
+  // Sans-serif italic (for italic and blockquotes)
+  ITALIC_UPPER: 120263, // A-Z
+  ITALIC_LOWER: 120257, // a-z
 
-  // Same as italic - sans-serif italic
-  blockquote: (s) =>
-    s
-      .split("")
-      .map((c) => {
-        if (c >= "A" && c <= "Z") return String.fromCodePoint(c.charCodeAt(0) + 120263);
-        if (c >= "a" && c <= "z") return String.fromCodePoint(c.charCodeAt(0) + 120257);
-        return c;
-      })
-      .join(""),
+  // Monospace (for code)
+  MONO_UPPER: 120367, // A-Z
+  MONO_LOWER: 120361, // a-z
+  MONO_DIGIT: 120774, // 0-9
+};
 
-  // Convert to monospace (for code)
-  code: (s) =>
-    s
-      .split("")
-      .map((c) => {
-        if (c >= "A" && c <= "Z") return String.fromCodePoint(c.charCodeAt(0) + 120367);
-        if (c >= "a" && c <= "z") return String.fromCodePoint(c.charCodeAt(0) + 120361);
-        if (c >= "0" && c <= "9") return String.fromCodePoint(c.charCodeAt(0) + 120764);
-        return c;
-      })
-      .join(""),
+// ============================================================================
+// Forward Conversion: ASCII → Unicode
+// ============================================================================
 
-  link: (text, url) => (text === url ? text : `${text} (${url})`),
-  image: (alt) => alt,
+/**
+ * Convert ASCII text to Unicode style
+ * @param {string} text - Input text
+ * @param {Object} offsets - Unicode offsets for uppercase, lowercase, and optionally digits
+ * @returns {string} Unicode-styled text
+ */
+const toUnicodeStyle = (text, { upper, lower, digit = null }) => {
+  return text
+    .split("")
+    .map((char) => {
+      if (char >= "A" && char <= "Z") {
+        return String.fromCodePoint(char.charCodeAt(0) + upper);
+      }
+      if (char >= "a" && char <= "z") {
+        return String.fromCodePoint(char.charCodeAt(0) + lower);
+      }
+      if (digit !== null && char >= "0" && char <= "9") {
+        return String.fromCodePoint(char.charCodeAt(0) + digit);
+      }
+      return char;
+    })
+    .join("");
+};
+
+// Style-specific converters
+const toBold = (text) => toUnicodeStyle(text, { upper: UNICODE_OFFSETS.BOLD_UPPER, lower: UNICODE_OFFSETS.BOLD_LOWER });
+const toItalic = (text) => toUnicodeStyle(text, { upper: UNICODE_OFFSETS.ITALIC_UPPER, lower: UNICODE_OFFSETS.ITALIC_LOWER });
+const toMonospace = (text) =>
+  toUnicodeStyle(text, { upper: UNICODE_OFFSETS.MONO_UPPER, lower: UNICODE_OFFSETS.MONO_LOWER, digit: UNICODE_OFFSETS.MONO_DIGIT });
+
+// ============================================================================
+// Reverse Conversion: Unicode → ASCII
+// ============================================================================
+
+/**
+ * Convert Unicode-styled character back to ASCII
+ * @param {string} char - Single Unicode character
+ * @returns {string} ASCII character or original if not a styled character
+ */
+const toAscii = (char) => {
+  const code = char.codePointAt(0);
+
+  // Sans-serif bold uppercase (A-Z)
+  if (code >= 0x1d5d4 && code <= 0x1d5ed) return String.fromCharCode(code - UNICODE_OFFSETS.BOLD_UPPER);
+  // Sans-serif bold lowercase (a-z)
+  if (code >= 0x1d5ee && code <= 0x1d607) return String.fromCharCode(code - UNICODE_OFFSETS.BOLD_LOWER);
+
+  // Sans-serif italic uppercase (A-Z)
+  if (code >= 0x1d608 && code <= 0x1d621) return String.fromCharCode(code - UNICODE_OFFSETS.ITALIC_UPPER);
+  // Sans-serif italic lowercase (a-z)
+  if (code >= 0x1d622 && code <= 0x1d63b) return String.fromCharCode(code - UNICODE_OFFSETS.ITALIC_LOWER);
+
+  // Monospace uppercase (A-Z)
+  if (code >= 0x1d670 && code <= 0x1d689) return String.fromCharCode(code - UNICODE_OFFSETS.MONO_UPPER);
+  // Monospace lowercase (a-z)
+  if (code >= 0x1d68a && code <= 0x1d6a3) return String.fromCharCode(code - UNICODE_OFFSETS.MONO_LOWER);
+  // Monospace digits (0-9)
+  if (code >= 0x1d7f6 && code <= 0x1d7ff) return String.fromCharCode(code - UNICODE_OFFSETS.MONO_DIGIT);
+
+  return char;
 };
 
 /**
- * Show error message to the user
+ * Detect the Unicode style of a character
+ * @param {string} char - Single character
+ * @returns {string|null} Style name ('bold', 'italic', 'mono') or null
+ */
+const detectStyle = (char) => {
+  const code = char.codePointAt(0);
+
+  // Bold (sans-serif bold)
+  if ((code >= 0x1d5d4 && code <= 0x1d5ed) || (code >= 0x1d5ee && code <= 0x1d607)) return "bold";
+
+  // Italic (sans-serif italic)
+  if ((code >= 0x1d608 && code <= 0x1d621) || (code >= 0x1d622 && code <= 0x1d63b)) return "italic";
+
+  // Monospace
+  if ((code >= 0x1d670 && code <= 0x1d689) || (code >= 0x1d68a && code <= 0x1d6a3) || (code >= 0x1d7f6 && code <= 0x1d7ff)) return "mono";
+
+  return null;
+};
+
+/**
+ * Convert Unicode text back to ASCII, preserving structure
+ * @param {string} text - Unicode-styled text
+ * @returns {string} ASCII text
+ */
+const fromUnicodeStyle = (text) => {
+  return text
+    .split("")
+    .map((char) => toAscii(char))
+    .join("");
+};
+
+// ============================================================================
+// Markdown to Unicode Conversion
+// ============================================================================
+
+/**
+ * Convert Markdown to Unicode-styled text
+ * @param {string} markdown - Input Markdown text
+ * @returns {string} Unicode-styled output
+ */
+const convertMarkdownToUnicode = (markdown) => {
+  if (!markdown.trim()) return "";
+
+  try {
+    const renderer = new marked.Renderer();
+
+    // Headings → bold
+    renderer.heading = (text) => toBold(raw(text)) + "\n\n";
+
+    // Bold text → bold
+    renderer.strong = (text) => toBold(raw(text));
+
+    // Italic text → italic
+    renderer.em = (text) => toItalic(raw(text));
+
+    // Blockquotes → italic
+    renderer.blockquote = (text) => toItalic(raw(text).replace(/<p>/g, "").replace(/<\/p>/g, "")) + "\n\n";
+
+    // Code blocks → monospace
+    renderer.code = (code) => toMonospace(raw(code)) + "\n\n";
+    renderer.codespan = (code) => toMonospace(raw(code));
+
+    // Links → text (url)
+    renderer.link = (href, title, text) => {
+      const linkText = raw(text);
+      return linkText === href ? linkText : `${linkText} (${href})`;
+    };
+
+    // Images → alt text
+    renderer.image = (href, title, alt) => raw(alt) || "Image";
+
+    // Paragraphs
+    renderer.paragraph = (text) => raw(text) + "\n\n";
+
+    // Lists
+    renderer.list = (body) => body + "\n";
+    renderer.listitem = (text) => `• ${raw(text)}\n`;
+
+    const options = {
+      renderer: renderer,
+      gfm: true,
+      breaks: true,
+    };
+
+    return marked.parse(markdown, options);
+  } catch (error) {
+    showError(error.message);
+    return "Failed to parse Markdown.";
+  }
+};
+
+// ============================================================================
+// Unicode to Markdown Conversion
+// ============================================================================
+
+/**
+ * Convert Unicode-styled text back to Markdown
+ * @param {string} unicodeText - Unicode-styled input text
+ * @returns {string} Markdown output
+ */
+const convertUnicodeToMarkdown = (unicodeText) => {
+  if (!unicodeText.trim()) return "";
+
+  try {
+    let result = "";
+    let currentStyle = null;
+    let currentSegment = "";
+
+    // Process character by character (using for...of to handle surrogate pairs correctly)
+    for (const char of unicodeText) {
+      const style = detectStyle(char);
+
+      // If style changed, flush the current segment
+      if (style !== currentStyle) {
+        if (currentSegment) {
+          result += formatSegment(currentSegment, currentStyle);
+          currentSegment = "";
+        }
+        currentStyle = style;
+      }
+
+      // Add character to current segment (convert to ASCII if styled)
+      currentSegment += style ? toAscii(char) : char;
+    }
+
+    // Flush remaining segment
+    if (currentSegment) {
+      result += formatSegment(currentSegment, currentStyle);
+    }
+
+    // Merge consecutive styled segments separated by spaces
+    return mergeStyledSegments(result);
+  } catch (error) {
+    showError(error.message);
+    return "Failed to convert Unicode text.";
+  }
+};
+
+/**
+ * Format a text segment with appropriate Markdown syntax
+ * @param {string} text - Text segment
+ * @param {string|null} style - Style type ('bold', 'italic', 'mono', or null)
+ * @returns {string} Formatted text
+ */
+const formatSegment = (text, style) => {
+  if (!style) return text;
+
+  switch (style) {
+    case "bold":
+      return `**${text}**`;
+    case "italic":
+      return `*${text}*`;
+    case "mono":
+      return `\`${text}\``;
+    default:
+      return text;
+  }
+};
+
+/**
+ * Merge consecutive styled segments separated by single spaces
+ * For example: "**Hello** **World**" becomes "**Hello World**"
+ * @param {string} markdown - Markdown text with potentially separated segments
+ * @returns {string} Merged markdown
+ */
+const mergeStyledSegments = (markdown) => {
+  // Merge bold segments: **text** **text** -> **text text**
+  markdown = markdown.replace(/\*\*([^*]+)\*\* \*\*([^*]+)\*\*/g, "**$1 $2**");
+  // Merge italic segments: *text* *text* -> *text text*
+  markdown = markdown.replace(/\*([^*]+)\* \*([^*]+)\*/g, "*$1 $2*");
+  // Merge code segments: `text` `text` -> `text text`
+  markdown = markdown.replace(/`([^`]+)` `([^`]+)`/g, "`$1 $2`");
+
+  // Keep applying until no more merges possible (for multiple consecutive segments)
+  const original = markdown;
+  markdown = markdown.replace(/\*\*([^*]+)\*\* \*\*([^*]+)\*\*/g, "**$1 $2**");
+  markdown = markdown.replace(/\*([^*]+)\* \*([^*]+)\*/g, "*$1 $2*");
+  markdown = markdown.replace(/`([^`]+)` `([^`]+)`/g, "`$1 $2`");
+
+  return markdown !== original ? mergeStyledSegments(markdown) : markdown;
+};
+
+// ============================================================================
+// UI Helper Functions
+// ============================================================================
+
+/**
+ * Show error message
  */
 const showError = (message) => {
   const errorContainer = document.getElementById("error-container");
@@ -82,32 +293,29 @@ const hideError = () => {
 };
 
 /**
- * Copy the formatted output to clipboard
+ * Copy text to clipboard with button feedback
+ * @param {string} text - Text to copy
+ * @param {HTMLElement} button - Button element to update
  */
-const copyToClipboard = () => {
-  const outputText = document.getElementById("output").innerText;
-
-  if (!outputText.trim()) {
+const copyToClipboard = (text, button) => {
+  if (!text.trim()) {
     showError("Nothing to copy");
     return;
   }
 
   try {
-    navigator.clipboard.writeText(outputText).then(() => {
-      const copyButton = document.getElementById("copy-button");
+    navigator.clipboard.writeText(text).then(() => {
+      const originalHTML = button.innerHTML;
+      const originalClasses = [...button.classList];
 
-      copyButton.textContent = "Copied!";
-      copyButton.classList.remove("btn-light");
-      copyButton.classList.add("btn-success");
+      button.textContent = "Copied!";
+      button.classList.remove("btn-light");
+      button.classList.add("btn-success");
 
       setTimeout(() => {
-        copyButton.innerHTML = /* html */ `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard me-1" viewBox="0 0 16 16">
-                <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/>
-                <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/>
-              </svg>
-              Copy to Clipboard`;
-        copyButton.classList.remove("btn-success");
-        copyButton.classList.add("btn-light");
+        button.innerHTML = originalHTML;
+        button.className = "";
+        originalClasses.forEach((cls) => button.classList.add(cls));
       }, 2000);
     });
   } catch (error) {
@@ -115,81 +323,68 @@ const copyToClipboard = () => {
   }
 };
 
-/**
- * Convert Markdown to specially formatted text using unicode styles
- */
-const convertMarkdownToUnicode = (markdown) => {
-  if (!markdown.trim()) return "";
-
-  try {
-    // Configure marked renderer
-    const renderer = new marked.Renderer();
-
-    // Handle headings
-    renderer.heading = (text) => styles.heading(raw(text)) + "\n\n";
-
-    // Handle bold text
-    renderer.strong = (text) => styles.bold(raw(text));
-
-    // Handle italic text
-    renderer.em = (text) => styles.italic(raw(text));
-
-    // Handle blockquotes
-    renderer.blockquote = (text) => styles.blockquote(raw(text).replace(/<p>/g, "").replace(/<\/p>/g, "")) + "\n\n";
-
-    // Handle code
-    renderer.code = (code) => styles.code(raw(code)) + "\n\n";
-    renderer.codespan = (code) => styles.code(raw(code));
-
-    // Handle links
-    renderer.link = (href, title, text) => styles.link(raw(text), href);
-
-    // Handle images
-    renderer.image = (href, title, alt) => styles.image(raw(alt) || "Image");
-
-    // Handle paragraphs
-    renderer.paragraph = (text) => raw(text) + "\n\n";
-
-    // Handle lists
-    renderer.list = (body) => body + "\n";
-    renderer.listitem = (text) => `• ${raw(text)}\n`;
-
-    const options = {
-      renderer: renderer,
-      gfm: true,
-      breaks: true,
-    };
-
-    // Convert markdown to formatted text
-    return marked.parse(markdown, options);
-  } catch (error) {
-    showError(error.message);
-    return "Failed to parse Markdown.";
-  }
-};
+// ============================================================================
+// Event Handlers
+// ============================================================================
 
 /**
- * Update the output when input changes
+ * Update output when markdown input changes
  */
-const updateOutput = () => {
+const updateMarkdownOutput = () => {
   hideError();
   const markdown = document.getElementById("markdown-input").value;
   const output = convertMarkdownToUnicode(markdown);
 
-  // Display formatted output
-  document.getElementById("output").replaceChildren();
+  document.getElementById("unicode-output").replaceChildren();
   document
-    .getElementById("output")
-    .insertAdjacentHTML(
-      "beforeend",
-      /* html */ `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${output}</div>`,
-    );
+    .getElementById("unicode-output")
+    .insertAdjacentHTML("beforeend", `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${output}</div>`);
 };
 
-// Setup event listeners
+/**
+ * Update output when unicode input changes
+ */
+const updateUnicodeOutput = () => {
+  hideError();
+  const unicodeText = document.getElementById("unicode-input").value;
+  const output = convertUnicodeToMarkdown(unicodeText);
+
+  document.getElementById("markdown-output").replaceChildren();
+  document
+    .getElementById("markdown-output")
+    .insertAdjacentHTML("beforeend", `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${output}</div>`);
+};
+
+/**
+ * Handle copy button click for markdown section
+ */
+const handleMarkdownCopy = () => {
+  const outputText = document.getElementById("unicode-output").innerText;
+  const button = document.getElementById("copy-button-markdown");
+  copyToClipboard(outputText, button);
+};
+
+/**
+ * Handle copy button click for unicode section
+ */
+const handleUnicodeCopy = () => {
+  const outputText = document.getElementById("markdown-output").innerText;
+  const button = document.getElementById("copy-button-unicode");
+  copyToClipboard(outputText, button);
+};
+
+// ============================================================================
+// Initialize
+// ============================================================================
+
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("markdown-input").addEventListener("input", updateOutput);
-  document.getElementById("copy-button").addEventListener("click", copyToClipboard);
+  // Markdown to Unicode section
+  document.getElementById("markdown-input").addEventListener("input", updateMarkdownOutput);
+  document.getElementById("copy-button-markdown").addEventListener("click", handleMarkdownCopy);
+
+  // Unicode to Markdown section
+  document.getElementById("unicode-input").addEventListener("input", updateUnicodeOutput);
+  document.getElementById("copy-button-unicode").addEventListener("click", handleUnicodeCopy);
 
   // Initialize with example content
   const exampleMarkdown = `# Heading 1
@@ -215,5 +410,19 @@ This is \`"inline" code\`
 - List item 2
 `;
   document.getElementById("markdown-input").value = exampleMarkdown;
-  updateOutput();
+  updateMarkdownOutput();
 });
+
+// Export functions for testing
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    convertMarkdownToUnicode,
+    convertUnicodeToMarkdown,
+    toBold,
+    toItalic,
+    toMonospace,
+    toAscii,
+    detectStyle,
+    fromUnicodeStyle,
+  };
+}
