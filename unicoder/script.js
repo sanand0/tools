@@ -2,13 +2,14 @@ import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 saveform("#unicoder-form");
 
 const raw = (s) => new DOMParser().parseFromString(s, "text/html").documentElement.textContent;
+const $ = (s) => document.querySelector(s);
 
 // ============================================================================
 // Unicode Character Mapping Constants
 // ============================================================================
 
 // Offsets for Unicode Mathematical Alphanumeric Symbols
-const UNICODE_OFFSETS = {
+const OFFSETS = {
   // Sans-serif bold (for headings and bold)
   BOLD_UPPER: 120211, // A-Z
   BOLD_LOWER: 120205, // a-z
@@ -52,10 +53,10 @@ const toUnicodeStyle = (text, { upper, lower, digit = null }) => {
 };
 
 // Style-specific converters
-const toBold = (text) => toUnicodeStyle(text, { upper: UNICODE_OFFSETS.BOLD_UPPER, lower: UNICODE_OFFSETS.BOLD_LOWER });
-const toItalic = (text) => toUnicodeStyle(text, { upper: UNICODE_OFFSETS.ITALIC_UPPER, lower: UNICODE_OFFSETS.ITALIC_LOWER });
+const toBold = (text) => toUnicodeStyle(text, { upper: OFFSETS.BOLD_UPPER, lower: OFFSETS.BOLD_LOWER });
+const toItalic = (text) => toUnicodeStyle(text, { upper: OFFSETS.ITALIC_UPPER, lower: OFFSETS.ITALIC_LOWER });
 const toMonospace = (text) =>
-  toUnicodeStyle(text, { upper: UNICODE_OFFSETS.MONO_UPPER, lower: UNICODE_OFFSETS.MONO_LOWER, digit: UNICODE_OFFSETS.MONO_DIGIT });
+  toUnicodeStyle(text, { upper: OFFSETS.MONO_UPPER, lower: OFFSETS.MONO_LOWER, digit: OFFSETS.MONO_DIGIT });
 
 // ============================================================================
 // Reverse Conversion: Unicode → ASCII
@@ -63,13 +64,13 @@ const toMonospace = (text) =>
 
 // Character range mappings for detection and conversion
 const CHAR_RANGES = [
-  { start: 0x1d5d4, end: 0x1d5ed, offset: UNICODE_OFFSETS.BOLD_UPPER, style: "bold" },
-  { start: 0x1d5ee, end: 0x1d607, offset: UNICODE_OFFSETS.BOLD_LOWER, style: "bold" },
-  { start: 0x1d608, end: 0x1d621, offset: UNICODE_OFFSETS.ITALIC_UPPER, style: "italic" },
-  { start: 0x1d622, end: 0x1d63b, offset: UNICODE_OFFSETS.ITALIC_LOWER, style: "italic" },
-  { start: 0x1d670, end: 0x1d689, offset: UNICODE_OFFSETS.MONO_UPPER, style: "mono" },
-  { start: 0x1d68a, end: 0x1d6a3, offset: UNICODE_OFFSETS.MONO_LOWER, style: "mono" },
-  { start: 0x1d7f6, end: 0x1d7ff, offset: UNICODE_OFFSETS.MONO_DIGIT, style: "mono" },
+  { start: 0x1d5d4, end: 0x1d5ed, offset: OFFSETS.BOLD_UPPER, style: "bold" },
+  { start: 0x1d5ee, end: 0x1d607, offset: OFFSETS.BOLD_LOWER, style: "bold" },
+  { start: 0x1d608, end: 0x1d621, offset: OFFSETS.ITALIC_UPPER, style: "italic" },
+  { start: 0x1d622, end: 0x1d63b, offset: OFFSETS.ITALIC_LOWER, style: "italic" },
+  { start: 0x1d670, end: 0x1d689, offset: OFFSETS.MONO_UPPER, style: "mono" },
+  { start: 0x1d68a, end: 0x1d6a3, offset: OFFSETS.MONO_LOWER, style: "mono" },
+  { start: 0x1d7f6, end: 0x1d7ff, offset: OFFSETS.MONO_DIGIT, style: "mono" },
 ];
 
 /**
@@ -89,7 +90,6 @@ const detectStyle = (char) => {
   const range = CHAR_RANGES.find((r) => code >= r.start && code <= r.end);
   return range?.style ?? null;
 };
-
 
 // ============================================================================
 // Markdown to Unicode Conversion
@@ -116,7 +116,7 @@ const convertMarkdownToUnicode = (markdown) => {
     renderer.em = (text) => toItalic(raw(text));
 
     // Blockquotes → italic
-    renderer.blockquote = (text) => toItalic(raw(text).replace(/<p>/g, "").replace(/<\/p>/g, "")) + "\n\n";
+    renderer.blockquote = (text) => toItalic(raw(text).replace(/<p>/g, "").replace(/<\/p>/g, ""));
 
     // Code blocks → monospace
     renderer.code = (code) => toMonospace(raw(code)) + "\n\n";
@@ -199,7 +199,7 @@ const convertUnicodeToMarkdown = (unicodeText) => {
 
     // Process non-code-block lines normally
     const result = processedLines
-      .map((line, i) => {
+      .map((line) => {
         if (typeof line === "object") return line.markdown; // Already processed code block
         return convertLine(line);
       })
@@ -292,7 +292,7 @@ const convertBulletsToLists = (markdown) => markdown.replace(/^• /gm, "- ");
  * Show or hide error message
  */
 const setError = (message = null) => {
-  const el = document.getElementById("error-container");
+  const el = $("#error-container");
   if (message) {
     el.textContent = `Error: ${message}`;
     el.classList.remove("d-none");
@@ -330,17 +330,17 @@ const copyToClipboard = (text, button) => {
 const renderOutput = (id, content) => {
   const el = document.getElementById(id);
   el.replaceChildren();
-  el.insertAdjacentHTML("beforeend", `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${content}</div>`);
+  el.insertAdjacentHTML("beforeend", `<div class="m-0 text-break" style="white-space: pre-wrap">${content}</div>`);
 };
 
 const updateMarkdownOutput = () => {
   setError();
-  renderOutput("unicode-output", convertMarkdownToUnicode(document.getElementById("markdown-input").value));
+  renderOutput("unicode-output", convertMarkdownToUnicode($("#markdown-input").value));
 };
 
 const updateUnicodeOutput = () => {
   setError();
-  renderOutput("markdown-output", convertUnicodeToMarkdown(document.getElementById("unicode-input").value));
+  renderOutput("markdown-output", convertUnicodeToMarkdown($("#unicode-input").value));
 };
 
 const handleCopy = (outputId, buttonId) => () =>
@@ -352,15 +352,15 @@ const handleCopy = (outputId, buttonId) => () =>
 
 document.addEventListener("DOMContentLoaded", () => {
   // Markdown to Unicode section
-  document.getElementById("markdown-input").addEventListener("input", updateMarkdownOutput);
-  document.getElementById("copy-button-markdown").addEventListener("click", handleCopy("unicode-output", "copy-button-markdown"));
+  $("#markdown-input").addEventListener("input", updateMarkdownOutput);
+  $("#copy-button-markdown").addEventListener("click", handleCopy("unicode-output", "copy-button-markdown"));
 
   // Unicode to Markdown section
-  document.getElementById("unicode-input").addEventListener("input", updateUnicodeOutput);
-  document.getElementById("copy-button-unicode").addEventListener("click", handleCopy("markdown-output", "copy-button-unicode"));
+  $("#unicode-input").addEventListener("input", updateUnicodeOutput);
+  $("#copy-button-unicode").addEventListener("click", handleCopy("markdown-output", "copy-button-unicode"));
 
   // Initialize with example
-  document.getElementById("markdown-input").value = `# Heading 1
+  $("#markdown-input").value = `# Heading 1
 
 This is **"bold" text** and this is *"italic" text*.
 
@@ -384,8 +384,3 @@ This is \`"inline" code\`
 `;
   updateMarkdownOutput();
 });
-
-// Export functions for testing
-if (typeof module !== "undefined" && module.exports) {
-  module.exports = { convertMarkdownToUnicode, convertUnicodeToMarkdown, toBold, toItalic, toMonospace, toAscii, detectStyle };
-}

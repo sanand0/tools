@@ -9,6 +9,7 @@ This tool converts between standard Markdown syntax and text styled with special
 The "Markdown ↔ Unicode Converter" performs bidirectional conversions:
 
 ### Markdown → Unicode
+
 Takes Markdown input and applies specific Unicode character substitutions to simulate common formatting styles:
 
 - **Headings & Bold Text:** Converted to **sans-serif bold** Unicode characters (e.g., "Hello World" becomes "𝗛𝗲𝗹𝗹𝗼 𝗪𝗼𝗿𝗹𝗱").
@@ -19,6 +20,7 @@ Takes Markdown input and applies specific Unicode character substitutions to sim
 - **Lists:** List items are prefixed with a '•' character.
 
 ### Unicode → Markdown
+
 Takes Unicode-styled text and converts it back to standard Markdown:
 
 - **Sans-serif bold** characters → `**bold**`
@@ -43,10 +45,12 @@ The tool provides two conversion modes:
 ### Markdown → Unicode
 
 1.  **Input Markdown:**
+
     - The user types or pastes Markdown content into the input textarea.
     - An example Markdown text is provided on page load to demonstrate functionality.
 
 2.  **Live Conversion:**
+
     - As the user types, the input Markdown is parsed using the `marked` JavaScript library.
     - A custom renderer intercepts standard Markdown elements (headings, bold, italic, code, etc.).
     - Instead of outputting HTML, the renderer substitutes the text content with corresponding styled Unicode characters from the Mathematical Alphanumeric Symbols block and other Unicode ranges.
@@ -58,13 +62,16 @@ The tool provides two conversion modes:
 ### Unicode → Markdown
 
 1.  **Input Unicode:**
+
     - The user pastes Unicode-styled text into the input textarea.
 
 2.  **Style Detection:**
+
     - The tool analyzes each character to detect which Unicode style it uses.
     - Characters are converted back to ASCII and grouped by style.
 
 3.  **Markdown Generation:**
+
     - Styled segments are wrapped with appropriate Markdown syntax.
     - Consecutive segments of the same style separated by spaces are intelligently merged.
 

@@ -187,7 +187,7 @@ code block
     });
 
     it("should convert multi-line monospace to fenced code", () => {
-      setUnicodeInput("𝚏𝚞𝚗𝚌𝚝𝚒𝚘𝚗 𝚑𝚎𝚕𝚕𝚘() {\n  𝚛𝚎𝚝𝚞𝚛𝚗 \"𝚠𝚘𝚛𝚕𝚍\";\n}");
+      setUnicodeInput('𝚏𝚞𝚗𝚌𝚝𝚒𝚘𝚗 𝚑𝚎𝚕𝚕𝚘() {\n  𝚛𝚎𝚝𝚞𝚛𝚗 "𝚠𝚘𝚛𝚕𝚍";\n}');
       const output = markdownOutput.textContent.trim();
       expect(output).toContain("```");
       expect(output).toContain("function hello()");
@@ -195,7 +195,7 @@ code block
     });
 
     it("should handle code with mixed styled and plain characters", () => {
-      setUnicodeInput("// 𝚃𝚑𝚒𝚜 𝚒𝚜 𝚏𝚎𝚗𝚌𝚎𝚍 𝚌𝚘𝚍𝚎\n𝚏𝚞𝚗𝚌𝚝𝚒𝚘𝚗 𝚑𝚎𝚕𝚕𝚘() {\n  𝚛𝚎𝚝𝚞𝚛𝚗 \"𝚠𝚘𝚛𝚕𝚍\";\n}");
+      setUnicodeInput('// 𝚃𝚑𝚒𝚜 𝚒𝚜 𝚏𝚎𝚗𝚌𝚎𝚍 𝚌𝚘𝚍𝚎\n𝚏𝚞𝚗𝚌𝚝𝚒𝚘𝚗 𝚑𝚎𝚕𝚕𝚘() {\n  𝚛𝚎𝚝𝚞𝚛𝚗 "𝚠𝚘𝚛𝚕𝚍";\n}');
       const output = markdownOutput.textContent.trim();
       expect(output).toContain("```");
       expect(output).toContain("// This is fenced code");
