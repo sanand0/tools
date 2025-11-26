@@ -220,8 +220,8 @@ const convertUnicodeToMarkdown = (unicodeText) => {
       result += formatSegment(currentSegment, currentStyle);
     }
 
-    // Merge consecutive styled segments separated by spaces
-    return mergeStyledSegments(result);
+    // Post-process: merge segments and convert bullets to lists
+    return convertBulletsToLists(mergeStyledSegments(result));
   } catch (error) {
     showError(error.message);
     return "Failed to convert Unicode text.";
@@ -237,40 +237,45 @@ const convertUnicodeToMarkdown = (unicodeText) => {
 const formatSegment = (text, style) => {
   if (!style) return text;
 
-  switch (style) {
-    case "bold":
-      return `**${text}**`;
-    case "italic":
-      return `*${text}*`;
-    case "mono":
-      return `\`${text}\``;
-    default:
-      return text;
-  }
+  const formatters = {
+    bold: (t) => `**${t}**`,
+    italic: (t) => `*${t}*`,
+    mono: (t) => {
+      // Multi-line code becomes fenced, single-line stays inline
+      const lines = t.split("\n").filter((l) => l.trim());
+      return lines.length >= 2 ? `\`\`\`\n${t}\n\`\`\`` : `\`${t}\``;
+    },
+  };
+
+  return formatters[style]?.(text) ?? text;
 };
 
 /**
- * Merge consecutive styled segments separated by single spaces
+ * Merge consecutive styled segments separated by spaces
  * For example: "**Hello** **World**" becomes "**Hello World**"
- * @param {string} markdown - Markdown text with potentially separated segments
- * @returns {string} Merged markdown
  */
 const mergeStyledSegments = (markdown) => {
-  // Merge bold segments: **text** **text** -> **text text**
-  markdown = markdown.replace(/\*\*([^*]+)\*\* \*\*([^*]+)\*\*/g, "**$1 $2**");
-  // Merge italic segments: *text* *text* -> *text text*
-  markdown = markdown.replace(/\*([^*]+)\* \*([^*]+)\*/g, "*$1 $2*");
-  // Merge code segments: `text` `text` -> `text text`
-  markdown = markdown.replace(/`([^`]+)` `([^`]+)`/g, "`$1 $2`");
+  const patterns = [
+    [/\*\*([^*]+)\*\* \*\*([^*]+)\*\*/g, "**$1 $2**"], // Bold
+    [/\*([^*]+)\* \*([^*]+)\*/g, "*$1 $2*"], // Italic
+    [/`([^`]+)` `([^`]+)`/g, "`$1 $2`"], // Code
+  ];
 
-  // Keep applying until no more merges possible (for multiple consecutive segments)
-  const original = markdown;
-  markdown = markdown.replace(/\*\*([^*]+)\*\* \*\*([^*]+)\*\*/g, "**$1 $2**");
-  markdown = markdown.replace(/\*([^*]+)\* \*([^*]+)\*/g, "*$1 $2*");
-  markdown = markdown.replace(/`([^`]+)` `([^`]+)`/g, "`$1 $2`");
+  let prev;
+  do {
+    prev = markdown;
+    patterns.forEach(([pattern, replacement]) => {
+      markdown = markdown.replace(pattern, replacement);
+    });
+  } while (markdown !== prev);
 
-  return markdown !== original ? mergeStyledSegments(markdown) : markdown;
+  return markdown;
 };
+
+/**
+ * Convert bullet points (•) to Markdown list items (-)
+ */
+const convertBulletsToLists = (markdown) => markdown.replace(/^• /gm, "- ");
 
 // ============================================================================
 // UI Helper Functions
@@ -294,83 +299,48 @@ const hideError = () => {
 
 /**
  * Copy text to clipboard with button feedback
- * @param {string} text - Text to copy
- * @param {HTMLElement} button - Button element to update
  */
 const copyToClipboard = (text, button) => {
-  if (!text.trim()) {
-    showError("Nothing to copy");
-    return;
-  }
+  if (!text.trim()) return showError("Nothing to copy");
 
-  try {
-    navigator.clipboard.writeText(text).then(() => {
-      const originalHTML = button.innerHTML;
-      const originalClasses = [...button.classList];
+  const { innerHTML, className } = button;
 
+  navigator.clipboard
+    .writeText(text)
+    .then(() => {
       button.textContent = "Copied!";
-      button.classList.remove("btn-light");
-      button.classList.add("btn-success");
+      button.className = button.className.replace("btn-light", "btn-success");
 
       setTimeout(() => {
-        button.innerHTML = originalHTML;
-        button.className = "";
-        originalClasses.forEach((cls) => button.classList.add(cls));
+        button.innerHTML = innerHTML;
+        button.className = className;
       }, 2000);
-    });
-  } catch (error) {
-    showError("Failed to copy: " + error.message);
-  }
+    })
+    .catch((error) => showError("Failed to copy: " + error.message));
 };
 
 // ============================================================================
 // Event Handlers
 // ============================================================================
 
-/**
- * Update output when markdown input changes
- */
+const renderOutput = (outputId, content) => {
+  const output = document.getElementById(outputId);
+  output.replaceChildren();
+  output.insertAdjacentHTML("beforeend", `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${content}</div>`);
+};
+
 const updateMarkdownOutput = () => {
   hideError();
-  const markdown = document.getElementById("markdown-input").value;
-  const output = convertMarkdownToUnicode(markdown);
-
-  document.getElementById("unicode-output").replaceChildren();
-  document
-    .getElementById("unicode-output")
-    .insertAdjacentHTML("beforeend", `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${output}</div>`);
+  renderOutput("unicode-output", convertMarkdownToUnicode(document.getElementById("markdown-input").value));
 };
 
-/**
- * Update output when unicode input changes
- */
 const updateUnicodeOutput = () => {
   hideError();
-  const unicodeText = document.getElementById("unicode-input").value;
-  const output = convertUnicodeToMarkdown(unicodeText);
-
-  document.getElementById("markdown-output").replaceChildren();
-  document
-    .getElementById("markdown-output")
-    .insertAdjacentHTML("beforeend", `<div class="m-0" style="white-space: pre-wrap; word-break: break-word;">${output}</div>`);
+  renderOutput("markdown-output", convertUnicodeToMarkdown(document.getElementById("unicode-input").value));
 };
 
-/**
- * Handle copy button click for markdown section
- */
-const handleMarkdownCopy = () => {
-  const outputText = document.getElementById("unicode-output").innerText;
-  const button = document.getElementById("copy-button-markdown");
-  copyToClipboard(outputText, button);
-};
-
-/**
- * Handle copy button click for unicode section
- */
-const handleUnicodeCopy = () => {
-  const outputText = document.getElementById("markdown-output").innerText;
-  const button = document.getElementById("copy-button-unicode");
-  copyToClipboard(outputText, button);
+const handleCopy = (outputId, buttonId) => () => {
+  copyToClipboard(document.getElementById(outputId).innerText, document.getElementById(buttonId));
 };
 
 // ============================================================================
@@ -380,14 +350,14 @@ const handleUnicodeCopy = () => {
 document.addEventListener("DOMContentLoaded", () => {
   // Markdown to Unicode section
   document.getElementById("markdown-input").addEventListener("input", updateMarkdownOutput);
-  document.getElementById("copy-button-markdown").addEventListener("click", handleMarkdownCopy);
+  document.getElementById("copy-button-markdown").addEventListener("click", handleCopy("unicode-output", "copy-button-markdown"));
 
   // Unicode to Markdown section
   document.getElementById("unicode-input").addEventListener("input", updateUnicodeOutput);
-  document.getElementById("copy-button-unicode").addEventListener("click", handleUnicodeCopy);
+  document.getElementById("copy-button-unicode").addEventListener("click", handleCopy("markdown-output", "copy-button-unicode"));
 
-  // Initialize with example content
-  const exampleMarkdown = `# Heading 1
+  // Initialize with example
+  document.getElementById("markdown-input").value = `# Heading 1
 
 This is **"bold" text** and this is *"italic" text*.
 
@@ -409,7 +379,6 @@ This is \`"inline" code\`
 - List item 1
 - List item 2
 `;
-  document.getElementById("markdown-input").value = exampleMarkdown;
   updateMarkdownOutput();
 });
 
