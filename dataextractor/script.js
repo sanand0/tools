@@ -2,6 +2,7 @@ import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provide
 import { openaiHelp } from "../common/aiconfig.js";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import { objectsToCsv, csvToTable, downloadCsv } from "../common/csv.js";
+import { fileToDataUrl } from "../common/download.js";
 
 const qs = (id) => document.getElementById(id);
 const ui = {
@@ -121,13 +122,6 @@ async function extract(e) {
   }
   done();
 }
-
-const fileToDataUrl = (f) =>
-  new Promise((res) => {
-    const r = new FileReader();
-    r.onload = () => res(r.result);
-    r.readAsDataURL(f);
-  });
 
 function done(msg) {
   ui.loading.classList.add("d-none");

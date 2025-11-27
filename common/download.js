@@ -7,4 +7,13 @@ const downloadBlob = (blob, filename) => {
   a.remove();
   URL.revokeObjectURL(url);
 };
-export { objectUrl, downloadBlob };
+
+const fileToDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+
+export { downloadBlob, objectUrl, fileToDataUrl };
