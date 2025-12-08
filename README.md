@@ -27,6 +27,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[Google Suggest Explorer](./googlesuggest/)**: Explore Google Search suggestions from different countries and get AI-powered humorous explanations.
 - **[GitHub Users](./githubusers/)**: A web-based tool that allows you to fetch publicly available information for specified GitHub users.
 - **[Unicode](./unicode/)**: Helps users identify, view, and copy non-ASCII Unicode characters present in a given text, showing their hexadecimal and decimal code points.
+- **[Hacker News Thread Markdown](./hnmd/)**: Bookmarklet that copies a Hacker News post plus all nested comments as a Markdown list of lists.
 - **[Hacker News MD](./hackernewsmd/)**: Fetches top or best stories from Hacker News, converts their linked content to Markdown, and prepends Hacker News metadata as frontmatter.
 - **[Hacker News Links Extractor](./hnlinks/)**: Scrape main article links from Hacker News or HN Top Links.
 - **[Google Fit](./googlefit/)**: Allows you to view and summarize your Google Fit activity data obtained from Google Takeout.

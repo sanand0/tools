@@ -183,6 +183,13 @@
     },
     {
       "icon": "bi-newspaper",
+      "title": "Hacker News Thread Markdown",
+      "description": "Bookmarklet to copy a Hacker News thread as nested Markdown bullets.",
+      "url": "hnmd",
+      "created": "2025-12-03T00:00:00+00:00"
+    },
+    {
+      "icon": "bi-newspaper",
       "title": "Hacker News Extractor",
       "description": "Extract Hacker News articles to Markdown format for NotebookLM.",
       "url": "hackernewsmd",
