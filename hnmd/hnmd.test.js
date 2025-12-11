@@ -85,10 +85,10 @@ describe("hnmd bookmarklet", () => {
     const markdown = extractThread(document);
     expect(markdown).toBe(
       [
-        "- storyteller: Sample Story — Story body with extra details — https://example.com/story [storyteller @ 2024-07-01T12:34Z]",
-        "  - alice: First comment with newline [alice @ 2024-07-01T13:00Z]",
-        "    - bob: Reply comment [bob @ 2024-07-01T14:05Z]",
-        "    - carol: Check this https://newsletter.semianalysis.com/p/tpuv7-google-takes-a-swing-at-the#long [carol @ 2024-07-01T15:10Z]",
+        "- [1] storyteller: Sample Story — Story body with extra details — https://example.com/story [2024-07-01T12:34Z]",
+        "  - [1.1] alice: First comment with newline [2024-07-01T13:00Z]",
+        "    - [1.1.1] bob: Reply comment [2024-07-01T14:05Z]",
+        "    - [1.1.2] carol: Check this https://newsletter.semianalysis.com/p/tpuv7-google-takes-a-swing-at-the#long [2024-07-01T15:10Z]",
       ].join("\n"),
     );
   });

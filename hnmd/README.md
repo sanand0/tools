@@ -10,8 +10,8 @@ Copy any Hacker News post—story plus all nested comments—as a Markdown list 
 4. The thread is copied in the format:
 
 ```
-- user: message [user @ 2024-01-01T12:00Z]
-  - user: reply [user @ 2024-01-01T12:05Z]
+- [1] user: message [2024-01-01T12:00Z]
+  - [1.1] user: reply [2024-01-01T12:05Z]
 ```
 
 Story details are included as the first bullet, with all comments nested beneath.
