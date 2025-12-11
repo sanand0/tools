@@ -41,16 +41,31 @@ const buildComments = (doc) =>
     return { user, message, timestamp: formatTimestamp(row), indent };
   });
 
+const createIdFormatter = () => {
+  const counters = [];
+  return (indent) => {
+    const level = indent + 1;
+    if (!counters.length) {
+      counters.push(1);
+    } else if (level > counters.length) {
+      while (counters.length < level) counters.push(1);
+    } else {
+      counters.splice(level);
+      counters[counters.length - 1] += 1;
+    }
+    return counters.join(".");
+  };
+};
+
 export const extractThread = (doc = document) => {
   const story = buildStory(doc);
   const baseIndent = story ? 1 : 0;
   const comments = buildComments(doc).map((comment) => ({ ...comment, indent: comment.indent + baseIndent }));
   const items = [story, ...comments].filter(Boolean);
+  const formatId = createIdFormatter();
 
   return items
-    .map(
-      ({ indent, user, message, timestamp }) => `${"  ".repeat(indent)}- ${user}: ${message} [${user} @ ${timestamp}]`,
-    )
+    .map(({ indent, user, message, timestamp }) => `${"  ".repeat(indent)}- [${formatId(indent)}] ${user}: ${message} [${timestamp}]`)
     .join("\n");
 };
 
