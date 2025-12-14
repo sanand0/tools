@@ -65,7 +65,10 @@ export const extractThread = (doc = document) => {
   const formatId = createIdFormatter();
 
   return items
-    .map(({ indent, user, message, timestamp }) => `${"  ".repeat(indent)}- [${formatId(indent)}] ${user}: ${message} [${timestamp}]`)
+    .map(
+      ({ indent, user, message, timestamp }) =>
+        `${"  ".repeat(indent)}- [${formatId(indent)}] ${user}: ${message} [${timestamp}]`,
+    )
     .join("\n");
 };
 

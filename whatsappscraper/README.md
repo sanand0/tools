@@ -14,6 +14,7 @@ The scraper attempts to collect the following information for each message:
 - Author's phone number identifier
 - Author's display name
 - Message text
+- Link details (URL, site, preview title/description when available)
 - Timestamp (derived from message metadata or display)
 - Whether it's a system message (e.g., "User joined")
 - Whether it's a recalled (deleted) message
@@ -21,6 +22,13 @@ The scraper attempts to collect the following information for each message:
 - Reactions to the message
 
 The collected data is structured as a JSON array of message objects, which is then copied to the clipboard.
+
+Link previews (when WhatsApp renders them) are captured in:
+
+- `linkUrl`
+- `linkSite`
+- `linkTitle` (optional)
+- `linkDescription` (optional)
 
 ## Use Cases
 
@@ -52,8 +60,18 @@ The collected data is structured as a JSON array of message objects, which is th
 4. **Output:**
    - The extracted messages are formatted into a JSON string.
    - This JSON string is automatically copied to your clipboard.
-   - An alert message will confirm the number of messages copied.
-   - If `navigator.clipboard.writeText` fails, it uses a fallback method (creating a temporary textarea) to copy the data.
+   - Click the injected "Copy … messages" button to copy the JSON.
+
+## CDP Verification
+
+If you have a Chromium/Chrome instance running with the DevTools Protocol exposed (e.g. `--remote-debugging-port=9222`)
+and an existing WhatsApp Web tab open, you can sanity-check the scraper output without using the bookmarklet:
+
+- Build the bundled script: `npm --prefix whatsappscraper run build`
+- Run the verifier: `node whatsappscraper/verify.mjs`
+
+`verify.mjs` connects to `http://localhost:9222`, injects `whatsappscraper.min.js` into the WhatsApp Web tab, runs
+`whatsappscraper.whatsappMessages(document)`, and prints a representative message (prefering one with link preview data).
 
 ## Technical Details
 

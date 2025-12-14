@@ -1,6 +1,14 @@
 const defaultState = createScraperState();
 
-// Extract text from an element, replacing data-plain-text elements with their values
+// Extract human-visible text from an element.
+//
+// WhatsApp renders emojis in multiple ways:
+// - Real emoji characters, e.g. "😀"
+// - Spans/images with `data-plain-text="😀"` (common in selectable/copyable regions)
+// - Emoji images with `img.emoji[alt="😀"]`
+//
+// We clone the node and replace those wrappers with their plain-text equivalents so the
+// resulting `.textContent` matches what a human would copy/paste.
 function getTextWithEmojis(element) {
   if (!element) return undefined;
   const clone = element.cloneNode(true);
@@ -16,6 +24,22 @@ export function createScraperState(seed) {
 }
 
 export function whatsappMessages(rootDocument = document) {
+  // WhatsApp Web renders each visible message row within `#main` with `role="row"`.
+  //
+  // Example (simplified):
+  // <div id="main">
+  //   <div role="row">
+  //     <div data-id="false_<chat>@g.us_<MESSAGE_ID>_<internal>@lid">
+  //       <div data-pre-plain-text="[9:12 am, 10/12/2025] +00 10000 00000: ">
+  //         <div class="selectable-text">Hello</div>
+  //         <div role=""><span dir="ltr">Member Alpha</span></div>
+  //       </div>
+  //     </div>
+  //   </div>
+  // </div>
+  //
+  // We prefer role/data-* attributes over classes because WhatsApp classes are frequently
+  // obfuscated and change between builds.
   const messages = [];
   let lastAuthor;
   let lastTime;
@@ -26,7 +50,12 @@ export function whatsappMessages(rootDocument = document) {
     let [isSystemMessage, userId, _userDomain, messageId, _internalId, _authorDomain] = el
       .querySelector("[data-id]")
       .dataset.id.split(/[_@]/);
+    // `data-id` is the most stable per-message identifier we have.
+    // Format is not documented and can evolve, but in practice the message id sits in the 3rd segment:
+    //   "false_<userId>@g.us_<messageId>_<internalId>@lid"
+    // We split on "_" and "@" to avoid depending on domain suffixes.
     isSystemMessage = isSystemMessage === "true";
+    // Recalled/deleted messages show a small "recalled" icon.
     let isRecalled = !!el.querySelector('[data-icon="recalled"]');
     const message = { messageId, isSystemMessage, isRecalled, userId };
     // Non-recalled system messages are typically:
@@ -36,9 +65,16 @@ export function whatsappMessages(rootDocument = document) {
     if (!isSystemMessage && !isRecalled) {
       // TODO: Image links
       // TODO: Forwarded flag
+      // Actual message content (typed text or link URL) is usually in `.selectable-text`.
+      // This class has been comparatively stable and yields cleaner text than `el.innerText`
+      // (which includes author, phone, preview text, timestamps, reactions, etc.).
       const selectable = el.querySelector(".selectable-text");
       rawText = getTextWithEmojis(selectable);
+      // GIF messages have no meaningful text; detect via the play button label.
       hasGif = !!el.querySelector('[aria-label="Play GIF" i]');
+
+      // Author line is rendered in a container with `role=""` and a child with a `[dir]` attribute.
+      // (WhatsApp uses `[dir]` a lot to handle RTL/LTR names; it’s more stable than class names.)
       const authorSection = el.querySelector('[role=""]');
       message.author = authorSection?.querySelector("[dir]")?.textContent;
 
@@ -56,10 +92,14 @@ export function whatsappMessages(rootDocument = document) {
       // Time and authorPhone are available in data-pre-plain-text="[10:33 am, 8/5/2025] +91 99999 99999: "
       const prePlainText = el.querySelector("[data-pre-plain-text]")?.dataset.prePlainText;
       const { date, phone } = extractDateAndPhone(prePlainText);
+      // Prefer `data-pre-plain-text` because it includes both date and author phone in a machine-readable
+      // format. This is more robust than parsing a visual timestamp.
       message.time = date;
       if (phone) message.authorPhone = phone;
       // If not, the hh:mm am/pm is available in the last dir="auto"
       if (!message.time) {
+        // WhatsApp often renders the visible time as the last `[dir="auto"]` in the row.
+        // It's only a time-of-day, so we combine it with `lastTime`'s date to preserve chronology.
         const auto = [...el.querySelectorAll('[dir="auto"]')].at(-1);
         if (auto) message.time = updateTime(lastTime, auto.textContent);
         // Else it's a pinned message. Ignore it.
@@ -68,7 +108,9 @@ export function whatsappMessages(rootDocument = document) {
     lastTime = message.time;
     lastAuthor = message.author;
 
-    // Get quote information if it exists
+    // Quoted/replied messages:
+    // - The quote container uses an aria-label "Quoted message"
+    // - Inside is the quoted author (sometimes as an aria-label) and quoted text in `.quoted-mention`
     const quote = el.querySelector('[aria-label="Quoted message" i]');
     if (quote) {
       const quoteAuthorNoLabel = quote.querySelector('[role=""] :not([aria-label])')?.textContent;
@@ -91,6 +133,7 @@ export function whatsappMessages(rootDocument = document) {
             }
         }
     }
+    // Reactions are exposed via aria-label. We use two selectors because WhatsApp varies the casing.
     const reactions = el.querySelector('[aria-label^="Reactions "],[aria-label^="reaction "]');
     if (reactions)
       message.reactions = reactions
@@ -100,6 +143,24 @@ export function whatsappMessages(rootDocument = document) {
         .replace(/ *in total/i, "")
         .replace(/[, .]+$/, "");
     if (!isSystemMessage && !isRecalled) {
+      // Link previews:
+      //
+      // When a message is "link-only" (the message text is just the URL), WhatsApp renders an
+      // expanded preview card inside the same row (title/description/site), in addition to the URL.
+      // The preview card’s class structure is volatile, so we don't target it directly.
+      //
+      // Instead:
+      // - Find the first external anchor `a[href^="http"]` (covers both the URL and preview links)
+      // - Always capture `linkUrl/linkSite`
+      // - If a preview card is present, anchor off the site line (e.g. "x.com") and read the smallest
+      //   surrounding block to extract `linkTitle/linkDescription` without depending on volatile classes.
+      const link = extractLinkDetails(el, { author: message.author, authorPhone: message.authorPhone, rawText });
+      if (link) {
+        message.linkUrl = link.url;
+        message.linkSite = link.site;
+        if (link.title) message.linkTitle = link.title;
+        if (link.description) message.linkDescription = link.description;
+      }
       const cleaned = cleanMessageText(rawText, {
         author: message.author,
         quoteAuthor: message.quoteAuthor,
@@ -107,12 +168,103 @@ export function whatsappMessages(rootDocument = document) {
         usedFallback,
         hasGif,
       });
-      if (cleaned) message.text = cleaned;
-      else delete message.text;
+      if (cleaned) {
+        message.text = cleaned;
+        // For link-only messages, include preview title/description in `.text` so downstream consumers
+        // get the same "human-visible" content WhatsApp shows in the bubble.
+        if (link?.title && normalizeUrl(cleaned) === normalizeUrl(link.url)) {
+          const previewParts = [link.title, link.description].filter(Boolean);
+          if (previewParts.length) message.text = [cleaned, ...previewParts].join("\n");
+        }
+      } else delete message.text;
     }
     messages.push(message);
   }
   return messages;
+}
+
+function normalizeUrl(value) {
+  if (typeof value !== "string") return "";
+  return value.trim().replace(/\/+$/, "");
+}
+
+function textLines(value) {
+  return (value || "")
+    .split(/\n+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function normalizeLine(value) {
+  return normalizeUrl((value || "").trim()).toLowerCase();
+}
+
+function isTimeLine(value) {
+  return /^\d{1,2}:\d{2}\s*(?:am|pm)\b/i.test(value || "");
+}
+
+function isTinyCountLine(value) {
+  return /^\d{1,3}$/.test((value || "").trim());
+}
+
+function looksLikeDomain(value) {
+  return /^[a-z0-9.-]+\.[a-z]{2,}$/i.test((value || "").trim());
+}
+
+function looksLikeUrl(value) {
+  const t = (value || "").trim();
+  if (!t) return false;
+  if (/^https?:\/\//i.test(t)) return true;
+  if (/\s/.test(t)) return false;
+  // Reject punctuation-only lines like "." that can appear as author names.
+  return /[a-z0-9]/i.test(t) && /[/.]/.test(t);
+}
+
+function extractLinkDetails(messageRow, { author, authorPhone, rawText } = {}) {
+  // Links in WhatsApp messages are typically rendered as <a href="https://…">…</a>.
+  // We only consider http(s) links; internal blob: and data: URLs are ignored by this selector.
+  // Prefer links inside `.selectable-text` because preview cards may contain extra links (e.g. in description).
+  const a = messageRow.querySelector('.selectable-text a[href^="http"],a[href^="http"]');
+  if (!a?.href) return null;
+  let site;
+  try {
+    site = new URL(a.href).hostname.replace(/^www\./i, "");
+  } catch {
+    return null;
+  }
+
+  const selectableText =
+    typeof rawText === "string" ? rawText : getTextWithEmojis(messageRow.querySelector(".selectable-text"));
+  const selectableLineSet = new Set(textLines(selectableText));
+  const quoteLineSet = new Set(textLines(messageRow.querySelector('[aria-label="Quoted message" i]')?.innerText));
+
+  // Preview text appears above the URL line inside the same message row. Instead of using brittle preview-card
+  // selectors, anchor off the URL's position in `row.innerText` and extract the text immediately preceding it.
+  const urlNorm = normalizeLine(a.href);
+  const allLines = textLines(messageRow.innerText);
+  const urlIndex = allLines.findIndex((line) => {
+    const n = normalizeLine(line);
+    if (!looksLikeUrl(line)) return false;
+    return n === urlNorm || n.includes(urlNorm) || urlNorm.includes(n);
+  });
+  if (urlIndex < 0) return { url: a.href, site };
+
+  let candidates = allLines.slice(0, urlIndex).filter((line) => {
+    if (author && line === author) return false;
+    if (authorPhone && line === authorPhone) return false;
+    if (selectableLineSet.has(line)) return false;
+    if (quoteLineSet.has(line)) return false;
+    if (isTimeLine(line)) return false;
+    if (isTinyCountLine(line)) return false;
+    return true;
+  });
+
+  // Preview cards commonly end with a site line like "youtube.com" (not necessarily the same as the URL host).
+  if (looksLikeDomain(candidates.at(-1))) candidates = candidates.slice(0, -1);
+
+  const [title, ...rest] = candidates;
+  const description = rest.join("\n").trim() || undefined;
+  return title ? { url: a.href, site, title, description } : { url: a.href, site };
 }
 
 function extractDateAndPhone(prePlainText) {
@@ -186,6 +338,10 @@ export function scrape({
 }
 
 function cleanMessageText(text, { author, quoteAuthor, quoteText, usedFallback, hasGif } = {}) {
+  // Post-processing rationale:
+  // - When we fall back to `el.textContent`, it may include author names/phones/timestamps; strip those.
+  // - When a quote is present, WhatsApp repeats quoted text inside the row; remove it from the main text.
+  // - Normalize whitespace and curly quotes so downstream matching and diffing is easier.
   if (typeof text !== "string") return text;
   let cleaned = text;
 
@@ -208,11 +364,13 @@ function cleanMessageText(text, { author, quoteAuthor, quoteText, usedFallback, 
     cleaned = cleaned.replace(new RegExp(escapedQuoteAuthor, "gi"), "");
   }
   if (usedFallback) {
+    // "Maybe <name>" and phone numbers show up in fallback text in group chats; remove to avoid duplication.
     cleaned = cleaned.replace(/\bMaybe\b/gi, "");
     cleaned = cleaned.replace(/\+?\d[\d\s-]{5,}/g, "");
   }
 
   cleaned = cleaned
+    // GIF rows include playback fallback strings and "tenor"/forward markers; hide those and keep "(media-gif)".
     .replace(/Your browser doesn't support video playback\.?/gi, "")
     .replace(/\btenor\b/gi, "")
     .replace(/\bforward-[\w-]+\b/gi, "")
