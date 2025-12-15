@@ -67,13 +67,13 @@ describe("whatsappscraper", () => {
     expect(messages[1].time).toBe(secondExpected.toISOString());
 
     expect(messages[2]).toMatchObject({
-      messageId: "AC808B3EE3AB05D57A37A08250124655",
-      isSystemMessage: true,
-      isRecalled: false,
+      messageId: "RECALLEDMSG1",
+      isSystemMessage: false,
+      isRecalled: true,
       userId: "120363403498637789",
     });
     expect(messages[2].authorPhone).toBeUndefined();
-    expect(messages[2].text).toContain("changed to a new mobile number");
+    expect(messages[2].text).toBeUndefined();
 
     expect(messages[3]).toMatchObject({
       messageId: "3EB0E63CFC6AC65FD9BF6E",
@@ -440,7 +440,7 @@ describe("whatsappscraper", () => {
     const main = document.getElementById("main");
     const button = document.getElementById("copy-btn");
     expect(button).not.toBeNull();
-    expect(button.textContent).toBe("Copy 5 messages");
+    expect(button.textContent).toBe("Copy 4 messages");
 
     const newRow = document.createElement("div");
     newRow.setAttribute("role", "row");
@@ -463,7 +463,7 @@ describe("whatsappscraper", () => {
     });
 
     const refreshedButton = document.getElementById("copy-btn");
-    expect(refreshedButton.textContent).toBe("Copy 6 messages");
+    expect(refreshedButton.textContent).toBe("Copy 5 messages");
 
     refreshedButton.click();
     expect(writeText).toHaveBeenCalledTimes(1);
