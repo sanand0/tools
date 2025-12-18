@@ -10,39 +10,46 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous" />
 </head>
 
-<body class="bg-light">
-  <form class="container py-4" id="form">
-    <h1 class="mb-4">
-      <i class="bi bi-chat-quote"></i> WhatsApp Thread Viewer
-    </h1>
-
-    <p>
-      Paste the JSON copied from the
-      <a href="../whatsappscraper">WhatsApp Scraper</a> to view it as a
-      threaded discussion.
-    </p>
-
-    <div class="mb-3">
-      <textarea id="json" class="form-control font-monospace" rows="10" placeholder="Paste WhatsApp messages JSON array here..."></textarea>
+<body>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-chat-quote me-2"></i>
+        WhatsApp Thread Viewer
+      </a>
+      <div class="bootstrap-dark-theme"></div>
     </div>
+  </nav>
 
-    <div class="d-flex gap-2 mb-4">
-      <button type="submit" class="btn btn-primary">
-        <i class="bi bi-arrow-repeat"></i> Parse Messages
-        <span id="spinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status"></span>
-      </button>
-      <button type="button" id="copyMarkdown" class="btn btn-outline-secondary" disabled>
-        <i class="bi bi-clipboard"></i> Copy Markdown
-      </button>
-    </div>
+  <main class="container pb-4">
+    <header class="mt-4 mb-4">
+      <h2 class="fs-4 mb-2">View WhatsApp chats as threads</h2>
+      <p class="text-secondary mb-0">Paste JSON from the <a href="../whatsappscraper">WhatsApp Scraper</a> to see a threaded discussion.</p>
+    </header>
+    <div id="sampleContainer" class="d-flex flex-wrap align-items-center gap-2 mb-3"></div>
+    <div id="alertContainer" class="mb-3"></div>
 
-    <div id="errorAlert" class="alert alert-danger d-none" role="alert">
-      <i class="bi bi-exclamation-triangle"></i> <span id="errorText"></span>
-    </div>
-  </form>
+    <form id="form">
+      <div class="mb-3">
+        <textarea id="json" class="form-control font-monospace" rows="10" placeholder="Paste WhatsApp messages JSON array here..."></textarea>
+      </div>
+
+      <div class="d-flex gap-2 mb-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-arrow-repeat"></i> Parse Messages
+          <span id="spinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status"></span>
+        </button>
+        <button type="button" id="copyMarkdown" class="btn btn-outline-secondary" disabled>
+          <i class="bi bi-clipboard"></i> Copy Markdown
+        </button>
+      </div>
+    </form>
+  </main>
 
   <div class="container" id="threadContainer"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
   <script type="module" src="script.js"></script>
 </body>
 

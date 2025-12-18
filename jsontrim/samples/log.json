@@ -1,0 +1,19 @@
+{
+  "requestId": "req_123",
+  "user": {
+    "id": 42,
+    "email": "someone@example.com"
+  },
+  "payload": {
+    "prompt": "This is a deliberately long prompt string used to demonstrate trimming. It keeps going with extra detail that would usually be too big for logs or previews.",
+    "response": "Another intentionally long string. Imagine this is an LLM response or HTML blob that you want to truncate before sharing. It should be cut to the chosen maximum length."
+  },
+  "events": [
+    { "type": "start", "message": "Starting job…" },
+    {
+      "type": "debug",
+      "message": "A very long debug message that should be truncated. It contains stack traces, JSON blobs, and repeated details that are not useful in a preview."
+    }
+  ]
+}
+

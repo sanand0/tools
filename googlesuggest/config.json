@@ -1,0 +1,8 @@
+{
+  "samples": [
+    { "id": "learn-python", "name": "learn python", "q": "learn python" },
+    { "id": "why-is", "name": "why is", "q": "why is" },
+    { "id": "best-way", "name": "best way to", "q": "best way to" }
+  ]
+}
+

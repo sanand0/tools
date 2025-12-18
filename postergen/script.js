@@ -5,6 +5,8 @@ import pptxgenjs from "https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/+esm";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 import { llmfoundryHelp } from "../common/aiconfig.js";
 import { getClosestAspectRatio } from "./utils.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { readParam } from "../common/demo.js";
 
 const baseUrls = [
   { url: "https://llmfoundry.straive.com/openai/v1", name: "LLM Foundry" },
@@ -30,6 +32,7 @@ const $poster = document.getElementById("poster");
 const $downloadContainer = document.getElementById("download-container");
 const $downloadPNG = document.getElementById("download-png");
 const $downloadPPTX = document.getElementById("download-pptx");
+const $sampleContainer = document.getElementById("sampleContainer");
 
 // Image enhancement elements
 const $imageEnhancementContainer = document.getElementById("image-enhancement-container");
@@ -38,6 +41,7 @@ const $conversationHistory = document.getElementById("conversation-history");
 const $openaiConfigBtn = document.getElementById("openai-config-btn");
 
 const marked = new Marked();
+saveform("#poster-form", { exclude: '[type="file"]' });
 
 // Add config button event listener
 $openaiConfigBtn.addEventListener("click", async () => {
@@ -70,7 +74,7 @@ let brief;
 
 // Load configuration and render templates.
 $templateGallery.innerHTML = loading;
-const { templates, logos } = await fetch("config.json").then((res) => res.json());
+const { templates, logos, presets } = await fetch("config.json").then((res) => res.json());
 const sections = [
   { type: "template", $gallery: $templateGallery, items: templates, cols: "col-12 col-sm-3" },
   { type: "logo", $gallery: $logoGallery, items: logos, cols: "col-12 col-sm-2 col-lg-1" },
@@ -107,6 +111,61 @@ for (const { type, $gallery, items, cols } of sections) {
     });
   });
 }
+
+const normalize = (value) =>
+  String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+function selectById(type, id) {
+  const gallery = type === "template" ? $templateGallery : $logoGallery;
+  const items = type === "template" ? templates : logos;
+  const index =
+    type === "template"
+      ? items.findIndex((item) => item.id === id)
+      : items.findIndex((item) => normalize(item.name) === normalize(id) || item.name === id);
+  if (index < 0) return false;
+  const card = gallery.querySelector(`.${type}-card[data-${type}-id="${index}"]`);
+  card?.click();
+  return true;
+}
+
+function renderPresets(value) {
+  if (!$sampleContainer) return;
+  if (!Array.isArray(value) || !value.length) {
+    $sampleContainer.replaceChildren();
+    return;
+  }
+  const label = document.createElement("span");
+  label.className = "text-secondary small fw-semibold me-1";
+  label.textContent = "Examples";
+  $sampleContainer.replaceChildren(
+    label,
+    ...value.map((preset) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-secondary";
+      button.textContent = preset.name || preset.id;
+      button.addEventListener("click", () => {
+        if (preset.template) selectById("template", preset.template);
+        if (preset.logo) selectById("logo", preset.logo);
+        if (preset.brief) document.getElementById("brief").value = preset.brief;
+        document.getElementById("brief").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      return button;
+    }),
+  );
+}
+
+renderPresets(presets);
+
+const urlTemplate = readParam("template", { fallback: "" });
+const urlLogo = readParam("logo", { fallback: "" });
+const urlBrief = readParam("brief", { fallback: "", trim: false });
+if (urlTemplate) selectById("template", urlTemplate);
+if (urlLogo) selectById("logo", urlLogo);
+if (urlBrief) document.getElementById("brief").value = urlBrief;
 
 // Render the generation form
 $submitContainer.innerHTML = /* html */ `<button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-stars me-2"></i>Generate Poster</button>`;

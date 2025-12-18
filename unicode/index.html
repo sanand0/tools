@@ -32,33 +32,43 @@
   </style>
 </head>
 
-<body class="bg-light">
-  <div class="container-fluid py-4">
-    <div class="row justify-content-center mb-4">
-      <div class="col-md-8 text-center">
-        <h1 class="mb-4">Unicode Character Viewer</h1>
-        <form id="unicode-form" class="mb-3">
-          <textarea id="textInput" class="form-control mb-2" rows="3" placeholder="Enter text here..."></textarea>
-          <button type="button" id="readText" class="btn btn-primary btn-lg me-2">
-            <i class="bi bi-file-text me-2"></i>Read Text
-          </button>
-          <button type="button" id="readClipboard" class="btn btn-primary btn-lg">
-            <i class="bi bi-clipboard me-2"></i>Read Clipboard
-          </button>
-        </form>
-        <div id="spinner" class="spinner-border text-primary mt-3 d-none" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
+<body>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-type me-2"></i>
+        Unicode Character Viewer
+      </a>
+      <div class="bootstrap-dark-theme"></div>
+    </div>
+  </nav>
+  <main class="container pb-4">
+    <header class="mt-4 mb-4">
+      <h2 class="fs-4 mb-2">Find and copy non-ASCII characters</h2>
+      <p class="text-secondary mb-0">Paste text (or read from clipboard) to list all non-ASCII characters. Click one to copy it.</p>
+    </header>
+    <div id="sampleContainer" class="d-flex flex-wrap align-items-center gap-2 mb-3"></div>
+    <form id="unicode-form" class="mb-3">
+      <textarea id="textInput" class="form-control mb-2" rows="3" placeholder="Enter text here..."></textarea>
+      <button type="button" id="readText" class="btn btn-primary me-2">
+        <i class="bi bi-file-text me-2"></i>Read Text
+      </button>
+      <button type="button" id="readClipboard" class="btn btn-primary">
+        <i class="bi bi-clipboard me-2"></i>Read Clipboard
+      </button>
+    </form>
+    <div id="spinner" class="spinner-border text-primary mt-3 d-none" role="status">
+      <span class="visually-hidden">Loading...</span>
     </div>
     <div class="row justify-content-center">
       <div class="col-md-10">
         <div id="charContainer" class="d-flex flex-wrap justify-content-center"></div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
   <script type="module" src="script.js"></script>
 </body>
 

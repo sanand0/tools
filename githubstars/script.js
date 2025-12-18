@@ -2,6 +2,7 @@ import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html/+esm";
 import { marked } from "https://cdn.jsdelivr.net/npm/marked/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { loadConfigJson, readListParam, readParam } from "../common/demo.js";
 
 const formatters = {
   number: new Intl.NumberFormat("en"),
@@ -10,6 +11,10 @@ const formatters = {
 };
 
 saveform("#repoForm", { exclude: '[type="file"]' });
+let config;
+const sampleContainer = document.getElementById("sampleContainer");
+const form = document.getElementById("repoForm");
+const textarea = document.getElementById("inputText");
 
 const extractRepoLinks = (text) => {
   const links = [];
@@ -72,15 +77,17 @@ const replaceText = (text, repoData) =>
 const tokenInput = document.getElementById("token");
 tokenInput.value = localStorage.getItem("github_token") || "";
 
-document.getElementById("repoForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const text = document.getElementById("inputText").value;
+function reposToMarkdown(repos) {
+  return repos.map((fullName) => `- [${fullName}](https://github.com/${fullName})`).join("\n");
+}
+
+async function analyze() {
+  const text = textarea.value;
   const token = tokenInput.value.trim();
   if (token) localStorage.setItem("github_token", token);
 
   const loading = document.getElementById("loading");
   const resultsDiv = document.getElementById("resultsTable");
-  const textarea = document.getElementById("inputText");
 
   loading.classList.remove("d-none");
   resultsDiv.classList.add("d-none");
@@ -108,4 +115,60 @@ document.getElementById("repoForm").addEventListener("submit", async (e) => {
   } finally {
     loading.classList.add("d-none");
   }
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  await analyze();
 });
+
+function renderSamples(samples) {
+  if (!sampleContainer) return;
+  if (!Array.isArray(samples) || !samples.length) {
+    sampleContainer.replaceChildren();
+    return;
+  }
+  const label = document.createElement("span");
+  label.className = "text-secondary small fw-semibold me-1";
+  label.textContent = "Examples";
+  sampleContainer.replaceChildren(
+    label,
+    ...samples.map((sample) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-secondary";
+      button.textContent = sample.name || sample.id;
+      button.addEventListener("click", () => {
+        const repos = Array.isArray(sample.repos) ? sample.repos : [];
+        textarea.value = reposToMarkdown(repos);
+        void analyze();
+      });
+      return button;
+    }),
+  );
+}
+
+async function init() {
+  try {
+    config = await loadConfigJson("config.json");
+    renderSamples(config.samples);
+    const repos = readListParam("repos", { fallback: [], split: /[,\n]+/ });
+    if (repos.length) {
+      textarea.value = reposToMarkdown(repos);
+      void analyze();
+      return;
+    }
+    const sampleId = readParam("sample", { fallback: "" });
+    if (sampleId) {
+      const sample = config?.samples?.find((item) => item.id === sampleId);
+      const sampleRepos = Array.isArray(sample?.repos) ? sample.repos : [];
+      textarea.value = reposToMarkdown(sampleRepos);
+      void analyze();
+      return;
+    }
+  } catch (error) {
+    bootstrapAlert({ title: "Config error", body: error.message, color: "danger" });
+  }
+}
+
+void init();

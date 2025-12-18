@@ -7,7 +7,7 @@
   <title>PosterGen</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTUiIGZpbGw9IiMyNTYzZWIiLz48cGF0aCBmaWxsPSIjZmZmIiBkPSJtMTYgNyAyIDcgNyAyLTcgMi0yIDctMi03LTctMiA3LTJaIi8+PC9zdmc+">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" crossorigin="anonymous" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css" crossorigin="anonymous">
   <style>
     .narrative {
@@ -73,64 +73,53 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" href=".">PosterGen</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <div class="navbar-nav ms-auto">
-          <button class="btn btn-outline-light me-2" id="openai-config-btn" title="Configure API Key">
-            <i class="bi bi-gear"></i>
-          </button>
-        </div>
-        <div class="nav-item dropdown" role="group" aria-label="Toggle dark mode" title="Toggle Dark Mode">
-          <button class="dark-theme-toggle btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Toggle theme (auto)">
-            <i class="bi bi-circle-half"></i> <span class="d-lg-none ms-2">Toggle theme</span>
-          </button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><button class="dropdown-item" data-bs-theme-value="light"><i class="me-2 bi bi-sun-fill"></i> Light</button></li>
-            <li><button class="dropdown-item" data-bs-theme-value="dark"><i class="me-2 bi bi-moon-stars-fill"></i> Dark</button></li>
-            <li><button class="dropdown-item" data-bs-theme-value="auto"><i class="me-2 bi bi-circle-half"></i> Auto</button></li>
-          </ul>
-        </div>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-stars me-2"></i>
+        Concept to Poster
+      </a>
+      <div class="d-flex align-items-center gap-2 ms-auto">
+        <button class="btn btn-outline-secondary" id="openai-config-btn" title="Configure API Key" type="button">
+          <i class="bi bi-gear"></i>
+        </button>
+        <div class="bootstrap-dark-theme"></div>
       </div>
     </div>
   </nav>
 
-  <div class="container-fluid">
-    <h1 class="display-1 my-4 text-center">Concept to Poster</h1>
-    <h2 class="display-6 text-center">Single-prompt Poster Generation</h2>
-    <div class="mx-auto my-3 narrative">
-      <ul class="fs-5 bullet-queries my-5">
-        <li>Do you <strong>spend a lot</strong> on media agencies to create images?</li>
-        <li>Do AI image generators <strong>fail to generate</strong> brand or text content?</li>
-        <li>Is your team <strong>too busy</strong> or expensive to create images?</li>
-      </ul>
-      <p>You can combine engineering with AI to create templatized images.</p>
-      <p>Pick a template. Select a prompt. Generate.</p>
+  <div class="container">
+    <header class="mt-4 mb-4">
+      <h2 class="fs-4 mb-2">Generate branded posters from a brief</h2>
+      <p class="text-secondary mb-0">Choose a size, pick a template and logo, then describe what you want on the poster.</p>
+    </header>
+    <div class="narrative mb-4">
+      <p class="mb-1"><strong>1.</strong> Select a size.</p>
+      <p class="mb-1"><strong>2.</strong> Pick a template and logo.</p>
+      <p class="mb-0"><strong>3.</strong> Write a brief and generate a poster you can download.</p>
+    </div>
+
+    <div class="narrative">
+      <label for="aspect-ratio" class="form-label">Select Size:</label>
+      <select class="form-select" id="aspect-ratio" aria-label="Select poster format">
+        <optgroup label="Social Media">
+          <option value="instagram-square" data-width="1080" data-height="1080">Instagram Square (1:1) - 1080×1080px</option>
+          <option value="instagram-portrait" data-width="1080" data-height="1350">Instagram Portrait (4:5) - 1080×1350px</option>
+          <option value="instagram-story" data-width="1080" data-height="1920">Instagram Story (9:16) - 1080×1920px</option>
+          <option value="facebook" data-width="1200" data-height="675">Facebook Post (16:9) - 1200×675px</option>
+          <option value="linkedin" data-width="1200" data-height="800">LinkedIn (3:2) - 1200×800px</option>
+        </optgroup>
+        <optgroup label="Marketing">
+          <option value="twitter" data-width="1200" data-height="600">Twitter Post (2:1) - 1200×600px</option>
+          <option value="pinterest" data-width="1000" data-height="1500">Pinterest Pin (2:3) - 1000×1500px</option>
+          <option value="youtube" data-width="1280" data-height="720">YouTube Thumbnail (16:9) - 1280×720px</option>
+          <option value="display" data-width="800" data-height="600">Display Ad (4:3) - 800×600px</option>
+        </optgroup>
+      </select>
     </div>
   </div>
 
-  <div class="mx-auto narrative">
-    <label for="aspect-ratio" class="form-label">Select Size:</label>
-    <select class="form-select" id="aspect-ratio" aria-label="Select poster format">
-      <optgroup label="Social Media">
-        <option value="instagram-square" data-width="1080" data-height="1080">Instagram Square (1:1) - 1080×1080px</option>
-        <option value="instagram-portrait" data-width="1080" data-height="1350">Instagram Portrait (4:5) - 1080×1350px</option>
-        <option value="instagram-story" data-width="1080" data-height="1920">Instagram Story (9:16) - 1080×1920px</option>
-        <option value="facebook" data-width="1200" data-height="675">Facebook Post (16:9) - 1200×675px</option>
-        <option value="linkedin" data-width="1200" data-height="800">LinkedIn (3:2) - 1200×800px</option>
-      </optgroup>
-      <optgroup label="Marketing">
-        <option value="twitter" data-width="1200" data-height="600">Twitter Post (2:1) - 1200×600px</option>
-        <option value="pinterest" data-width="1000" data-height="1500">Pinterest Pin (2:3) - 1000×1500px</option>
-        <option value="youtube" data-width="1280" data-height="720">YouTube Thumbnail (16:9) - 1280×720px</option>
-        <option value="display" data-width="800" data-height="600">Display Ad (4:3) - 800×600px</option>
-      </optgroup>
-    </select>
-  </div>
+  <div id="sampleContainer" class="container my-4 d-flex flex-wrap align-items-center gap-2"></div>
 
   <div id="template-gallery" class="container my-5"></div>
   <div id="logo-gallery" class="container my-5"></div>
@@ -196,8 +185,8 @@ Update styles ONLY if needed and different from default.
     <button type="button" class="btn btn-lg btn-success mx-2" id="download-pptx"><i class="bi bi-file-slides-fill"></i> Download PPTX</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" type="module"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@gramex/ui@0.3/dist/dark-theme.js" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
   <script src="script.js" type="module"></script>
 </body>
 

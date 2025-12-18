@@ -1,25 +1,95 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { copyText } from "../common/clipboard-utils.js";
+import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
+import { loadConfigJson, readParam } from "../common/demo.js";
 
 const $form = document.querySelector("#form");
 const $json = document.querySelector("#json");
 const $threads = document.querySelector("#threadContainer");
+const $spinner = document.querySelector("#spinner");
+const $alertContainer = document.querySelector("#alertContainer");
+const $sampleContainer = document.querySelector("#sampleContainer");
 const copyBtn = document.querySelector("#copyMarkdown");
 const defaultCopyLabel = copyBtn?.innerHTML ?? "";
 let currentThreads = [];
+let config;
+
+const alert = (options) =>
+  bootstrapAlert({
+    container: $alertContainer ?? undefined,
+    replace: true,
+    ...options,
+  });
 
 if ($form) saveform("#form");
+
+const setLoading = (loading) => {
+  if (!$spinner) return;
+  $spinner.classList.toggle("d-none", !loading);
+};
+
+function renderSamples(chats) {
+  if (!$sampleContainer) return;
+  if (!Array.isArray(chats) || !chats.length) {
+    $sampleContainer.replaceChildren();
+    return;
+  }
+  const label = document.createElement("span");
+  label.className = "text-secondary small fw-semibold me-1";
+  label.textContent = "Examples";
+  $sampleContainer.replaceChildren(
+    label,
+    ...chats.map((chat) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-secondary";
+      button.textContent = chat.name || chat.id;
+      button.addEventListener("click", () => void loadChat(chat.id, { parse: true }));
+      return button;
+    }),
+  );
+}
+
+async function loadChat(id, { parse = false } = {}) {
+  const chat = config?.chats?.find((item) => item.id === id);
+  if (!chat?.path) return;
+  setLoading(true);
+  try {
+    const response = await fetch(chat.path);
+    if (!response.ok) throw new Error(`Failed to load ${chat.path}: HTTP ${response.status}`);
+    $json.value = await response.text();
+    copyBtn.disabled = true;
+    copyBtn.innerHTML = defaultCopyLabel;
+    if (parse) $form?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+  } catch (error) {
+    alert({ title: "Load failed", body: error.message, color: "danger" });
+  } finally {
+    setLoading(false);
+  }
+}
 
 $form?.addEventListener("submit", (e) => {
   e.preventDefault();
   copyBtn.disabled = true;
   copyBtn.innerHTML = defaultCopyLabel;
 
-  let messages = JSON.parse($json.value || "[]");
-  const threads = threadMessages(messages);
-  currentThreads = threads;
-  $threads.innerHTML = renderThreads(threads);
-  copyBtn.disabled = !threads.length;
+  setLoading(true);
+  try {
+    const messages = JSON.parse($json.value || "[]");
+    const threads = threadMessages(Array.isArray(messages) ? messages : []);
+    currentThreads = threads;
+    $threads.replaceChildren();
+    $threads.insertAdjacentHTML("beforeend", renderThreads(threads));
+    copyBtn.disabled = !threads.length;
+    $alertContainer?.replaceChildren();
+  } catch (error) {
+    currentThreads = [];
+    $threads.replaceChildren();
+    copyBtn.disabled = true;
+    alert({ title: "Parse failed", body: error.message, color: "danger" });
+  } finally {
+    setLoading(false);
+  }
 });
 
 copyBtn?.addEventListener("click", async () => {
@@ -158,3 +228,16 @@ function messagesToMarkdown(threads) {
 function escapeMarkdown(text) {
   return String(text).replace(/([\\`*_{}[\]()#+\-!.>])/g, "\\$1");
 }
+
+async function init() {
+  try {
+    config = await loadConfigJson("config.json");
+    renderSamples(config.chats);
+    const chatId = readParam("chat", { fallback: "" });
+    if (chatId) await loadChat(chatId, { parse: true });
+  } catch (error) {
+    alert({ title: "Config error", body: error.message, color: "danger" });
+  }
+}
+
+void init();

@@ -1,0 +1,10 @@
+{
+  "chats": [
+    {
+      "id": "sample",
+      "name": "Sample thread",
+      "path": "samples/chat.json"
+    }
+  ]
+}
+

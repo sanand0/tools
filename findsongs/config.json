@@ -1,0 +1,17 @@
+{
+  "presets": [
+    {
+      "id": "synth-pop",
+      "name": "Energetic synth-pop",
+      "vibe": "Energetic synth-pop like CHVRCHES, catchy hooks, female vocals, upbeat workout vibes.",
+      "model": "gpt-5-nano"
+    },
+    {
+      "id": "lofi",
+      "name": "Lo-fi focus",
+      "vibe": "Lo-fi instrumental beats for deep focus. No vocals. Chill, warm, minimal.",
+      "model": "gpt-5-nano"
+    }
+  ]
+}
+

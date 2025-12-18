@@ -10,30 +10,40 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" />
 </head>
 
-<body class="bg-light">
-  <div class="container py-4 mb-5">
-    <header class="pb-3 mb-4 border-bottom">
-      <div class="d-flex align-items-center">
-        <i class="bi bi-brush-fill fs-1 me-3 text-primary"></i>
-        <h1 class="display-5 fw-bold">Image Generator</h1>
-      </div>
+<body>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-brush-fill me-2"></i>
+        Image Generator
+      </a>
+      <div class="bootstrap-dark-theme"></div>
+    </div>
+  </nav>
+  <main class="container pb-5">
+    <header class="mt-4 mb-4">
+      <h2 class="fs-4 mb-2">Create and modify images through conversation</h2>
+      <p class="text-secondary mb-0">Optionally upload an image (or paste a URL), describe your change, and keep chatting to iterate.</p>
     </header>
 
     <div class="row g-4 mb-4">
       <div class="col-md-8">
-        <div class="p-4 bg-white rounded-3 shadow-sm h-100">
-          <h2 class="fs-4 mb-2">Create and modify images through conversation</h2>
-          <p>Optionally upload an image or paste its URL, describe your changes, and keep chatting to iterate.</p>
+        <div class="p-4 bg-body rounded-3 border shadow-sm h-100">
+          <h3 class="h5 mb-2">How it works</h3>
+          <p class="mb-3">Start with an optional image, then describe the change you want. Each reply becomes the base for the next step.</p>
           <ul class="list-unstyled mb-0">
             <li class="mb-2"><i class="bi bi-cloud-upload me-2 text-secondary"></i>Optionally upload or link to a starting image</li>
             <li class="mb-2"><i class="bi bi-pencil-square me-2 text-secondary"></i>Describe your changes and send</li>
             <li class="mb-2"><i class="bi bi-images me-2 text-secondary"></i>Get a new image and continue the chat</li>
           </ul>
-          <div id="samples" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 mt-3"></div>
+          <div class="d-flex align-items-center gap-2 mt-3 mb-2">
+            <span class="text-secondary small fw-semibold">Examples</span>
+          </div>
+          <div id="samples" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3"></div>
         </div>
       </div>
       <div class="col-md-4">
-        <div class="p-3 bg-white rounded-3 shadow-sm h-100">
+        <div class="p-3 bg-body rounded-3 border shadow-sm h-100">
           <h3 class="h5 mb-3">Choose Image</h3>
           <input type="file" id="upload-input" accept="image/*" class="form-control mb-3" />
           <img id="preview-image" class="img-fluid rounded mb-3 d-none" alt="Preview" />
@@ -88,7 +98,7 @@
 
     <div class="row g-4">
       <div class="col-12">
-        <div class="p-3 bg-white rounded-3 shadow-sm d-flex flex-column h-100">
+        <div class="p-3 bg-body rounded-3 border shadow-sm d-flex flex-column h-100">
           <div id="chat-log" class="flex-grow-1 overflow-auto mb-3"></div>
           <form id="chat-form" class="input-group">
             <textarea id="prompt-input" class="form-control" rows="2" placeholder="Describe the image modification..."></textarea>
@@ -101,9 +111,10 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
   <script type="module" src="script.js"></script>
 </body>
 

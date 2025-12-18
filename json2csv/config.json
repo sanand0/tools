@@ -1,0 +1,26 @@
+{
+  "presets": [
+    {
+      "id": "nested",
+      "name": "Nested objects",
+      "value": [
+        {
+          "name": "Bond, James",
+          "age": 30,
+          "place": { "city": "New York\nUSA" }
+        },
+        {
+          "name": "Alice",
+          "age": 25,
+          "place": { "country": "Canada", "city": "Ottawa" }
+        }
+      ]
+    },
+    {
+      "id": "single",
+      "name": "Single object",
+      "value": { "id": 1, "title": "Hello", "tags": ["a", "b"] }
+    }
+  ]
+}
+

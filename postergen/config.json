@@ -74,5 +74,21 @@
       "name": "Straive",
       "image": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGRhdGEtbmFtZT0iTGF5ZXIgMSIgdmlld0JveD0iMCAwIDY0NyA2MTUiPjxwYXRoIGQ9Ik02MjAgMzA2YzAtNDQtMzYtODAtODAtODBsLTIzOSAxIDc4LTc5YzMxLTMxIDMxLTgyIDAtMTE0YTgwIDgwIDAgMCAwLTExMyAxTDUwIDI1MWMtNyA3LTEyIDE1LTE2IDI0bC0xIDItMSAyYTc5IDc5IDAgMCAwIDAgNTdsMSAyIDEgMyAzIDVjMyA3IDggMTMgMTMgMTggNyA3IDE1IDEyIDI0IDE2bDMgMmgyYzkgNCAxOCA2IDI4IDZsMjQwLTEtODAgODBhODAgODAgMCAwIDAgMCAxMTRjMzIgMzEgODMgMzEgMTE0LTFsMjE1LTIxNmMxMi0xMiAxOS0yNiAyMi00MXoiIHN0eWxlPSJmaWxsOiNmZjc5MzMiLz48cGF0aCBkPSJNMTYzIDI1MWMzMiAzMSAzMiA4MiAxIDExM2wxMzYtMTM3SDEwN2MyMCAxIDQxIDggNTYgMjRtMzIxIDExM2E4MCA4MCAwIDAgMS0xLTExNEwzNDcgMzg3aDE5MmMtMjAgMC00MC04LTU1LTIzIiBzdHlsZT0iZmlsbDojZWQ0MzAwIi8+PHBhdGggZD0iTTM4MCAxNDdBODAgODAgMCAxIDAgMjY2IDM0YTgwIDgwIDAgMCAwIDExNCAxMTNNNTAgMjUxYTgwIDgwIDAgMSAwIDExNCAxMTNBODAgODAgMCAwIDAgNTAgMjUxbTIxNyAyMTZhODAgODAgMCAxIDAgMTE0IDExNCA4MCA4MCAwIDAgMC0xMTQtMTE0bTM0NS0xOTYtMS0xYTczIDczIDAgMCAwLTQtN2wtMi00YTY5IDY5IDAgMCAwLTE0LTE0bC00LTMtMy0yYTg4IDg4IDAgMCAwLTYtNGgtMWE3OSA3OSAwIDAgMC0yOC05aC03YTMzIDMzIDAgMCAwLTMgMCA4MCA4MCAwIDAgMC00MyAxM2wtMyAyYTc1IDc1IDAgMCAwLTEwIDggODAgODAgMCAxIDAgMTE5IDEwN2wzLTMgMi0zYTg2IDg2IDAgMCAwIDQtN2wxLTJjMTEtMjIgMTEtNDggMC03MSIgc3R5bGU9ImZpbGw6I2ZmNTEwMCIvPjwvc3ZnPg=="
     }
+  ],
+  "presets": [
+    {
+      "id": "tech-summit",
+      "name": "Tech summit poster",
+      "template": "poster-1",
+      "logo": "Straive",
+      "brief": "A modern conference poster for a machine learning summit. Include: date, venue, 3 speaker names, and a clear call-to-action to register."
+    },
+    {
+      "id": "fuel-ad",
+      "name": "Fuel ad poster",
+      "template": "poster-2",
+      "logo": "Shell",
+      "brief": "A bold ad emphasizing high-performance fuel benefits. Use energetic language, 3 key benefits, and a clean product-first layout."
+    }
   ]
 }

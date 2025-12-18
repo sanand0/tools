@@ -11,16 +11,28 @@
   <style>
     textarea {
       font-family: monospace;
-      background-color: #f8f9fa;
+      background-color: var(--bs-body-bg);
     }
 
   </style>
 </head>
 
 <body>
-  <div class="container py-4">
-    <h1 class="text-center mb-4">JSON String Trimmer</h1>
-
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-scissors me-2"></i>
+        JSON String Trimmer
+      </a>
+      <div class="bootstrap-dark-theme"></div>
+    </div>
+  </nav>
+  <main class="container pb-5">
+    <header class="mt-4 mb-4">
+      <h2 class="fs-4 mb-2">Trim long JSON strings safely</h2>
+      <p class="text-secondary mb-0">Set a maximum length and trim every string value (recursively) in your JSON.</p>
+    </header>
+    <div id="sampleContainer" class="d-flex flex-wrap align-items-center gap-2 mb-3"></div>
     <div id="error-container"></div>
 
     <form id="jsontrim-form">
@@ -56,8 +68,10 @@
         </div>
       </div>
     </form>
-  </div>
+  </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
   <script type="module" src="script.js"></script>
 </body>
 

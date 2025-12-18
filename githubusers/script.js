@@ -1,12 +1,16 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { downloadBlob } from "../common/download.js";
+import { loadConfigJson, readListParam, readParam } from "../common/demo.js";
 const form = document.getElementById("urlForm");
 const alertsDiv = document.getElementById("alerts");
 const results = document.getElementById("results");
+const urlsTextarea = document.getElementById("urls");
+const sampleContainer = document.getElementById("sampleContainer");
 
 saveform("#urlForm");
 
 let userDataStorage = []; // To store fetched and processed user data
+let config;
 
 // Define the order and selection of fields
 const SELECTED_FIELDS = [
@@ -91,6 +95,32 @@ async function copyToClipboard(text) {
   await navigator.clipboard.writeText(text);
 }
 
+function renderSamples(presets) {
+  if (!sampleContainer) return;
+  if (!Array.isArray(presets) || !presets.length) {
+    sampleContainer.replaceChildren();
+    return;
+  }
+  const label = document.createElement("span");
+  label.className = "text-secondary small fw-semibold me-1";
+  label.textContent = "Examples";
+  sampleContainer.replaceChildren(
+    label,
+    ...presets.map((preset) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-secondary";
+      button.textContent = preset.name || preset.id;
+      button.addEventListener("click", () => {
+        const users = Array.isArray(preset.users) ? preset.users : [];
+        urlsTextarea.value = users.join("\n");
+        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      });
+      return button;
+    }),
+  );
+}
+
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
   alertsDiv.innerHTML = "";
@@ -98,7 +128,7 @@ form.addEventListener("submit", async (e) => {
   userDataStorage = []; // Clear previous results
 
   const token = document.getElementById("token").value.trim();
-  const text = document.getElementById("urls").value;
+  const text = urlsTextarea.value;
 
   const input = text
     .split("\n")
@@ -268,3 +298,27 @@ function escapeCellCSV(value) {
   }
   return stringValue;
 }
+
+async function init() {
+  try {
+    config = await loadConfigJson("config.json");
+    renderSamples(config.presets);
+    const users = readListParam("users", { fallback: [], split: /[,\n]+/ });
+    if (users.length) {
+      urlsTextarea.value = users.join("\n");
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      return;
+    }
+    const presetId = readParam("sample", { fallback: "" });
+    if (presetId) {
+      const preset = config?.presets?.find((item) => item.id === presetId);
+      const presetUsers = Array.isArray(preset?.users) ? preset.users : [];
+      urlsTextarea.value = presetUsers.join("\n");
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    }
+  } catch (error) {
+    showAlert(`Config error: ${error.message}`, "danger", true);
+  }
+}
+
+void init();

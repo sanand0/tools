@@ -5,6 +5,7 @@ import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 import { openrouterHelp } from "../common/aiconfig.js";
+import { loadConfigJson, readParam } from "../common/demo.js";
 
 const DEFAULT_BASE_URLS = ["https://openrouter.ai/api/v1", "https://aipipe.org/openrouter/v1"];
 
@@ -30,6 +31,7 @@ const resultsDiv = document.getElementById("results");
 const loadingIndicator = document.getElementById("loadingIndicator");
 const explainButton = document.getElementById("explainButton");
 const searchHistoryDiv = document.getElementById("searchHistory");
+const sampleContainer = document.getElementById("sampleContainer");
 const llmModelSelect = document.getElementById("llmModel");
 const openaiConfigBtn = document.getElementById("openai-config-btn");
 const llmResponseDiv = document.getElementById("llmResponse");
@@ -48,6 +50,7 @@ openaiConfigBtn.addEventListener("click", async () => {
 let currentSuggestions = null;
 let currentQuery = "";
 let lastLLMResponse = "";
+let config = null;
 
 // --- Constants ---
 const CACHE_VERSION = "v1.1";
@@ -451,11 +454,47 @@ copyResponseButton.addEventListener("click", async () => {
 });
 
 // --- Initial Load ---
-function init() {
+function renderSamples(samples) {
+  if (!sampleContainer) return;
+  if (!Array.isArray(samples) || !samples.length) {
+    sampleContainer.replaceChildren();
+    return;
+  }
+  const label = document.createElement("span");
+  label.className = "text-secondary small fw-semibold me-1";
+  label.textContent = "Examples";
+  sampleContainer.replaceChildren(
+    label,
+    ...samples.map((sample) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-secondary";
+      button.textContent = sample.name || sample.q || sample.id;
+      button.addEventListener("click", () => {
+        searchTermInput.value = sample.q || "";
+        handleFetchAction();
+      });
+      return button;
+    }),
+  );
+}
+
+async function init() {
   loadLlmSettings();
   renderSearchHistory();
   resetUIElements(["suggestions", "llm"]); // Set initial placeholder for suggestions
+  try {
+    config = await loadConfigJson("config.json");
+    renderSamples(config.samples);
+  } catch {
+    renderSamples([]);
+  }
+  const q = readParam("q", { fallback: "" });
+  if (q) {
+    searchTermInput.value = q;
+    handleFetchAction();
+  }
   console.log("Google Suggest Explorer Initialized with Caching and History.");
 }
 
-init();
+void init();

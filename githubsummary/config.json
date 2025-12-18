@@ -1,0 +1,17 @@
+{
+  "presets": [
+    {
+      "id": "sanand-week",
+      "name": "sanand0 (last 7 days)",
+      "user": "sanand0",
+      "rangeDays": 7
+    },
+    {
+      "id": "simonw-week",
+      "name": "simonw (last 7 days)",
+      "user": "simonw",
+      "rangeDays": 7
+    }
+  ]
+}
+

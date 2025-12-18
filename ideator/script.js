@@ -1,5 +1,6 @@
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import { createCard } from "../recall/card.js";
+import { loadConfigJson, readParam } from "../common/demo.js";
 
 const promptTemplate = `You are a radical concept synthesizer hired to astound even experts.
 
@@ -36,6 +37,7 @@ STYLE:
 const goalInput = document.getElementById("goal-input");
 const notesDiv = document.getElementById("notes");
 const promptEl = document.getElementById("prompt-template");
+const sampleContainer = document.getElementById("sampleContainer");
 promptEl.value = promptTemplate;
 
 [
@@ -45,6 +47,7 @@ promptEl.value = promptTemplate;
 ].forEach(([id, fn]) => (document.getElementById(id).onclick = fn));
 
 await Promise.all([addNote(), addNote()]);
+await initPresets();
 
 /** @returns {Promise<void>} */
 async function addNote() {
@@ -62,6 +65,53 @@ async function addNote() {
       notesDiv.firstElementChild.querySelector(".note-delete").classList.add("d-none");
   };
   if (notesDiv.children.length === 1) del.classList.add("d-none");
+}
+
+async function initPresets() {
+  let config;
+  try {
+    config = await loadConfigJson("config.json");
+  } catch {
+    return;
+  }
+  const presets = Array.isArray(config?.presets) ? config.presets : [];
+  if (sampleContainer) {
+    const label = document.createElement("span");
+    label.className = "text-secondary small fw-semibold me-1";
+    label.textContent = "Examples";
+    sampleContainer.replaceChildren(
+      label,
+      ...presets.map((preset) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "btn btn-sm btn-outline-secondary";
+        button.textContent = preset.name || preset.id;
+        button.addEventListener("click", () => void applyPreset(preset));
+        return button;
+      }),
+    );
+  }
+
+  const urlGoal = readParam("goal", { fallback: "", trim: false });
+  if (urlGoal) goalInput.value = urlGoal;
+  const presetId = readParam("concepts", { fallback: "" });
+  if (presetId) {
+    const preset = presets.find((item) => item.id === presetId);
+    if (preset) await applyPreset(preset);
+  }
+}
+
+async function applyPreset(preset) {
+  if (preset.goal) goalInput.value = preset.goal;
+  const searches = Array.isArray(preset.searches) ? preset.searches.filter(Boolean) : [];
+  while (notesDiv.children.length < searches.length) await addNote();
+  Array.from(notesDiv.children).forEach((card, index) => {
+    const searchInput = card.querySelector(".note-search");
+    if (!(searchInput instanceof HTMLInputElement)) return;
+    const term = searches[index] ?? "";
+    searchInput.value = term;
+    searchInput.dispatchEvent(new Event("input", { bubbles: true }));
+  });
 }
 
 /** @returns {string|undefined} */

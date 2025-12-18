@@ -3,9 +3,11 @@ import { marked } from "https://cdn.jsdelivr.net/npm/marked@12.0.2/lib/marked.es
 import DOMPurify from "https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.es.mjs";
 import { copyText } from "../common/clipboard-utils.js";
 import { downloadBlob } from "../common/download.js";
+import { loadConfigJson, readParam } from "../common/demo.js";
 
 const ui = {
   alertContainer: document.getElementById("alertContainer"),
+  sampleContainer: document.getElementById("sampleContainer"),
   dropZone: document.getElementById("dropZone"),
   fileInput: document.getElementById("fileInput"),
   spinner: document.getElementById("loadingSpinner"),
@@ -16,6 +18,7 @@ const ui = {
 
 let currentMarkdown = "";
 let currentFilename = "session.md";
+let sampleConfig = null;
 
 const alert = (options) =>
   bootstrapAlert({
@@ -31,6 +34,28 @@ const resetOutput = () => {
   ui.copy.disabled = true;
   ui.download.disabled = true;
   ui.copy.innerHTML = `<i class="bi bi-clipboard me-1"></i>Copy Markdown`;
+};
+
+const renderSamples = (samples) => {
+  if (!ui.sampleContainer) return;
+  if (!Array.isArray(samples) || !samples.length) {
+    ui.sampleContainer.replaceChildren();
+    return;
+  }
+  const label = document.createElement("span");
+  label.className = "text-secondary small fw-semibold me-1";
+  label.textContent = "Examples";
+  ui.sampleContainer.replaceChildren(
+    label,
+    ...samples.map((sample) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-secondary";
+      button.textContent = sample.name || sample.id;
+      button.addEventListener("click", () => void loadSample(sample.id));
+      return button;
+    }),
+  );
 };
 
 const safeJson = (value) => {
@@ -57,11 +82,22 @@ const showPlaceholder = () => {
 
 const renderPreview = (markdown) => {
   if (!ui.preview) return;
-  const html = DOMPurify.sanitize(marked.parse(markdown));
-  const wrapper = document.createElement("div");
-  wrapper.className = "markdown-preview";
-  wrapper.innerHTML = html;
-  ui.preview.replaceChildren(wrapper);
+  try {
+    if (marked?.parse && DOMPurify?.sanitize) {
+      const html = DOMPurify.sanitize(marked.parse(markdown));
+      const wrapper = document.createElement("div");
+      wrapper.className = "markdown-preview";
+      wrapper.innerHTML = html;
+      ui.preview.replaceChildren(wrapper);
+      return;
+    }
+  } catch {
+    // Fall back to a plain-text preview.
+  }
+  const pre = document.createElement("pre");
+  pre.className = "m-0";
+  pre.textContent = markdown;
+  ui.preview.replaceChildren(pre);
 };
 
 const firstSummaryText = (summaryItems) => {
@@ -133,6 +169,29 @@ const convertToMarkdown = (text) => {
   return parts.join("").replace(/^\s+/, "");
 };
 
+const loadSample = async (id) => {
+  if (!sampleConfig?.samples?.length) return;
+  const sample = sampleConfig.samples.find((item) => item.id === id);
+  if (!sample?.path) return;
+  resetOutput();
+  setLoading(true);
+  try {
+    const response = await fetch(sample.path);
+    if (!response.ok) throw new Error(`Failed to load ${sample.path}: HTTP ${response.status}`);
+    const text = await response.text();
+    const markdown = convertToMarkdown(text);
+    currentMarkdown = markdown;
+    currentFilename = `${sample.id}.md`;
+    renderPreview(markdown);
+    ui.copy.disabled = false;
+    ui.download.disabled = false;
+  } catch (error) {
+    alert({ title: "Sample load failed", body: error.message, color: "danger" });
+  } finally {
+    setLoading(false);
+  }
+};
+
 const handleFile = async (file) => {
   if (!file) return;
   if (!file.name.toLowerCase().endsWith(".jsonl")) {
@@ -164,6 +223,17 @@ const handleFile = async (file) => {
     if (ui.fileInput) ui.fileInput.value = "";
   }
 };
+
+async function initSamples() {
+  try {
+    sampleConfig = await loadConfigJson("config.json");
+    renderSamples(sampleConfig.samples);
+    const sampleId = readParam("log", { fallback: "" });
+    if (sampleId) void loadSample(sampleId);
+  } catch (error) {
+    alert({ title: "Config error", body: error.message, color: "danger" });
+  }
+}
 
 ui.dropZone.addEventListener("dragover", (event) => {
   event.preventDefault();
@@ -200,5 +270,7 @@ ui.download.addEventListener("click", () => {
   const blob = new Blob([currentMarkdown], { type: "text/markdown;charset=utf-8" });
   downloadBlob(blob, currentFilename);
 });
+
+void initSamples();
 
 showPlaceholder();

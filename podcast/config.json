@@ -1,0 +1,15 @@
+{
+  "sources": [
+    {
+      "id": "product-update",
+      "name": "Product update memo",
+      "content": "We shipped a new onboarding flow with fewer steps and clearer pricing. Early tests show a 12% increase in activation and fewer support tickets about billing. Next: add an in-app checklist and improve error messages for failed payments."
+    },
+    {
+      "id": "meeting-notes",
+      "name": "Meeting notes",
+      "content": "Agenda: demo readiness.\n- Add sample presets and semantic URLs.\n- Ensure errors are user-friendly.\n- Add integration tests for UI wiring.\nDecision: ship non-LLM tools first, then LLM tools.\nOwners: Asha (LLM), Ben (data tools), Chen (tests)."
+    }
+  ]
+}
+

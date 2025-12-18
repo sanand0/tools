@@ -10,11 +10,14 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
 </head>
 
-<body class="bg-light bootstrap-dark-theme">
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<body class="bg-body-tertiary">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
     <div class="container">
-      <a class="navbar-brand" href="../index.html"><i class="bi bi-lightning-charge me-2"></i>Tools</a>
-      <span class="navbar-text">Thread Scraper</span>
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-twitter-x me-2"></i>
+        Scrape X (Twitter) Thread
+      </a>
+      <div class="bootstrap-dark-theme"></div>
     </div>
   </nav>
   <div class="container py-5">
@@ -53,6 +56,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
   <script>
     fetch("xscraper.min.js").then(r => r.text()).then(code => {
       const bookmarkletCode = `${code};xscraper.scrape();`;

@@ -1,6 +1,7 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
 import { openaiHelp } from "../common/aiconfig.js";
+import { loadConfigJson, readParam } from "../common/demo.js";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -34,9 +35,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const progressBar = document.getElementById("progressBar");
   const alertContainer = document.getElementById("alertContainer");
   const resetSettingsBtn = document.getElementById("resetSettingsBtn");
+  const sampleContainer = document.getElementById("sampleContainer");
 
   openaiConfigBtn.addEventListener("click", async () => {
-    await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true, openaiHelp });
+    await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true, help: openaiHelp });
   });
 
   // Function to show alerts
@@ -241,4 +243,41 @@ document.addEventListener("DOMContentLoaded", async () => {
     savedForm.clear();
     location.reload();
   });
+
+  try {
+    const config = await loadConfigJson("config.json");
+    const sources = Array.isArray(config?.sources) ? config.sources : [];
+    if (sampleContainer && sources.length) {
+      const label = document.createElement("span");
+      label.className = "text-secondary small fw-semibold me-1";
+      label.textContent = "Examples";
+      sampleContainer.replaceChildren(
+        label,
+        ...sources.map((source) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "btn btn-sm btn-outline-secondary";
+          button.textContent = source.name || source.id;
+          button.addEventListener("click", () => {
+            contentInput.value = source.content || "";
+          });
+          return button;
+        }),
+      );
+    }
+
+    const sourceId = readParam("source", { fallback: "" });
+    const source = sources.find((item) => item.id === sourceId);
+    if (source?.content) contentInput.value = source.content;
+    if (!contentInput.value.trim() && sources.length) contentInput.value = sources[0].content || "";
+  } catch {
+    // ignore missing config
+  }
+
+  const urlModel = readParam("model", { fallback: "" });
+  if (urlModel) modelInput.value = urlModel;
+  const urlVoice1 = readParam("voice1", { fallback: "" });
+  if (urlVoice1) voice1NameInput.value = urlVoice1;
+  const urlVoice2 = readParam("voice2", { fallback: "" });
+  if (urlVoice2) voice2NameInput.value = urlVoice2;
 });

@@ -1,0 +1,10 @@
+{
+  "samples": [
+    {
+      "id": "short",
+      "name": "Short sample log",
+      "path": "samples/short.jsonl"
+    }
+  ]
+}
+

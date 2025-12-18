@@ -1,0 +1,11 @@
+{
+  "presets": [
+    {
+      "id": "people",
+      "name": "People (TSV)",
+      "format": "jsonl",
+      "path": "samples/people.tsv"
+    }
+  ]
+}
+

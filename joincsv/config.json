@@ -1,0 +1,11 @@
+{
+  "presets": [
+    {
+      "id": "basic",
+      "name": "Basic join",
+      "separator": ",",
+      "path": "samples/basic.txt"
+    }
+  ]
+}
+

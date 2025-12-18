@@ -1,0 +1,10 @@
+{
+  "samples": [
+    {
+      "id": "search",
+      "name": "Search/LLM tools",
+      "repos": ["simonw/llm", "duckdb/duckdb", "pola-rs/polars"]
+    }
+  ]
+}
+

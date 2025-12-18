@@ -3,6 +3,8 @@ import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html@3/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import { openrouterHelp } from "../common/aiconfig.js";
 import { copyText } from "../common/clipboard-utils.js";
+import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { loadConfigJson, readParam } from "../common/demo.js";
 
 const DEFAULT_BASE_URLS = ["https://openrouter.ai/api/v1", "https://aipipe.org/openrouter/v1"];
 const DEFAULT_MODEL = "gpt-5-nano";
@@ -54,9 +56,11 @@ const ui = {
   spinner: document.getElementById("loading-indicator"),
   playlist: document.getElementById("playlist"),
   alertContainer: document.getElementById("alert-container"),
+  sampleContainer: document.getElementById("sampleContainer"),
 };
 
 const defaultCopyLabel = ui.copyBtn.innerHTML;
+saveform("#preferences-form", { exclude: '[type="file"]' });
 
 const state = {
   playlist: /** @type {PlaylistItem[]} */ ([]),
@@ -333,3 +337,53 @@ ui.playlist.addEventListener("click", (event) => {
 });
 
 render(loadingTemplate("No playlist yet."), ui.playlist);
+
+function renderSamples(presets) {
+  if (!ui.sampleContainer) return;
+  if (!Array.isArray(presets) || !presets.length) {
+    ui.sampleContainer.replaceChildren();
+    return;
+  }
+  const label = document.createElement("span");
+  label.className = "text-secondary small fw-semibold me-1";
+  label.textContent = "Examples";
+  ui.sampleContainer.replaceChildren(
+    label,
+    ...presets.map((preset) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-secondary";
+      button.textContent = preset.name || preset.id;
+      button.addEventListener("click", () => {
+        ui.preferences.value = preset.vibe || "";
+        if (preset.model && MODEL_OPTIONS.some((option) => option.value === preset.model))
+          ui.modelSelect.value = preset.model;
+        ui.preferences.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      return button;
+    }),
+  );
+}
+
+async function init() {
+  try {
+    const config = await loadConfigJson("config.json");
+    renderSamples(config.presets);
+    if (!ui.preferences.value.trim() && Array.isArray(config.presets) && config.presets.length) {
+      ui.preferences.value = config.presets[0].vibe || "";
+      ui.preferences.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  } catch {
+    renderSamples([]);
+  }
+
+  const vibe = readParam("vibe", { fallback: "", trim: false });
+  if (vibe) {
+    ui.preferences.value = vibe;
+    ui.preferences.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+  const model = readParam("model", { fallback: "" });
+  if (model && MODEL_OPTIONS.some((option) => option.value === model)) ui.modelSelect.value = model;
+}
+
+void init();

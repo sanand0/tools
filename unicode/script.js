@@ -1,10 +1,12 @@
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { readParam } from "../common/demo.js";
 const readClipboardBtn = document.getElementById("readClipboard");
 const charContainer = document.getElementById("charContainer");
 const spinner = document.getElementById("spinner");
 const readTextBtn = document.getElementById("readText");
 const textInput = document.getElementById("textInput");
+const sampleContainer = document.getElementById("sampleContainer");
 saveform("#unicode-form");
 
 function showError(message) {
@@ -52,16 +54,17 @@ function createCharacterButton(char) {
 
 function processText(text) {
   const nonAsciiChars = getNonAsciiChars(text);
-  charContainer.innerHTML = "";
+  charContainer.replaceChildren();
 
   if (nonAsciiChars.length === 0) {
-    charContainer.innerHTML = '<p class="text-muted">No non-ASCII characters found.</p>';
+    const message = document.createElement("p");
+    message.className = "text-muted";
+    message.textContent = "No non-ASCII characters found.";
+    charContainer.replaceChildren(message);
     return;
   }
 
-  nonAsciiChars.forEach((char) => {
-    charContainer.appendChild(createCharacterButton(char));
-  });
+  charContainer.replaceChildren(...nonAsciiChars.map((char) => createCharacterButton(char)));
 }
 
 readTextBtn.addEventListener("click", () => {
@@ -83,3 +86,40 @@ readClipboardBtn.addEventListener("click", async () => {
     readClipboardBtn.disabled = false;
   }
 });
+
+const samples = [
+  { id: "emoji", name: "Emoji + Greek", text: "Hello 😊 World αβγ" },
+  { id: "accents", name: "Accents", text: "Café Noël — déjà vu" },
+  { id: "math", name: "Math symbols", text: "∑ √ π ≈ 3.14159" },
+];
+
+function renderSamples() {
+  if (!sampleContainer) return;
+  const label = document.createElement("span");
+  label.className = "text-secondary small fw-semibold me-1";
+  label.textContent = "Examples";
+  sampleContainer.replaceChildren(
+    label,
+    ...samples.map((sample) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-secondary";
+      button.textContent = sample.name;
+      button.addEventListener("click", () => {
+        textInput.value = sample.text;
+        processText(sample.text);
+      });
+      return button;
+    }),
+  );
+}
+
+renderSamples();
+
+const urlText = readParam("text", { fallback: "" });
+if (urlText) {
+  textInput.value = urlText;
+  processText(urlText);
+} else if (!textInput.value.trim()) {
+  textInput.value = samples[0].text;
+}

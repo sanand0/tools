@@ -1,0 +1,30 @@
+[
+  {
+    "messageId": "m1",
+    "author": "Asha",
+    "text": "Can we ship the demo today?",
+    "time": "2025-01-01T09:00:00Z"
+  },
+  {
+    "messageId": "m2",
+    "author": "Ben",
+    "text": "Yes — if we lock scope to presets + URL params.",
+    "time": "2025-01-01T09:02:00Z",
+    "quoteMessageId": "m1"
+  },
+  {
+    "messageId": "m3",
+    "author": "Chen",
+    "text": "I can take the non-LLM tools.",
+    "time": "2025-01-01T09:03:00Z",
+    "quoteMessageId": "m1",
+    "reactions": "👍"
+  },
+  {
+    "messageId": "m4",
+    "author": "Asha",
+    "text": "Great. I’ll handle the LLM ones.",
+    "time": "2025-01-01T09:05:00Z"
+  }
+]
+

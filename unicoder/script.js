@@ -1,8 +1,10 @@
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { readParam } from "../common/demo.js";
 saveform("#unicoder-form");
 
 const raw = (s) => new DOMParser().parseFromString(s, "text/html").documentElement.textContent;
 const $ = (s) => document.querySelector(s);
+const sampleContainer = document.getElementById("sampleContainer");
 
 // ============================================================================
 // Unicode Character Mapping Constants
@@ -359,8 +361,12 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#unicode-input").addEventListener("input", updateUnicodeOutput);
   $("#copy-button-unicode").addEventListener("click", handleCopy("markdown-output", "copy-button-unicode"));
 
-  // Initialize with example
-  $("#markdown-input").value = `# Heading 1
+  const samples = [
+    {
+      id: "markdown",
+      name: "Markdown → Unicode",
+      mode: "md2unicode",
+      text: `# Heading 1
 
 This is **"bold" text** and this is *"italic" text*.
 
@@ -381,6 +387,51 @@ This is \`"inline" code\`
 
 - List item 1
 - List item 2
-`;
-  updateMarkdownOutput();
+`,
+    },
+    {
+      id: "unicode",
+      name: "Unicode → Markdown",
+      mode: "unicode2md",
+      text: "𝗛𝗲𝗹𝗹𝗼 𝘞𝘰𝘳𝘭𝘥\n\n𝚏𝚞𝚗𝚌𝚝𝚒𝚘𝚗 𝚑𝚎𝚕𝚕𝚘() { 𝚛𝚎𝚝𝚞𝚛𝚗 𝟷𝟸𝟹; }",
+    },
+  ];
+
+  const applySample = (sample) => {
+    const mode = sample?.mode;
+    const text = sample?.text ?? "";
+    if (mode === "unicode2md") {
+      $("#unicode-input").value = text;
+      updateUnicodeOutput();
+      return;
+    }
+    $("#markdown-input").value = text;
+    updateMarkdownOutput();
+  };
+
+  if (sampleContainer) {
+    const label = document.createElement("span");
+    label.className = "text-secondary small fw-semibold me-1";
+    label.textContent = "Examples";
+    sampleContainer.replaceChildren(
+      label,
+      ...samples.map((sample) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "btn btn-sm btn-outline-secondary";
+        button.textContent = sample.name;
+        button.addEventListener("click", () => applySample(sample));
+        return button;
+      }),
+    );
+  }
+
+  const mode = readParam("mode", { fallback: "" });
+  const urlText = readParam("text", { fallback: "", trim: false });
+  if (urlText) {
+    applySample({ mode, text: urlText });
+    return;
+  }
+
+  if (!$("#markdown-input").value.trim() && !$("#unicode-input").value.trim()) applySample(samples[0]);
 });

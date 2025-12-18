@@ -1,19 +1,16 @@
 import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv } from "../common/csv.js";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
+import { loadConfigJson, readParam } from "../common/demo.js";
 
 const $jsonInput = document.getElementById("jsonInput");
 const $convertBtn = document.getElementById("convertBtn");
 const $output = document.getElementById("output");
 const $downloadBtn = document.getElementById("downloadBtn");
 const $copyBtn = document.getElementById("copyBtn");
+const sampleContainer = document.getElementById("sampleContainer");
 saveform("#json2csv-form");
-
-// Initialize with sample data
-$jsonInput.value = JSON.stringify([
-  { name: "Bond, James", age: 30, place: { city: "New York\nUSA" } },
-  { name: "Alice", age: 25, place: { country: "Canada", city: "Ottawa" } },
-]);
+let config;
 
 const parseJsonInput = (input) => {
   try {
@@ -50,7 +47,7 @@ const jsonToCsv = (jsonStringInput, toTsv = false) => {
 
 const displayCsvTable = (csv) => csvToTable($output, csv);
 
-$convertBtn.addEventListener("click", () => {
+function runConvert() {
   try {
     const jsonStringInput = $jsonInput.value.trim();
     if (!jsonStringInput) throw new Error("Please enter some JSON data.");
@@ -65,10 +62,61 @@ $convertBtn.addEventListener("click", () => {
     $downloadBtn.classList.add("d-none");
     $copyBtn.classList.add("d-none");
   }
-});
+}
+
+$convertBtn.addEventListener("click", runConvert);
 
 $downloadBtn.addEventListener("click", () => downloadCsv(jsonToCsv($jsonInput.value.trim())));
 $copyBtn.addEventListener("click", async () => {
   await navigator.clipboard.writeText(jsonToCsv($jsonInput.value.trim(), true));
   bootstrapAlert("Copied to clipboard!");
 });
+
+function renderSamples(presets) {
+  if (!sampleContainer) return;
+  if (!Array.isArray(presets) || !presets.length) {
+    sampleContainer.replaceChildren();
+    return;
+  }
+  const label = document.createElement("span");
+  label.className = "text-secondary small fw-semibold me-1";
+  label.textContent = "Examples";
+  sampleContainer.replaceChildren(
+    label,
+    ...presets.map((preset) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-secondary";
+      button.textContent = preset.name || preset.id;
+      button.addEventListener("click", () => applyPreset(preset.id, { convert: true }));
+      return button;
+    }),
+  );
+}
+
+function applyPreset(id, { convert = false } = {}) {
+  const preset = config?.presets?.find((item) => item.id === id);
+  if (!preset) return;
+  $jsonInput.value = JSON.stringify(preset.value, null, 2);
+  $downloadBtn.classList.add("d-none");
+  $copyBtn.classList.add("d-none");
+  $output.replaceChildren();
+  if (convert) runConvert();
+}
+
+async function init() {
+  try {
+    config = await loadConfigJson("config.json");
+    renderSamples(config.presets);
+    const presetId = readParam("json", { fallback: "" });
+    if (presetId) {
+      applyPreset(presetId, { convert: true });
+      return;
+    }
+    if (!$jsonInput.value.trim() && config?.presets?.length) applyPreset(config.presets[0].id);
+  } catch (error) {
+    bootstrapAlert(`Config error: ${error.message}`, "danger");
+  }
+}
+
+void init();

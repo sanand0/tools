@@ -1,0 +1,10 @@
+{
+  "presets": [
+    {
+      "id": "sample",
+      "name": "Popular accounts",
+      "users": ["octocat", "@google", "https://github.com/microsoft"]
+    }
+  ]
+}
+

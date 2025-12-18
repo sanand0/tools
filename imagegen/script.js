@@ -2,6 +2,7 @@ import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provide
 import { openaiHelp } from "../common/aiconfig.js";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import { objectUrl } from "../common/download.js";
+import { readIntParam, readParam } from "../common/demo.js";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -42,6 +43,15 @@ let baseImage = null;
 let selectedUrl = "";
 const history = [];
 let loadingTimer;
+const urlState = {
+  image: readParam("image", { fallback: "" }),
+  prompt: readParam("prompt", { fallback: "", trim: false }),
+  size: readParam("size", { fallback: "" }),
+  quality: readParam("quality", { fallback: "" }),
+  format: readParam("format", { fallback: "" }),
+  compression: readIntParam("compression", { fallback: null, min: 0, max: 100 }),
+  background: readParam("background", { fallback: "" }),
+};
 
 const msg = () =>
   `Generating image (1-2 min)... ${LOADING_MESSAGES[Math.floor(Math.random() * LOADING_MESSAGES.length)]}`;
@@ -146,6 +156,17 @@ function selectImage() {
 
 const buildPrompt = (p) =>
   history.length ? `${p}.\n\nFor context, here are previous messages:\n\n${history.join("\n")}\n\n${p}` : p;
+
+function applyUrlOptions() {
+  if (urlState.size && Array.from(ui.size.options).some((o) => o.value === urlState.size))
+    ui.size.value = urlState.size;
+  if (urlState.quality && Array.from(ui.quality.options).some((o) => o.value === urlState.quality))
+    ui.quality.value = urlState.quality;
+  if (urlState.format && Array.from(ui.format.options).some((o) => o.value === urlState.format))
+    ui.format.value = urlState.format;
+  if (urlState.compression !== null) ui.compression.value = String(urlState.compression);
+  if (urlState.background) ui.background.checked = ["1", "true", "yes", "transparent"].includes(urlState.background);
+}
 
 async function makeRequest(prompt, opts) {
   const { apiKey, baseUrl } = await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, help: openaiHelp });
@@ -272,10 +293,17 @@ ui.samples.addEventListener("click", (e) => {
 fetch("config.json")
   .then((r) => r.json())
   .then(({ samples }) => {
+    const slug = (value) =>
+      String(value)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
     samples.forEach(({ title, image, prompt }) => {
+      const id = slug(title);
       ui.samples.insertAdjacentHTML(
         "beforeend",
-        `<div class="col-6 col-md-4 col-lg-3 sample" data-url="${image}" data-prompt="${prompt}">
+        `<div class="col-6 col-md-4 col-lg-3 sample" data-id="${id}" data-url="${image}" data-prompt="${prompt}">
            <div class="card h-100 shadow-sm cursor-pointer">
              <img src="${image}" class="card-img-top object-fit-cover" style="height:120px" alt="${title}">
              <div class="card-body p-2"><small class="card-title">${title}</small></div>
@@ -284,5 +312,20 @@ fetch("config.json")
       );
       addHover(ui.samples.lastElementChild.querySelector(".card"));
     });
+
+    applyUrlOptions();
+    if (urlState.image) {
+      const match = Array.from(ui.samples.querySelectorAll(".sample")).find(
+        (node) => node.dataset.id === urlState.image,
+      );
+      if (match) match.querySelector(".card")?.click();
+      else {
+        ui.url.value = urlState.image;
+        ui.url.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
+    if (urlState.prompt) ui.prompt.value = urlState.prompt;
   })
   .catch((err) => bootstrapAlert({ title: "Config error", body: err.message, color: "danger" }));
+
+applyUrlOptions();

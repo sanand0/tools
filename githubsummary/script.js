@@ -4,6 +4,7 @@ import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provide
 import { html, render } from "https://cdn.jsdelivr.net/npm/lit-html@3";
 import { openaiHelp } from "../common/aiconfig.js";
 import { createActivityClient } from "./activity.js";
+import { loadConfigJson, readParam } from "../common/demo.js";
 
 const DEFAULT_BASE_URLS = [
   "https://api.openai.com/v1",
@@ -32,6 +33,9 @@ const openaiConfigBtn = document.getElementById("openai-config-btn");
 openaiConfigBtn.addEventListener("click", async () => {
   await openaiConfig({ defaultBaseUrls: DEFAULT_BASE_URLS, show: true, help: openaiHelp });
 });
+
+const sampleContainer = document.getElementById("sampleContainer");
+let demoConfig;
 
 async function initDB() {
   return new Promise((resolve, reject) => {
@@ -427,10 +431,70 @@ document.getElementById("generate-summary-btn").addEventListener("click", async 
 document.addEventListener("DOMContentLoaded", () => {
   saveform("#github-form", { exclude: '[type="file"]' });
 
-  // Set default dates (last week)
-  const today = new Date();
-  const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const usernameInput = document.getElementById("username");
+  const sinceInput = document.getElementById("since");
+  const untilInput = document.getElementById("until");
+  const toIsoDate = (value) => value.toISOString().split("T")[0];
 
-  document.getElementById("until").value = today.toISOString().split("T")[0];
-  document.getElementById("since").value = lastWeek.toISOString().split("T")[0];
+  const urlUser = readParam("user", { fallback: "" });
+  const urlFrom = readParam("from", { fallback: "" });
+  const urlTo = readParam("to", { fallback: "" });
+
+  if (urlUser) usernameInput.value = urlUser;
+  if (urlFrom) sinceInput.value = urlFrom;
+  if (urlTo) untilInput.value = urlTo;
+
+  if (!untilInput.value) untilInput.value = toIsoDate(new Date());
+  if (!sinceInput.value) sinceInput.value = toIsoDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+
+  void initDemoPresets({ usernameInput, sinceInput, untilInput, toIsoDate });
 });
+
+async function initDemoPresets({ usernameInput, sinceInput, untilInput, toIsoDate }) {
+  if (!sampleContainer) return;
+  try {
+    demoConfig = await loadConfigJson("config.json");
+  } catch {
+    sampleContainer.replaceChildren();
+    return;
+  }
+
+  const presets = Array.isArray(demoConfig?.presets) ? demoConfig.presets : [];
+  if (!presets.length) {
+    sampleContainer.replaceChildren();
+    return;
+  }
+
+  const setRangeDays = (days) => {
+    const today = new Date();
+    const since = new Date(today.getTime() - days * 24 * 60 * 60 * 1000);
+    untilInput.value = toIsoDate(today);
+    sinceInput.value = toIsoDate(since);
+  };
+
+  const label = document.createElement("span");
+  label.className = "text-secondary small fw-semibold me-1";
+  label.textContent = "Examples";
+
+  sampleContainer.replaceChildren(
+    label,
+    ...presets.map((preset) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-secondary";
+      button.textContent = preset.name || preset.id;
+      button.addEventListener("click", () => {
+        if (preset.user) usernameInput.value = preset.user;
+        if (typeof preset.rangeDays === "number") setRangeDays(preset.rangeDays);
+      });
+      return button;
+    }),
+  );
+
+  const presetId = readParam("sample", { fallback: "" });
+  if (!presetId) return;
+  const preset = presets.find((item) => item.id === presetId);
+  if (!preset) return;
+  if (preset.user) usernameInput.value = preset.user;
+  if (typeof preset.rangeDays === "number") setRangeDays(preset.rangeDays);
+}

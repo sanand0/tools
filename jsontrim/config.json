@@ -1,0 +1,11 @@
+{
+  "presets": [
+    {
+      "id": "logs",
+      "name": "Trim log payloads",
+      "max": 80,
+      "path": "samples/log.json"
+    }
+  ]
+}
+
