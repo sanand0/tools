@@ -161,6 +161,13 @@
       "created": "2025-06-10T09:38:18+00:00"
     },
     {
+      "icon": "bi-check2",
+      "title": "Comparator",
+      "description": "Highlight differences between ground truth and system output using LLM.",
+      "url": "comparator",
+      "created": "2025-08-30T00:00:00+00:00"
+    },
+    {
       "icon": "bi-search-heart",
       "title": "Google Suggest Explorer",
       "description": "Explore Google Search suggestions from different countries and get AI-powered humorous explanations.",
