@@ -133,7 +133,7 @@ const withPrompt = (fn) => {
   if (p) fn(p);
 };
 function ideate() {
-  withPrompt((p) => window.open(`https://chatgpt.com/?model=gpt-5-thinking&q=${encodeURIComponent(p)}`, "_blank"));
+  withPrompt((p) => window.open(`https://chatgpt.com/?q=${encodeURIComponent(p)}`, "_blank"));
 }
 
 /** @returns {Promise<void>} */
