@@ -9,7 +9,7 @@
 - Use bootstrap-llm-provider for API keys (imagegen/, speakmd/, podcast/, picbook/)
 - Stream LLM calls with asyncllm (podcast/, speakmd/, githubsummary/, llmboundingbox/)
 - Import utilities from common/ for CSV and errors (googletasks/, json2csv/, excelconvert/, joincsv/)
-- Include a navbar and apply add a `bootstrap-dark-theme` (most tools)
+- Navbar: copy the shared pattern from `unicoder/index.html` (nav + container + brand link + `.bootstrap-dark-theme`) so all tools match.
 - Lint with `npm run lint`
 - Test with `npm test`. To test a single tool, run `npm test -- ${tool}`
 - NEVER generate binary files (e.g. screenshots). Codex PRs do not allow binary files.
