@@ -21,6 +21,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[WhatsApp Scraper](./whatsappscraper/)**: A browser bookmarklet that allows users to scrape messages from an active WhatsApp Web chat session into JSON format.
 - **[Discourse Thread Scraper](./discoursescraper/)**: Bookmarklet that copies every post in a Discourse topic into structured JSON with replies, reactions, and metadata.
 - **[X Thread Scraper](./xscraper/)**: Bookmarklet to copy a tweet and all its replies into JSON (ads dropped), including metrics and computed buzz/keep scores.
+- **[Gemini Conversation Scraper](./geminiscraper/)**: Copy a Gemini conversation as Markdown with YAML frontmatter via a console script.
 - **[Straive Intelligence](./straiveintelligence/)**: Bookmarklet to convert ChatGPT into a Straive-style user interface
 - **[GitHub Summary](./githubsummary/)**: Generates a blog-post-style summary of a GitHub user's activity within a specified date range.
 - **[Join CSV Tables](./joincsv/)**: Join multiple tables on the first column.

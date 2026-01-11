@@ -22,6 +22,13 @@
       "created": "2025-10-29T00:00:00+00:00"
     },
     {
+      "icon": "bi-stars",
+      "title": "Gemini Conversation Scraper",
+      "description": "Copy a Gemini conversation as Markdown with YAML frontmatter.",
+      "url": "geminiscraper",
+      "created": "2026-01-11T12:22:42+08:00"
+    },
+    {
       "icon": "bi-clock-history",
       "title": "Recall",
       "description": "Randomly recall list items from Markdown.",
