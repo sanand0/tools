@@ -1,18 +1,23 @@
-(function() {
+(function () {
   const $ = (selector, el = document) => el.querySelector(selector);
 
   function formatLocalIso(date) {
-    const pad = value => String(value).padStart(2, "0");
+    const pad = (value) => String(value).padStart(2, "0");
     const offsetMinutes = -date.getTimezoneOffset();
     const sign = offsetMinutes >= 0 ? "+" : "-";
     const absOffset = Math.abs(offsetMinutes);
     const offsetHours = pad(Math.floor(absOffset / 60));
     const offsetMins = pad(absOffset % 60);
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}${sign}${offsetHours}:${offsetMins}`;
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(
+      date.getMinutes(),
+    )}:${pad(date.getSeconds())}${sign}${offsetHours}:${offsetMins}`;
   }
 
   function yamlEscape(value) {
-    return String(value ?? "").replace(/\\/g, "\\\\").replace(/"/g, "\\\"").replace(/\r?\n/g, " ");
+    return String(value ?? "")
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\r?\n/g, " ");
   }
 
   function parseGeminiNode(node) {
@@ -24,7 +29,6 @@
     // 2. Handle Elements
     if (node.nodeType === Node.ELEMENT_NODE) {
       const tag = node.tagName.toLowerCase();
-      const classList = node.classList;
 
       // --- Code Blocks ---
       // Gemini wraps code in a custom <code-block> element
@@ -42,7 +46,11 @@
       if (tag === "a") return `[${node.textContent}](${node.getAttribute("href") || "#"})`;
 
       // --- Structure ---
-      if (tag === "p") return `${parseChildren(node)}\n\n`;
+      if (tag === "p") {
+        // If inside a list item to avoid double newlines
+        const inList = node.closest("li");
+        return `${parseChildren(node)}${inList ? "\n" : "\n\n"}`;
+      }
       if (tag === "br") return `\n`;
       if (tag.match(/^h[1-6]$/)) {
         const level = "#".repeat(parseInt(tag[1]));
@@ -52,15 +60,22 @@
 
       // --- Lists ---
       if (tag === "li") {
-        // Determine if parent is ul or ol for numbering
         const parent = node.parentElement;
-        if (parent.tagName.toLowerCase() === "ol") {
-          // Calculate index
-          const index = Array.from(parent.children).indexOf(node) + 1;
-          return `${index}. ${parseChildren(node).trim()}\n`;
-        } else {
-          return `* ${parseChildren(node).trim()}\n`;
+        const index = Array.from(parent.children).indexOf(node) + 1;
+        const marker = parent.tagName.toLowerCase() === "ol" ? `${index}. ` : "* ";
+
+        // Calculate indent based on parent li's marker length for proper nesting
+        let indent = "";
+        let p = parent.parentElement;
+        while (p?.tagName.toLowerCase() === "li") {
+          const grandparent = p.parentElement;
+          const parentIndex = Array.from(grandparent.children).indexOf(p) + 1;
+          const parentMarker = grandparent.tagName.toLowerCase() === "ol" ? `${parentIndex}. ` : "* ";
+          indent = " ".repeat(parentMarker.length) + indent;
+          p = grandparent.parentElement;
         }
+
+        return `${indent}${marker}${parseChildren(node).trim()}\n`;
       }
       if (tag === "ul" || tag === "ol") {
         return `${parseChildren(node)}\n`;
@@ -84,7 +99,7 @@
   const conversations = document.querySelectorAll(".conversation-container");
   let mdOutput = `---\ntitle: "${yamlEscape(title)}"\ndate: ${date}\nsource: "${yamlEscape(source)}"\n---\n\n`;
 
-  conversations.forEach(conv => {
+  conversations.forEach((conv) => {
     // 1. User Query
     const userNode = conv.querySelector("user-query .query-text");
     if (userNode) {
@@ -98,7 +113,7 @@
     if (markdownNodes.length > 0) {
       mdOutput += `## Gemini\n\n`;
 
-      markdownNodes.forEach(node => {
+      markdownNodes.forEach((node) => {
         // Check if this markdown node is inside the "Thoughts" section
         const isThought = node.closest("model-thoughts");
 
