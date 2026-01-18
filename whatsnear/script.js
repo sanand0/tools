@@ -47,7 +47,7 @@ async function fetchNearbyAttractions() {
               out center;
           `;
   try {
-    const response = await fetch(`https://llmfoundry.straive.com/-/proxy/https://overpass-api.de/api/interpreter`, {
+    const response = await fetch(`https://llmfoundry.straivedemo.com/-/proxy/https://overpass-api.de/api/interpreter`, {
       method: "POST",
       body: query,
     });
@@ -64,7 +64,7 @@ async function fetchNearbyAttractions() {
 async function getAttractionDescription(attraction) {
   const prompt = `Describe the attraction "${attraction.tags.name}" located at ${attraction.lat}, ${attraction.lon} in about 50 words.`;
   try {
-    const response = await fetch("https://llmfoundry.straive.com/openai/v1/chat/completions", {
+    const response = await fetch("https://llmfoundry.straivedemo.com/openai/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

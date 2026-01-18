@@ -13,13 +13,16 @@ Think of it as a creative collision engine: it takes two unrelated concepts and 
 ## Why is this useful?
 
 ### The Problem
+
 - Creative blocks happen when we rely on the same mental patterns
 - Solo brainstorming often recycles familiar ideas
 - Innovation requires connecting disparate concepts
 - We need concrete starting points, not blank pages
 
 ### The Solution
+
 Ideator solves this by:
+
 1. **Forcing unexpected connections** - Random concept pairing breaks habitual thinking
 2. **Leveraging expert knowledge** - Draws from curated notes on LLMs, AI capabilities, core concepts, and creative ideas
 3. **Providing structure** - AI synthesis uses proven frameworks (Novel × Useful × Feasible scoring)
@@ -53,6 +56,7 @@ Ideator solves this by:
 #### Architecture
 
 **Frontend-only static web app** built with:
+
 - **Vanilla HTML/CSS/JS** - No build step required
 - **Bootstrap 5** - Responsive UI framework
 - **lit-html** - Efficient DOM rendering
@@ -62,27 +66,31 @@ Ideator solves this by:
 #### How it Works
 
 1. **Data Fetching** (`fetchNotes()`)
+
    - Fetches 6 markdown files from GitHub on page load
    - Sources: LLMs, Things I Learned, Core Concepts, Creative Ideas, AI Capabilities, Questions
    - Raw URLs: `https://raw.githubusercontent.com/sanand0/til/refs/heads/live/*.md`
 
 2. **Markdown Parsing** (`parseMarkdownNotes()`)
+
    - Extracts top-level bullets (lines starting with `- ` or `* `)
    - Groups sub-bullets and content under each top-level bullet
    - Tags each note with its most recent heading
    - Result: Structured notes array with `{ content, heading, source }` objects
 
 3. **Note Selection**
+
    - **Filtering**: Real-time search across note content and headings
    - **Navigation**: Arrow keys (↑/↓) in search box to browse filtered notes
    - **Random selection with decay**: Exponential weighting favors recent notes
      ```js
-     weight[i] = exp(decay * position * 5)
+     weight[i] = exp(decay * position * 5);
      // decay=0: uniform distribution
      // decay=1: strong preference for recent notes
      ```
 
 4. **Prompt Generation** (`generatePrompt()`)
+
    - Replaces template placeholders: `{{goal}}`, `{{note1}}`, `{{note2}}`
    - Default template uses mental models: Inversion, Mechanism-transplant, Constraint-violation, Scale-jump, Oblique strategies
    - Scores ideas on: Novel (1-5), Useful (1-5), Feasible (1-5)
@@ -96,6 +104,7 @@ Ideator solves this by:
 #### State Management
 
 Uses browser localStorage for:
+
 - `ideator_visited` - First-time user detection (pre-populates goal + notes)
 - `ideator_template` - Custom prompt template persistence
 
@@ -121,6 +130,7 @@ ideator/
 #### Dependencies
 
 All loaded from CDN (no npm install required):
+
 - `lit-html@^3` - Template rendering
 - `marked@^13` - Markdown parsing
 - `bootstrap@5.3.6` - UI framework
@@ -163,6 +173,7 @@ const DEFAULT_TEMPLATE = `Your custom prompt here...
 #### Deployment
 
 Static hosting on GitHub Pages:
+
 - No build step required
 - Just push to `main` branch
 - Access at `https://s-anand.net/ideator/`
@@ -170,6 +181,7 @@ Static hosting on GitHub Pages:
 #### Browser Compatibility
 
 Works in all modern browsers (Chrome, Firefox, Safari, Edge) with ES6 module support. Requires:
+
 - ES6 modules (`<script type="module">`)
 - Fetch API
 - localStorage
@@ -178,16 +190,19 @@ Works in all modern browsers (Chrome, Firefox, Safari, Edge) with ES6 module sup
 ## Troubleshooting
 
 ### Notes not loading
+
 - Check browser console for CORS errors
 - Verify GitHub raw URLs are accessible
 - Check network connectivity
 
 ### Random button not working
+
 - Ensure notes are loaded (wait for spinner to disappear)
 - Try filtering by source if "All Sources" fails
 - Check browser console for JavaScript errors
 
 ### Prompt template reset
+
 - Click "Reset to Default" button in Prompt Template section
 - Or clear localStorage: `localStorage.removeItem('ideator_template')`
 
@@ -201,6 +216,7 @@ Want to add features or fix bugs?
 4. Submit a pull request
 
 Suggested improvements:
+
 - Add more note sources
 - Improve markdown parsing for edge cases
 - Add export/share functionality for generated prompts

@@ -74,7 +74,6 @@ OUTPUT:
 STYLE: Easy to read: ELI15. Make it interesting to read!
 ```
 
-
 # App Style
 
 Read the demo skill to understand how to build demo apps and follow it.
@@ -112,5 +111,6 @@ Improve the UI labeling. For example, it isn't clear to a first-time user what "
 Improve the documentation on the page itself. Visually explain what this is and why it's useful. Explain how to use it. The documentation needs to be visually engaging and friendly.
 
 Create a README.md that clearly explains
+
 - To laymen: what this app does, why it's useful, how to use it
 - To developers & future maintainers: how it is built, and anything else that may be non-obvious and useful for them to know

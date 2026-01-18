@@ -438,10 +438,7 @@ function renderApp() {
         <div class="mobile-sort mb-3">
           <div class="d-flex gap-2 align-items-center">
             <label class="form-label mb-0 text-nowrap">Sort by:</label>
-            <select
-              class="form-select form-select-sm"
-              @change=${(e) => changeSort(e.target.value)}
-            >
+            <select class="form-select form-select-sm" @change=${(e) => changeSort(e.target.value)}>
               ${sortOptions.map(({ key, label }) => {
                 const selected = state.sort.key === key;
                 return html`<option value=${key} ?selected=${selected}>
@@ -467,19 +464,13 @@ function renderApp() {
           ${sorted.length
             ? sorted.map(
                 (row) =>
-                  html`<div
-                    class="repo-card"
-                    role="button"
-                    @click=${() => window.open(row.url, "_blank", "noopener")}
-                  >
+                  html`<div class="repo-card" role="button" @click=${() => window.open(row.url, "_blank", "noopener")}>
                     <div class="repo-card-header">
                       <div class="repo-card-status">${row.status}</div>
                       <div style="flex: 1; min-width: 0;">
                         <div class="repo-card-title">${row.repo}</div>
                         ${row.language
-                          ? html`<div class="text-muted small">
-                              <i class="bi bi-code-slash"></i> ${row.language}
-                            </div>`
+                          ? html`<div class="text-muted small"><i class="bi bi-code-slash"></i> ${row.language}</div>`
                           : ""}
                       </div>
                     </div>
@@ -503,9 +494,7 @@ function renderApp() {
                     </div>
                   </div>`,
               )
-            : html`<div class="text-center py-5 text-secondary">
-                No repositories match these filters yet.
-              </div>`}
+            : html`<div class="text-center py-5 text-secondary">No repositories match these filters yet.</div>`}
         </div>
 
         <!-- Desktop Table View -->

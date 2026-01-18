@@ -7,10 +7,26 @@ import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 const SOURCES = [
   { id: "llms", name: "LLMs", url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/llms.md" },
   { id: "til", name: "Things I Learned", url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/til.md" },
-  { id: "core", name: "Core Concepts", url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/core-concepts.md" },
-  { id: "creative", name: "Creative Ideas", url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/creative-ideas.md" },
-  { id: "ai", name: "AI Capabilities", url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/ai-capabilities.md" },
-  { id: "questions", name: "Questions", url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/questions.md" },
+  {
+    id: "core",
+    name: "Core Concepts",
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/core-concepts.md",
+  },
+  {
+    id: "creative",
+    name: "Creative Ideas",
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/creative-ideas.md",
+  },
+  {
+    id: "ai",
+    name: "AI Capabilities",
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/ai-capabilities.md",
+  },
+  {
+    id: "questions",
+    name: "Questions",
+    url: "https://raw.githubusercontent.com/sanand0/til/refs/heads/live/questions.md",
+  },
 ];
 
 // Quick goal examples with icons
@@ -227,7 +243,10 @@ function displayNote(cardNum) {
   const index = parseInt(document.getElementById(`index${cardNum}`).value) || 0;
 
   if (notes.length === 0) {
-    render(html`<p class="text-muted"><em>No notes match your filter</em></p>`, document.getElementById(`note${cardNum}`));
+    render(
+      html`<p class="text-muted"><em>No notes match your filter</em></p>`,
+      document.getElementById(`note${cardNum}`),
+    );
     document.getElementById(`meta${cardNum}`).textContent = "";
     currentNotes[cardNum] = null;
     return;
@@ -241,7 +260,8 @@ function displayNote(cardNum) {
   render(html`${unsafeHTML(noteHtml)}`, document.getElementById(`note${cardNum}`));
 
   // Update metadata
-  document.getElementById(`meta${cardNum}`).textContent = `${note.source} / ${note.heading || "No heading"} (${index + 1} of ${notes.length})`;
+  document.getElementById(`meta${cardNum}`).textContent =
+    `${note.source} / ${note.heading || "No heading"} (${index + 1} of ${notes.length})`;
 }
 
 // Pick random note with decay
@@ -286,18 +306,23 @@ function generatePrompt() {
 
 // Initialize goal cards
 function initializeGoalCards() {
-  const cards = GOAL_EXAMPLES.map((goal) => html`
-    <div class="col">
-      <div class="card goal-card h-100 text-center p-3" @click=${() => {
-        goalInput.value = goal.text;
-      }}>
-        <div class="card-body p-2">
-          <i class="bi ${goal.icon} mb-2 d-block"></i>
-          <small class="fw-semibold">${goal.text}</small>
+  const cards = GOAL_EXAMPLES.map(
+    (goal) => html`
+      <div class="col">
+        <div
+          class="card goal-card h-100 text-center p-3"
+          @click=${() => {
+            goalInput.value = goal.text;
+          }}
+        >
+          <div class="card-body p-2">
+            <i class="bi ${goal.icon} mb-2 d-block"></i>
+            <small class="fw-semibold">${goal.text}</small>
+          </div>
         </div>
       </div>
-    </div>
-  `);
+    `,
+  );
   render(html`${cards}`, goalCards);
 }
 
@@ -354,37 +379,43 @@ function setupEventListeners() {
   document.getElementById("ideateGrok").addEventListener("click", () => {
     const prompt = generatePrompt();
     // Grok doesn't support URL params, so we copy to clipboard
-    navigator.clipboard.writeText(prompt).then(() => {
-      bootstrapAlert({
-        title: "Copied to clipboard",
-        body: "Prompt copied! Paste it in Grok at grok.com",
-        color: "info",
+    navigator.clipboard
+      .writeText(prompt)
+      .then(() => {
+        bootstrapAlert({
+          title: "Copied to clipboard",
+          body: "Prompt copied! Paste it in Grok at grok.com",
+          color: "info",
+        });
+        window.open("https://grok.com/", "_blank");
+      })
+      .catch(() => {
+        bootstrapAlert({
+          title: "Copy failed",
+          body: "Could not copy to clipboard",
+          color: "danger",
+        });
       });
-      window.open("https://grok.com/", "_blank");
-    }).catch(() => {
-      bootstrapAlert({
-        title: "Copy failed",
-        body: "Could not copy to clipboard",
-        color: "danger",
-      });
-    });
   });
 
   document.getElementById("copyPrompt").addEventListener("click", () => {
     const prompt = generatePrompt();
-    navigator.clipboard.writeText(prompt).then(() => {
-      bootstrapAlert({
-        title: "Copied",
-        body: "Prompt copied to clipboard",
-        color: "success",
+    navigator.clipboard
+      .writeText(prompt)
+      .then(() => {
+        bootstrapAlert({
+          title: "Copied",
+          body: "Prompt copied to clipboard",
+          color: "success",
+        });
+      })
+      .catch(() => {
+        bootstrapAlert({
+          title: "Copy failed",
+          body: "Could not copy to clipboard",
+          color: "danger",
+        });
       });
-    }).catch(() => {
-      bootstrapAlert({
-        title: "Copy failed",
-        body: "Could not copy to clipboard",
-        color: "danger",
-      });
-    });
   });
 
   // Template management
