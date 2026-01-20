@@ -11,19 +11,25 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
 </head>
 
-<body class="bg-light">
-  <div class="container py-5">
+<body class="bg-body-tertiary">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-stars me-2"></i>
+        Straive Intelligence
+      </a>
+      <div class="bootstrap-dark-theme"></div>
+    </div>
+  </nav>
+  <main class="container py-5">
     <div class="row justify-content-center">
-      <div class="col-md-8">
+      <div class="col-lg-8 col-xl-7">
         <div class="text-center mb-5">
-          <h1 class="display-4 mb-3">
-            <i class="bi bi-markdown-fill me-2 text-primary"></i>
-            Straive Intelligence
-          </h1>
+          <h1 class="display-5 mb-2">Straive Intelligence</h1>
           <p class="lead text-secondary">Bookmarklet to convert ChatGPT into a Straive-style user interface</p>
         </div>
 
-        <div class="bg-white shadow-sm rounded-3 p-4 text-center">
+        <div class="bg-body shadow-sm border rounded-3 p-4 text-center mb-5">
           <p class="mb-3">Drag this button to your bookmarks bar:</p>
           <a href="" id="bookmarklet" class="btn btn-primary btn-lg mb-3 shadow-sm">
             Straive Intelligence
@@ -33,11 +39,21 @@
             Click and drag the button above to your bookmarks bar
           </p>
         </div>
+
+        <div class="bg-body shadow-sm border rounded-3 p-4">
+          <h2 class="h5 text-secondary text-center mb-3">Usage</h2>
+          <ol class="mb-0 ps-3">
+            <li>Open <a href="https://chatgpt.com/">ChatGPT</a> in your browser.</li>
+            <li>Click the <kbd>Straive Intelligence</kbd> bookmarklet.</li>
+            <li>The interface is restyled to match the Straive look.</li>
+          </ol>
+        </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
   <script>
     fetch("straiveintelligence.min.js")
       .then(response => response.text())

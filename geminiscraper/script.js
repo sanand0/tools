@@ -1,13 +1,24 @@
 // @ts-check
-import hljs from "https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/+esm";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 
-const codeEl = document.getElementById("script-code");
-const codeContainer = document.getElementById("script-container");
-const loadingEl = document.getElementById("script-loading");
-const copyButton = document.getElementById("copy-script");
+const bookmarkletButton = document.getElementById("bookmarklet");
+const statusText = document.getElementById("bookmarklet-status-text");
+const spinner = document.getElementById("bookmarklet-spinner");
+const errorText = document.getElementById("bookmarklet-error");
 
-let scriptText = "";
+let bookmarkletHref = "";
+
+const setLoading = (isLoading) => {
+  if (spinner) spinner.classList.toggle("d-none", !isLoading);
+};
+
+const updateStatus = (text) => {
+  if (statusText) statusText.textContent = text;
+};
+
+const showError = (message) => {
+  if (errorText) errorText.textContent = message;
+};
 
 const loadConfig = async () => {
   const response = await fetch("config.json", { cache: "no-store" });
@@ -15,43 +26,10 @@ const loadConfig = async () => {
   return response.json();
 };
 
-const setLoading = (isLoading) => {
-  if (loadingEl) loadingEl.classList.toggle("d-none", !isLoading);
-  if (codeContainer) codeContainer.classList.toggle("d-none", isLoading);
-  if (copyButton) copyButton.disabled = isLoading;
-};
-
-const updateCopyState = (label, highlight = false) => {
-  if (!copyButton) return;
-  const baseClass = "btn-accent";
-  copyButton.textContent = label;
-  copyButton.classList.toggle("btn-success", highlight);
-  copyButton.classList.toggle(baseClass, !highlight);
-};
-
-const fallbackCopy = (text) => {
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.setAttribute("readonly", "");
-  textarea.style.position = "absolute";
-  textarea.style.left = "-9999px";
-  document.body.appendChild(textarea);
-  textarea.select();
-  const ok = document.execCommand("copy");
-  textarea.remove();
-  if (!ok) throw new Error("Copy failed");
-};
-
-const copyToClipboard = async (text) => {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-  fallbackCopy(text);
-};
-
-const loadScript = async () => {
+const loadBookmarklet = async () => {
   setLoading(true);
+  updateStatus("Loading bookmarklet...");
+  showError("");
   try {
     let scriptPath = "geminiscraper.js";
     try {
@@ -63,35 +41,20 @@ const loadScript = async () => {
     }
 
     const response = await fetch(scriptPath, { cache: "no-store" });
-    if (!response.ok) throw new Error(`Unable to load script (${response.status})`);
-    scriptText = await response.text();
-    if (!codeEl) return;
-    codeEl.replaceChildren(document.createTextNode(scriptText));
-    hljs.highlightElement(codeEl);
+    if (!response.ok) throw new Error(`Unable to load bookmarklet (${response.status})`);
+    const code = await response.text();
+    const bookmarkletCode = `${code};geminiscraper.scrape();`;
+    bookmarkletHref = `javascript:${encodeURIComponent(bookmarkletCode)}`;
+    if (bookmarkletButton) bookmarkletButton.href = bookmarkletHref;
+    updateStatus("Drag the button to your bookmarks bar, then click it on a Gemini conversation.");
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
+    updateStatus("Unable to load bookmarklet.");
+    showError(message);
     bootstrapAlert({ title: "Load error", body: message, color: "danger" });
   } finally {
     setLoading(false);
   }
 };
 
-const handleCopy = async () => {
-  if (!scriptText) {
-    bootstrapAlert({ title: "Copy unavailable", body: "Script not loaded yet.", color: "warning" });
-    return;
-  }
-  try {
-    updateCopyState("Copying...");
-    await copyToClipboard(scriptText);
-    updateCopyState("Copied", true);
-    setTimeout(() => updateCopyState("Copy script"), 1600);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to copy";
-    bootstrapAlert({ title: "Copy error", body: message, color: "danger" });
-    updateCopyState("Copy script");
-  }
-};
-
-if (copyButton) copyButton.addEventListener("click", handleCopy);
-loadScript();
+loadBookmarklet();

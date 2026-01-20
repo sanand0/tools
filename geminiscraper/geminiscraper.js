@@ -1,5 +1,6 @@
-(function () {
-  const $ = (selector, el = document) => el.querySelector(selector);
+(function (root) {
+  const $ = (selector, el = root.document) => el.querySelector(selector);
+  const nodeTypes = root.Node || { TEXT_NODE: 3, ELEMENT_NODE: 1 };
 
   function formatLocalIso(date) {
     const pad = (value) => String(value).padStart(2, "0");
@@ -21,50 +22,40 @@
   }
 
   function parseGeminiNode(node) {
-    // 1. Handle Text
-    if (node.nodeType === Node.TEXT_NODE) {
+    if (node.nodeType === nodeTypes.TEXT_NODE) {
       return node.textContent;
     }
 
-    // 2. Handle Elements
-    if (node.nodeType === Node.ELEMENT_NODE) {
+    if (node.nodeType === nodeTypes.ELEMENT_NODE) {
       const tag = node.tagName.toLowerCase();
 
-      // --- Code Blocks ---
-      // Gemini wraps code in a custom <code-block> element
       if (tag === "code-block") {
         const lang = node.querySelector(".code-block-decoration span")?.textContent || "";
-        // Get raw text from the code container to preserve whitespace/indentation
         const code = node.querySelector(".code-container")?.textContent || "";
         return `\n\`\`\`${lang}\n${code}\n\`\`\`\n\n`;
       }
 
-      // --- Formatting ---
       if (tag === "b" || tag === "strong") return `**${parseChildren(node)}**`;
       if (tag === "i" || tag === "em") return `*${parseChildren(node)}*`;
-      if (tag === "code") return `\`${node.textContent}\``; // Inline code
+      if (tag === "code") return `\`${node.textContent}\``;
       if (tag === "a") return `[${node.textContent}](${node.getAttribute("href") || "#"})`;
 
-      // --- Structure ---
       if (tag === "p") {
-        // If inside a list item to avoid double newlines
         const inList = node.closest("li");
         return `${parseChildren(node)}${inList ? "\n" : "\n\n"}`;
       }
-      if (tag === "br") return `\n`;
+      if (tag === "br") return "\n";
       if (tag.match(/^h[1-6]$/)) {
-        const level = "#".repeat(parseInt(tag[1]));
+        const level = "#".repeat(parseInt(tag[1], 10));
         return `${level} ${parseChildren(node)}\n\n`;
       }
-      if (tag === "hr") return `\n---\n\n`;
+      if (tag === "hr") return "\n---\n\n";
 
-      // --- Lists ---
       if (tag === "li") {
         const parent = node.parentElement;
         const index = Array.from(parent.children).indexOf(node) + 1;
         const marker = parent.tagName.toLowerCase() === "ol" ? `${index}. ` : "* ";
 
-        // Calculate indent based on parent li's marker length for proper nesting
         let indent = "";
         let p = parent.parentElement;
         while (p?.tagName.toLowerCase() === "li") {
@@ -81,8 +72,6 @@
         return `${parseChildren(node)}\n`;
       }
 
-      // --- Container Fallback ---
-      // Recurse for divs, spans, or custom tags like <response-element>
       return parseChildren(node);
     }
     return "";
@@ -92,46 +81,74 @@
     return Array.from(node.childNodes).map(parseGeminiNode).join("");
   }
 
-  // --- Main Extraction ---
-  const title = $(".conversation-title-container .conversation-title")?.textContent?.trim() || "Gemini Conversation";
-  const date = formatLocalIso(new Date());
-  const source = location.href;
-  const conversations = document.querySelectorAll(".conversation-container");
-  let mdOutput = `---\ntitle: "${yamlEscape(title)}"\ndate: ${date}\nsource: "${yamlEscape(source)}"\n---\n\n`;
+  function extractConversation(doc = root.document) {
+    const title =
+      $(".conversation-title-container .conversation-title", doc)?.textContent?.trim() || "Gemini Conversation";
+    const date = formatLocalIso(new Date());
+    const source = doc.location?.href || "";
+    const conversations = doc.querySelectorAll(".conversation-container");
+    let mdOutput = `---\ntitle: "${yamlEscape(title)}"\ndate: ${date}\nsource: "${yamlEscape(source)}"\n---\n\n`;
 
-  conversations.forEach((conv) => {
-    // 1. User Query
-    const userNode = conv.querySelector("user-query .query-text");
-    if (userNode) {
-      mdOutput += `## User\n\n${userNode.innerText.trim()}\n\n`;
-    }
+    conversations.forEach((conv) => {
+      const userNode = conv.querySelector("user-query .query-text");
+      if (userNode) {
+        mdOutput += `## User\n\n${userNode.innerText.trim()}\n\n`;
+      }
 
-    // 2. Model Response
-    // We select ALL markdown containers. This captures 'Thinking' and 'Final Response'.
-    const markdownNodes = conv.querySelectorAll("model-response .markdown");
+      const markdownNodes = conv.querySelectorAll("model-response .markdown");
+      if (markdownNodes.length > 0) {
+        mdOutput += "## Gemini\n\n";
 
-    if (markdownNodes.length > 0) {
-      mdOutput += `## Gemini\n\n`;
+        markdownNodes.forEach((node) => {
+          const isThought = node.closest("model-thoughts");
+          const content = parseGeminiNode(node).trim();
 
-      markdownNodes.forEach((node) => {
-        // Check if this markdown node is inside the "Thoughts" section
-        const isThought = node.closest("model-thoughts");
-
-        let content = parseGeminiNode(node).trim();
-
-        if (content.length > 0) {
-          if (isThought) {
-            mdOutput += `> **Thinking:**\n> ${content.replace(/\n/g, "\n> ")}\n\n`;
-          } else {
-            mdOutput += `${content}\n\n`;
+          if (content.length > 0) {
+            if (isThought) {
+              mdOutput += `> **Thinking:**\n> ${content.replace(/\n/g, "\n> ")}\n\n`;
+            } else {
+              mdOutput += `${content}\n\n`;
+            }
           }
-        }
-      });
+        });
 
-      mdOutput += `---\n\n`;
+        mdOutput += "---\n\n";
+      }
+    });
+
+    return mdOutput;
+  }
+
+  async function copyText(text, doc = root.document, nav = root.navigator) {
+    try {
+      await nav?.clipboard?.writeText?.(text);
+      return true;
+    } catch {
+      const textarea = doc.createElement("textarea");
+      textarea.value = text;
+      doc.body.appendChild(textarea);
+      textarea.select();
+      const ok = doc.execCommand?.("copy");
+      textarea.remove();
+      return Boolean(ok);
     }
-  });
+  }
 
-  // --- Copy ---
-  copy(mdOutput);
-})();
+  async function copyConversation(doc = root.document, win = root, nav = root.navigator) {
+    const markdown = extractConversation(doc);
+    const ok = await copyText(markdown, doc, nav);
+    const notify = win?.alert ?? console.warn;
+    notify(ok ? "Gemini conversation copied to clipboard." : "Failed to copy Gemini conversation.");
+    return markdown;
+  }
+
+  function scrape(doc = root.document, win = root, nav = root.navigator) {
+    return copyConversation(doc, win, nav);
+  }
+
+  root.geminiscraper = {
+    extractConversation,
+    copyConversation,
+    scrape,
+  };
+})(typeof window === "undefined" ? globalThis : window);

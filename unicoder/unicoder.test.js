@@ -61,7 +61,7 @@ describe("Unicoder tests", async () => {
 
     it("should preserve code blocks with SVG tags", () => {
       setMarkdownInput(
-        "```svg\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <circle cx=\"16\" cy=\"16\" r=\"15\" fill=\"#2563eb\"/>\n</svg>\n```"
+        '```svg\n<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">\n  <circle cx="16" cy="16" r="15" fill="#2563eb"/>\n</svg>\n```',
       );
       const output = unicodeOutput.textContent.trim();
       expect(output).toContain("<");

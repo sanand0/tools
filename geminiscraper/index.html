@@ -8,174 +8,9 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f1c376%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23d1495b%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url(%23g)%22%2F%3E%3Cpath%20d%3D%22M32%2012l7%2014%2015%202-11%2011%203%2016-14-7-14%207%203-16-11-11%2015-2z%22%20fill%3D%22%231b1a17%22%2F%3E%3C%2Fsvg%3E" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" />
-  <style>
-    :root {
-      --ink: #1b1a17;
-      --muted: #5c5348;
-      --accent: #d1495b;
-      --accent-strong: #b83f4f;
-      --accent-2: #1f7a6d;
-      --paper: #f7efe6;
-      --paper-strong: #f0e2d0;
-      --shadow: 0 28px 60px -40px rgba(27, 26, 23, 0.6);
-    }
-
-    body {
-      font-family: "Bricolage Grotesque", "Segoe UI", sans-serif;
-      color: var(--ink);
-      background:
-        radial-gradient(1000px 700px at 10% -10%, rgba(241, 195, 118, 0.45), transparent 55%),
-        radial-gradient(900px 700px at 110% 0%, rgba(31, 122, 109, 0.28), transparent 60%),
-        linear-gradient(180deg, #fbf6ef 0%, #f1e4d6 100%);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(600px 300px at 20% 90%, rgba(209, 73, 91, 0.18), transparent 60%);
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    h1,
-    h2,
-    h3 {
-      font-family: "Cormorant Garamond", "Times New Roman", serif;
-      letter-spacing: 0.02em;
-    }
-
-    .hero-card {
-      background: rgba(255, 255, 255, 0.78);
-      border: 1px solid rgba(27, 26, 23, 0.08);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(12px);
-    }
-
-    .hero-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(31, 122, 109, 0.1);
-      border: 1px solid rgba(31, 122, 109, 0.35);
-      color: var(--accent-2);
-      font-weight: 600;
-      padding: 0.35rem 0.75rem;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-size: 0.72rem;
-    }
-
-    .callout {
-      background: rgba(209, 73, 91, 0.08);
-      border: 1px dashed rgba(209, 73, 91, 0.5);
-      border-radius: 16px;
-      padding: 1rem 1.25rem;
-    }
-
-    .step-card {
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid rgba(27, 26, 23, 0.12);
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-      height: 100%;
-    }
-
-    .step-card ol {
-      padding-left: 1.25rem;
-    }
-
-    .code-panel {
-      background: #101318;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 22px;
-      padding: 1.5rem;
-      box-shadow: 0 32px 70px -45px rgba(16, 19, 24, 0.9);
-      color: #f5f2ee;
-    }
-
-    .code-panel h2 {
-      color: #f7efe6;
-    }
-
-    .code-scroll {
-      background: #0f1115;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      max-height: 420px;
-      overflow: auto;
-      padding: 1.25rem;
-      font-size: 0.9rem;
-    }
-
-    .code-scroll code {
-      font-family: "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
-    }
-
-    .btn-accent {
-      background: var(--accent);
-      border: none;
-      color: #fff;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    .btn-accent:hover,
-    .btn-accent:focus {
-      background: var(--accent-strong);
-      color: #fff;
-    }
-
-    .loading-state {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      color: rgba(255, 255, 255, 0.7);
-      font-weight: 500;
-      margin-bottom: 1rem;
-    }
-
-    .purpose-card {
-      background: rgba(255, 255, 255, 0.8);
-      border: 1px solid rgba(27, 26, 23, 0.1);
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-    }
-
-    .reveal {
-      opacity: 0;
-      transform: translateY(18px);
-      animation: rise 0.8s ease forwards;
-      animation-delay: calc(var(--delay, 0) * 0.12s);
-    }
-
-    @keyframes rise {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @media (max-width: 991px) {
-      .code-panel {
-        padding: 1.25rem;
-      }
-
-      .hero-card {
-        border-radius: 20px;
-      }
-    }
-
-  </style>
 </head>
 
-<body>
+<body class="bg-body-tertiary">
   <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
     <div class="container">
       <a class="navbar-brand d-flex align-items-center" href="../">
@@ -186,74 +21,37 @@
     </div>
   </nav>
 
-  <main class="container pb-5">
-    <section class="hero-card p-4 p-lg-5 mb-5 reveal" style="--delay: 1;">
-      <div class="hero-pill mb-3">
-        <i class="bi bi-shield-check"></i>
-        Safe local export
-      </div>
-      <h1 class="display-5 mb-3">Export Gemini conversations as Markdown</h1>
-      <p class="lead text-secondary mb-4">
-        This page hosts a ready-to-run script that turns a Gemini conversation into Markdown with YAML frontmatter.
-        Copy the script below, paste it into the Gemini browser console, and the conversation lands on your clipboard.
-      </p>
-      <div class="callout text-secondary">
-        <strong>Why no bookmarklet?</strong> Gemini blocks external scripts in bookmarklets, so the console paste route is
-        the only reliable way to run the exporter.
-      </div>
-    </section>
+  <main class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7">
+        <header class="mb-5 text-center">
+          <h1 class="display-5 mb-2">Gemini Conversation Scraper</h1>
+          <p class="lead text-secondary">Export Gemini chats to Markdown with YAML frontmatter</p>
+        </header>
 
-    <section class="row g-4 align-items-stretch mb-5">
-      <div class="col-lg-5 reveal" style="--delay: 2;">
-        <div class="step-card p-4 p-lg-5 h-100">
-          <h2 class="h4 mb-3">How to use it</h2>
-          <ol class="text-secondary">
-            <li class="mb-2">Open the Gemini conversation you want to export.</li>
-            <li class="mb-2">Open DevTools, switch to the Console tab, and paste the script.</li>
-            <li class="mb-2">Press <kbd>Enter</kbd>. The Markdown is copied automatically.</li>
-            <li class="mb-0">Paste into your notes or repository to keep the full thread.</li>
+        <section class="bg-body shadow-sm border rounded-3 p-4 text-center mb-5">
+          <p class="mb-3">Drag this button to your bookmarks bar:</p>
+          <a href="" id="bookmarklet" class="btn btn-primary btn-lg mb-3 shadow-sm">
+            Gemini Scraper
+          </a>
+          <p class="text-secondary small mb-0" id="bookmarklet-status">
+            <span id="bookmarklet-spinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <span id="bookmarklet-status-text">Loading bookmarklet...</span>
+          </p>
+          <p class="text-danger small mb-0" id="bookmarklet-error"></p>
+        </section>
+
+        <section class="bg-body shadow-sm border rounded-3 p-4">
+          <h2 class="h5 text-secondary text-center mb-3">Usage</h2>
+          <ol class="mb-0 ps-3">
+            <li>Open a Gemini conversation page.</li>
+            <li>Click the <kbd>Gemini Scraper</kbd> bookmarklet.</li>
+            <li>The conversation is copied to your clipboard as Markdown with YAML frontmatter.</li>
+            <li>Paste it into your notes, editor, or knowledge base.</li>
           </ol>
-        </div>
+        </section>
       </div>
-      <div class="col-lg-7 reveal" style="--delay: 3;">
-        <div class="code-panel">
-          <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
-            <div>
-              <h2 class="h4 mb-1">Copy the script</h2>
-              <p class="mb-0 text-secondary">Includes title, date, and source in YAML frontmatter.</p>
-            </div>
-            <button id="copy-script" class="btn btn-accent btn-sm" type="button" disabled>Copy script</button>
-          </div>
-          <div id="script-loading" class="loading-state" role="status" aria-live="polite">
-            <span class="spinner-border spinner-border-sm text-warning" aria-hidden="true"></span>
-            Loading script...
-          </div>
-          <pre id="script-container" class="code-scroll d-none"><code id="script-code" class="language-javascript"></code></pre>
-          <p class="small text-secondary mt-3 mb-0">Tip: run the script on the active conversation page so the URL and title are accurate.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="purpose-card p-4 p-lg-5 reveal" style="--delay: 4;">
-      <div class="row g-4">
-        <div class="col-lg-6">
-          <h2 class="h4 mb-3">What you get</h2>
-          <ul class="text-secondary mb-0">
-            <li>YAML frontmatter with the conversation title, local timestamp, and Gemini URL.</li>
-            <li>Clean Markdown for both user prompts and Gemini responses.</li>
-            <li>Inline formatting, lists, headers, and code blocks preserved.</li>
-          </ul>
-        </div>
-        <div class="col-lg-6">
-          <h2 class="h4 mb-3">Best for</h2>
-          <ul class="text-secondary mb-0">
-            <li>Archiving research conversations.</li>
-            <li>Building Markdown notes for knowledge bases.</li>
-            <li>Sharing a Gemini thread with collaborators.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
+    </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>

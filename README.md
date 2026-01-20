@@ -87,7 +87,7 @@ The site is automatically deployed to GitHub Pages when changes are pushed to th
 ## Project Structure
 
 - `index.html` - Main landing page
-- `tools.js` - Dynamic tool card generator
+- `tools.mjs` - Dynamic tool card generator
 - `tools.json` - Tool metadata
 - `/[tool-name]/` - Individual tool directories, with an `index.html` and ESM `script.js` imported as `<script type="module" src="script.js"></script>`
 
