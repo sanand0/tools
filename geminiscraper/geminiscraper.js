@@ -81,6 +81,26 @@
     return Array.from(node.childNodes).map(parseGeminiNode).join("");
   }
 
+  async function waitForThoughtsContent(targets, win = root, timeoutMs = 8000) {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      const pending = targets.filter((target) => !target.container.querySelector(".thoughts-content"));
+      if (pending.length === 0) return;
+      await new Promise((resolve) => win.setTimeout(resolve, 100));
+    }
+  }
+
+  async function expandThoughts(doc = root.document, win = root) {
+    const targets = Array.from(doc.querySelectorAll("button.thoughts-header-button"))
+      .map((button) => ({ button, container: button.closest(".model-thoughts") }))
+      .filter((target) => target.container && !target.container.querySelector(".thoughts-content"));
+
+    targets.forEach((target) => target.button.click());
+    if (targets.length > 0) {
+      await waitForThoughtsContent(targets, win);
+    }
+  }
+
   function extractConversation(doc = root.document) {
     const title =
       $(".conversation-title-container .conversation-title", doc)?.textContent?.trim() || "Gemini Conversation";
@@ -142,13 +162,16 @@
     return markdown;
   }
 
-  function scrape(doc = root.document, win = root, nav = root.navigator) {
+  async function scrape(doc = root.document, win = root, nav = root.navigator) {
+    await expandThoughts(doc, win);
+    await new Promise((resolve) => win.setTimeout(resolve, 500));
     return copyConversation(doc, win, nav);
   }
 
   root.geminiscraper = {
     extractConversation,
     copyConversation,
+    expandThoughts,
     scrape,
   };
 })(typeof window === "undefined" ? globalThis : window);
