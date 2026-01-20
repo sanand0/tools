@@ -147,6 +147,9 @@ const convertMarkdownToUnicode = (markdown) => {
       return altText ? `[${altText}]` : "";
     };
 
+    // Horizontal rule
+    renderer.hr = () => "\n\n---\n\n";
+
     // Paragraphs
     renderer.paragraph = (text) => {
       const content = raw(text);

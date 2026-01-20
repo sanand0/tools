@@ -187,6 +187,12 @@ code block
       expect(unicodeOutput.textContent).toContain("a\nb");
     });
 
+    it("should convert horizontal rules to markdown dashes", () => {
+      setMarkdownInput("Before\n\n---\n\nAfter");
+      expect(unicodeOutput.textContent).toContain("\n\n---\n\n");
+      expect(unicodeOutput.textContent).not.toContain("<hr");
+    });
+
     it("should drop empty image lines without adding extra spacing", () => {
       setMarkdownInput("text\n\n![](...)\n\ntext");
       expect(unicodeOutput.textContent.trim()).toBe("text\n\ntext");
