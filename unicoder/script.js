@@ -2,7 +2,18 @@ import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { readParam } from "../common/demo.js";
 saveform("#unicoder-form");
 
-const raw = (s) => new DOMParser().parseFromString(s, "text/html").documentElement.textContent;
+const decodeEntities = (s) => new DOMParser().parseFromString(s, "text/html").documentElement.textContent;
+const decodeCodeEntities = (s) => {
+  let decoded = s;
+  for (let i = 0; i < 2; i += 1) decoded = decoded.replace(/&amp;/g, "&");
+  return decoded
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+};
+const raw = (s) => decodeEntities(s.replace(/<br\s*\/?>/gi, "\n"));
+const rawCode = (s) => decodeCodeEntities(s);
 const $ = (s) => document.querySelector(s);
 const sampleContainer = document.getElementById("sampleContainer");
 
@@ -121,24 +132,40 @@ const convertMarkdownToUnicode = (markdown) => {
     renderer.blockquote = (text) => toItalic(raw(text).replace(/<p>/g, "").replace(/<\/p>/g, ""));
 
     // Code blocks → monospace
-    renderer.code = (code) => toMonospace(raw(code)) + "\n\n";
-    renderer.codespan = (code) => toMonospace(raw(code));
+    renderer.code = (code) => toMonospace(rawCode(code)) + "\n\n";
+    renderer.codespan = (code) => toMonospace(rawCode(code));
 
     // Links → text (url)
     renderer.link = (href, title, text) => {
       const linkText = raw(text);
-      return linkText === href ? linkText : `${linkText} (${href})`;
+      return linkText || href;
     };
 
     // Images → alt text
-    renderer.image = (href, title, alt) => raw(alt) || "Image";
+    renderer.image = (href, title, alt) => {
+      const altText = raw(alt);
+      return altText ? `[${altText}]` : "";
+    };
 
     // Paragraphs
-    renderer.paragraph = (text) => raw(text) + "\n\n";
+    renderer.paragraph = (text) => {
+      const content = raw(text);
+      return content.trim() ? content + "\n\n" : "";
+    };
 
     // Lists
-    renderer.list = (body) => body + "\n";
-    renderer.listitem = (text) => `• ${raw(text)}\n`;
+    renderer.listitem = (text) => `${raw(text)}\n`;
+    renderer.list = (body, ordered, start = 1) => {
+      const items = body
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+      if (!items.length) return "";
+      const lines = ordered
+        ? items.map((item, index) => `${start + index}. ${item}`)
+        : items.map((item) => `• ${item}`);
+      return lines.join("\n") + "\n\n";
+    };
 
     const options = {
       renderer: renderer,
@@ -331,8 +358,11 @@ const copyToClipboard = (text, button) => {
 
 const renderOutput = (id, content) => {
   const el = document.getElementById(id);
-  el.replaceChildren();
-  el.insertAdjacentHTML("beforeend", `<div class="m-0 text-break" style="white-space: pre-wrap">${content}</div>`);
+  const output = document.createElement("div");
+  output.className = "m-0 text-break";
+  output.style.whiteSpace = "pre-wrap";
+  output.textContent = content;
+  el.replaceChildren(output);
 };
 
 const updateMarkdownOutput = () => {

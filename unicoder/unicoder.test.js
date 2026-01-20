@@ -59,6 +59,16 @@ describe("Unicoder tests", async () => {
       expect(output).toContain("𝟺𝟸");
     });
 
+    it("should preserve code blocks with SVG tags", () => {
+      setMarkdownInput(
+        "```svg\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 32 32\">\n  <circle cx=\"16\" cy=\"16\" r=\"15\" fill=\"#2563eb\"/>\n</svg>\n```"
+      );
+      const output = unicodeOutput.textContent.trim();
+      expect(output).toContain("<");
+      expect(output).toContain("𝚜𝚟𝚐");
+      expect(output).toContain("𝚌𝚒𝚛𝚌𝚕𝚎");
+    });
+
     it("should convert heading level 1", () => {
       setMarkdownInput("# Heading One");
       expect(unicodeOutput.textContent.trim()).toBe("𝗛𝗲𝗮𝗱𝗶𝗻𝗴 𝗢𝗻𝗲");
@@ -81,7 +91,7 @@ describe("Unicoder tests", async () => {
 
     it("should convert links", () => {
       setMarkdownInput("[Click here](https://example.com)");
-      expect(unicodeOutput.textContent.trim()).toBe("Click here (https://example.com)");
+      expect(unicodeOutput.textContent.trim()).toBe("Click here");
     });
 
     it("should convert links with same text as URL", () => {
@@ -91,12 +101,12 @@ describe("Unicoder tests", async () => {
 
     it("should convert images", () => {
       setMarkdownInput("![Alternative text](image.jpg)");
-      expect(unicodeOutput.textContent.trim()).toBe("Alternative text");
+      expect(unicodeOutput.textContent.trim()).toBe("[Alternative text]");
     });
 
     it("should convert images without alt text", () => {
       setMarkdownInput("![](image.jpg)");
-      expect(unicodeOutput.textContent.trim()).toBe("Image");
+      expect(unicodeOutput.textContent.trim()).toBe("");
     });
 
     it("should convert unordered lists", () => {
@@ -110,9 +120,9 @@ describe("Unicoder tests", async () => {
     it("should convert ordered lists", () => {
       setMarkdownInput("1. First\n2. Second\n3. Third");
       const output = unicodeOutput.textContent.trim();
-      expect(output).toContain("• First");
-      expect(output).toContain("• Second");
-      expect(output).toContain("• Third");
+      expect(output).toContain("1. First");
+      expect(output).toContain("2. Second");
+      expect(output).toContain("3. Third");
     });
 
     it("should convert mixed inline formatting", () => {
@@ -159,7 +169,27 @@ code block
       expect(output).toContain("𝘪𝘵𝘢𝘭𝘪𝘤");
       expect(output).toContain("𝚌𝚘𝚍𝚎");
       expect(output).toContain("• List item");
-      expect(output).toContain("A link (https://example.com)");
+      expect(output).toContain("A link");
+    });
+
+    it("should keep autolinks as plain text", () => {
+      setMarkdownInput("<https://example.com>");
+      expect(unicodeOutput.textContent.trim()).toBe("https://example.com");
+    });
+
+    it("should keep bare URLs as plain text", () => {
+      setMarkdownInput("https://example.com/");
+      expect(unicodeOutput.textContent.trim()).toBe("https://example.com/");
+    });
+
+    it("should preserve line breaks", () => {
+      setMarkdownInput("a\nb");
+      expect(unicodeOutput.textContent).toContain("a\nb");
+    });
+
+    it("should drop empty image lines without adding extra spacing", () => {
+      setMarkdownInput("text\n\n![](...)\n\ntext");
+      expect(unicodeOutput.textContent.trim()).toBe("text\n\ntext");
     });
 
     it("should return empty string for empty input", () => {
