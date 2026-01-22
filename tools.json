@@ -50,6 +50,13 @@
       "created": "2025-05-20T11:08:17+08:00"
     },
     {
+      "icon": "bi-palette2",
+      "title": "Color Table Builder",
+      "description": "Paste a delimited table and get a colored HTML table.",
+      "url": "colortable",
+      "created": "2026-01-22T10:48:06+05:30"
+    },
+    {
       "icon": "bi-music-note-list",
       "title": "Findsongs",
       "description": "Generate playlists from your favourite songs, rate them, and refine picks.",
