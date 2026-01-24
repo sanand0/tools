@@ -125,7 +125,7 @@
 
           if (content.length > 0) {
             if (isThought) {
-              mdOutput += `> **Thinking:**\n> ${content.replace(/\n/g, "\n> ")}\n\n`;
+              mdOutput += `<details>\n<summary>Thinking</summary>\n\n> ${content.replace(/\n/g, "\n> ")}\n\n</details>\n\n`;
             } else {
               mdOutput += `${content}\n\n`;
             }
