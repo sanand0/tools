@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Copy Links</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%235eead4%22%2F%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%230ea5e9%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url(%23g)%22%2F%3E%3Cpath%20d%3D%22M22%2032a10%2010%200%200%201%2010-10h8%22%20fill%3D%22none%22%20stroke%3D%22%231b1a17%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M42%2032a10%2010%200%200%201-10%2010h-8%22%20fill%3D%22none%22%20stroke%3D%22%231b1a17%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M27%2032h10%22%20fill%3D%22none%22%20stroke%3D%22%231b1a17%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" />
+</head>
+
+<body class="bg-body-tertiary">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-link-45deg me-2"></i>
+        Copy Links
+      </a>
+      <div class="bootstrap-dark-theme"></div>
+    </div>
+  </nav>
+
+  <main class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7">
+        <header class="mb-5 text-center">
+          <h1 class="display-5 mb-2">Copy Links</h1>
+          <p class="lead text-secondary">Grab every URL on a page and copy it as a tidy TSV list</p>
+        </header>
+
+        <section class="bg-body shadow-sm border rounded-3 p-4 text-center mb-5">
+          <p class="mb-3">Drag this button to your bookmarks bar:</p>
+          <a href="" id="bookmarklet" class="btn btn-primary btn-lg mb-3 shadow-sm">
+            Copy Links
+          </a>
+          <p class="text-secondary small mb-0" id="bookmarklet-status">
+            <span id="bookmarklet-spinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <span id="bookmarklet-status-text">Loading bookmarklet...</span>
+          </p>
+          <p class="text-danger small mb-0" id="bookmarklet-error"></p>
+        </section>
+
+        <section class="bg-body shadow-sm border rounded-3 p-4">
+          <h2 class="h5 text-secondary text-center mb-3">Usage</h2>
+          <ol class="mb-0 ps-3">
+            <li>Open any page with links or embedded assets.</li>
+            <li>Click the <kbd>Copy Links</kbd> bookmarklet.</li>
+            <li>All unique URLs are copied as tab-separated values (URL + description).</li>
+            <li>Paste into a spreadsheet, text editor, or your notes.</li>
+          </ol>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>

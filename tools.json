@@ -29,6 +29,13 @@
       "created": "2026-01-11T12:22:42+08:00"
     },
     {
+      "icon": "bi-link-45deg",
+      "title": "Copy Links",
+      "description": "Bookmarklet to copy all page URLs and asset links as TSV.",
+      "url": "copylinks",
+      "created": "2026-01-12T09:00:00+08:00"
+    },
+    {
       "icon": "bi-clock-history",
       "title": "Recall",
       "description": "Randomly recall list items from Markdown.",
