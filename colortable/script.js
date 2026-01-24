@@ -89,8 +89,7 @@ const parseRangeInput = (value) => {
   return Number.isFinite(number) ? number : null;
 };
 
-const escapeText = (value) =>
-  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const escapeText = (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const escapeAttribute = (value) =>
   value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -99,9 +98,7 @@ const formatTableHtml = (table) => {
   const serialize = (element, depth) => {
     const tag = element.tagName.toLowerCase();
     const indent = "  ".repeat(depth);
-    const attrs = [...element.attributes]
-      .map((attr) => ` ${attr.name}="${escapeAttribute(attr.value)}"`)
-      .join("");
+    const attrs = [...element.attributes].map((attr) => ` ${attr.name}="${escapeAttribute(attr.value)}"`).join("");
     const children = [...element.children];
     if (!children.length) {
       const text = escapeText(element.textContent ?? "");

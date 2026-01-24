@@ -1,3 +1,6 @@
+// Force ESM so oxlint accepts top-level await.
+export {};
+
 const { tools } = await fetch("tools.json").then((r) => r.json());
 
 let currentSort = "default";

@@ -1,7 +1,6 @@
 (function (root) {
   function collectLinks(doc = root.document) {
-    const selectors =
-      "a[href], img[src], iframe[src], script[src], link[href], video[src], audio[src], source[src]";
+    const selectors = "a[href], img[src], iframe[src], script[src], link[href], video[src], audio[src], source[src]";
     const elements = doc.querySelectorAll(selectors);
     const seen = new Set();
 
@@ -12,7 +11,10 @@
         seen.add(url);
 
         let desc = el.innerText || el.alt || el.title || el.rel || el.tagName;
-        desc = (desc + "").replace(/[\r\n\t]+/g, " ").trim().substring(0, 200);
+        desc = (desc + "")
+          .replace(/[\r\n\t]+/g, " ")
+          .trim()
+          .substring(0, 200);
 
         return `${url}\t${desc}`;
       })

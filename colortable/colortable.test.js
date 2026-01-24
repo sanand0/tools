@@ -62,6 +62,6 @@ describe("Color Table Builder", async () => {
 
     const html = await window.navigator.clipboard.readText();
     expect(html).toContain("<table");
-    expect(html).toContain("scope=\"col\"");
+    expect(html).toContain('scope="col"');
   });
 });
