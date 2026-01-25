@@ -273,6 +273,13 @@
       "created": "2025-06-04T11:25:48+08:00"
     },
     {
+      "icon": "bi-mic-fill",
+      "title": "Voice Notes",
+      "description": "Record voice notes and transcribe with Gemini 2.5 Flash.",
+      "url": "voicenotes",
+      "created": "2025-08-16T00:00:00+00:00"
+    },
+    {
       "icon": "bi-file-slides-fill",
       "title": "RevealJS Slides",
       "description": "Convert Markdown to RevealJS HTML.",
