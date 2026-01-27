@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Gemini Table Fixture</title>
+</head>
+
+<body>
+  <div class="conversation-container">
+    <user-query>
+      <div class="query-text">Show me the table</div>
+    </user-query>
+    <model-response>
+      <div class="markdown">
+        <div class="horizontal-scroll-wrapper">
+          <div class="table-block-component">
+            <response-element>
+              <table-block>
+                <div class="table-block">
+                  <div class="table-content">
+                    <table>
+                      <thead>
+                        <tr>
+                          <td><span>Context</span></td>
+                          <td><span>Recommended Question</span></td>
+                          <td><span>Mechanism</span></td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><span><b>Universal</b></span></td>
+                          <td><span>"The crystal ball says it failed. What's the story?"</span></td>
+                          <td><span>Prospective Hindsight</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="table-footer">
+                    <button type="button">Export to Sheets</button>
+                  </div>
+                </div>
+              </table-block>
+            </response-element>
+          </div>
+        </div>
+        <h3>Next Step</h3>
+      </div>
+    </model-response>
+  </div>
+  <script src="../geminiscraper.js"></script>
+</body>
+
+</html>

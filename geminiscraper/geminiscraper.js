@@ -21,6 +21,17 @@
       .replace(/\r?\n/g, " ");
   }
 
+  const blockTags = new Set(["p", "ul", "ol", "li", "table", "hr", "code-block"]);
+  const headingPattern = /^h[1-6]$/;
+  const isBlockElement = (node) => {
+    if (node.nodeType !== nodeTypes.ELEMENT_NODE) return false;
+    const tag = node.tagName?.toLowerCase();
+    if (!tag) return false;
+    if (headingPattern.test(tag)) return true;
+    if (tag === "div") return node.classList?.contains("table-footer");
+    return blockTags.has(tag);
+  };
+
   function parseGeminiNode(node) {
     if (node.nodeType === nodeTypes.TEXT_NODE) {
       return node.textContent;
@@ -33,6 +44,22 @@
         const lang = node.querySelector(".code-block-decoration span")?.textContent || "";
         const code = node.querySelector(".code-container")?.textContent || "";
         return `\n\`\`\`${lang}\n${code}\n\`\`\`\n\n`;
+      }
+      if (tag === "table") {
+        const rows = Array.from(node.querySelectorAll("tr")).map((row) =>
+          Array.from(row.children)
+            .filter((child) => ["td", "th"].includes(child.tagName?.toLowerCase()))
+            .map((cell) => parseChildren(cell).replace(/\s+/g, " ").trim()),
+        );
+        if (rows.length === 0) return "";
+        const columnCount = Math.max(...rows.map((row) => row.length), 0);
+        if (columnCount === 0) return "";
+        const padded = rows.map((row) => [...row, ...Array(columnCount - row.length).fill("")]);
+        const [header, ...body] = padded;
+        const renderRow = (cells) => `| ${cells.join(" | ")} |`;
+        return `${renderRow(header)}\n${renderRow(Array(columnCount).fill("---"))}${
+          body.length ? `\n${body.map(renderRow).join("\n")}` : ""
+        }\n\n`;
       }
 
       if (tag === "b" || tag === "strong") return `**${parseChildren(node)}**`;
@@ -78,7 +105,25 @@
   }
 
   function parseChildren(node) {
-    return Array.from(node.childNodes).map(parseGeminiNode).join("");
+    return Array.from(node.childNodes).reduce((output, child) => {
+      let chunk = parseGeminiNode(child);
+      if (!chunk) return output;
+
+      if (child.nodeType === nodeTypes.TEXT_NODE) {
+        chunk = chunk.replace(/\s+/g, " ");
+        if (!chunk.trim()) {
+          if (!output || output.endsWith("\n")) return output;
+          return output.endsWith(" ") ? output : `${output} `;
+        }
+      }
+
+      if (isBlockElement(child)) {
+        output = output.replace(/[ \t]+$/g, "");
+        if (output && !output.endsWith("\n")) output += "\n\n";
+      }
+
+      return output + chunk;
+    }, "");
   }
 
   async function waitForThoughtsContent(targets, win = root, timeoutMs = 8000) {
@@ -112,7 +157,12 @@
     conversations.forEach((conv) => {
       const userNode = conv.querySelector("user-query .query-text");
       if (userNode) {
-        mdOutput += `## User\n\n${userNode.innerText.trim()}\n\n`;
+        const userText = userNode.innerText
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .join("\n");
+        mdOutput += `## User\n\n${userText}\n\n`;
       }
 
       const markdownNodes = conv.querySelectorAll("model-response .markdown");
