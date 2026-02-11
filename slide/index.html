@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Slide Editor</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      overflow: hidden;
+    }
+
+    #slide-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: background-color 0.3s ease;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    #slide-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: inherit;
+      z-index: 0;
+    }
+
+    #content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      max-width: 90%;
+    }
+
+    #title {
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+      transition: all 0.3s ease;
+    }
+
+    #subtitle {
+      font-weight: 400;
+      line-height: 1.4;
+      transition: all 0.3s ease;
+    }
+
+    #edit-icon {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      opacity: 0.1;
+      transition: opacity 0.3s ease;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #edit-icon:hover {
+      opacity: 0.8;
+    }
+
+    #edit-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    #modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #modal.show {
+      display: flex;
+    }
+
+    #modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    #modal-content h2 {
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group input[type="text"],
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-family: inherit;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .color-input-group {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .color-input-group input[type="color"] {
+      width: 60px;
+      height: 40px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .color-input-group input[type="text"] {
+      flex: 1;
+    }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .slider-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .slider-display .value {
+      font-weight: 600;
+      color: #333;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #ddd;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #007bff;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #007bff;
+      cursor: pointer;
+      border: none;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+    }
+
+    button.primary {
+      background: #007bff;
+      color: white;
+      flex: 1;
+    }
+
+    button.primary:hover {
+      background: #0056b3;
+    }
+
+    button.secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    button.secondary:hover {
+      background: #545b62;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div id="slide-container">
+    <div id="edit-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+      </svg>
+    </div>
+    <div id="content">
+      <h1 id="title"></h1>
+      <h2 id="subtitle"></h2>
+    </div>
+  </div>
+
+  <div id="modal">
+    <div id="modal-content">
+      <h2>Edit Slide</h2>
+
+      <div class="form-group">
+        <label for="title-input">Title (Markdown)</label>
+        <textarea id="title-input" placeholder="Enter slide title"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="subtitle-input">Subtitle (Markdown)</label>
+        <textarea id="subtitle-input" placeholder="Enter slide subtitle"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="font-select">Font</label>
+        <select id="font-select">
+          <option value="Montserrat">Montserrat</option>
+          <option value="Roboto">Roboto</option>
+          <option value="Open Sans">Open Sans</option>
+          <option value="Lato">Lato</option>
+          <option value="Raleway">Raleway</option>
+          <option value="Poppins">Poppins</option>
+          <option value="Playfair Display">Playfair Display</option>
+          <option value="Merriweather">Merriweather</option>
+          <option value="Oswald">Oswald</option>
+          <option value="Source Sans Pro">Source Sans Pro</option>
+          <option value="Nunito">Nunito</option>
+          <option value="Inter">Inter</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Font Scale</label>
+        <div class="slider-group">
+          <div class="slider-display">
+            <span>Scale factor: <span class="value" id="scale-display">100%</span></span>
+          </div>
+          <input type="range" id="scale-slider" min="-20" max="20" step="0.1" value="0">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="fg-color">Foreground Color</label>
+        <div class="color-input-group">
+          <input type="color" id="fg-color" value="#ffffff">
+          <input type="text" id="fg-color-text" value="#ffffff">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="bg-color">Background Color</label>
+        <div class="color-input-group">
+          <input type="color" id="bg-color" value="#1a1a2e">
+          <input type="text" id="bg-color-text" value="#1a1a2e">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="bg-search">Background Image URL</label>
+        <input type="text" id="bg-search" placeholder="Paste image URL (e.g., https://images.unsplash.com/...)">
+        <div class="hint">Leave empty for solid background color. Try <a href="https://unsplash.com" target="_blank">Unsplash</a>, <a href="https://www.pexels.com" target="_blank">Pexels</a>, or any image URL</div>
+      </div>
+
+      <div class="button-group">
+        <button class="secondary" id="close-modal">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    // Default values
+    const defaults = {
+      title: '# Welcome to Your Slide',
+      subtitle: 'A beautiful presentation starts here',
+      font: 'Montserrat',
+      scale: 0,
+      fgColor: '#ffffff',
+      bgColor: '#1a1a2e',
+      bgSearch: ''
+    };
+    let currentFont = null;
+    let loadedFonts = new Set();
+    // Parse URL hash parameters
+    function parseHash() {
+      const hash = window.location.hash.slice(1);
+      if (!hash) return {
+        ...defaults
+      };
+      const params = new URLSearchParams(hash);
+      return {
+        title: params.get('title') || defaults.title,
+        subtitle: params.get('subtitle') || defaults.subtitle,
+        font: params.get('font') || defaults.font,
+        scale: parseFloat(params.get('scale') || defaults.scale),
+        fgColor: params.get('fgColor') || defaults.fgColor,
+        bgColor: params.get('bgColor') || defaults.bgColor,
+        bgSearch: params.get('bgSearch') || defaults.bgSearch
+      };
+    }
+    // Update URL hash
+    function updateHash(params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== '') {
+          searchParams.set(key, value);
+        }
+      });
+      window.location.hash = searchParams.toString();
+    }
+    // Calculate scale factor from slider value
+    function calculateScale(value) {
+      return Math.pow(1.1, value);
+    }
+    // Load Google Font
+    function loadFont(fontName) {
+      if (loadedFonts.has(fontName)) return;
+      const link = document.createElement('link');
+      link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@400;700&display=swap`;
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+      loadedFonts.add(fontName);
+    }
+    // Render markdown
+    function renderMarkdown(text) {
+      return marked.parse(text);
+    }
+    // Get background image URL
+    async function getBackgroundImageUrl(input) {
+      if (!input || input.trim() === '') {
+        return null;
+      }
+      // If it's already a URL, return it directly
+      if (input.startsWith('http://') || input.startsWith('https://')) {
+        return input;
+      }
+      // Otherwise, return null (could add other providers here)
+      return null;
+    }
+    // Apply slide configuration
+    async function applyConfig(config) {
+      const {
+        title,
+        subtitle,
+        font,
+        scale,
+        fgColor,
+        bgColor,
+        bgSearch
+      } = config;
+      // Load font
+      loadFont(font);
+      // Apply font
+      document.getElementById('content').style.fontFamily = `'${font}', sans-serif`;
+      // Calculate and apply scale
+      const scaleFactor = calculateScale(scale);
+      const baseTitleSize = 4; // rem
+      const baseSubtitleSize = 2; // rem
+      const titleElement = document.getElementById('title');
+      const subtitleElement = document.getElementById('subtitle');
+      titleElement.style.fontSize = `${baseTitleSize * scaleFactor}rem`;
+      subtitleElement.style.fontSize = `${baseSubtitleSize * scaleFactor}rem`;
+      // Apply colors
+      titleElement.style.color = fgColor;
+      subtitleElement.style.color = fgColor;
+      document.getElementById('edit-icon').style.color = fgColor;
+      // Apply content
+      titleElement.innerHTML = renderMarkdown(title);
+      subtitleElement.innerHTML = renderMarkdown(subtitle);
+      // Apply background
+      const container = document.getElementById('slide-container');
+      if (bgSearch && bgSearch.trim() !== '') {
+        const imageUrl = await getBackgroundImageUrl(bgSearch);
+        if (imageUrl) {
+          container.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${imageUrl})`;
+          container.style.backgroundColor = bgColor;
+        } else {
+          container.style.backgroundImage = 'none';
+          container.style.backgroundColor = bgColor;
+        }
+      } else {
+        container.style.backgroundImage = 'none';
+        container.style.backgroundColor = bgColor;
+      }
+    }
+    // Initialize form with current config
+    function initForm(config) {
+      document.getElementById('title-input').value = config.title;
+      document.getElementById('subtitle-input').value = config.subtitle;
+      document.getElementById('font-select').value = config.font;
+      document.getElementById('scale-slider').value = config.scale;
+      document.getElementById('fg-color').value = config.fgColor;
+      document.getElementById('fg-color-text').value = config.fgColor;
+      document.getElementById('bg-color').value = config.bgColor;
+      document.getElementById('bg-color-text').value = config.bgColor;
+      document.getElementById('bg-search').value = config.bgSearch;
+      updateScaleDisplay(config.scale);
+    }
+    // Update scale display
+    function updateScaleDisplay(value) {
+      const scale = calculateScale(value);
+      const percentage = Math.round(scale * 100);
+      document.getElementById('scale-display').textContent = `${percentage}%`;
+    }
+    // Get current form values
+    function getFormValues() {
+      return {
+        title: document.getElementById('title-input').value,
+        subtitle: document.getElementById('subtitle-input').value,
+        font: document.getElementById('font-select').value,
+        scale: parseFloat(document.getElementById('scale-slider').value),
+        fgColor: document.getElementById('fg-color').value,
+        bgColor: document.getElementById('bg-color').value,
+        bgSearch: document.getElementById('bg-search').value
+      };
+    }
+    // Update live
+    function updateLive() {
+      const config = getFormValues();
+      updateHash(config);
+      applyConfig(config);
+    }
+    // Event listeners
+    document.getElementById('edit-icon').addEventListener('click', () => {
+      const config = parseHash();
+      initForm(config);
+      document.getElementById('modal').classList.add('show');
+    });
+    document.getElementById('close-modal').addEventListener('click', () => {
+      document.getElementById('modal').classList.remove('show');
+    });
+    document.getElementById('modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modal')) {
+        document.getElementById('modal').classList.remove('show');
+      }
+    });
+    // Live updates
+    document.getElementById('title-input').addEventListener('input', updateLive);
+    document.getElementById('subtitle-input').addEventListener('input', updateLive);
+    document.getElementById('font-select').addEventListener('change', updateLive);
+    document.getElementById('scale-slider').addEventListener('input', (e) => {
+      updateScaleDisplay(e.target.value);
+      updateLive();
+    });
+    // Color sync
+    document.getElementById('fg-color').addEventListener('input', (e) => {
+      document.getElementById('fg-color-text').value = e.target.value;
+      updateLive();
+    });
+    document.getElementById('fg-color-text').addEventListener('input', (e) => {
+      document.getElementById('fg-color').value = e.target.value;
+      updateLive();
+    });
+    document.getElementById('bg-color').addEventListener('input', (e) => {
+      document.getElementById('bg-color-text').value = e.target.value;
+      updateLive();
+    });
+    document.getElementById('bg-color-text').addEventListener('input', (e) => {
+      document.getElementById('bg-color').value = e.target.value;
+      updateLive();
+    });
+    document.getElementById('bg-search').addEventListener('input', updateLive);
+    // Handle hash changes (for bookmarking)
+    window.addEventListener('hashchange', () => {
+      const config = parseHash();
+      applyConfig(config);
+    });
+    // Initialize
+    const initialConfig = parseHash();
+    applyConfig(initialConfig);
+
+  </script>
+</body>
+
+</html>
