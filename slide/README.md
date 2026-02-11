@@ -30,18 +30,20 @@ A beautiful, interactive slide editor for creating professional title slides.
 ## Example URLs
 
 Default slide:
+
 ```
 /slide/#
 ```
 
 Custom slide:
+
 ```
 /slide/#?title=%23%20My%20Presentation&subtitle=A%20professional%20slide&font=Poppins&scale=2&fgColor=%23ffffff&bgColor=%231a1a2e&bgSearch=https://images.unsplash.com/photo-1506905925346-21bda4d32df4
 ```
 
 ## Tips
 
-- Use Markdown in title/subtitle for **bold**, *italic*, or other formatting
+- Use Markdown in title/subtitle for **bold**, _italic_, or other formatting
 - Leave background URL empty for a solid color background
 - Get free images from [Unsplash](https://unsplash.com), [Pexels](https://www.pexels.com), or [Pixabay](https://pixabay.com)
 - Right-click on an image and select "Copy image address" to get the URL

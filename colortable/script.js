@@ -307,11 +307,7 @@ const renderTable = () => {
         const numericValue = numericGrid[rowIndex][colIndex];
         const isNumeric = Number.isFinite(numericValue);
         const scale =
-          mode === "table"
-            ? tableScale
-            : mode === "rows"
-              ? rowScales?.[rowIndex]
-              : columnScales?.[colIndex];
+          mode === "table" ? tableScale : mode === "rows" ? rowScales?.[rowIndex] : columnScales?.[colIndex];
         const cellEl = document.createElement(isRowHeader ? "th" : "td");
         if (isRowHeader) cellEl.scope = "row";
         cellEl.textContent = cell;
