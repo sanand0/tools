@@ -328,9 +328,9 @@
             </div>
 
             <div class="form-group">
-                <label for="bg-search">Background Image Search</label>
-                <input type="text" id="bg-search" placeholder="Enter keywords to search for background image">
-                <div class="hint">Leave empty for solid background color</div>
+                <label for="bg-search">Background Image URL</label>
+                <input type="text" id="bg-search" placeholder="Paste image URL (e.g., https://images.unsplash.com/...)">
+                <div class="hint">Leave empty for solid background color. Try <a href="https://unsplash.com" target="_blank">Unsplash</a>, <a href="https://www.pexels.com" target="_blank">Pexels</a>, or any image URL</div>
             </div>
 
             <div class="button-group">
@@ -404,19 +404,19 @@
             return marked.parse(text);
         }
 
-        // Search for background image using Unsplash API
-        async function searchBackgroundImage(query) {
-            if (!query || query.trim() === '') {
+        // Get background image URL
+        async function getBackgroundImageUrl(input) {
+            if (!input || input.trim() === '') {
                 return null;
             }
 
-            try {
-                const response = await fetch(`https://source.unsplash.com/1920x1080/?${encodeURIComponent(query)}`);
-                return response.url;
-            } catch (error) {
-                console.error('Error fetching background image:', error);
-                return null;
+            // If it's already a URL, return it directly
+            if (input.startsWith('http://') || input.startsWith('https://')) {
+                return input;
             }
+
+            // Otherwise, return null (could add other providers here)
+            return null;
         }
 
         // Apply slide configuration
@@ -452,7 +452,7 @@
             // Apply background
             const container = document.getElementById('slide-container');
             if (bgSearch && bgSearch.trim() !== '') {
-                const imageUrl = await searchBackgroundImage(bgSearch);
+                const imageUrl = await getBackgroundImageUrl(bgSearch);
                 if (imageUrl) {
                     container.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url(${imageUrl})`;
                     container.style.backgroundColor = bgColor;
