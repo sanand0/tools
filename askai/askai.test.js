@@ -20,6 +20,16 @@ describe("askai", () => {
     );
   });
 
+  it("opens the new Phind provider", () => {
+    document.getElementById("question").value = "debug a stack trace";
+    document.getElementById("ask-phind").click();
+
+    expect(window.localStorage.getItem("askai:lastProvider")).toBe("phind");
+    expect(window.__askaiRedirectTarget).toBe(
+      "https://www.phind.com/search?q=debug%20a%20stack%20trace",
+    );
+  });
+
   it("copies a share link with q parameter", async () => {
     document.getElementById("question").value = "hello world";
 
