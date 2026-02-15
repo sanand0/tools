@@ -1,49 +1,25 @@
-const {
-  providers = {},
-  storageKey = "askai:lastProvider",
-  defaultProvider = "google",
-} = window.__askaiConfig || {};
+const { providers, storageKey, defaultProvider } = window.askai;
 const questionInput = document.getElementById("question");
 const status = document.getElementById("status");
 
-function normalizeProvider(provider) {
-  return providers[provider] ? provider : defaultProvider;
-}
-
-function buildProviderUrl(provider, question) {
-  return providers[normalizeProvider(provider)].replace(
-    "%s",
-    encodeURIComponent(question),
-  );
-}
-
-function getPreferredProvider() {
-  const provider = localStorage.getItem(storageKey);
-  return normalizeProvider(provider);
-}
-
-function navigateTo(url) {
+const pickProvider = (provider) =>
+  providers[provider] ? provider : defaultProvider;
+const toUrl = (provider, question) =>
+  providers[provider].replace("%s", encodeURIComponent(question));
+const showProvider = (provider) => {
+  document.querySelectorAll("[data-ai]").forEach((button) => {
+    const active = button.dataset.ai === provider;
+    button.classList.toggle("btn-primary", active);
+    button.classList.toggle("btn-outline-primary", !active);
+  });
+};
+const navigate = (url) => {
   if (window.location.hostname === "test") {
     window.__askaiRedirectTarget = url;
     return;
   }
   window.location.href = url;
-}
-
-function setPreferredButton(provider) {
-  document.querySelectorAll("[data-ai]").forEach((button) => {
-    button.classList.remove("btn-primary");
-    button.classList.add("btn-outline-primary");
-  });
-
-  const preferredButton = document.querySelector(
-    `[data-ai="${normalizeProvider(provider)}"]`,
-  );
-  if (!preferredButton) return;
-
-  preferredButton.classList.remove("btn-outline-primary");
-  preferredButton.classList.add("btn-primary");
-}
+};
 
 function ask(provider) {
   const question = questionInput.value.trim();
@@ -52,17 +28,15 @@ function ask(provider) {
     return;
   }
 
-  const normalizedProvider = normalizeProvider(provider);
-  localStorage.setItem(storageKey, normalizedProvider);
-  setPreferredButton(normalizedProvider);
-  status.textContent = `Opening ${normalizedProvider}...`;
-  navigateTo(buildProviderUrl(normalizedProvider, question));
+  const resolvedProvider = pickProvider(provider);
+  localStorage.setItem(storageKey, resolvedProvider);
+  showProvider(resolvedProvider);
+  status.textContent = `Opening ${resolvedProvider}...`;
+  navigate(toUrl(resolvedProvider, question));
 }
 
 document.querySelectorAll("[data-ai]").forEach((button) => {
-  button.addEventListener("click", () => {
-    ask(button.dataset.ai);
-  });
+  button.addEventListener("click", () => ask(button.dataset.ai));
 });
 
 document.getElementById("copy-link").addEventListener("click", async () => {
@@ -84,6 +58,6 @@ document.getElementById("copy-link").addEventListener("click", async () => {
   }
 });
 
-const preferredProvider = getPreferredProvider();
-setPreferredButton(preferredProvider);
+const preferredProvider = pickProvider(localStorage.getItem(storageKey));
+showProvider(preferredProvider);
 document.querySelector(`[data-ai="${preferredProvider}"]`)?.focus();

@@ -4,38 +4,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ask AI</title>
-    <script id="askai-config" type="application/json">
-      {
-        "storageKey": "askai:lastProvider",
-        "defaultProvider": "google",
-        "providers": {
-          "chatgpt": "https://chatgpt.com/?q=%s",
-          "claude": "https://claude.ai/new?q=%s",
-          "grok": "https://grok.com/?q=%s",
-          "perplexity": "https://www.perplexity.ai/search?q=%s",
-          "google": "https://www.google.com/search?udm=50&q=%s"
-        }
-      }
-    </script>
     <script>
       (() => {
-        const configElement = document.getElementById("askai-config");
-        const config = JSON.parse(configElement?.textContent || "{}");
-        const providers = config.providers || {};
-        const defaultProvider = config.defaultProvider || "google";
-        const storageKey = config.storageKey || "askai:lastProvider";
+        window.askai = {
+          storageKey: "askai:lastProvider",
+          defaultProvider: "google",
+          providers: {
+            chatgpt: "https://chatgpt.com/?q=%s",
+            claude: "https://claude.ai/new?q=%s",
+            grok: "https://grok.com/?q=%s",
+            perplexity: "https://www.perplexity.ai/search?q=%s",
+            google: "https://www.google.com/search?udm=50&q=%s",
+          },
+        };
 
-        window.__askaiConfig = { providers, defaultProvider, storageKey };
+        const { providers, storageKey, defaultProvider } = window.askai;
+        const pickProvider = (provider) =>
+          providers[provider] ? provider : defaultProvider;
 
         const params = new URLSearchParams(window.location.search);
         const query = params.get("q");
         if (!query) return;
 
-        const candidate =
+        const provider = pickProvider(
           params.get("ai")?.toLowerCase() ||
-          localStorage.getItem(storageKey) ||
-          defaultProvider;
-        const provider = providers[candidate] ? candidate : defaultProvider;
+            localStorage.getItem(storageKey) ||
+            defaultProvider,
+        );
 
         localStorage.setItem(storageKey, provider);
         const target = providers[provider].replace(
