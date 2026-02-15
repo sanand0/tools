@@ -1,22 +1,25 @@
-const providers = {
-  chatgpt: "https://chatgpt.com/?q=%s",
-  claude: "https://claude.ai/new?q=%s",
-  grok: "https://grok.com/?q=%s",
-  perplexity: "https://www.perplexity.ai/search?q=%s",
-  google: "https://www.google.com/search?udm=50&q=%s",
-};
-
-const storageKey = "askai:lastProvider";
+const {
+  providers = {},
+  storageKey = "askai:lastProvider",
+  defaultProvider = "google",
+} = window.__askaiConfig || {};
 const questionInput = document.getElementById("question");
 const status = document.getElementById("status");
 
+function normalizeProvider(provider) {
+  return providers[provider] ? provider : defaultProvider;
+}
+
 function buildProviderUrl(provider, question) {
-  return providers[provider].replace("%s", encodeURIComponent(question));
+  return providers[normalizeProvider(provider)].replace(
+    "%s",
+    encodeURIComponent(question),
+  );
 }
 
 function getPreferredProvider() {
   const provider = localStorage.getItem(storageKey);
-  return providers[provider] ? provider : "chatgpt";
+  return normalizeProvider(provider);
 }
 
 function navigateTo(url) {
@@ -33,7 +36,9 @@ function setPreferredButton(provider) {
     button.classList.add("btn-outline-primary");
   });
 
-  const preferredButton = document.querySelector(`[data-ai="${provider}"]`);
+  const preferredButton = document.querySelector(
+    `[data-ai="${normalizeProvider(provider)}"]`,
+  );
   if (!preferredButton) return;
 
   preferredButton.classList.remove("btn-outline-primary");
@@ -47,10 +52,11 @@ function ask(provider) {
     return;
   }
 
-  localStorage.setItem(storageKey, provider);
-  setPreferredButton(provider);
-  status.textContent = `Opening ${provider}...`;
-  navigateTo(buildProviderUrl(provider, question));
+  const normalizedProvider = normalizeProvider(provider);
+  localStorage.setItem(storageKey, normalizedProvider);
+  setPreferredButton(normalizedProvider);
+  status.textContent = `Opening ${normalizedProvider}...`;
+  navigateTo(buildProviderUrl(normalizedProvider, question));
 }
 
 document.querySelectorAll("[data-ai]").forEach((button) => {

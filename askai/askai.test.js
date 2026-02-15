@@ -31,15 +31,27 @@ describe("askai", () => {
     expect(document.getElementById("status").textContent).toBe("Link copied.");
   });
 
-  it("redirects immediately to ChatGPT by default when q is present", async () => {
+  it("redirects immediately to Google by default when q is present", async () => {
     ({ window } = await loadFrom(
       import.meta.dirname,
       "index.html?q=best+book",
     ));
 
     expect(window.__askaiRedirectTarget).toBe(
-      "https://chatgpt.com/?q=best%20book",
+      "https://www.google.com/search?udm=50&q=best%20book",
     );
+  });
+
+  it("falls back to Google for invalid providers", async () => {
+    ({ window } = await loadFrom(
+      import.meta.dirname,
+      "index.html?q=coffee&ai=invalid",
+    ));
+
+    expect(window.__askaiRedirectTarget).toBe(
+      "https://www.google.com/search?udm=50&q=coffee",
+    );
+    expect(window.localStorage.getItem("askai:lastProvider")).toBe("google");
   });
 
   it("uses ai query parameter over stored preference", async () => {
