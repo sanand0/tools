@@ -50,6 +50,13 @@
       "created": "2025-08-11T00:00:00+00:00"
     },
     {
+      "icon": "bi-chat-left-text",
+      "title": "Ask AI",
+      "description": "Send a question to your preferred AI chat engine in one click.",
+      "url": "askai",
+      "created": "2026-02-15T00:00:00+00:00"
+    },
+    {
       "icon": "bi-mic",
       "title": "Podcast Generator",
       "description": "Generate podcasts from text using LLMs.",

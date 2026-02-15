@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ask AI</title>
+    <script>
+      (() => {
+        const providers = {
+          chatgpt: "https://chatgpt.com/?q=%s",
+          claude: "https://claude.ai/new?q=%s",
+          grok: "https://grok.com/?q=%s",
+          perplexity: "https://www.perplexity.ai/search?q=%s",
+          google: "https://www.google.com/search?udm=50&q=%s",
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const query = params.get("q");
+
+        if (!query) return;
+
+        const storageKey = "askai:lastProvider";
+        const candidate =
+          params.get("ai")?.toLowerCase() ||
+          localStorage.getItem(storageKey) ||
+          "chatgpt";
+        const provider = providers[candidate] ? candidate : "chatgpt";
+
+        localStorage.setItem(storageKey, provider);
+        const target = providers[provider].replace(
+          "%s",
+          encodeURIComponent(query),
+        );
+
+        if (window.location.hostname === "test") {
+          window.__askaiRedirectTarget = target;
+          return;
+        }
+
+        window.location.replace(target);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <main>
+      <h1>Ask AI</h1>
+      <p>Type your question and choose where to ask it.</p>
+      <label for="question">Question</label>
+      <textarea
+        id="question"
+        rows="8"
+        placeholder="What do you want to ask?"
+      ></textarea>
+      <div>
+        <button type="button" id="ask-chatgpt" data-ai="chatgpt">
+          ChatGPT
+        </button>
+        <button type="button" id="ask-claude" data-ai="claude">Claude</button>
+        <button type="button" id="ask-grok" data-ai="grok">Grok</button>
+        <button type="button" id="ask-perplexity" data-ai="perplexity">
+          Perplexity
+        </button>
+        <button type="button" id="ask-google" data-ai="google">
+          Google AI Mode
+        </button>
+      </div>
+      <div>
+        <button type="button" id="copy-link">Copy link</button>
+      </div>
+      <p id="status" aria-live="polite"></p>
+    </main>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
