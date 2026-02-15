@@ -27,6 +27,19 @@ function navigateTo(url) {
   window.location.href = url;
 }
 
+function setPreferredButton(provider) {
+  document.querySelectorAll("[data-ai]").forEach((button) => {
+    button.classList.remove("btn-primary");
+    button.classList.add("btn-outline-primary");
+  });
+
+  const preferredButton = document.querySelector(`[data-ai="${provider}"]`);
+  if (!preferredButton) return;
+
+  preferredButton.classList.remove("btn-outline-primary");
+  preferredButton.classList.add("btn-primary");
+}
+
 function ask(provider) {
   const question = questionInput.value.trim();
   if (!question) {
@@ -35,6 +48,7 @@ function ask(provider) {
   }
 
   localStorage.setItem(storageKey, provider);
+  setPreferredButton(provider);
   status.textContent = `Opening ${provider}...`;
   navigateTo(buildProviderUrl(provider, question));
 }
@@ -65,9 +79,5 @@ document.getElementById("copy-link").addEventListener("click", async () => {
 });
 
 const preferredProvider = getPreferredProvider();
-const preferredButton = document.querySelector(
-  `[data-ai="${preferredProvider}"]`,
-);
-if (preferredButton) {
-  preferredButton.focus();
-}
+setPreferredButton(preferredProvider);
+document.querySelector(`[data-ai="${preferredProvider}"]`)?.focus();
