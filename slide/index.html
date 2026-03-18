@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Slide Editor</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22oklch(0.5%200.3%20225)%22%20rx%3D%2212%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2248%22%20fill%3D%22%23fff%22%20font-family%3D%22sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22900%22%20text-anchor%3D%22middle%22%3ES%3C%2Ftext%3E%3C%2Fsvg%3E" />
+  <link id="favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22oklch(0.5%200.3%20225)%22%20rx%3D%2212%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2248%22%20fill%3D%22%23fff%22%20font-family%3D%22sans-serif%22%20font-size%3D%2252%22%20font-weight%3D%22900%22%20text-anchor%3D%22middle%22%3ES%3C%2Ftext%3E%3C%2Fsvg%3E" />
   <style>
     * {
       margin: 0;
@@ -306,12 +306,22 @@
       </div>
 
       <div class="form-group">
-        <label>Font Scale</label>
+        <label for="title-scale-slider">Title Size</label>
         <div class="slider-group">
           <div class="slider-display">
-            <span>Scale factor: <span class="value" id="scale-display">100%</span></span>
+            <span>Scale factor: <span class="value" id="title-scale-display">100%</span></span>
           </div>
-          <input type="range" id="scale-slider" min="-20" max="20" step="0.1" value="0">
+          <input type="range" id="title-scale-slider" min="-20" max="20" step="0.1" value="0">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="subtitle-scale-slider">Subtitle Size</label>
+        <div class="slider-group">
+          <div class="slider-display">
+            <span>Scale factor: <span class="value" id="subtitle-scale-display">100%</span></span>
+          </div>
+          <input type="range" id="subtitle-scale-slider" min="-20" max="20" step="0.1" value="0">
         </div>
       </div>
 
@@ -350,7 +360,8 @@
       title: '# Welcome to Your Slide',
       subtitle: 'A beautiful presentation starts here',
       font: 'Montserrat',
-      scale: 0,
+      titleScale: 0,
+      subtitleScale: 0,
       fgColor: '#ffffff',
       bgColor: '#1a1a2e',
       bgSearch: ''
@@ -364,11 +375,13 @@
         ...defaults
       };
       const params = new URLSearchParams(hash);
+      const legacyScale = parseFloat(params.get('scale') || defaults.titleScale);
       return {
         title: params.get('title') || defaults.title,
         subtitle: params.get('subtitle') || defaults.subtitle,
         font: params.get('font') || defaults.font,
-        scale: parseFloat(params.get('scale') || defaults.scale),
+        titleScale: parseFloat(params.get('titleScale') || legacyScale),
+        subtitleScale: parseFloat(params.get('subtitleScale') || legacyScale),
         fgColor: params.get('fgColor') || defaults.fgColor,
         bgColor: params.get('bgColor') || defaults.bgColor,
         bgSearch: params.get('bgSearch') || defaults.bgSearch
@@ -407,6 +420,27 @@
       temp.innerHTML = renderMarkdown(text);
       return temp.textContent?.trim() || '';
     }
+    function getFaviconLetter(text) {
+      return text.match(/\p{L}/u)?.[0]?.toLocaleUpperCase() || 'S';
+    }
+    function getFaviconTextColor(color) {
+      const hex = color.match(/^#?([\da-f]{3}|[\da-f]{6})$/i)?.[1];
+      if (!hex) return '#fff';
+      const normalized = hex.length === 3 ? [...hex].map((char) => char + char).join('') : hex;
+      const red = parseInt(normalized.slice(0, 2), 16);
+      const green = parseInt(normalized.slice(2, 4), 16);
+      const blue = parseInt(normalized.slice(4, 6), 16);
+      const brightness = (red * 299 + green * 587 + blue * 114) / 1000;
+      return brightness > 160 ? '#111' : '#fff';
+    }
+    function updateFavicon(title, color) {
+      const favicon = document.getElementById('favicon') || document.querySelector('link[rel="icon"]');
+      if (!favicon) return;
+      const letter = getFaviconLetter(title);
+      const textColor = getFaviconTextColor(color);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="${color}" rx="12"/><text x="32" y="48" fill="${textColor}" font-family="sans-serif" font-size="52" font-weight="900" text-anchor="middle">${letter}</text></svg>`;
+      favicon.href = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+    }
     // Get background image URL
     async function getBackgroundImageUrl(input) {
       if (!input || input.trim() === '') {
@@ -425,7 +459,8 @@
         title,
         subtitle,
         font,
-        scale,
+        titleScale,
+        subtitleScale,
         fgColor,
         bgColor,
         bgSearch
@@ -435,13 +470,12 @@
       // Apply font
       document.getElementById('content').style.fontFamily = `'${font}', sans-serif`;
       // Calculate and apply scale
-      const scaleFactor = calculateScale(scale);
       const baseTitleSize = 4; // rem
       const baseSubtitleSize = 2; // rem
       const titleElement = document.getElementById('title');
       const subtitleElement = document.getElementById('subtitle');
-      titleElement.style.fontSize = `${baseTitleSize * scaleFactor}rem`;
-      subtitleElement.style.fontSize = `${baseSubtitleSize * scaleFactor}rem`;
+      titleElement.style.fontSize = `${baseTitleSize * calculateScale(titleScale)}rem`;
+      subtitleElement.style.fontSize = `${baseSubtitleSize * calculateScale(subtitleScale)}rem`;
       // Apply colors
       titleElement.style.color = fgColor;
       subtitleElement.style.color = fgColor;
@@ -453,6 +487,7 @@
       const plainSubtitle = markdownToPlainText(subtitle);
       const tabTitle = plainTitle || plainSubtitle;
       document.title = tabTitle ? `${tabTitle} - Slide Editor` : 'Slide Editor';
+      updateFavicon(plainTitle, bgColor);
       // Apply background
       const container = document.getElementById('slide-container');
       if (bgSearch && bgSearch.trim() !== '') {
@@ -474,19 +509,21 @@
       document.getElementById('title-input').value = config.title;
       document.getElementById('subtitle-input').value = config.subtitle;
       document.getElementById('font-select').value = config.font;
-      document.getElementById('scale-slider').value = config.scale;
+      document.getElementById('title-scale-slider').value = config.titleScale;
+      document.getElementById('subtitle-scale-slider').value = config.subtitleScale;
       document.getElementById('fg-color').value = config.fgColor;
       document.getElementById('fg-color-text').value = config.fgColor;
       document.getElementById('bg-color').value = config.bgColor;
       document.getElementById('bg-color-text').value = config.bgColor;
       document.getElementById('bg-search').value = config.bgSearch;
-      updateScaleDisplay(config.scale);
+      updateScaleDisplay(config.titleScale, 'title-scale-display');
+      updateScaleDisplay(config.subtitleScale, 'subtitle-scale-display');
     }
     // Update scale display
-    function updateScaleDisplay(value) {
+    function updateScaleDisplay(value, displayId) {
       const scale = calculateScale(value);
       const percentage = Math.round(scale * 100);
-      document.getElementById('scale-display').textContent = `${percentage}%`;
+      document.getElementById(displayId).textContent = `${percentage}%`;
     }
     // Get current form values
     function getFormValues() {
@@ -494,7 +531,8 @@
         title: document.getElementById('title-input').value,
         subtitle: document.getElementById('subtitle-input').value,
         font: document.getElementById('font-select').value,
-        scale: parseFloat(document.getElementById('scale-slider').value),
+        titleScale: parseFloat(document.getElementById('title-scale-slider').value),
+        subtitleScale: parseFloat(document.getElementById('subtitle-scale-slider').value),
         fgColor: document.getElementById('fg-color').value,
         bgColor: document.getElementById('bg-color').value,
         bgSearch: document.getElementById('bg-search').value
@@ -524,8 +562,12 @@
     document.getElementById('title-input').addEventListener('input', updateLive);
     document.getElementById('subtitle-input').addEventListener('input', updateLive);
     document.getElementById('font-select').addEventListener('change', updateLive);
-    document.getElementById('scale-slider').addEventListener('input', (e) => {
-      updateScaleDisplay(e.target.value);
+    document.getElementById('title-scale-slider').addEventListener('input', (e) => {
+      updateScaleDisplay(e.target.value, 'title-scale-display');
+      updateLive();
+    });
+    document.getElementById('subtitle-scale-slider').addEventListener('input', (e) => {
+      updateScaleDisplay(e.target.value, 'subtitle-scale-display');
       updateLive();
     });
     // Color sync
