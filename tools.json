@@ -134,6 +134,13 @@
       "created": "2024-12-21T17:15:17+08:00"
     },
     {
+      "icon": "bi-window",
+      "title": "Markdown View Popup",
+      "description": "Bookmarklet to render selected Markdown, or full-page text, in a syntax-highlighted popup.",
+      "url": "mdview",
+      "created": "2026-03-24T00:00:00+00:00"
+    },
+    {
       "icon": "bi-code",
       "title": "GitHub Stars",
       "description": "Replaces GitHub links in Markdown with the repo name, stars, and last pushed date.",

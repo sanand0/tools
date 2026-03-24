@@ -1,201 +1,131 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ask AI</title>
-    <script>
-      (() => {
-        window.askai = {
-          storageKey: "askai:lastProvider",
-          defaultProvider: "google",
-          providers: {
-            chatgpt: "https://chatgpt.com/?q=%s",
-            claude: "https://claude.ai/new?q=%s",
-            grok: "https://grok.com/?q=%s",
-            perplexity: "https://www.perplexity.ai/search?q=%s",
-            google: "https://www.google.com/search?udm=50&q=%s",
-            // Coding & Developer Focused
-            phind: "https://www.phind.com/search?q=%s",
-            // Deep Research & Agents (New & Powerful)
-            genspark: "https://genspark.ai/search?q=%s",
-            felo: "https://felo.ai/search?q=%s",
-            // Coding
-            // blackbox: "https://www.blackbox.ai/?q=%s",
-            // Privacy & Browser Integrated
-            // brave: "https://search.brave.com/search?q=%s&source=llm",
-            // duckduckgo: "https://duckduckgo.com/?q=%s&ia=chat",
-            // you: "https://you.com/search?q=%s&tbm=youchat",
-            // Microsoft Copilot (Note: URL structure changes frequently)
-            // copilot: "https://copilot.microsoft.com/?q=%s",
-          },
-        };
 
-        const { providers, storageKey, defaultProvider } = window.askai;
-        const pickProvider = (provider) =>
-          providers[provider] ? provider : defaultProvider;
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ask AI</title>
+  <script>
+    (() => {
+      window.askai = {
+        storageKey: "askai:lastProvider",
+        defaultProvider: "google",
+        providers: {
+          chatgpt: "https://chatgpt.com/?q=%s",
+          claude: "https://claude.ai/new?q=%s",
+          grok: "https://grok.com/?q=%s",
+          perplexity: "https://www.perplexity.ai/search?q=%s",
+          google: "https://www.google.com/search?udm=50&q=%s",
+          // Coding & Developer Focused
+          phind: "https://www.phind.com/search?q=%s",
+          // Deep Research & Agents (New & Powerful)
+          genspark: "https://genspark.ai/search?q=%s",
+          felo: "https://felo.ai/search?q=%s",
+          // Coding
+          // blackbox: "https://www.blackbox.ai/?q=%s",
+          // Privacy & Browser Integrated
+          // brave: "https://search.brave.com/search?q=%s&source=llm",
+          // duckduckgo: "https://duckduckgo.com/?q=%s&ia=chat",
+          // you: "https://you.com/search?q=%s&tbm=youchat",
+          // Microsoft Copilot (Note: URL structure changes frequently)
+          // copilot: "https://copilot.microsoft.com/?q=%s",
+        },
+      };
+      const {
+        providers,
+        storageKey,
+        defaultProvider
+      } = window.askai;
+      const pickProvider = (provider) =>
+        providers[provider] ? provider : defaultProvider;
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get("q");
+      if (!query) return;
+      const provider = pickProvider(
+        params.get("ai")?.toLowerCase() ||
+        localStorage.getItem(storageKey) ||
+        defaultProvider,
+      );
+      localStorage.setItem(storageKey, provider);
+      const target = providers[provider].replace(
+        "%s",
+        encodeURIComponent(query),
+      );
+      if (window.location.hostname === "test") {
+        window.__askaiRedirectTarget = target;
+        return;
+      }
+      window.location.replace(target);
+    })();
 
-        const params = new URLSearchParams(window.location.search);
-        const query = params.get("q");
-        if (!query) return;
+  </script>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%230d6efd%22%20rx%3D%2212%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20fill%3D%22white%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2234%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%3EAI%3C%2Ftext%3E%3C%2Fsvg%3E" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" crossorigin="anonymous" />
+</head>
 
-        const provider = pickProvider(
-          params.get("ai")?.toLowerCase() ||
-            localStorage.getItem(storageKey) ||
-            defaultProvider,
-        );
+<body>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-chat-left-text me-2"></i>
+        Ask AI
+      </a>
+      <div class="bootstrap-dark-theme"></div>
+    </div>
+  </nav>
 
-        localStorage.setItem(storageKey, provider);
-        const target = providers[provider].replace(
-          "%s",
-          encodeURIComponent(query),
-        );
+  <main class="container pb-5">
+    <header class="mt-4 mb-4">
+      <h2 class="fs-4 mb-2">Ask any question in your favorite AI chat</h2>
+      <p class="text-secondary mb-0">
+        Type once, then open ChatGPT, Claude, Grok, Perplexity, or Google AI
+        Mode with one click.
+      </p>
+    </header>
 
-        if (window.location.hostname === "test") {
-          window.__askaiRedirectTarget = target;
-          return;
-        }
+    <form id="ask-form" class="card">
+      <div class="card-body">
+        <label for="question" class="form-label">Question</label>
+        <textarea id="question" class="form-control mb-3" rows="8" placeholder="What do you want to ask?"></textarea>
 
-        window.location.replace(target);
-      })();
-    </script>
-    <link
-      rel="icon"
-      type="image/svg+xml"
-      href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%230d6efd%22%20rx%3D%2212%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20fill%3D%22white%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2234%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%3EAI%3C%2Ftext%3E%3C%2Fsvg%3E"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css"
-      crossorigin="anonymous"
-    />
-  </head>
-
-  <body>
-    <nav
-      class="navbar navbar-expand-lg bg-body-tertiary mb-4"
-      data-bs-theme="dark"
-    >
-      <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="../">
-          <i class="bi bi-chat-left-text me-2"></i>
-          Ask AI
-        </a>
-        <div class="bootstrap-dark-theme"></div>
-      </div>
-    </nav>
-
-    <main class="container pb-5">
-      <header class="mt-4 mb-4">
-        <h2 class="fs-4 mb-2">Ask any question in your favorite AI chat</h2>
-        <p class="text-secondary mb-0">
-          Type once, then open ChatGPT, Claude, Grok, Perplexity, or Google AI
-          Mode with one click.
-        </p>
-      </header>
-
-      <form id="ask-form" class="card">
-        <div class="card-body">
-          <label for="question" class="form-label">Question</label>
-          <textarea
-            id="question"
-            class="form-control mb-3"
-            rows="8"
-            placeholder="What do you want to ask?"
-          ></textarea>
-
-          <div
-            class="d-flex flex-wrap gap-2 mb-3"
-            role="group"
-            aria-label="AI providers"
-          >
-            <button
-              type="button"
-              id="ask-chatgpt"
-              class="btn btn-outline-primary"
-              data-ai="chatgpt"
-            >
-              ChatGPT
-            </button>
-            <button
-              type="button"
-              id="ask-claude"
-              class="btn btn-outline-primary"
-              data-ai="claude"
-            >
-              Claude
-            </button>
-            <button
-              type="button"
-              id="ask-grok"
-              class="btn btn-outline-primary"
-              data-ai="grok"
-            >
-              Grok
-            </button>
-            <button
-              type="button"
-              id="ask-perplexity"
-              class="btn btn-outline-primary"
-              data-ai="perplexity"
-            >
-              Perplexity
-            </button>
-            <button
-              type="button"
-              id="ask-google"
-              class="btn btn-outline-primary"
-              data-ai="google"
-            >
-              Google AI Mode
-            </button>
-            <button
-              type="button"
-              id="ask-phind"
-              class="btn btn-outline-primary"
-              data-ai="phind"
-            >
-              Phind
-            </button>
-            <button
-              type="button"
-              id="ask-genspark"
-              class="btn btn-outline-primary"
-              data-ai="genspark"
-            >
-              Genspark
-            </button>
-            <button
-              type="button"
-              id="ask-felo"
-              class="btn btn-outline-primary"
-              data-ai="felo"
-            >
-              Felo
-            </button>
-          </div>
-
-          <button type="button" id="copy-link" class="btn btn-secondary">
-            Copy link
+        <div class="d-flex flex-wrap gap-2 mb-3" role="group" aria-label="AI providers">
+          <button type="button" id="ask-chatgpt" class="btn btn-outline-primary" data-ai="chatgpt">
+            ChatGPT
           </button>
-          <p
-            id="status"
-            class="text-secondary mt-3 mb-0"
-            aria-live="polite"
-          ></p>
+          <button type="button" id="ask-claude" class="btn btn-outline-primary" data-ai="claude">
+            Claude
+          </button>
+          <button type="button" id="ask-grok" class="btn btn-outline-primary" data-ai="grok">
+            Grok
+          </button>
+          <button type="button" id="ask-perplexity" class="btn btn-outline-primary" data-ai="perplexity">
+            Perplexity
+          </button>
+          <button type="button" id="ask-google" class="btn btn-outline-primary" data-ai="google">
+            Google AI Mode
+          </button>
+          <button type="button" id="ask-phind" class="btn btn-outline-primary" data-ai="phind">
+            Phind
+          </button>
+          <button type="button" id="ask-genspark" class="btn btn-outline-primary" data-ai="genspark">
+            Genspark
+          </button>
+          <button type="button" id="ask-felo" class="btn btn-outline-primary" data-ai="felo">
+            Felo
+          </button>
         </div>
-      </form>
-    </main>
 
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1"
-      type="module"
-    ></script>
-    <script type="module" src="script.js"></script>
-  </body>
+        <button type="button" id="copy-link" class="btn btn-secondary">
+          Copy link
+        </button>
+        <p id="status" class="text-secondary mt-3 mb-0" aria-live="polite"></p>
+      </div>
+    </form>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
 </html>

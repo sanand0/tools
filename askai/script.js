@@ -2,10 +2,8 @@ const { providers, storageKey, defaultProvider } = window.askai;
 const questionInput = document.getElementById("question");
 const status = document.getElementById("status");
 
-const pickProvider = (provider) =>
-  providers[provider] ? provider : defaultProvider;
-const toUrl = (provider, question) =>
-  providers[provider].replace("%s", encodeURIComponent(question));
+const pickProvider = (provider) => (providers[provider] ? provider : defaultProvider);
+const toUrl = (provider, question) => providers[provider].replace("%s", encodeURIComponent(question));
 const showProvider = (provider) => {
   document.querySelectorAll("[data-ai]").forEach((button) => {
     const active = button.dataset.ai === provider;

@@ -420,9 +420,11 @@
       temp.innerHTML = renderMarkdown(text);
       return temp.textContent?.trim() || '';
     }
+
     function getFaviconLetter(text) {
       return text.match(/\p{L}/u)?.[0]?.toLocaleUpperCase() || 'S';
     }
+
     function getFaviconTextColor(color) {
       const hex = color.match(/^#?([\da-f]{3}|[\da-f]{6})$/i)?.[1];
       if (!hex) return '#fff';
@@ -433,6 +435,7 @@
       const brightness = (red * 299 + green * 587 + blue * 114) / 1000;
       return brightness > 160 ? '#111' : '#fff';
     }
+
     function updateFavicon(title, color) {
       const favicon = document.getElementById('favicon') || document.querySelector('link[rel="icon"]');
       if (!favicon) return;

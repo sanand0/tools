@@ -7,14 +7,9 @@ import { Window } from "happy-dom";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const html = fs.readFileSync(path.join(__dirname, "index.html"), "utf8");
-const faviconHref =
-  html.match(
-    /<link id="favicon" rel="icon" type="image\/svg\+xml" href="([^"]+)"/,
-  )?.[1] || "";
-const bodyMarkup =
-  html.match(/<body>([\s\S]*?)<script src=/)?.[1]?.trim() || "";
-const inlineScript =
-  html.match(/<script>\s*([\s\S]*?)\s*<\/script>\s*<\/body>/)?.[1] || "";
+const faviconHref = html.match(/<link id="favicon" rel="icon" type="image\/svg\+xml" href="([^"]+)"/)?.[1] || "";
+const bodyMarkup = html.match(/<body>([\s\S]*?)<script src=/)?.[1]?.trim() || "";
+const inlineScript = html.match(/<script>\s*([\s\S]*?)\s*<\/script>\s*<\/body>/)?.[1] || "";
 
 function createWindow(hash = "") {
   const window = new Window({ url: `https://test/slide/${hash}` });
@@ -47,9 +42,7 @@ describe("slide favicon", () => {
 
   it("updates the favicon when the title input changes", () => {
     document.getElementById("edit-icon")?.click();
-    const titleInput = /** @type {HTMLTextAreaElement | null} */ (
-      document.getElementById("title-input")
-    );
+    const titleInput = /** @type {HTMLTextAreaElement | null} */ (document.getElementById("title-input"));
     expect(titleInput).toBeTruthy();
     if (!titleInput) throw new Error("title input missing");
 
@@ -62,28 +55,16 @@ describe("slide favicon", () => {
   });
 
   it("applies title and subtitle scales independently", () => {
-    const sizedWindow = createWindow(
-      "#?titleScale=2&subtitleScale=-1&title=Size%20Title&subtitle=Size%20Subtitle",
-    );
+    const sizedWindow = createWindow("#?titleScale=2&subtitleScale=-1&title=Size%20Title&subtitle=Size%20Subtitle");
     const sizedDocument = sizedWindow.document;
-    const title = /** @type {HTMLElement | null} */ (
-      sizedDocument.getElementById("title")
-    );
-    const subtitle = /** @type {HTMLElement | null} */ (
-      sizedDocument.getElementById("subtitle")
-    );
+    const title = /** @type {HTMLElement | null} */ (sizedDocument.getElementById("title"));
+    const subtitle = /** @type {HTMLElement | null} */ (sizedDocument.getElementById("subtitle"));
 
     expect(title).toBeTruthy();
     expect(subtitle).toBeTruthy();
     if (!title || !subtitle) throw new Error("slide content missing");
 
-    expect(parseFloat(title.style.fontSize)).toBeCloseTo(
-      4 * Math.pow(1.1, 2),
-      5,
-    );
-    expect(parseFloat(subtitle.style.fontSize)).toBeCloseTo(
-      2 * Math.pow(1.1, -1),
-      5,
-    );
+    expect(parseFloat(title.style.fontSize)).toBeCloseTo(4 * Math.pow(1.1, 2), 5);
+    expect(parseFloat(subtitle.style.fontSize)).toBeCloseTo(2 * Math.pow(1.1, -1), 5);
   });
 });

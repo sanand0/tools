@@ -15,9 +15,7 @@ describe("askai", () => {
     document.getElementById("ask-claude").click();
 
     expect(window.localStorage.getItem("askai:lastProvider")).toBe("claude");
-    expect(window.__askaiRedirectTarget).toBe(
-      "https://claude.ai/new?q=What%20is%20life",
-    );
+    expect(window.__askaiRedirectTarget).toBe("https://claude.ai/new?q=What%20is%20life");
   });
 
   it("opens the new Phind provider", () => {
@@ -25,9 +23,7 @@ describe("askai", () => {
     document.getElementById("ask-phind").click();
 
     expect(window.localStorage.getItem("askai:lastProvider")).toBe("phind");
-    expect(window.__askaiRedirectTarget).toBe(
-      "https://www.phind.com/search?q=debug%20a%20stack%20trace",
-    );
+    expect(window.__askaiRedirectTarget).toBe("https://www.phind.com/search?q=debug%20a%20stack%20trace");
   });
 
   it("copies a share link with q parameter", async () => {
@@ -35,42 +31,27 @@ describe("askai", () => {
 
     document.getElementById("copy-link").click();
 
-    expect(await window.navigator.clipboard.readText()).toBe(
-      "https://test/askai/index.html?q=hello+world",
-    );
+    expect(await window.navigator.clipboard.readText()).toBe("https://test/askai/index.html?q=hello+world");
     expect(document.getElementById("status").textContent).toBe("Link copied.");
   });
 
   it("redirects immediately to Google by default when q is present", async () => {
-    ({ window } = await loadFrom(
-      import.meta.dirname,
-      "index.html?q=best+book",
-    ));
+    ({ window } = await loadFrom(import.meta.dirname, "index.html?q=best+book"));
 
-    expect(window.__askaiRedirectTarget).toBe(
-      "https://www.google.com/search?udm=50&q=best%20book",
-    );
+    expect(window.__askaiRedirectTarget).toBe("https://www.google.com/search?udm=50&q=best%20book");
   });
 
   it("falls back to Google for invalid providers", async () => {
-    ({ window } = await loadFrom(
-      import.meta.dirname,
-      "index.html?q=coffee&ai=invalid",
-    ));
+    ({ window } = await loadFrom(import.meta.dirname, "index.html?q=coffee&ai=invalid"));
 
-    expect(window.__askaiRedirectTarget).toBe(
-      "https://www.google.com/search?udm=50&q=coffee",
-    );
+    expect(window.__askaiRedirectTarget).toBe("https://www.google.com/search?udm=50&q=coffee");
     expect(window.localStorage.getItem("askai:lastProvider")).toBe("google");
   });
 
   it("uses ai query parameter over stored preference", async () => {
     window.localStorage.setItem("askai:lastProvider", "claude");
 
-    ({ window } = await loadFrom(
-      import.meta.dirname,
-      "index.html?q=coffee&ai=grok",
-    ));
+    ({ window } = await loadFrom(import.meta.dirname, "index.html?q=coffee&ai=grok"));
 
     expect(window.__askaiRedirectTarget).toBe("https://grok.com/?q=coffee");
     expect(window.localStorage.getItem("askai:lastProvider")).toBe("grok");
