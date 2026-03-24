@@ -24,6 +24,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[X Thread Scraper](./xscraper/)**: Bookmarklet to copy a tweet and all its replies into JSON (ads dropped), including metrics and computed buzz/keep scores.
 - **[Gemini Conversation Scraper](./geminiscraper/)**: Copy a Gemini conversation as Markdown with YAML frontmatter via a console script.
 - **[Copy Links](./copylinks/)**: Bookmarklet to copy all page URLs and asset links as TSV.
+- **[Google Meet Captions](./gmeetcaptions/)**: Bookmarklet to copy the visible Google Meet captions as Markdown.
 - **[Straive Intelligence](./straiveintelligence/)**: Bookmarklet to convert ChatGPT into a Straive-style user interface
 - **[GitHub Summary](./githubsummary/)**: Generates a blog-post-style summary of a GitHub user's activity within a specified date range.
 - **[Join CSV Tables](./joincsv/)**: Join multiple tables on the first column.

@@ -36,6 +36,13 @@
       "created": "2026-01-12T09:00:00+08:00"
     },
     {
+      "icon": "bi-badge-cc",
+      "title": "Google Meet Captions",
+      "description": "Bookmarklet to copy the visible Google Meet captions as Markdown.",
+      "url": "gmeetcaptions",
+      "created": "2026-03-24T00:00:00+00:00"
+    },
+    {
       "icon": "bi-clock-history",
       "title": "Recall",
       "description": "Randomly recall list items from Markdown.",
