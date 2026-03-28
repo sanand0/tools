@@ -1,9 +1,23 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 import path from "node:path";
 import { fileURLToPath } from "url";
 import { Window } from "happy-dom";
 import { loadFrom } from "../common/testutils.js";
-import { createScraperState, mergeMessages, scrape, whatsappMessages } from "./whatsappscraper.js";
+import {
+  createScraperState,
+  mergeMessages,
+  scrape,
+  whatsappMessages,
+} from "./whatsappscraper.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -27,7 +41,10 @@ describe("whatsappscraper", () => {
   });
 
   beforeEach(async () => {
-    ({ page, document, window } = await loadFrom(__dirname, "__fixtures__/conversation.html"));
+    ({ page, document, window } = await loadFrom(
+      __dirname,
+      "__fixtures__/conversation.html",
+    ));
     window.setInterval = setInterval;
     window.setTimeout = setTimeout;
     window.clearInterval = clearInterval;
@@ -37,42 +54,35 @@ describe("whatsappscraper", () => {
     if (typeof page?.close === "function") page.close();
   });
 
-  it("extracts rich message data from DOM conversation", () => {
+  it("extracts rich message data from the legacy conversation fixture", () => {
     const messages = whatsappMessages(document);
     expect(messages).toHaveLength(5);
 
     expect(messages[0]).toMatchObject({
       messageId: "AC186CE91CBE1B7EA49A2127E5DDE29D",
       authorPhone: "+00 10000 00000",
-      isSystemMessage: false,
-      isRecalled: false,
       userId: "120363403498637789",
       author: "Member Alpha",
+      time: "2025-12-10T09:12:00.000Z",
     });
-    expect(messages[0].text.trim()).toMatch(/^As far as US dairy argument/i);
-    expect(messages[0].time).toBeInstanceOf(Date);
-    expect(messages[0].time.getHours()).toBe(9);
-    expect(messages[0].time.getMinutes()).toBe(12);
-    expect(messages[0].time.getMonth()).toBe(11);
-    expect(messages[0].time.getDate()).toBe(10);
+    expect(messages[0].text).toMatch(/^As far as US dairy argument/i);
+    expect(messages[0]).not.toHaveProperty("isOutgoing");
+    expect(messages[0]).not.toHaveProperty("isRecalled");
+    expect(messages[0]).not.toHaveProperty("isSystemMessage");
 
-    const secondExpected = new Date(messages[0].time);
-    secondExpected.setHours(21, 34, 0, 0);
     expect(messages[1]).toMatchObject({
       messageId: "3EB036C7035BE6F5227333",
       author: "Member Alpha",
       reactions: "👍, ❤ 4",
+      time: "2025-12-10T21:34:00.000Z",
     });
-    expect(messages[1].authorPhone).toBeUndefined(); // No data-pre-plain-text
-    expect(messages[1].time).toBe(secondExpected.toISOString());
+    expect(messages[1].authorPhone).toBeUndefined();
 
     expect(messages[2]).toMatchObject({
       messageId: "RECALLEDMSG1",
-      isSystemMessage: false,
       isRecalled: true,
       userId: "120363403498637789",
     });
-    expect(messages[2].authorPhone).toBeUndefined();
     expect(messages[2].text).toBeUndefined();
 
     expect(messages[3]).toMatchObject({
@@ -81,18 +91,214 @@ describe("whatsappscraper", () => {
       quoteAuthor: "Member Alpha",
       quoteAuthorPhone: "001000000000",
       quoteMessageId: "AC186CE91CBE1B7EA49A2127E5DDE29D",
+      time: "2025-10-12T04:32:00.000Z",
     });
-    expect(messages[3].quoteText.trim()).toMatch(/^As far as US dairy argument/i);
+    expect(messages[3].quoteText).toMatch(
+      /^As far as US dairy argument is concerned/i,
+    );
 
     expect(messages[4]).toMatchObject({
       messageId: "GIFMSG1",
+      authorPhone: "+00 10000 00002",
+      mediaType: "gif",
       quoteAuthor: "Member Gamma",
       quoteAuthorPhone: "001000000003",
       text: "(media-gif)",
+      time: "2025-10-12T21:34:00.000Z",
     });
-    expect(messages[4].authorPhone).toBeUndefined(); // No data-pre-plain-text
-    expect(messages[4].text).toBe("(media-gif)");
-    expect(messages[4].quoteText.trim()).toMatch(/^"Corn fields look impressive on camera/);
+    expect(messages[4].quoteText).toMatch(
+      /^"Corn fields look impressive on camera/i,
+    );
+  });
+
+  it("extracts clean current-style messages from the curated HTML fixture", async () => {
+    const { page: fixturePage, document: fixtureDocument } = await loadFrom(
+      __dirname,
+      "test-messages.html",
+    );
+    const messages = whatsappMessages(fixtureDocument);
+    fixturePage.close();
+
+    expect(messages).toHaveLength(9);
+
+    expect(messages[0]).toMatchObject({
+      messageId: "MSG001",
+      userId: "120363403498637789",
+      author: "Ravi Menon",
+      authorPhone: "+65 9000 0001",
+      time: "2026-03-22T13:52:00.000Z",
+      text: "Very sad to hear this. May he rest in peace 🙏",
+    });
+    expect(messages[0]).not.toHaveProperty("isOutgoing");
+    expect(messages[0]).not.toHaveProperty("isRecalled");
+    expect(messages[0]).not.toHaveProperty("isSystemMessage");
+
+    expect(messages[1]).toMatchObject({
+      messageId: "MSG002",
+      author: "Ravi Menon",
+      authorPhone: "+65 9000 0001",
+      time: "2026-03-22T14:28:00.000Z",
+      reactions: "👍",
+      text: "Golden Village did not agree to a full hall screening for Dhurandhar 2 in the first weekend, so we could not organise it.",
+    });
+
+    expect(messages[2]).toMatchObject({
+      messageId: "MSG003",
+      author: "Aravind Rao",
+      authorPhone: "+65 9000 0002",
+      time: "2026-03-24T15:24:00.000Z",
+      text: "Thanks Anand, and hello everyone. Great to be part of this community.",
+    });
+
+    expect(messages[3]).toMatchObject({
+      messageId: "MSG004",
+      author: "Pawan Sachdeva",
+      authorPhone: "+65 9000 0003",
+      time: "2026-03-24T15:28:00.000Z",
+      quoteAuthor: "Aravind Rao",
+      quoteAuthorPhone: "6590000002",
+      quoteMessageId: "MSG003",
+      quoteText:
+        "Thanks Anand, and hello everyone. Great to be part of this community.",
+      reactions: "👍",
+      text: "Welcome!",
+    });
+    expect(messages[3].text).not.toContain("Pawan");
+    expect(messages[3].text).not.toContain("15:28");
+    expect(messages[3].text).not.toContain("Aravind");
+
+    expect(messages[4]).toMatchObject({
+      messageId: "MSG005",
+      userId: "120363403498637789",
+      isOutgoing: true,
+      author: "Jordan Poe",
+      time: "2025-12-14T20:05:00.000Z",
+      quoteAuthor: "Richa Shah",
+      quoteText:
+        "Hi Jordan\nBack on the 22nd.\nLunch on the 22nd or 23rd would work.\n\nOthers?",
+      text: "22 Dec lunch or evening works well for me. 23 Dec evening works too.",
+    });
+    expect(messages[4]).not.toHaveProperty("isSystemMessage");
+
+    expect(messages[5]).toMatchObject({
+      messageId: "MSG006",
+      userId: "120363403498637789",
+      isRecalled: true,
+      authorPhone: "+65 9000 0004",
+      time: "2025-12-14T20:07:00.000Z",
+    });
+    expect(messages[5].text).toBeUndefined();
+
+    expect(messages[6]).toMatchObject({
+      messageId: "MSG007",
+      author: "Sana Iyer",
+      authorPhone: "+65 9000 0005",
+      time: "2025-12-14T21:12:00.000Z",
+      linkUrl:
+        "https://cookbook.openai.com/articles/openai-harmony#receiving-tool-calls",
+      linkSite: "cookbook.openai.com",
+      linkTitle: "Example article title",
+      linkDescription: "Example article description.",
+    });
+    expect(messages[6].text).toContain("Worth a read");
+    expect(messages[6].text).toContain(
+      "https://cookbook.openai.com/articles/openai-harmony#receiving-tool-calls",
+    );
+    expect(messages[6].text).not.toContain("Example article title");
+
+    expect(messages[7]).toMatchObject({
+      messageId: "MSG008",
+      author: "Asha Rao",
+      authorPhone: "+65 9000 0099",
+      time: "2026-03-24T14:20:00.000Z",
+      mediaType: "image",
+      mediaCaption: "Venue map for tonight's event",
+      mediaWidth: 330,
+      mediaHeight: 248,
+      text: "Venue map for tonight's event",
+    });
+
+    expect(messages[8]).toMatchObject({
+      messageId: "MSG009",
+      author: "Vijay Gupta",
+      authorPhone: "+65 9777 7777",
+      time: "2026-03-25T11:20:00.000Z",
+      mediaType: "voice",
+      mediaDuration: "0:37",
+      mediaDurationSeconds: 37,
+    });
+    expect(messages[8].text).toBeUndefined();
+  });
+
+  it("extracts image captions and dimensions from media messages", () => {
+    const messages = messagesFrom(`
+      <div id="main">
+        <div role="row">
+          <div data-id="false_123@g.us_IMGMSG_456@lid">
+            <div class="copyable-text" data-pre-plain-text="[2:20 pm, 24/03/2026] +65 9000 0099: ">
+              <div role="">
+                <span dir="auto">Asha Rao</span>
+                <span class="_ahx_">+65 9000 0099</span>
+              </div>
+              <div role="button" aria-label="Open picture" style="width: 330px; height: 248px;">
+                <img
+                  alt="Venue map for tonight's event"
+                  width="330"
+                  height="248"
+                  src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/"
+                />
+              </div>
+              <div class="message-meta"><span dir="auto">2:20 pm</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      messageId: "IMGMSG",
+      author: "Asha Rao",
+      authorPhone: "+65 9000 0099",
+      time: "2026-03-24T14:20:00.000Z",
+      mediaType: "image",
+      mediaCaption: "Venue map for tonight's event",
+      mediaWidth: 330,
+      mediaHeight: 248,
+      text: "Venue map for tonight's event",
+    });
+  });
+
+  it("extracts voice message duration metadata", () => {
+    const messages = messagesFrom(`
+      <div id="main">
+        <div role="row">
+          <div data-id="false_123@g.us_VOICEMSG_456@lid">
+            <div class="copyable-text" data-pre-plain-text="[11:20, 25/03/2026] +65 9777 7777: ">
+              <div role="">
+                <span dir="auto">Vijay Gupta</span>
+                <span class="_ahx_">+65 9777 7777</span>
+              </div>
+              <button aria-label="Play voice message"></button>
+              <span aria-label="Voice message"></span>
+              <div role="slider" aria-valuenow="0" aria-valuetext="0:00/0:37" aria-valuemin="0" aria-valuemax="37"></div>
+              <div aria-hidden="true">0:37</div>
+              <div class="message-meta"><span dir="auto">11:20</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `);
+    expect(messages).toHaveLength(1);
+    expect(messages[0]).toMatchObject({
+      messageId: "VOICEMSG",
+      author: "Vijay Gupta",
+      authorPhone: "+65 9777 7777",
+      time: "2026-03-25T11:20:00.000Z",
+      mediaType: "voice",
+      mediaDuration: "0:37",
+      mediaDurationSeconds: 37,
+    });
+    expect(messages[0].text).toBeUndefined();
   });
 
   it("prefers richer fields when merging message updates", () => {
@@ -125,7 +331,50 @@ describe("whatsappscraper", () => {
     });
   });
 
-  it("inherits lastAuthor when message has NO author section (continuation)", () => {
+  it("upgrades late-loading numeric and tie-break fields when merging", () => {
+    const state = createScraperState();
+    mergeMessages(
+      [
+        {
+          messageId: "img1",
+          mediaType: "image",
+          mediaWidth: 330,
+          mediaHeight: 248,
+          mediaCaption: "Flyer",
+          time: "2026-03-24T14:20:00.000Z",
+          reactions: "👍",
+        },
+      ],
+      state,
+    );
+    mergeMessages(
+      [
+        {
+          messageId: "img1",
+          mediaType: "image",
+          mediaWidth: 1080,
+          mediaHeight: 1190,
+          mediaCaption:
+            "Flyer with full event details and registration link included",
+          time: "2026-03-24T14:20:30.000Z",
+          reactions: "❤",
+        },
+      ],
+      state,
+    );
+
+    expect(state.messagesById.img1).toMatchObject({
+      mediaType: "image",
+      mediaWidth: 1080,
+      mediaHeight: 1190,
+      mediaCaption:
+        "Flyer with full event details and registration link included",
+      time: "2026-03-24T14:20:30.000Z",
+      reactions: "❤",
+    });
+  });
+
+  it("inherits the previous author when the message row omits the author block", () => {
     const messages = messagesFrom(`
       <div id="main">
         <div role="row">
@@ -148,7 +397,7 @@ describe("whatsappscraper", () => {
     expect(messages).toHaveLength(2);
     expect(messages[0].author).toBe("User A");
     expect(messages[0].authorPhone).toBe("+00 00000 00000");
-    expect(messages[1].author).toBe("User A"); // Should inherit
+    expect(messages[1].author).toBe("User A");
     expect(messages[1].authorPhone).toBe("+00 00000 00000");
   });
 
@@ -188,7 +437,7 @@ describe("whatsappscraper", () => {
     expect(messages[0].text).toBe("Thinking 🤔");
   });
 
-  it("does NOT inherit lastAuthor when message has author section but no dir element (phone number only)", () => {
+  it("does not inherit the previous author when the sender identity changed", () => {
     const messages = messagesFrom(`
       <div id="main">
         <div role="row">
@@ -214,11 +463,11 @@ describe("whatsappscraper", () => {
     expect(messages).toHaveLength(2);
     expect(messages[0].author).toBe("User A");
     expect(messages[0].authorPhone).toBe("+00 00000 00000");
-    expect(messages[1].author).toBeUndefined(); // Should NOT inherit
-    expect(messages[1].authorPhone).toBe("+00 00000 00001"); // But phone is extracted from data-pre-plain-text
+    expect(messages[1].author).toBeUndefined();
+    expect(messages[1].authorPhone).toBe("+00 00000 00001");
   });
 
-  it("extracts link title + description (and appends when message is link-only)", () => {
+  it("extracts link title and description and appends them when the message is link-only", () => {
     const messages = messagesFrom(`
       <div id="main">
         <div role="row">
@@ -252,7 +501,9 @@ describe("whatsappscraper", () => {
       linkTitle: "Example Title",
       linkDescription: "Example description.",
     });
-    expect(messages[0].text).toContain("https://thinkingmachines.ai/blog/tinker-general-availability/");
+    expect(messages[0].text).toContain(
+      "https://thinkingmachines.ai/blog/tinker-general-availability/",
+    );
     expect(messages[0].text).toContain("Example Title");
     expect(messages[0].text).toContain("Example description.");
   });
@@ -280,14 +531,15 @@ describe("whatsappscraper", () => {
     expect(messages).toHaveLength(1);
     expect(messages[0]).toMatchObject({
       messageId: "LINKMSG2",
-      linkUrl: "https://www.linkedin.com/posts/introducing-the-interactions-api",
+      linkUrl:
+        "https://www.linkedin.com/posts/introducing-the-interactions-api",
       linkSite: "linkedin.com",
       linkTitle: "Now available in public beta",
       linkDescription: "Quickstart docs inside.",
     });
   });
 
-  it("extracts link preview even when selectable text is a caption + url", () => {
+  it("extracts link preview even when the selectable text is a caption plus a URL", () => {
     const messages = messagesFrom(`
       <div id="main">
         <div role="row">
@@ -317,11 +569,13 @@ describe("whatsappscraper", () => {
       linkDescription: "Example preview description.",
     });
     expect(messages[0].text).toContain("Some caption text");
-    expect(messages[0].text).toContain("https://x.com/claudeai/status/1999209593247826419");
+    expect(messages[0].text).toContain(
+      "https://x.com/claudeai/status/1999209593247826419",
+    );
     expect(messages[0].text).not.toContain("Example preview title");
   });
 
-  it("extracts YouTube preview text even when URL host is youtu.be", () => {
+  it("extracts YouTube preview text even when the URL host is youtu.be", () => {
     const messages = messagesFrom(`
       <div id="main">
         <div role="row">
@@ -351,7 +605,7 @@ describe("whatsappscraper", () => {
     });
   });
 
-  it("does not confuse title text with the URL line (horses.html)", () => {
+  it("does not confuse title text with the URL line", () => {
     const messages = messagesFrom(`
       <div id="main">
         <div role="row">
@@ -381,7 +635,7 @@ describe("whatsappscraper", () => {
     });
   });
 
-  it("extracts preview when author is '.' and message is a caption + link (cookbook.openai.com)", () => {
+  it("extracts previews when the author label is punctuation and the message is a caption plus link", () => {
     const messages = messagesFrom(`
       <div id="main">
         <div role="row">
@@ -412,76 +666,81 @@ describe("whatsappscraper", () => {
     expect(messages).toHaveLength(1);
     expect(messages[0]).toMatchObject({
       messageId: "COOKMSG",
-      linkUrl: "https://cookbook.openai.com/articles/openai-harmony#receiving-tool-calls",
+      linkUrl:
+        "https://cookbook.openai.com/articles/openai-harmony#receiving-tool-calls",
       linkSite: "cookbook.openai.com",
       linkTitle: "Example article title",
       linkDescription: "Example article description...",
     });
   });
 
-  it("scrape keeps the live state in sync and copies the transcript", { timeout: 10_000 }, async () => {
-    const state = createScraperState();
-    let resolveClipboard;
-    const writeText = vi.fn(
-      () =>
-        new Promise((resolve) => {
-          resolveClipboard = resolve;
-        }),
-    );
+  it(
+    "keeps the live state in sync and copies the transcript",
+    { timeout: 10_000 },
+    async () => {
+      const state = createScraperState();
+      let resolveClipboard;
+      const writeText = vi.fn(
+        () =>
+          new Promise((resolve) => {
+            resolveClipboard = resolve;
+          }),
+      );
 
-    scrape({
-      document,
-      navigator: { clipboard: { writeText } },
-      state,
-      setIntervalFn: setInterval,
-      clearIntervalFn: clearInterval,
-    });
+      scrape({
+        document,
+        navigator: { clipboard: { writeText } },
+        state,
+        setIntervalFn: setInterval,
+        clearIntervalFn: clearInterval,
+      });
 
-    const main = document.getElementById("main");
-    const button = document.getElementById("copy-btn");
-    expect(button).not.toBeNull();
-    expect(button.textContent).toBe("Copy 4 messages");
+      const main = document.getElementById("main");
+      const button = document.getElementById("copy-btn");
+      expect(button).not.toBeNull();
+      expect(button.textContent).toBe("Copy 5 messages");
 
-    const newRow = document.createElement("div");
-    newRow.setAttribute("role", "row");
-    newRow.innerHTML = `
-        <div data-id="false_120363403498637789@g.us_NEWMSGID_123@lid">
-          <div data-pre-plain-text="[5:05 am, 12/10/2025] +00 00000 00000: ">
-            <div class="selectable-text">New insight on dairy trade.</div>
-            <div role=""><span dir="ltr">User Z</span></div>
-          </div>
+      const newRow = document.createElement("div");
+      newRow.setAttribute("role", "row");
+      newRow.innerHTML = `
+      <div data-id="false_120363403498637789@g.us_NEWMSGID_123@lid">
+        <div data-pre-plain-text="[5:05 am, 12/10/2025] +00 00000 00000: ">
+          <div class="selectable-text">New insight on dairy trade.</div>
+          <div role=""><span dir="ltr">User Z</span></div>
         </div>
-      `;
-    main.appendChild(newRow);
+      </div>
+    `;
+      main.appendChild(newRow);
 
-    await vi.advanceTimersByTimeAsync(500);
+      await vi.advanceTimersByTimeAsync(500);
 
-    expect(state.messagesById.NEWMSGID).toMatchObject({
-      text: "New insight on dairy trade.",
-      author: "User Z",
-      authorPhone: "+00 00000 00000",
-    });
+      expect(state.messagesById.NEWMSGID).toMatchObject({
+        text: "New insight on dairy trade.",
+        author: "User Z",
+        authorPhone: "+00 00000 00000",
+      });
 
-    const refreshedButton = document.getElementById("copy-btn");
-    expect(refreshedButton.textContent).toBe("Copy 5 messages");
+      const refreshedButton = document.getElementById("copy-btn");
+      expect(refreshedButton.textContent).toBe("Copy 6 messages");
 
-    refreshedButton.click();
-    expect(writeText).toHaveBeenCalledTimes(1);
-    expect(resolveClipboard).toBeTypeOf("function");
-    resolveClipboard();
-    await Promise.resolve();
+      refreshedButton.click();
+      expect(writeText).toHaveBeenCalledTimes(1);
+      expect(resolveClipboard).toBeTypeOf("function");
+      resolveClipboard();
+      await Promise.resolve();
 
-    const payload = writeText.mock.calls[0][0];
-    const parsed = JSON.parse(payload);
-    expect(parsed).toHaveLength(6);
-    const newEntry = parsed.find((msg) => msg.messageId === "NEWMSGID");
-    expect(newEntry).toMatchObject({
-      messageId: "NEWMSGID",
-      author: "User Z",
-      authorPhone: "+00 00000 00000",
-    });
+      const payload = writeText.mock.calls[0][0];
+      const parsed = JSON.parse(payload);
+      expect(parsed).toHaveLength(6);
+      const newEntry = parsed.find((msg) => msg.messageId === "NEWMSGID");
+      expect(newEntry).toMatchObject({
+        messageId: "NEWMSGID",
+        author: "User Z",
+        authorPhone: "+00 00000 00000",
+      });
 
-    expect(document.getElementById("copy-btn")).toBeNull();
-    expect(state.captureTimer).toBeNull();
-  });
+      expect(document.getElementById("copy-btn")).toBeNull();
+      expect(state.captureTimer).toBeNull();
+    },
+  );
 });
