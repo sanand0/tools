@@ -11,6 +11,7 @@ Key features include:
 
 - **JSON Input:** Accepts a JSON array of objects or a single JSON object.
 - **Nested Object Flattening:** Automatically flattens nested JSON objects, creating new column headers with a dot notation (e.g., `parent.child.field`).
+- **Array Expansion:** Expands arrays of nested objects into repeated rows while preserving parent fields.
 - **CSV Output:** Generates standard CSV formatted text.
 - **Table Preview:** Displays the converted data in an HTML table for immediate review.
 - **TSV for Excel:** Provides an option to copy the data as Tab Separated Values, which is ideal for pasting directly into spreadsheet software.
@@ -35,6 +36,7 @@ Key features include:
     - The user clicks the "Convert" button.
     - The tool parses the JSON. If the JSON is invalid, an error message is shown.
     - Nested objects are flattened (e.g., `{"user": {"name": "John"}}` becomes a column `user.name` with value `John`).
+    - Arrays of objects are expanded into multiple rows with dot-notation columns (e.g., `items[].price` becomes `items.price` across repeated rows).
     - The converted data is displayed as an HTML table.
     - The "Download CSV" and "Copy to Excel" buttons become active.
 

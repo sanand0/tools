@@ -1,4 +1,9 @@
-import { objectsToCsv, objectsToTsv, csvToTable, downloadCsv } from "../common/csv.js";
+import {
+  objectsToCsv,
+  objectsToTsv,
+  csvToTable,
+  downloadCsv,
+} from "../common/csv.js";
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1.2";
 import { loadConfigJson, readParam } from "../common/demo.js";
@@ -29,7 +34,11 @@ const parseJsonInput = (input) => {
   // This path is mostly for the case where JSON.parse(input) results in a non-array (e.g. a single object)
   try {
     const parsedObject = JSON.parse(input);
-    if (typeof parsedObject === "object" && parsedObject !== null && !Array.isArray(parsedObject)) {
+    if (
+      typeof parsedObject === "object" &&
+      parsedObject !== null &&
+      !Array.isArray(parsedObject)
+    ) {
       return [parsedObject];
     }
   } catch {
@@ -40,9 +49,67 @@ const parseJsonInput = (input) => {
   throw new Error("Invalid JSON input. Expected an array or an object.");
 };
 
+const isPlainObject = (value) =>
+  value !== null && typeof value === "object" && !Array.isArray(value);
+
+function collectExpandablePaths(value, prefix = "", paths = new Set()) {
+  if (Array.isArray(value)) {
+    if (value.length && value.every(isPlainObject) && prefix) {
+      paths.add(prefix);
+      value.forEach((item) => collectExpandablePaths(item, prefix, paths));
+    }
+    return paths;
+  }
+  if (!isPlainObject(value)) return paths;
+  Object.entries(value).forEach(([key, nestedValue]) => {
+    collectExpandablePaths(
+      nestedValue,
+      prefix ? `${prefix}.${key}` : key,
+      paths,
+    );
+  });
+  return paths;
+}
+
+const mergeRows = (rows, fragments) =>
+  rows.flatMap((row) => fragments.map((fragment) => ({ ...row, ...fragment })));
+
+function flattenRows(value, prefix, expandablePaths) {
+  if (Array.isArray(value)) {
+    if (!expandablePaths.has(prefix)) return [{ [prefix]: value }];
+    if (!value.length) return [{}];
+    return value.flatMap((item) =>
+      isPlainObject(item) ? flattenRows(item, prefix, expandablePaths) : [{}],
+    );
+  }
+  if (isPlainObject(value)) {
+    return Object.entries(value).reduce(
+      (rows, [key, nestedValue]) => {
+        const nestedKey = prefix ? `${prefix}.${key}` : key;
+        return mergeRows(
+          rows,
+          flattenRows(nestedValue, nestedKey, expandablePaths),
+        );
+      },
+      [{}],
+    );
+  }
+  if (expandablePaths.has(prefix)) return [{}];
+  return [{ [prefix]: value }];
+}
+
+function normalizeRows(dataArray) {
+  const expandablePaths = dataArray.reduce(
+    (paths, item) => collectExpandablePaths(item, "", paths),
+    new Set(),
+  );
+  return dataArray.flatMap((item) => flattenRows(item, "", expandablePaths));
+}
+
 const jsonToCsv = (jsonStringInput, toTsv = false) => {
   const dataArray = parseJsonInput(jsonStringInput);
-  return toTsv ? objectsToTsv(dataArray) : objectsToCsv(dataArray);
+  const rows = normalizeRows(dataArray);
+  return toTsv ? objectsToTsv(rows) : objectsToCsv(rows);
 };
 
 const displayCsvTable = (csv) => csvToTable($output, csv);
@@ -66,7 +133,9 @@ function runConvert() {
 
 $convertBtn.addEventListener("click", runConvert);
 
-$downloadBtn.addEventListener("click", () => downloadCsv(jsonToCsv($jsonInput.value.trim())));
+$downloadBtn.addEventListener("click", () =>
+  downloadCsv(jsonToCsv($jsonInput.value.trim())),
+);
 $copyBtn.addEventListener("click", async () => {
   await navigator.clipboard.writeText(jsonToCsv($jsonInput.value.trim(), true));
   bootstrapAlert("Copied to clipboard!");
@@ -88,7 +157,9 @@ function renderSamples(presets) {
       button.type = "button";
       button.className = "btn btn-sm btn-outline-secondary";
       button.textContent = preset.name || preset.id;
-      button.addEventListener("click", () => applyPreset(preset.id, { convert: true }));
+      button.addEventListener("click", () =>
+        applyPreset(preset.id, { convert: true }),
+      );
       return button;
     }),
   );
@@ -113,7 +184,8 @@ async function init() {
       applyPreset(presetId, { convert: true });
       return;
     }
-    if (!$jsonInput.value.trim() && config?.presets?.length) applyPreset(config.presets[0].id);
+    if (!$jsonInput.value.trim() && config?.presets?.length)
+      applyPreset(config.presets[0].id);
   } catch (error) {
     bootstrapAlert(`Config error: ${error.message}`, "danger");
   }

@@ -23,13 +23,19 @@ describe("JSON to CSV tests", async () => {
 
     const table = output.querySelector("table");
     expect(table).not.toBeNull();
-    const headers = Array.from(table.querySelectorAll("th")).map((th) => th.textContent);
+    const headers = Array.from(table.querySelectorAll("th")).map(
+      (th) => th.textContent,
+    );
     expect(headers).toEqual(["name", "age"]);
     const rows = Array.from(table.querySelectorAll("tbody tr"));
     expect(rows.length).toBe(2);
-    const firstRowCells = Array.from(rows[0].querySelectorAll("td")).map((td) => td.textContent);
+    const firstRowCells = Array.from(rows[0].querySelectorAll("td")).map(
+      (td) => td.textContent,
+    );
     expect(firstRowCells).toEqual(["John", "30"]);
-    const secondRowCells = Array.from(rows[1].querySelectorAll("td")).map((td) => td.textContent);
+    const secondRowCells = Array.from(rows[1].querySelectorAll("td")).map(
+      (td) => td.textContent,
+    );
     expect(secondRowCells).toEqual(["Jane", "25"]);
     expect(downloadBtn.classList.contains("d-none")).toBe(false);
     expect(copyBtn.classList.contains("d-none")).toBe(false);
@@ -42,21 +48,72 @@ describe("JSON to CSV tests", async () => {
 
     const table = output.querySelector("table");
     expect(table).not.toBeNull();
-    const headers = Array.from(table.querySelectorAll("th")).map((th) => th.textContent);
+    const headers = Array.from(table.querySelectorAll("th")).map(
+      (th) => th.textContent,
+    );
     expect(headers).toEqual(["name", "details.age", "details.city"]);
     const rows = Array.from(table.querySelectorAll("tbody tr"));
     expect(rows.length).toBe(1);
-    const cells = Array.from(rows[0].querySelectorAll("td")).map((td) => td.textContent);
+    const cells = Array.from(rows[0].querySelectorAll("td")).map(
+      (td) => td.textContent,
+    );
     expect(cells).toEqual(["Peter", "40", "New York"]);
   });
 
+  it("should expand arrays of nested objects into repeated rows", async () => {
+    const json = [
+      {
+        user_id: 1034891,
+        challenges: [
+          {
+            name: "Crack the Gate 1",
+            choices: { a: true, b: false },
+          },
+          {
+            name: "Power Cookie",
+            choices: { a: true, b: false },
+          },
+        ],
+      },
+    ];
+    jsonInput.value = JSON.stringify(json);
+    convertBtn.click();
+
+    const table = output.querySelector("table");
+    expect(table).not.toBeNull();
+    const headers = Array.from(table.querySelectorAll("th")).map(
+      (th) => th.textContent,
+    );
+    expect(headers).toEqual([
+      "user_id",
+      "challenges.name",
+      "challenges.choices.a",
+      "challenges.choices.b",
+    ]);
+
+    const rows = Array.from(table.querySelectorAll("tbody tr"));
+    expect(rows.length).toBe(2);
+    expect(
+      Array.from(rows[0].querySelectorAll("td")).map((td) => td.textContent),
+    ).toEqual(["1034891", "Crack the Gate 1", "true", "false"]);
+    expect(
+      Array.from(rows[1].querySelectorAll("td")).map((td) => td.textContent),
+    ).toEqual(["1034891", "Power Cookie", "true", "false"]);
+  });
+
   it("should handle JSON object as input", async () => {
-    const json = { name: "Alice", age: 25, place: { country: "Canada", city: "Ottawa" } };
+    const json = {
+      name: "Alice",
+      age: 25,
+      place: { country: "Canada", city: "Ottawa" },
+    };
     jsonInput.value = JSON.stringify(json);
     convertBtn.click();
     const table = output.querySelector("table");
     expect(table).not.toBeNull();
-    const headers = Array.from(table.querySelectorAll("th")).map((th) => th.textContent);
+    const headers = Array.from(table.querySelectorAll("th")).map(
+      (th) => th.textContent,
+    );
     expect(headers).toEqual(["name", "age", "place.country", "place.city"]);
   });
 
@@ -87,7 +144,9 @@ describe("JSON to CSV tests", async () => {
 
     copyBtn.click();
 
-    expect(await window.navigator.clipboard.readText()).toBe("name	value\nCopy Test	123");
+    expect(await window.navigator.clipboard.readText()).toBe(
+      "name	value\nCopy Test	123",
+    );
 
     // Check for toast message
     const toastElement = document.querySelector(".toast-body");

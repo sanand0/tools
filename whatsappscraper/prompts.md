@@ -60,3 +60,5 @@ Run a blameless post-mortem on this entire conversation to improve future perfor
 Create `post-mortem.md` and add `## Post mortem (%d %b %Y)` with today's date.
 
 Commit all files (including the prompts.md I was editing).
+
+<!-- codex resume 'WhatsApp scraper rewrite' -->
