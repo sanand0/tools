@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "npx -y esbuild scroller.js --bundle --minify --format=iife --global-name=scroller --outfile=scroller.min.js"
+  }
+}

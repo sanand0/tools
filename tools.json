@@ -141,6 +141,13 @@
       "created": "2024-12-21T17:15:17+08:00"
     },
     {
+      "icon": "bi-arrow-down-up",
+      "title": "Scroller Bookmarklet",
+      "description": "Bookmarklet that adds a compact smooth autoscroller with live speed and direction controls.",
+      "url": "scroller",
+      "created": "2026-04-01T00:00:00+00:00"
+    },
+    {
       "icon": "bi-window",
       "title": "Markdown View Popup",
       "description": "Bookmarklet to render selected Markdown, or full-page text, in a syntax-highlighted popup.",
