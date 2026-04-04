@@ -239,7 +239,7 @@ Changes:
 
 <!-- copilot --resume=35e7e6a6-dfbe-46f4-9b10-cf9c3b6f31bf -->
 
-## ai-anand.json, 04 Apr 2026
+## ai-radar.json, 04 Apr 2026
 
 <!--
 
@@ -309,11 +309,19 @@ PLAN first. For example, think about:
 Build tools where required.
 Execute EFFICIENTLY. Use sub-agents as required.
 
-<!-- I renamed ai-radar.json to ai-anand.json -->
-
 ---
 
 Go ahead.
+
+---
+
+Expand to ~200 nodes with a focus on "Hold" (roughly 40 nodes) and "Assess" (roughly 10 nodes).
+
+---
+
+The descriptions are too short and lack context. Expand the descriptions using surrounding context. Keep them simple - ELI15.
+
+<!-- codex resume 019d5719-d2f3-78e1-a9ce-61d052db49f2 -->
 
 ## data.json, 04 Apr 2026
 
