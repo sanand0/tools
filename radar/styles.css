@@ -218,7 +218,7 @@ body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 16px 18px 24px;
+  padding: 0 18px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -277,7 +277,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding-top: 4px;
+  padding: 4px 0;
   border-top: 1px solid var(--border);
 }
 
@@ -473,36 +473,96 @@ body {
 }
 .chip-clear-all:hover { color: var(--text); }
 
-/* Tag filter accordion toggle */
-.tag-filters-toggle {
+/* ── Tag filter Bootstrap dropdowns ──────────────────────────────────────── */
+.tag-dropdowns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag-filter-btn {
   font-size: 11px;
-  color: var(--text-muted);
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: var(--surface);
   padding: 3px 9px;
   border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 4px;
-  transition: background 120ms;
+  white-space: nowrap;
+  transition: background 120ms, border-color 120ms;
 }
-.tag-filters-toggle:hover { background: var(--chip-bg); }
-
-.tag-filters-panel {
-  display: none;
-  width: 100%;
-  padding-top: 6px;
-  flex-wrap: wrap;
-  gap: 6px 16px;
+.tag-filter-btn::after {
+  /* Bootstrap caret */
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-top: 4px solid currentColor;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  vertical-align: middle;
+  margin-left: 2px;
+  opacity: 0.6;
 }
-.tag-filters-panel.open { display: flex; }
+.tag-filter-btn:hover { background: var(--chip-bg); }
+.tag-filter-btn.has-active {
+  background: var(--q-techniques);
+  color: #fff;
+  border-color: transparent;
+}
+.tag-filter-btn.has-active::after { opacity: 0.8; }
 
-.tag-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
+.tag-dropdown-menu {
+  min-width: 180px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.tag-dropdown-menu .dropdown-item {
+  font-size: 12px;
+  color: var(--text);
+  padding: 5px 12px;
+  gap: 8px;
+  cursor: pointer;
+}
+.tag-dropdown-menu .dropdown-item:hover,
+.tag-dropdown-menu .dropdown-item:focus {
+  background: var(--chip-bg);
+  color: var(--text);
+}
+.tag-dropdown-menu .dropdown-item.active,
+.tag-dropdown-menu .dropdown-item.active:hover {
+  background: var(--chip-bg);
+  color: var(--q-techniques);
+  font-weight: 600;
+}
+.tag-dropdown-menu .form-check-input {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* Clickable tag values in panel detail view */
+.panel-tag-filter {
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background 120ms, color 120ms;
+}
+.panel-tag-filter:hover {
+  background: var(--chip-bg);
+  outline: 1px solid var(--border);
+}
+.panel-tag-filter.filter-active {
+  background: var(--q-techniques);
+  color: #fff;
 }
 
 /* ─── Radar Main ──────────────────────────────────────────────────────────── */
@@ -616,10 +676,10 @@ body {
   pointer-events: none;
 }
 
-/* Node number label */
+/* Node number label — font size driven by CSS custom property for ui.node_font_scale support */
 .node-label {
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--node-font-size, 9px);
   font-weight: 600;
   fill: var(--node-label-fill);
   text-anchor: middle;
@@ -630,7 +690,7 @@ body {
 
 /* 3-digit IDs (100–999) get a smaller font to fit inside the circle */
 .node-label.node-label-3d {
-  font-size: 6.5px;
+  font-size: var(--node-font-size-3d, 6.5px);
 }
 
 /* Quadrant fill colors — scoped to .node-circle only (not .node-new-ring) */
@@ -675,18 +735,33 @@ body {
 
 .node-tooltip.visible { opacity: 1; }
 
-/* ─── Legend (inside sidebar) ─────────────────────────────────────────────── */
+/* ─── Legend (inside sidebar) — single condensed row ──────────────────────── */
+.sidebar-legend-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0 12px;
+  border-top: 1px solid var(--border);
+}
+
+.legend-items-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  align-items: center;
+}
+
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   font-size: 11px;
   color: var(--text-muted);
 }
 
 .legend-icon {
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
 }
 
@@ -808,9 +883,15 @@ body {
   font-weight: 500;
   padding: 3px 10px;
   border-radius: 100px;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
+  border: 1px solid transparent;
+  color: var(--text);
 }
+
+/* Per-ring background colors matching the SVG ring arc fills */
+.panel-ring-adopt  { background: var(--ring-bg-1); border-color: var(--ring-bg-3); }
+.panel-ring-trial  { background: var(--ring-bg-2); border-color: var(--ring-bg-3); }
+.panel-ring-assess { background: var(--ring-bg-3); border-color: var(--ring-bg-4); }
+.panel-ring-hold   { background: var(--ring-bg-4); border-color: var(--border); }
 
 .panel-node-name {
   font-size: 22px;

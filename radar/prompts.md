@@ -226,9 +226,20 @@ Corrections:
 - Clicking on any area outside a node in any quadrant (i.e. in any empty area or in a .ring-arc - basically, anything in that quadrant) should filter by that quadrant. Clicking again should toggle the filter off.
 - Make .dark-theme-toggle a .btn-outline-secondary instead of .btn-primary. Also make sure that the .active items inside it are colored the same way as the active filters.
 
+---
+
+Changes:
+
+- In .tag-filters-panel, convert tags into a Bootstrap multi-select dropdown.
+- Clicking on a tag value in the popup should filter by that tag value.
+- In the popup, color the .panel-ring-badge with the same background color as the corresponding ring in the radar.
+- Condense the .legend-item elements into a single row
+- Add a ui.node_font_scale config that allows scaling the font size of the node numbers. This defaults to ui.node_scale || 1.
+- Set .sidebar-scroll { padding: 0 18px }.
+
 <!-- copilot --resume=35e7e6a6-dfbe-46f4-9b10-cf9c3b6f31bf -->
 
-## Radar Data, 04 Apr 2026
+## ai-anand.json, 04 Apr 2026
 
 <!--
 
@@ -298,6 +309,12 @@ PLAN first. For example, think about:
 Build tools where required.
 Execute EFFICIENTLY. Use sub-agents as required.
 
+<!-- I renamed ai-radar.json to ai-anand.json -->
+
 ---
 
 Go ahead.
+
+## data.json, 04 Apr 2026
+
+<!-- See https://chatgpt.com/c/69d0c710-cd20-8398-8f26-cfdf027222f2 -->

@@ -161,8 +161,10 @@ function computeGeometry(data) {
   const nodeScale = data.ui?.node_scale ?? 1;
   const nodeR = Math.max(4, Math.round(baseNodeR * nodeScale));
   const nodeFillOpacity = data.ui?.node_fill_opacity ?? 1;
+  // node_font_scale defaults to node_scale (or 1 if neither set)
+  const nodeFontScale = data.ui?.node_font_scale ?? nodeScale;
 
-  return { ringRadii, nodeR, nodeFillOpacity };
+  return { ringRadii, nodeR, nodeFillOpacity, nodeFontScale };
 }
 
 // ─── Node placement (seeded grid + jitter) ────────────────────────────────
@@ -520,9 +522,14 @@ function arrowTri(tx, ty, dx, dy, height, width) {
 
 // ── Render all nodes ─────────────────────────────────────────────────────────
 function renderNodes(data, geo, positions) {
-  const { nodeR, nodeFillOpacity } = geo;
+  const { nodeR, nodeFillOpacity, nodeFontScale } = geo;
   const container = d3.select(".nodes-container");
   container.selectAll("*").remove();
+
+  // Set CSS custom properties for font scale on the container so CSS rules pick them up
+  container
+    .style("--node-font-size", `${(9 * nodeFontScale).toFixed(2)}px`)
+    .style("--node-font-size-3d", `${(6.5 * nodeFontScale).toFixed(2)}px`);
 
   const groups = container
     .selectAll(".node-group")
@@ -707,32 +714,29 @@ function renderLegend() {
 
   legend.append("p").attr("class", "sidebar-legend-title").text("Legend");
 
+  const row = legend.append("div").attr("class", "legend-items-row");
+
   const items = [
     { label: "New", change: "new" },
     { label: "Moved in/out", change: "in" },
     { label: "No change", change: "" },
   ];
 
-  const r = 10;
+  const r = 9;
   items.forEach(({ label, change }) => {
-    const item = legend.append("div").attr("class", "legend-item");
+    const item = row.append("div").attr("class", "legend-item");
     const svg = item
       .append("svg")
       .attr("class", "legend-icon")
-      .attr("viewBox", "-18 -18 36 36")
-      .attr("width", 28)
-      .attr("height", 28);
+      .attr("viewBox", "-16 -16 32 32")
+      .attr("width", 22)
+      .attr("height", 22);
 
     if (change === "new") {
       svg.append("circle").attr("r", r).attr("class", "node-q-techniques node-circle");
-      svg
-        .append("circle")
-        .attr("r", r + 4)
-        .attr("fill", "none")
-        .attr("class", "node-new-ring node-q-techniques");
+      svg.append("circle").attr("r", r + 4).attr("fill", "none").attr("class", "node-new-ring node-q-techniques");
     } else if (change === "in") {
       svg.append("circle").attr("r", r).attr("class", "node-q-techniques node-circle");
-      // Arc at angle 0 (top)
       const { arcPath, inArrow } = changeIndicatorPaths(0, 0, 0, r);
       svg.append("path").attr("d", arcPath).attr("class", "node-change-arc node-q-techniques");
       svg.append("path").attr("d", inArrow).attr("class", "node-change-arrow node-q-techniques");
@@ -808,46 +812,31 @@ function renderFilterBar(data) {
       });
   });
 
-  // ── Active filter chips + clear-all ─────────────────────────────────────
-  const hasTagFilters = Object.values(state.filters).some((s) => s.size > 0);
-  if (hasTagFilters) {
+  // ── Active filter chips for quadrant/ring + clear-all ───────────────────
+  const hasActiveFilters = state.quadrant || state.ring || Object.values(state.filters).some((s) => s.size > 0);
+  if (state.quadrant || state.ring) {
     bar.append("div").attr("class", "filter-sep");
     const activeGroup = bar.append("div").attr("class", "filter-group");
-
-    for (const [key, vals] of Object.entries(state.filters)) {
-      for (const v of vals) {
-        activeGroup
-          .append("button")
-          .attr("class", "chip active")
-          .html(`${snakeToLabel(key)}: ${v} <span class="chip-remove">✕</span>`)
-          .on("click", () => {
-            state.filters[key].delete(v);
-            applyFilters();
-            renderFilterBar(data);
-          });
-      }
+    if (hasActiveFilters) {
+      activeGroup
+        .append("button")
+        .attr("class", "chip-clear-all")
+        .text("Clear all")
+        .on("click", () => {
+          state.filters = {};
+          state.quadrant = null;
+          state.ring = null;
+          state.search = "";
+          applyFilters();
+          renderFilterBar(data);
+        });
     }
-
-    activeGroup
-      .append("button")
-      .attr("class", "chip-clear-all")
-      .text("Clear filters")
-      .on("click", () => {
-        state.filters = {};
-        state.quadrant = null;
-        state.ring = null;
-        state.search = "";
-        applyFilters();
-        renderFilterBar(data);
-      });
   }
 
-  // ── Tag filters toggle ────────────────────────────────────────────────────
-  // Collect all unique tag keys from data; skip keys where >90% of distinct
-  // values appear in only a single node (e.g. URLs, IDs, per-node sources).
+  // ── Tag filters — Bootstrap multi-select dropdowns, one per tag key ─────
+  // Keys where >90% of distinct values are singletons are skipped (URLs, IDs, etc.)
   const allNodes = data.nodes;
   const tagKeys = [...new Set(allNodes.flatMap((n) => Object.keys(n.tags || {})))].sort().filter((key) => {
-    // Count how many nodes share each value for this key
     const valueCounts = new Map();
     for (const n of allNodes) {
       const v = n.tags?.[key];
@@ -859,19 +848,26 @@ function renderFilterBar(data) {
     }
     if (!valueCounts.size) return false;
     const singletonCount = [...valueCounts.values()].filter((c) => c === 1).length;
-    // Skip if over 90% of distinct values are singletons
     return singletonCount / valueCounts.size <= 0.9;
   });
 
   if (tagKeys.length) {
     bar.append("div").attr("class", "filter-sep");
-    const toggleBtn = bar
-      .append("button")
-      .attr("class", "tag-filters-toggle")
-      .attr("aria-expanded", state.tagPanelOpen)
-      .html('<i class="bi bi-funnel"></i> Filters <i class="bi bi-chevron-down"></i>');
+    const tagDropdownsWrap = bar.append("div").attr("class", "tag-dropdowns");
 
-    const panel = bar.append("div").attr("class", `tag-filters-panel${state.tagPanelOpen ? " open" : ""}`);
+    // "Clear filters" button — only shown when tag filters are active
+    const hasTagFilters = Object.values(state.filters).some((s) => s.size > 0);
+    if (hasTagFilters) {
+      tagDropdownsWrap
+        .append("button")
+        .attr("class", "chip-clear-all")
+        .text("Clear filters")
+        .on("click", () => {
+          state.filters = {};
+          applyFilters();
+          renderFilterBar(data);
+        });
+    }
 
     tagKeys.forEach((key) => {
       const vals = [
@@ -886,37 +882,59 @@ function renderFilterBar(data) {
         ),
       ]
         .sort()
-        .slice(0, 20); // cap at 20 values per key
+        .slice(0, 20);
 
       if (!vals.length) return;
 
-      const group = panel.append("div").attr("class", "tag-group");
-      group.append("span").attr("class", "filter-group-label").text(snakeToLabel(key));
+      const activeSet = state.filters[key] ? new Set(state.filters[key]) : new Set();
+      const hasActive = activeSet.size > 0;
+
+      // Bootstrap dropdown wrapper
+      const dropDiv = tagDropdownsWrap.append("div").attr("class", "dropdown");
+
+      const toggleBtn = dropDiv
+        .append("button")
+        .attr("class", `tag-filter-btn${hasActive ? " has-active" : ""}`)
+        .attr("type", "button")
+        .attr("data-bs-toggle", "dropdown")
+        .attr("data-bs-auto-close", "outside")
+        .attr("aria-expanded", "false")
+        .text(snakeToLabel(key) + (hasActive ? ` · ${activeSet.size}` : ""));
+
+      const menu = dropDiv
+        .append("div")
+        .attr("class", "dropdown-menu tag-dropdown-menu");
 
       vals.forEach((v) => {
-        const active = state.filters[key]?.has(v);
-        group
-          .append("button")
-          .attr("class", `chip${active ? " active" : ""}`)
-          .attr("aria-pressed", active)
-          .text(v)
-          .on("click", () => {
-            if (!state.filters[key]) state.filters[key] = new Set();
-            if (state.filters[key].has(v)) state.filters[key].delete(v);
-            else state.filters[key].add(v);
-            if (!state.filters[key].size) delete state.filters[key];
-            applyFilters();
-            // Rebuild filter bar but keep tag panel open
-            state.tagPanelOpen = true;
-            renderFilterBar(data);
-          });
-      });
-    });
+        const isActive = activeSet.has(v);
+        const labelEl = menu
+          .append("label")
+          .attr("class", `dropdown-item d-flex align-items-center${isActive ? " active" : ""}`);
 
-    toggleBtn.on("click", function () {
-      state.tagPanelOpen = !state.tagPanelOpen;
-      panel.classed("open", state.tagPanelOpen);
-      d3.select(this).attr("aria-expanded", state.tagPanelOpen);
+        labelEl
+          .append("input")
+          .attr("type", "checkbox")
+          .attr("class", "form-check-input")
+          .property("checked", isActive)
+          .on("change", function (e) {
+            if (!state.filters[key]) state.filters[key] = new Set();
+            if (this.checked) state.filters[key].add(v);
+            else {
+              state.filters[key].delete(v);
+              if (!state.filters[key].size) delete state.filters[key];
+            }
+            applyFilters();
+            // Update this item's visual state without rebuilding the bar
+            labelEl.classed("active", !!state.filters[key]?.has(v));
+            const cnt = state.filters[key]?.size || 0;
+            toggleBtn.classed("has-active", cnt > 0);
+            toggleBtn.text(snakeToLabel(key) + (cnt ? ` · ${cnt}` : ""));
+          });
+
+        labelEl.append("span").text(v);
+      });
+
+      // Bootstrap auto-init via data-bs-toggle; no programmatic init needed
     });
   }
 }
@@ -1080,11 +1098,18 @@ function renderPanelContent(nodeId) {
             const label = snakeToLabel(k);
             let valueHTML;
             if (Array.isArray(v)) {
-              valueHTML = `<div class="panel-tag-chips">${v.map((i) => `<span class="panel-tag-chip">${escHtml(String(i))}</span>`).join("")}</div>`;
+              // Each chip is clickable to filter by that tag value
+              valueHTML = `<div class="panel-tag-chips">${v
+                .map(
+                  (i) =>
+                    `<span class="panel-tag-chip panel-tag-filter" role="button" tabindex="0" data-tag-key="${escHtml(k)}" data-tag-val="${escHtml(String(i))}">${escHtml(String(i))}</span>`,
+                )
+                .join("")}</div>`;
             } else if (typeof v === "string" && /^https?:\/\//.test(v)) {
               valueHTML = `<a href="${escHtml(v)}" target="_blank" rel="noopener">${escHtml(v)}</a>`;
             } else {
-              valueHTML = escHtml(String(v));
+              // Scalar non-URL values: clickable to filter
+              valueHTML = `<span class="panel-tag-filter" role="button" tabindex="0" data-tag-key="${escHtml(k)}" data-tag-val="${escHtml(String(v))}">${escHtml(String(v))}</span>`;
             }
             return `<dt class="panel-tag-key">${escHtml(label)}</dt><dd class="panel-tag-value">${valueHTML}</dd>`;
           })
@@ -1118,7 +1143,7 @@ function renderPanelContent(nodeId) {
     <div class="panel-badge-row">
       <span class="panel-id-badge">#${node.id}</span>
       <span class="panel-quadrant-badge panel-q-${node.quadrant}">${escHtml(quadLabel)}</span>
-      <span class="panel-ring-badge">${escHtml(ringLabel)}</span>
+      <span class="panel-ring-badge panel-ring-${node.ring}">${escHtml(ringLabel)}</span>
     </div>
     <h1 id="panel-node-name" class="panel-node-name">${escHtml(node.name)}</h1>
     ${descHTML ? `<div class="panel-description">${descHTML}</div>` : ""}
@@ -1126,6 +1151,24 @@ function renderPanelContent(nodeId) {
     ${node.added ? `<p class="panel-added">First appeared: <strong>${escHtml(formatMonth(node.added))}</strong></p>` : ""}
     ${historyHTML}
   `;
+
+  // Tag value filter clicks — toggle filter and reflect state visually
+  content.querySelectorAll("[data-tag-key]").forEach((el) => {
+    const key = el.dataset.tagKey;
+    const val = el.dataset.tagVal;
+    // Reflect current filter state
+    el.classList.toggle("filter-active", !!state.filters[key]?.has(val));
+    el.addEventListener("click", () => {
+      if (!state.filters[key]) state.filters[key] = new Set();
+      if (state.filters[key].has(val)) state.filters[key].delete(val);
+      else state.filters[key].add(val);
+      if (!state.filters[key].size) delete state.filters[key];
+      applyFilters();
+      renderFilterBar(state.data);
+      // Update active state on this chip
+      el.classList.toggle("filter-active", !!state.filters[key]?.has(val));
+    });
+  });
 
   // Highlight this node on the radar
   d3.selectAll(".node-group").classed("hovered", (d) => d.id === nodeId);

@@ -3,6 +3,11 @@
   "title": "AI Radar",
   "subtitle": "Experts' opinion on LLM / Generative AI tools, techniques, platforms, and frameworks",
   "description": "This radar captures the experts' current point of view on LLM and generative AI tools, techniques, platforms, and frameworks. Each node is evidence-backed with sources.",
+  "ui": {
+    "node_scale": 2,
+    "node_fill_opacity": 0.8,
+    "node_font_scale": 1.0
+  },
   "quadrants": {
     "techniques": {
       "label": "Techniques",
