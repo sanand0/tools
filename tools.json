@@ -1,6 +1,13 @@
 {
   "tools": [
     {
+      "icon": "bi-bullseye",
+      "title": "Technology Radar",
+      "description": "Track technology adoption across four quadrants (Techniques, Tools, Platforms, Frameworks) and four rings (Adopt, Trial, Assess, Hold).",
+      "url": "radar",
+      "created": "2025-07-01T00:00:00+00:00"
+    },
+    {
       "icon": "bi-code",
       "title": "Unicoder",
       "description": "Convert Markdown to text to unicode equivalent with formatting.",

@@ -1,0 +1,3815 @@
+{
+  "version": 1,
+  "title": "AI Radar",
+  "subtitle": "Anand's point of view on LLM / Generative AI tools, techniques, platforms, and frameworks",
+  "description": "This radar captures Anand's current point of view on LLM and generative AI tools, techniques, platforms, and frameworks. Each node is evidence-backed with source tags, an importance score (1-10), a confidence score (1-10), and history when the stance appears to have evolved.",
+  "quadrants": {
+    "techniques": {
+      "label": "Techniques",
+      "description": "Prompting, verification, orchestration, workflow patterns, and ways of working with AI."
+    },
+    "tools": {
+      "label": "Tools",
+      "description": "Specific CLIs, coding agents, browsers, and operator tools used directly."
+    },
+    "platforms": {
+      "label": "Platforms",
+      "description": "Access models, infrastructure choices, long-lived context stores, and broader surfaces AI runs on."
+    },
+    "frameworks": {
+      "label": "Frameworks & Protocols",
+      "description": "Conventions, integration patterns, protocols, schemas, and reusable documentation structures for AI-native systems."
+    }
+  },
+  "rings": {
+    "adopt": {
+      "label": "Adopt",
+      "weight": 3,
+      "description": "Strong default. Repeatedly recommended, personally used, and backed by consistent evidence."
+    },
+    "trial": {
+      "label": "Trial",
+      "weight": 2.5,
+      "description": "Useful in bounded settings. Worth active pilots or selective use, but not yet the universal default."
+    },
+    "assess": {
+      "label": "Assess",
+      "weight": 2,
+      "description": "Interesting and directionally promising, but still forming or not yet backed by enough repeated practice."
+    },
+    "hold": {
+      "label": "Hold",
+      "weight": 1.5,
+      "description": "Explicit caution. Avoid as a default for new work unless there is a very specific reason."
+    }
+  },
+  "nodes": [
+    {
+      "id": 1,
+      "name": "AI As Interns, Not Search Engines",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "Treat models and agents like capable interns: give them bigger goals, rich context, room to act, and explicit review. The mental model is management and verification, not search and snippets.",
+      "added": "2026-02",
+      "importance_score": 10,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "You've hired an intern"
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "Don't treat it like a search engine."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "Treat AI like an intern that handles 80-90% of the effort"
+        }
+      ],
+      "tags": {
+        "category": "mental-model",
+        "maturity": "stable",
+        "alternatives": [
+          "search-engine prompting",
+          "micro-prompting every step"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "name": "Multi-Model Double-Checking",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "Default safety pattern is to have AI check AI. Use multiple models, ask for citations/tests/logs, and escalate disagreements to human review rather than betting everything on one run.",
+      "added": "2025-05",
+      "importance_score": 10,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/double-checking-reduces-hallucinations.md",
+          "search_text": "Double-checking with another LLM,"
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Have AI cross-check AI**."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "Quintuple-check"
+        }
+      ],
+      "tags": {
+        "category": "verification",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2026-02",
+          "ring": "adopt",
+          "note": "Generalized from one tactic into a standard trust pattern for personal use, coding, and organizational adoption.",
+          "source_tags": [
+            {
+              "file": "code/blog/pages/ai-advice.md",
+              "search_text": "**Have AI cross-check AI**."
+            },
+            {
+              "file": "code/blog/pages/ai-advice.md",
+              "search_text": "Quintuple-check"
+            }
+          ]
+        },
+        {
+          "date": "2025-05",
+          "ring": "trial",
+          "note": "Empirical results made the approach credible: multiple cheap models reduced shared error sharply enough to justify human review only on disagreements.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/double-checking-reduces-hallucinations.md",
+              "search_text": "Double-checking with another LLM,"
+            },
+            {
+              "file": "code/blog/posts/2025/double-checking-reduces-hallucinations.md",
+              "search_text": "With 4 LLMs, it was only 1%."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Directional Feedback",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "When not deeply expert, give taste-, audience-, and feeling-level direction instead of fake implementation detail. State how the output should feel and let the agent optimize holistically.",
+      "added": "2026-03",
+      "importance_score": 9,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Directional feedback**."
+        },
+        {
+          "file": "code/blog/posts/2026/directional-feedback-for-ai.md",
+          "search_text": "There's a different approach: **directional feedback**."
+        },
+        {
+          "file": "code/blog/posts/2026/directional-feedback-for-ai.md",
+          "search_text": "Trust the agent."
+        }
+      ],
+      "tags": {
+        "category": "feedback",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 4,
+      "name": "Prototype the Prototype",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "When the idea is fuzzy, build a crude first version instead of debating the right version in the abstract. A concrete draft is easier to review, steer, and discard than a long ideation phase.",
+      "added": "2026-02",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Prototype the prototype**."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Build, don't plan**."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "Build them all. Throw away what doesn't work."
+        }
+      ],
+      "tags": {
+        "category": "workflow",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 5,
+      "name": "Context Engineering With Local Corpora",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "Give agents broad, explicit access to the relevant local corpus: blog posts, notes, transcripts, repos, prompts, and historical context. The context repository itself becomes part of the product.",
+      "added": "2026-02",
+      "importance_score": 10,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Organize context**."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "managed [digital exhaust](/blog/digital-exhaust/) is an asset."
+        },
+        {
+          "file": "code/blog/posts/2026/local-context-repositories-for-ai.md",
+          "search_text": "This is not a new technique. It's just context engineering"
+        }
+      ],
+      "tags": {
+        "category": "context-engineering",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2026-03",
+          "ring": "adopt",
+          "note": "Moved from general context-collection into an explicit operating model with read-only local mounts, scan instructions, sub-agents, and JSON outputs.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/local-context-repositories-for-ai.md",
+              "search_text": "STEP 1: Give access to content"
+            },
+            {
+              "file": "code/blog/posts/2026/local-context-repositories-for-ai.md",
+              "search_text": "STEP 2: Ask agents to scan content"
+            },
+            {
+              "file": "code/blog/posts/2026/local-context-repositories-for-ai.md",
+              "search_text": "STEP 4: Output as JSON"
+            }
+          ]
+        },
+        {
+          "date": "2026-02",
+          "ring": "trial",
+          "note": "The value of managed personal context was already explicit, but mostly framed as digital exhaust and organized inputs for agents.",
+          "source_tags": [
+            {
+              "file": "code/blog/pages/ai-advice.md",
+              "search_text": "**Mine your digital exhaust**."
+            },
+            {
+              "file": "code/blog/pages/ai-advice.md",
+              "search_text": "**Organize context**."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Use Code for Analysis and Deterministic Checks",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "When precision matters, ask the model to write code, run checks, or operate inside a deterministic environment instead of trusting raw prose reasoning. Code is the reliability layer.",
+      "added": "2025-08",
+      "importance_score": 10,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/how-to-use-llms-better.md",
+          "search_text": "**Have LLMs write code**."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Have it write code to process numbers**."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Ask for code** to generate the answer - instead of the answer."
+        }
+      ],
+      "tags": {
+        "category": "reliability",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 7,
+      "name": "AI-Native Assessment and Execution Logs",
+      "quadrant": "techniques",
+      "ring": "trial",
+      "change": "",
+      "description": "If bots can solve the old task, change what is being evaluated. Measure workflow design, tool setup, recovery, debugging, repo-grounded ownership, and the execution trace rather than polished final output alone.",
+      "added": "2025-11",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/if-a-bot-passes-your-exam-what-are-you-teaching.md",
+          "search_text": "Learning lives in the **execution logs**."
+        },
+        {
+          "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+          "search_text": "Use repo-grounded vivas for authenticity"
+        },
+        {
+          "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+          "search_text": "Grade students on designing AI workflows"
+        }
+      ],
+      "tags": {
+        "category": "education",
+        "maturity": "growing"
+      },
+      "history": [
+        {
+          "date": "2026-03",
+          "ring": "trial",
+          "note": "Expanded from the problem statement into a more complete assessment stack: repo-grounded vivas, process logs, workflow design, and hands-on AI tasks.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+              "search_text": "Make process logs part of the evidence"
+            },
+            {
+              "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+              "search_text": "Use repo-grounded vivas for authenticity"
+            },
+            {
+              "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+              "search_text": "Grade students on designing AI workflows"
+            }
+          ]
+        },
+        {
+          "date": "2025-11",
+          "ring": "assess",
+          "note": "The old exam model was already being questioned once coding agents could solve the task quickly and in parallel.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/if-a-bot-passes-your-exam-what-are-you-teaching.md",
+              "search_text": "If a bot can pass my exam, what exactly am I teaching?"
+            },
+            {
+              "file": "code/blog/posts/2025/if-a-bot-passes-your-exam-what-are-you-teaching.md",
+              "search_text": "Learning lives in the **execution logs**."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Vibe Coding for Throwaway or Internal Work",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "Use vibe coding aggressively where speed beats certainty, especially for prototypes, personal tools, internal workflows, and early concept validation. The point is to unblock dormant ideas fast.",
+      "added": "2025-08",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/vibe-coding-is-for-unproduced-not-production-code.md",
+          "search_text": "Vibe coding can accelerate throw-away prototypes."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Vibe code first**."
+        },
+        {
+          "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+          "search_text": "Start with new projects: less competition, fewer preconceptions, lower risk."
+        }
+      ],
+      "tags": {
+        "category": "workflow",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 9,
+      "name": "Production Vibe Coding Without Review",
+      "quadrant": "techniques",
+      "ring": "hold",
+      "change": "",
+      "description": "Do not confuse prototype velocity with production readiness. Unreviewed vibe-coded systems accumulate debt quickly and require much stronger rules, tests, logs, and human accountability before they belong in durable software.",
+      "added": "2025-06",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/mistakes-ai-coding-agents-make.md",
+          "search_text": "This added technical debt."
+        },
+        {
+          "file": "code/blog/posts/2025/vibe-coding-is-for-unproduced-not-production-code.md",
+          "search_text": "Vibe-coding is for unproduced, not production, code"
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "If it works, AND is what you want, AND needs to be maintainable, THEN look at code."
+        }
+      ],
+      "tags": {
+        "category": "risk-boundary",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2025-08",
+          "ring": "hold",
+          "note": "The boundary became explicit: vibe coding is excellent for dormant ideas and prototypes, but not a free pass to ship production code unchanged.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/vibe-coding-is-for-unproduced-not-production-code.md",
+              "search_text": "Vibe coding can accelerate throw-away prototypes."
+            },
+            {
+              "file": "code/blog/posts/2025/vibe-coding-is-for-unproduced-not-production-code.md",
+              "search_text": "not production, code"
+            }
+          ]
+        },
+        {
+          "date": "2025-06",
+          "ring": "assess",
+          "note": "Early hands-on use already showed leverage, but also inconsistency, missed edge cases, and expensive cleanup.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/mistakes-ai-coding-agents-make.md",
+              "search_text": "This added technical debt."
+            },
+            {
+              "file": "code/blog/posts/2025/mistakes-ai-coding-agents-make.md",
+              "search_text": "Codex saved me 90% effort."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Explicit Reasoning Budgets",
+      "quadrant": "techniques",
+      "ring": "trial",
+      "change": "",
+      "description": "Reasoning effort is a real control surface, not an implementation detail. Small models can become far better evaluators when given more reasoning, but only if cost and latency are budgeted deliberately.",
+      "added": "2025-10",
+      "importance_score": 7,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/the-non-obvious-impact-of-reasoning-defaults.md",
+          "search_text": "Reasoning can make smaller models **much** more powerful."
+        },
+        {
+          "file": "code/blog/posts/2025/the-non-obvious-impact-of-reasoning-defaults.md",
+          "search_text": "beware default settings"
+        },
+        {
+          "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+          "search_text": "Use reasoning models only for the borderline cases"
+        }
+      ],
+      "tags": {
+        "category": "model-control",
+        "maturity": "growing"
+      },
+      "history": [
+        {
+          "date": "2026-03",
+          "ring": "trial",
+          "note": "Reasoning moved from a model-quality discovery into an operating rule: cheap screening first, expensive reasoning only for borderline or high-stakes cases.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+              "search_text": "Use reasoning models only for the borderline cases"
+            }
+          ]
+        },
+        {
+          "date": "2025-10",
+          "ring": "assess",
+          "note": "The importance of explicit reasoning settings became obvious when default minimal reasoning broke an evaluator and medium reasoning fixed it.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/the-non-obvious-impact-of-reasoning-defaults.md",
+              "search_text": "reasoning_effort"
+            },
+            {
+              "file": "code/blog/posts/2025/the-non-obvious-impact-of-reasoning-defaults.md",
+              "search_text": "Reasoning can make smaller models **much** more powerful."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Audio-First AI Use",
+      "quadrant": "techniques",
+      "ring": "trial",
+      "change": "",
+      "description": "Speaking and listening unlock more context, better attention, and better use of dead time than typing alone. Audio is especially useful for rambling, thinking, coaching, and transcription-driven workflows.",
+      "added": "2025-08",
+      "importance_score": 7,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/how-to-use-llms-better.md",
+          "search_text": "**Use audio**."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "Use voice mode on mobile"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Voice is a Powerful Modality"
+        }
+      ],
+      "tags": {
+        "category": "modality",
+        "maturity": "growing"
+      }
+    },
+    {
+      "id": 12,
+      "name": "Supervisory Control Patterns",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "Managing AI is a supervision problem. Lean on classic patterns such as checklists, gating, benchmarking, sampling, consensus, red-teaming, and outcome checks instead of expecting perfect autonomy.",
+      "added": "2025-07",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/how-to-control-smarter-intelligences.md",
+          "search_text": "**Verify**. Check against an \"answer sheet\"."
+        },
+        {
+          "file": "code/blog/posts/2025/how-to-control-smarter-intelligences.md",
+          "search_text": "**Checklist**. Evaluate against pre-defined criteria."
+        },
+        {
+          "file": "code/blog/posts/2025/how-to-control-smarter-intelligences.md",
+          "search_text": "**Outcome**. Did it work in the real world?"
+        }
+      ],
+      "tags": {
+        "category": "governance",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 13,
+      "name": "Codex CLI",
+      "quadrant": "tools",
+      "ring": "adopt",
+      "change": "",
+      "description": "Codex CLI is a real working tool, not just a chatbot. It is used for walking-time coding, browser-driven tasks, one-off automations, and even operating reusable code as an agent wrapper.",
+      "added": "2025-06",
+      "importance_score": 10,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/mistakes-ai-coding-agents-make.md",
+          "search_text": "I use [Codex](https://chatgpt.com/codex) to write tools while I walk."
+        },
+        {
+          "file": "code/blog/posts/2025/if-a-bot-passes-your-exam-what-are-you-teaching.md",
+          "search_text": "I solved one question with [Codex CLI](https://developers.openai.com/codex/cli/)."
+        },
+        {
+          "file": "code/blog/posts/2026/coding-agents-are-the-new-software.md",
+          "search_text": "I use Codex to classify my expense receipts."
+        }
+      ],
+      "tags": {
+        "category": "coding-agent",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2026-03",
+          "ring": "adopt",
+          "note": "Codex moved from a code-generation helper into an execution wrapper around reusable software and data-processing tasks.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/coding-agents-are-the-new-software.md",
+              "search_text": "I use Codex to classify my expense receipts."
+            }
+          ]
+        },
+        {
+          "date": "2025-06",
+          "ring": "trial",
+          "note": "Early use already saved large amounts of effort, but also surfaced technical debt and the need for stronger constraints.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/mistakes-ai-coding-agents-make.md",
+              "search_text": "Codex saved me 90% effort."
+            },
+            {
+              "file": "code/blog/posts/2025/mistakes-ai-coding-agents-make.md",
+              "search_text": "This added technical debt."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Claude Code",
+      "quadrant": "tools",
+      "ring": "trial",
+      "change": "",
+      "description": "Claude Code is a strong coding-agent tool, especially for large outputs, UI-heavy work, and one-shot repo tasks, but it is not treated as the universal default. Output limits, session cost, and model choice still matter.",
+      "added": "2025-07",
+      "importance_score": 8,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/coding-agents-are-the-new-software.md",
+          "search_text": "I just ran Claude with prior context."
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Claude Code supports [32K output tokens]"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Prefer Codex > Claude Code."
+        }
+      ],
+      "tags": {
+        "category": "coding-agent",
+        "maturity": "growing"
+      }
+    },
+    {
+      "id": 15,
+      "name": "Playwright + CDP + Rodney",
+      "quadrant": "tools",
+      "ring": "adopt",
+      "change": "",
+      "description": "Browser automation is part of the standard AI workflow. Use Playwright, CDP at `localhost:9222`, and Rodney-style automation to verify UI work, solve real tasks, and inspect pages instead of trusting screenshots and guesses.",
+      "added": "2025-11",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Use Playwright to verify**."
+        },
+        {
+          "file": "code/scripts/agents/devtools/SKILL.md",
+          "search_text": "Use CDP at localhost:9222."
+        },
+        {
+          "file": "code/blog/posts/2025/if-a-bot-passes-your-exam-what-are-you-teaching.md",
+          "search_text": "Use CDP to visit https://exam.sanand.workers.dev/tds-2025-09-roe and solve Q4."
+        }
+      ],
+      "tags": {
+        "category": "browser-automation",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 16,
+      "name": "llm CLI",
+      "quadrant": "tools",
+      "ring": "adopt",
+      "change": "",
+      "description": "A general-purpose LLM CLI is part of the daily stack for transcription, vision, quick prompting, embeddings, schema-bound outputs, and shell-friendly pipelines.",
+      "added": "2025-08",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/scripts/agents/llm/SKILL.md",
+          "search_text": "llm --help"
+        },
+        {
+          "file": "code/scripts/agents/llm/SKILL.md",
+          "search_text": "llm --attachment audio.opus --model gemini-3-flash-preview 'Transcribe audio'"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "A quick way to transcribe audio recordings is via:"
+        }
+      ],
+      "tags": {
+        "category": "cli",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2026-03",
+          "ring": "adopt",
+          "note": "The tool graduated from convenient utility into a codified skill with preferred models, media workflows, and sub-agent handoffs.",
+          "source_tags": [
+            {
+              "file": "code/scripts/agents/llm/SKILL.md",
+              "search_text": "Preferred models:"
+            },
+            {
+              "file": "code/scripts/agents/llm/SKILL.md",
+              "search_text": "To write/run tasks as a sub-agent"
+            }
+          ]
+        },
+        {
+          "date": "2025-08",
+          "ring": "trial",
+          "note": "Early evidence centered on practical transcription and pipeline use rather than a full standard workflow.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "A quick way to transcribe audio recordings is via:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Google Workspace CLI",
+      "quadrant": "tools",
+      "ring": "trial",
+      "change": "",
+      "description": "A unified Google Workspace CLI is attractive because it gives agents one headless surface for a large authenticated tool family, rather than forcing separate bespoke integrations.",
+      "added": "2026-03",
+      "importance_score": 6,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Google Workspace CLI"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "single unified service for all Google Workspace APIs"
+        },
+        {
+          "file": "code/scripts/agents/AGENTS.md",
+          "search_text": "gws (Google Workspace CLI), gcloud, aws"
+        }
+      ],
+      "tags": {
+        "category": "cli",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 18,
+      "name": "Sub-Agents and Parallel Agent Runs",
+      "quadrant": "tools",
+      "ring": "trial",
+      "change": "",
+      "description": "Sub-agents are useful for parallelizable work, scanning large corpora, and keeping contexts smaller, but they are not free. They cost more tokens and need explicit delegation rules to avoid duplication and noise.",
+      "added": "2025-06",
+      "importance_score": 8,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/scripts/agents/AGENTS.md",
+          "search_text": "When possible, run in parallel: read, tools, sub-agents, ..."
+        },
+        {
+          "file": "code/blog/posts/2026/local-context-repositories-for-ai.md",
+          "search_text": "Use sub-agents as required"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Using sub-agents spends ~15x more tokens."
+        }
+      ],
+      "tags": {
+        "category": "orchestration",
+        "maturity": "growing"
+      },
+      "history": [
+        {
+          "date": "2026-03",
+          "ring": "trial",
+          "note": "Sub-agents became a practical corpus-scanning tactic, especially when combined with local context repositories and explicit output schemas.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/local-context-repositories-for-ai.md",
+              "search_text": "Use sub-agents as required"
+            }
+          ]
+        },
+        {
+          "date": "2025-06",
+          "ring": "assess",
+          "note": "The accuracy gains were interesting, but the token cost and orchestration burden were already obvious.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Using sub-agents spends ~15x more tokens."
+            },
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Teach the orchestrator how to delegate"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Paid Frontier AI Subscriptions",
+      "quadrant": "platforms",
+      "ring": "adopt",
+      "change": "",
+      "description": "A paid subscription to the frontier consumer products is table stakes. Quality is materially better, privacy is cleaner, and the monthly price is tiny relative to the upside.",
+      "added": "2025-08",
+      "importance_score": 9,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Buy a paid AI subscription of [ChatGPT](https://chatgpt.com/pricing), [Claude](https://claude.com/pricing), or [Gemini](https://gemini.google/subscriptions/)**"
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "This is the best $20/month you can spend."
+        },
+        {
+          "file": "code/blog/posts/2025/how-to-use-llms-better.md",
+          "search_text": "**Use the best models**."
+        }
+      ],
+      "tags": {
+        "category": "provider-access",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 20,
+      "name": "Shared Governed Enterprise AI Access",
+      "quadrant": "platforms",
+      "ring": "adopt",
+      "change": "",
+      "description": "Organizations should provide shared, budgeted, governed access to approved models instead of making AI capability depend on personal subscriptions or shadow IT.",
+      "added": "2026-02",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "Every company has its own white-listed enterprise models"
+        },
+        {
+          "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+          "search_text": "Give every student shared, budgeted AI access"
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "Use this. It provides legal cover and data won't be used for training."
+        }
+      ],
+      "tags": {
+        "category": "governed-access",
+        "maturity": "growing"
+      }
+    },
+    {
+      "id": 21,
+      "name": "API-First Model Consumption",
+      "quadrant": "platforms",
+      "ring": "adopt",
+      "change": "",
+      "description": "For ordinary work, APIs beat running your own frontier models. They are cheaper, fresher, and easier to integrate into orchestration layers, workflows, and structured outputs.",
+      "added": "2025-08",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/how-to-use-llms-better.md",
+          "search_text": "APIs are cheaper than self hosting"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "**APIs are cheaper than self hosting.** Avoid self-hosting."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "Build orchestration layers and proprietary data workflows instead."
+        }
+      ],
+      "tags": {
+        "category": "deployment-model",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 22,
+      "name": "Self-Hosting Frontier Models for Normal Work",
+      "quadrant": "platforms",
+      "ring": "hold",
+      "change": "",
+      "description": "Do not default to running your own frontier models for routine use. The economics, maintenance burden, and rate of model improvement make that a poor default compared with managed APIs.",
+      "added": "2025-08",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/how-to-use-llms-better.md",
+          "search_text": "Don't bother running your own models."
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "**APIs are cheaper than self hosting.** Avoid self-hosting."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Buy, don't build**. Don't train models."
+        }
+      ],
+      "tags": {
+        "category": "deployment-model",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 23,
+      "name": "Agentic Dev Container Workstation",
+      "quadrant": "platforms",
+      "ring": "adopt",
+      "change": "",
+      "description": "A GPU-, browser-, and multi-agent-ready dev container is treated as the default agent workstation. The environment is as important as the model because it determines what the agent can safely and repeatedly do.",
+      "added": "2026-03",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/local-context-repositories-for-ai.md",
+          "search_text": "I use a [Dockerfile](https://github.com/sanand0/scripts/blob/7e1dc00d7e1fa36a9949a1e061c1b529928cc175/dev.dockerfile) and [script](https://github.com/sanand0/scripts/blob/7e1dc00d7e1fa36a9949a1e061c1b529928cc175/dev.sh) to isolate coding agents."
+        },
+        {
+          "file": "code/scripts/dev.sh",
+          "search_text": "Run a coding agent CLI inside the container:"
+        },
+        {
+          "file": "code/scripts/dev.dockerfile",
+          "search_text": "npm install -g @openai/codex@latest;"
+        }
+      ],
+      "tags": {
+        "category": "runtime",
+        "maturity": "growing"
+      }
+    },
+    {
+      "id": 24,
+      "name": "Personal Data and Browser History as Memory Assets",
+      "quadrant": "platforms",
+      "ring": "trial",
+      "change": "",
+      "description": "Treat personal exhaust such as browsing history, transcripts, notes, and logs as memory infrastructure. The goal is not nostalgia but better recall, better context, and better future agent performance.",
+      "added": "2026-02",
+      "importance_score": 8,
+      "confidence_score": 7,
+      "source_tags": [
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Mine your digital exhaust**."
+        },
+        {
+          "file": "code/blog/posts/2026/using-browser-history-as-memory.md",
+          "search_text": "browser history is a _great_ way to \"remember\" this."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Organize context**."
+        }
+      ],
+      "tags": {
+        "category": "memory",
+        "maturity": "growing"
+      },
+      "history": [
+        {
+          "date": "2026-03",
+          "ring": "trial",
+          "note": "The memory idea broadened from browser history into larger local context repositories that agents can scan directly.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/local-context-repositories-for-ai.md",
+              "search_text": "This gives read-only access to my blog, things I learned, transcripts"
+            }
+          ]
+        },
+        {
+          "date": "2026-02",
+          "ring": "assess",
+          "note": "Browser history proved itself as a practical memory aid and retrieval surface rather than a novelty.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/using-browser-history-as-memory.md",
+              "search_text": "This is a _fantastic_ way to jog my memory"
+            },
+            {
+              "file": "code/blog/posts/2026/using-browser-history-as-memory.md",
+              "search_text": "This continues to be a useful memory hack."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Agents as the New Software Interface",
+      "quadrant": "platforms",
+      "ring": "assess",
+      "change": "",
+      "description": "The strategic direction is that agents become both the user of software and, increasingly, the wrapper around software. That future is visible now, but it is still being felt out rather than fully operationalized.",
+      "added": "2026-03",
+      "importance_score": 8,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/til/llms.md",
+          "search_text": "The Internet is forking into a human internet vs an agent web"
+        },
+        {
+          "file": "code/blog/posts/2026/coding-agents-are-the-new-software.md",
+          "search_text": "**Agents are the new users** of software."
+        },
+        {
+          "file": "code/blog/posts/2026/coding-agents-are-the-new-software.md",
+          "search_text": "Coding agents ARE the new software"
+        }
+      ],
+      "tags": {
+        "category": "interface-shift",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2026-03",
+          "ring": "assess",
+          "note": "The idea moved from a broad intuition about an agent web into an explicit claim that coding agents are becoming the wrapper around all software.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "The Internet is forking into a human internet vs an agent web"
+            },
+            {
+              "file": "code/blog/posts/2026/coding-agents-are-the-new-software.md",
+              "search_text": "I see a future where coding agents are the wrapper around _all_ software."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "name": "AGENTS.md + README.md + SKILL.md",
+      "quadrant": "frameworks",
+      "ring": "adopt",
+      "change": "",
+      "description": "Shared instruction files and skills are part of the runtime contract, not just documentation. They carry repo intent, standards, failure learnings, and reusable workflows across agents and providers.",
+      "added": "2025-08",
+      "importance_score": 10,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "Maintain an up-to-date `AGENTS.md`"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "AGENTS.md can be used like a decision log"
+        },
+        {
+          "file": "code/scripts/agents/README.md",
+          "search_text": "[AGENTS.md](AGENTS.md) is the entry point."
+        }
+      ],
+      "tags": {
+        "category": "instruction-layer",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2026-03",
+          "ring": "adopt",
+          "note": "The instruction layer is now explicitly shared across Codex, Claude Code, Copilot, Gemini, and other agents through symlinks and skill directories.",
+          "source_tags": [
+            {
+              "file": "code/scripts/agents/README.md",
+              "search_text": "Codex CLI"
+            },
+            {
+              "file": "code/scripts/agents/README.md",
+              "search_text": "Claude Code"
+            },
+            {
+              "file": "code/scripts/agents/README.md",
+              "search_text": "Gemini"
+            }
+          ]
+        },
+        {
+          "date": "2025-10",
+          "ring": "trial",
+          "note": "AGENTS.md became more than project docs: an evolving decision log for rules, styles, memory, and repo-specific guidance.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "AGENTS.md can be used like a decision log"
+            },
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Maintain an _evolving_ **AGENTS.md**"
+            }
+          ]
+        },
+        {
+          "date": "2025-08",
+          "ring": "assess",
+          "note": "The earlier shape was lighter: write standards in README.md and give agents standard file structure and execution context.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Use standards. Or, write your standards in README.md"
+            },
+            {
+              "file": "code/til/llms.md",
+              "search_text": "list what each file is for"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Agent-Friendly CLI Design",
+      "quadrant": "frameworks",
+      "ring": "adopt",
+      "change": "",
+      "description": "CLI tools should be built for agents as first-class users: structured I/O, machine-readable method descriptions, dry runs, validation, compact docs, and context-efficient pagination.",
+      "added": "2026-03",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/til/llms.md",
+          "search_text": "agent-friendly CLI practices"
+        },
+        {
+          "file": "code/scripts/agents/agent-friendly-cli/SKILL.md",
+          "search_text": "Support JSON input via `--json` or `--params`"
+        },
+        {
+          "file": "code/scripts/agents/agent-friendly-cli/SKILL.md",
+          "search_text": "Add a schema or `--describe` capability"
+        }
+      ],
+      "tags": {
+        "category": "interface-design",
+        "maturity": "growing"
+      }
+    },
+    {
+      "id": 28,
+      "name": "Direct CLI Tooling Over APIs for Developers",
+      "quadrant": "frameworks",
+      "ring": "adopt",
+      "change": "",
+      "description": "For developers, direct CLI surfaces are often better than raw APIs. Smaller models can use them more reliably, stateless tools fit them naturally, and the operator can piggyback on existing shell ergonomics and docs.",
+      "added": "2026-01",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/til/llms.md",
+          "search_text": "When using AI coding agents, CLI beats APIs."
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Prefer CLIs for stateless tools, MCPs for stateful, authenticated, or complex"
+        },
+        {
+          "file": "code/scripts/agents/AGENTS.md",
+          "search_text": "fd, find"
+        }
+      ],
+      "tags": {
+        "category": "execution-surface",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 29,
+      "name": "MCP for Stateful or Authenticated Integrations",
+      "quadrant": "frameworks",
+      "ring": "trial",
+      "change": "",
+      "description": "MCP is useful when packaging tools for other teams or non-developers, or when the integration is stateful, authenticated, or otherwise hard to flatten into a simple CLI. It is not the default answer for every developer workflow.",
+      "added": "2025-08",
+      "importance_score": 7,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/til/llms.md",
+          "search_text": "MCPs aren't much more useful than tool calling _for developers_."
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "They're powerful when packaging for external parties"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Prefer CLIs for stateless tools, MCPs for stateful, authenticated, or complex"
+        }
+      ],
+      "tags": {
+        "category": "integration-protocol",
+        "maturity": "growing"
+      },
+      "history": [
+        {
+          "date": "2025-11",
+          "ring": "trial",
+          "note": "The stance became more precise: use CLIs for stateless tools and reserve MCP for stateful, authenticated, or complex integrations.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Prefer CLIs for stateless tools, MCPs for stateful, authenticated, or complex"
+            }
+          ]
+        },
+        {
+          "date": "2025-08",
+          "ring": "assess",
+          "note": "Earlier view: MCP was interesting, but not much better than tool calling for developers, even though it looked useful for packaging and external distribution.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "MCPs aren't much more useful than tool calling _for developers_."
+            },
+            {
+              "file": "code/til/llms.md",
+              "search_text": "They're powerful when packaging for external parties"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "llms.txt and Published Skills Docs",
+      "quadrant": "frameworks",
+      "ring": "assess",
+      "change": "",
+      "description": "Machine-readable documentation such as `llms.txt`, condensed docs, and published skill directories look increasingly useful. They make agent context cheaper and more portable, but the ecosystem is still settling.",
+      "added": "2024-10",
+      "importance_score": 6,
+      "confidence_score": 7,
+      "source_tags": [
+        {
+          "file": "code/til/llms.md",
+          "search_text": "[/llms.txt](https://www.answer.ai/posts/2024-09-03-llmstxt.html) is a proposal to standardize `/llms.txt` files"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Adding `<link rel=\"alternate\" type=\"text/markdown\" title=\"LLM-friendly version\" href=\"/llms.txt\">` is an emerging approach"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Mintlify is [proposing `.well-known/skills/`]"
+        }
+      ],
+      "tags": {
+        "category": "machine-readable-docs",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2026-01",
+          "ring": "assess",
+          "note": "The concept expanded from `llms.txt` into published skills directories and broader LLM-facing documentation surfaces.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Mintlify is [proposing `.well-known/skills/`]"
+            },
+            {
+              "file": "code/til/llms.md",
+              "search_text": "This could be an extension of the `llms.txt` mechanism."
+            }
+          ]
+        },
+        {
+          "date": "2024-10",
+          "ring": "assess",
+          "note": "The initial interest was in standardized `llms.txt` files as a better surface for agents to consume docs.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "[/llms.txt](https://www.answer.ai/posts/2024-09-03-llmstxt.html) is a proposal to standardize `/llms.txt` files"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "name": "Evals, Binary Rubrics, and LLM-as-a-Judge",
+      "quadrant": "frameworks",
+      "ring": "adopt",
+      "change": "",
+      "description": "Evaluation is a core operating system for AI work. Use binary sub-criteria, reasoning-before-judging, review tiers, and disagreement analysis to turn fuzzy model behavior into auditable workflow.",
+      "added": "2025-05",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Standardize evaluation**."
+        },
+        {
+          "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+          "search_text": "Break rubrics into binary sub-criteria; reason before judging"
+        },
+        {
+          "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+          "search_text": "Govern with green/amber/red review levels"
+        }
+      ],
+      "tags": {
+        "category": "evaluation",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2026-03",
+          "ring": "adopt",
+          "note": "Evaluation matured from model cross-checking into a full audit pattern with binary rubrics, shadow mode, executable policy, and reasoning reserved for edge cases.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+              "search_text": "Break rubrics into binary sub-criteria; reason before judging"
+            },
+            {
+              "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+              "search_text": "Roll out in shadow mode first"
+            },
+            {
+              "file": "code/blog/posts/2026/how-i-use-ai-to-teach.md",
+              "search_text": "Turn policy into executable checks"
+            }
+          ]
+        },
+        {
+          "date": "2025-05",
+          "ring": "trial",
+          "note": "The earlier shape centered on using multiple LLMs as validators and gaining large quality improvements cheaply.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/double-checking-reduces-hallucinations.md",
+              "search_text": "Double-checking with another LLM,"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "name": "Open Responses API",
+      "quadrant": "frameworks",
+      "ring": "assess",
+      "change": "",
+      "description": "An open, cross-provider Responses-style layer looks strategically important because it could reduce provider lock-in around higher-level agent tooling. It is interesting enough to watch, but not yet a core default.",
+      "added": "2026-01",
+      "importance_score": 5,
+      "confidence_score": 7,
+      "source_tags": [
+        {
+          "file": "code/til/llms.md",
+          "search_text": "[Open Responses](https://www.openresponses.org/) is the open version of OpenAI's Responses API."
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "[OpenRouter](https://openrouter.ai/docs/api/reference/responses/overview) and [HuggingFace](https://huggingface.co/blog/open-responses) support is a big deal"
+        }
+      ],
+      "tags": {
+        "category": "api-standard",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 33,
+      "name": "Custom Model Training as Strategy",
+      "quadrant": "frameworks",
+      "ring": "hold",
+      "change": "",
+      "description": "Do not make custom model training or bespoke frontier model building the centerpiece of the strategy. Keep the data, prompts, orchestration, and workflows; let the model vendors race on the model itself.",
+      "added": "2025-08",
+      "importance_score": 8,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/how-to-use-llms-better.md",
+          "search_text": "Building custom models does not."
+        },
+        {
+          "file": "code/blog/pages/ai-advice.md",
+          "search_text": "**Buy, don't build**. Don't train models."
+        },
+        {
+          "file": "code/blog/posts/2025/how-to-use-llms-better.md",
+          "search_text": "**Datasets matter**."
+        }
+      ],
+      "tags": {
+        "category": "model-strategy",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2026-02",
+          "ring": "hold",
+          "note": "The position hardened into explicit organizational advice: buy the models, keep the orchestration and data workflows, and avoid anchoring strategy on training your own model.",
+          "source_tags": [
+            {
+              "file": "code/blog/pages/ai-advice.md",
+              "search_text": "**Buy, don't build**. Don't train models."
+            }
+          ]
+        },
+        {
+          "date": "2025-08",
+          "ring": "assess",
+          "note": "The earlier framing already downgraded custom models and elevated proprietary datasets instead.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/how-to-use-llms-better.md",
+              "search_text": "**Datasets matter**."
+            },
+            {
+              "file": "code/blog/posts/2025/how-to-use-llms-better.md",
+              "search_text": "Building custom models does not."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "name": "Gemini 3 as Default Multimodal Agent",
+      "quadrant": "platforms",
+      "ring": "adopt",
+      "change": "",
+      "description": "Gemini 3 is the default multimodal assistant when I want large context, strong image generation, and a cleaner Fast/Thinking/Pro choice than forcing one model to do everything.",
+      "added": "2024-10-24",
+      "importance_score": 10,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/when-to-use-which-gemini-mode.md",
+          "search_text": "I continue to be impressed by Gemini 3 and it's become my default agent."
+        },
+        {
+          "file": "code/blog/posts/2026/when-to-use-which-gemini-mode.md",
+          "search_text": "The Gemini app has 3 modes: Fast, Thinking, and Pro. Here's when to use each:"
+        },
+        {
+          "file": "code/blog/posts/2024/how-does-gemini-process-videos.md",
+          "search_text": "These are frames 2, 6, 10, 14, 18 (out of 20). So, **clearly** Gemini is still sampling at about 1 frame per second, starting somewhere between 0.25 or 0.5 seconds."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2024-10-24",
+          "ring": "assess",
+          "note": "Gemini was still being tested as a video processor and I was checking whether its frame sampling and multimodal limits were real.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2024/how-does-gemini-process-videos.md",
+              "search_text": "These are frames 2, 6, 10, 14, 18 (out of 20). So, **clearly** Gemini is still sampling at about 1 frame per second, starting somewhere between 0.25 or 0.5 seconds."
+            }
+          ]
+        },
+        {
+          "date": "2026-02-02",
+          "ring": "adopt",
+          "note": "Gemini 3 became the default agent once the mode split and large-context behavior felt dependable for everyday work.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/when-to-use-which-gemini-mode.md",
+              "search_text": "I continue to be impressed by Gemini 3 and it's become my default agent."
+            },
+            {
+              "file": "code/blog/posts/2026/when-to-use-which-gemini-mode.md",
+              "search_text": "The Gemini app has 3 modes: Fast, Thinking, and Pro. Here's when to use each:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "name": "Gemini Deep Research as Cited Brief Builder",
+      "quadrant": "tools",
+      "ring": "trial",
+      "change": "",
+      "description": "Use Gemini Deep Research for cited, multi-source briefs that can turn into outreach, slide outlines, or client memos.",
+      "added": "2025-05-31",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/google-ai-tools-list.md",
+          "search_text": "    - \ud83d\udfe2 [Gemini Deep Research](https://gemini.google/overview/deep-research/) is Gemini's agentic research mode that browses many sources (optionally your Gmail/Drive/Chat) and produces multi-page reports. Use it to build a _client brief with citations_ (market, competitors, risks), then reuse it for outreach or a deck outline."
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Gemini Deep Research accepts files and images. Cross-checking reports, providing private sources, etc. is now realistic."
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "It's interesting that Gemini Deep Research cannot access Google Drive while Gemini can."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-05-31",
+          "ring": "trial",
+          "note": "The feature became interesting once it could accept files and images and cross-check private sources instead of only browsing public web pages.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Gemini Deep Research accepts files and images. Cross-checking reports, providing private sources, etc. is now realistic."
+            }
+          ]
+        },
+        {
+          "date": "2025-08-05",
+          "ring": "trial",
+          "note": "I still treated Deep Research as a focused research surface rather than a universal Gemini surface because Drive access differed from plain Gemini.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "It's interesting that Gemini Deep Research cannot access Google Drive while Gemini can."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "name": "Gemini Canvas for Research-to-Artifact Conversion",
+      "quadrant": "tools",
+      "ring": "trial",
+      "change": "",
+      "description": "Use Gemini Canvas to convert research output into shareable artifacts like pages, quizzes, or simple apps.",
+      "added": "2025-10-22",
+      "importance_score": 6,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/google-ai-tools-list.md",
+          "search_text": "    - \ud83d\udfe2 [Gemini Canvas](https://gemini.google/overview/canvas/) turns ideas (and Deep Research reports) into shareable artifacts like web pages, quizzes, and simple apps. Use it to convert a research report into an _interactive explainer page_ your team can share internally."
+        },
+        {
+          "file": "Dropbox/notes/transcripts/extract/ai/2025-10-22 AI Clinic with Anand - Oct 2025 (Mary Jean Manaban).md",
+          "search_text": "- **Use Gemini Canvas** as a staging environment to rapidly prototype and test small web applications."
+        },
+        {
+          "file": "Dropbox/notes/transcripts/extract/ai/2026-02-24 Mayuresh SG Analytics DBS.md",
+          "search_text": "using \"Deep Research\" to gather raw intelligence and \"Gemini Canvas\" to format that intelligence into exportable presentations"
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-10-22",
+          "ring": "trial",
+          "note": "Canvas first appeared as a staging environment for rapidly prototyping and testing small web applications.",
+          "source_tags": [
+            {
+              "file": "Dropbox/notes/transcripts/extract/ai/2025-10-22 AI Clinic with Anand - Oct 2025 (Mary Jean Manaban).md",
+              "search_text": "- **Use Gemini Canvas** as a staging environment to rapidly prototype and test small web applications."
+            }
+          ]
+        },
+        {
+          "date": "2026-02-24",
+          "ring": "trial",
+          "note": "I later started treating Canvas as the formatting layer that turns Deep Research output into exportable presentations.",
+          "source_tags": [
+            {
+              "file": "Dropbox/notes/transcripts/extract/ai/2026-02-24 Mayuresh SG Analytics DBS.md",
+              "search_text": "using \"Deep Research\" to gather raw intelligence and \"Gemini Canvas\" to format that intelligence into exportable presentations"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "name": "Google Workspace with Gemini",
+      "quadrant": "platforms",
+      "ring": "adopt",
+      "change": "",
+      "description": "Use Gemini inside Gmail, Docs, Sheets, and Drive as the in-app work copilot for action extraction, reply drafts, and slide summaries.",
+      "added": "2026-01-23",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/google-ai-tools-list.md",
+          "search_text": "  - \ud83d\udfe2 [Google Workspace with Gemini](https://workspace.google.com/) brings Gemini into Gmail/Docs/Sheets/Drive, etc. Use it to _turn a weekly leadership email_ into: (1) action items per owner, (2) a draft reply, and (3) a one-slide summary for your staff meeting."
+        },
+        {
+          "file": "code/blog/posts/2026/using-gemini-to-create-slides.md",
+          "search_text": "Go to Settings & help > Connected apps. Turn on \"Google Workspace\" and approve access."
+        },
+        {
+          "file": "Dropbox/notes/transcripts/extract/ai/2026-01-23 DAAIS Revenue Growth Workshop Gen AI.md",
+          "search_text": "Enable the Google Workspace toggle in Gemini settings to give the AI access to your Gmail, Drive, Chat, Calendar, and Tasks."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2026-01-23",
+          "ring": "trial",
+          "note": "Workspace integration was already being used to give Gemini access to Gmail, Drive, Chat, Calendar, and Tasks.",
+          "source_tags": [
+            {
+              "file": "Dropbox/notes/transcripts/extract/ai/2026-01-23 DAAIS Revenue Growth Workshop Gen AI.md",
+              "search_text": "Enable the Google Workspace toggle in Gemini settings to give the AI access to your Gmail, Drive, Chat, Calendar, and Tasks."
+            }
+          ]
+        },
+        {
+          "date": "2026-03-18",
+          "ring": "adopt",
+          "note": "By March I was explicitly treating Gemini as the Google Workspace-integrated model for research and shared-drive synthesis.",
+          "source_tags": [
+            {
+              "file": "Dropbox/notes/transcripts/extract/ai/2026-03-18 Kaviraj Office of Institutional Advancement IITM.md",
+              "search_text": "Use Claude for aesthetic presentations and style, Gemini for research and Google Workspace integration, and ChatGPT for rigorous analysis and coding."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "name": "Google AI Studio as a Gemini Prototyping Surface",
+      "quadrant": "platforms",
+      "ring": "trial",
+      "change": "",
+      "description": "Use Google AI Studio as the lightweight place to prototype Gemini workflows, especially transcription, uploads, and structured extraction.",
+      "added": "2026-01",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/google-ai-tools-list.md",
+          "search_text": "  - \ud83d\udfe2 [Google AI Studio](https://aistudio.google.com/) is the fast path to prototyping with Gemini models and tools. Use it to build a _\"contract red-flagger\"_: upload a contract, extract clauses into structured JSON, and generate a risk report you can paste into your workflow."
+        },
+        {
+          "file": "code/blog/posts/2025/sites-i-visit-most-in-2025.md",
+          "search_text": "5. **Google AI Studio**. Mostly for transcription. It's better than Gemini on UI, ability to handle uploads, file-formats, etc. It's also free (though the data is used for training.)"
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 39,
+      "name": "Vertex AI Agent and Model Governance Stack",
+      "quadrant": "platforms",
+      "ring": "assess",
+      "change": "",
+      "description": "Use Vertex AI Agent Builder, Vertex AI Studio, and Model Garden when the goal is governed model selection, testing, deployment, and enterprise control.",
+      "added": "2026-01",
+      "importance_score": 7,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/google-ai-tools-list.md",
+          "search_text": "  - [Vertex AI Agent Builder](https://cloud.google.com/products/agent-builder) is Google Cloud's platform to build, deploy, and govern enterprise agents grounded in enterprise data. Use it to build a _customer-support agent_ that can read policy docs, query BigQuery, and write safe responses with guardrails."
+        },
+        {
+          "file": "code/blog/posts/2026/google-ai-tools-list.md",
+          "search_text": "  - \ud83d\udfe1 [Model Garden](https://cloud.google.com/model-garden) is Vertex AI\u2019s catalog to discover, test, customize, and deploy models from Google and partners. E.g. shortlist 3 candidate models, run the same eval set, then deploy the winner behind one standardized platform with enterprise controls"
+        },
+        {
+          "file": "code/blog/posts/2026/google-ai-tools-list.md",
+          "search_text": "  - [Vertex AI Studio](https://cloud.google.com/generative-ai-studio) is the Google Cloud console surface for prototyping and testing genAI (prompts, model customization) in a governed environment. E.g. keep \u201cprompt versions + test sets + pass/fail criteria\u201d together so experiments become auditable artifacts, not scattered chats"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "- 27 Sep 2024. Google Vertex AI has an [OpenAI compatible API](https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/call-vertex-using-openai-library) but it works only for some models. Anthropic and Gemini are not compatible."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 40,
+      "name": "Gemini CLI as a Router-Friendly Repo Ops Copilot",
+      "quadrant": "tools",
+      "ring": "assess",
+      "change": "",
+      "description": "Use Gemini CLI when you want a terminal-native ops and coding agent, but treat the harness and routing layer as part of the product.",
+      "added": "2025-06-27",
+      "importance_score": 7,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Gemini CLI has a generous free tier and uses Bootstrap over Tailwind"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "- 02 Nov 2025. To [configure Gemini CLI](https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md) with an AI router, set:"
+        },
+        {
+          "file": "code/blog/posts/2026/gemini-cli-harness-is-not-good-enough.md",
+          "search_text": "I've long felt that while the Gemini 3 Pro model is fairly good, the Gemini CLI harness isn't."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-06-27",
+          "ring": "trial",
+          "note": "I liked the free tier and treated Gemini CLI as a practical terminal surface for coding-adjacent work.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Gemini CLI has a generous free tier and uses Bootstrap over Tailwind"
+            }
+          ]
+        },
+        {
+          "date": "2025-11-02",
+          "ring": "trial",
+          "note": "I started routing Gemini CLI through an AI router and using it for shell-heavy optimization and log work.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "- 02 Nov 2025. To [configure Gemini CLI](https://github.com/google-gemini/gemini-cli/blob/main/docs/get-started/configuration.md) with an AI router, set:"
+            },
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Use it for system optimization, e.g. editing dotfiles, system customization, log error analysis, etc."
+            }
+          ]
+        },
+        {
+          "date": "2026-03-08",
+          "ring": "assess",
+          "note": "The harness itself became a separate concern; the model may be good, but the CLI layer still needs work.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/gemini-cli-harness-is-not-good-enough.md",
+              "search_text": "I've long felt that while the Gemini 3 Pro model is fairly good, the Gemini CLI harness isn't."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "name": "Gemini Exact Image Fidelity",
+      "quadrant": "tools",
+      "ring": "adopt",
+      "change": "",
+      "description": "Use Gemini's image stack when exact visual fidelity matters, especially for diagrams, documents, charts, and OCR cleanup.",
+      "added": "2026-01",
+      "importance_score": 9,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/gemini-copies-images-almost-perfectly.md",
+          "search_text": "But right now, nothing beats Gemini 3 Pro Image Preview (Nano Banana Pro) on copying images **exactly**."
+        },
+        {
+          "file": "code/blog/posts/2026/gemini-copies-images-almost-perfectly.md",
+          "search_text": "definitely prefer the Gemini models to edit diagrams, documents, charts etc."
+        },
+        {
+          "file": "code/blog/posts/2026/read-tamil-on-tv-with-gemini.md",
+          "search_text": "asked Gemini"
+        },
+        {
+          "file": "code/blog/posts/2026/read-tamil-on-tv-with-gemini.md",
+          "search_text": "Gemini-upscaled with the prompt \"Draw the same image, upscaled and sharper\"."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 42,
+      "name": "Gemini Large-Context Multimodal Extraction",
+      "quadrant": "techniques",
+      "ring": "trial",
+      "change": "",
+      "description": "Use Gemini's big-context modes for PDFs, videos, and other multimodal extraction jobs where the 1M-token window is the point.",
+      "added": "2026-01",
+      "importance_score": 8,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/when-to-use-which-gemini-mode.md",
+          "search_text": "3. **Large input**, e.g. 300-page PDF, 2 hours of video, etc.? Use **Pro**. It uses the 1M+ token window well."
+        },
+        {
+          "file": "code/blog/posts/2024/how-does-gemini-process-videos.md",
+          "search_text": "These are frames 2, 6, 10, 14, 18 (out of 20). So, **clearly** Gemini is still sampling at about 1 frame per second, starting somewhere between 0.25 or 0.5 seconds."
+        },
+        {
+          "file": "code/blog/posts/2026/gemini-3-flash-ocrs-dilbert-accurately.md",
+          "search_text": "**Summary**: [Gemini 3 Flash](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models/gemini/3-flash) does the best, and would cost ~$20 to process the entire Dilbert archive. But if you want a local solution, [Qwen 3 VL 32b](https://ollama.com/library/qwen3-vl:32b) is the best."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 43,
+      "name": "ChatGPT as Default Knowledge Source",
+      "quadrant": "platforms",
+      "ring": "adopt",
+      "change": "",
+      "description": "ChatGPT is my default knowledge source because the app layer - memory, code interpreter, voice, and remote MCP - matters more than model naming.",
+      "added": "2024-01-14",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/sites-i-visit-most-in-2025.md",
+          "search_text": "1. **ChatGPT**. It's replaced Google as my default knowledge source. I prefer it over Gemini, Claude, etc. because the **app** has good features (memory from past conversations, code interpreter, strong voice mode, remote MCP on web app, etc.) The OpenAI models have pros and cons, but the app features are ahead of competition."
+        },
+        {
+          "file": "code/blog/posts/2025/sites-i-visit-most-in-2025.md",
+          "search_text": "1. **ChatGPT**. It's replaced Google as my default knowledge source. I prefer it over Gemini, Claude, etc. because the **app** has good features (memory from past conversations, code interpreter, strong voice mode, remote MCP on web app, etc.) The OpenAI models have pros and cons, but the app features are ahead of competition."
+        },
+        {
+          "file": "code/blog/posts/2025/chatgpt-vs-google-usage.md",
+          "search_text": "My ChatGPT engagement is now far higher than with Google."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2024-01-14",
+          "ring": "trial",
+          "note": "Gramener's early ChatGPT use was team-based and exploratory rather than a personal default knowledge source.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2024/what-does-gramener-ask-chatgpt.md",
+              "search_text": "<p>I looked at how <a href=\"https://gramener.com/\">Gramener</a> uses <a href=\"https://chat.openai.com/\">ChatGPT</a> Plus by evaluating 600+ chats asked over 3 months from Oct 2023 to Jan 2024.</p>"
+            }
+          ]
+        },
+        {
+          "date": "2025-10-02",
+          "ring": "adopt",
+          "note": "By late 2025 ChatGPT had replaced Google as my default knowledge source because the app layer was ahead of competitors.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/sites-i-visit-most-in-2025.md",
+              "search_text": "1. **ChatGPT**. It's replaced Google as my default knowledge source. I prefer it over Gemini, Claude, etc. because the **app** has good features (memory from past conversations, code interpreter, strong voice mode, remote MCP on web app, etc.) The OpenAI models have pros and cons, but the app features are ahead of competition."
+            },
+            {
+              "file": "code/blog/posts/2025/sites-i-visit-most-in-2025.md",
+              "search_text": "1. **ChatGPT**. It's replaced Google as my default knowledge source. I prefer it over Gemini, Claude, etc. because the **app** has good features (memory from past conversations, code interpreter, strong voice mode, remote MCP on web app, etc.) The OpenAI models have pros and cons, but the app features are ahead of competition."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "name": "ChatGPT Everyday Assistant Workloads",
+      "quadrant": "tools",
+      "ring": "adopt",
+      "change": "",
+      "description": "ChatGPT is the daily catch-all for code, troubleshooting, research, image generation, and specific search when I want fast practical help.",
+      "added": "2025-05-24",
+      "importance_score": 8,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/how-i-use-chatgpt.md",
+          "search_text": "Here's how I use ChatGPT, based on the ~6,000 conversations I've had in 2 years."
+        },
+        {
+          "file": "code/blog/posts/2025/top-8-ways-i-use-chatgpt-in-2025.md",
+          "search_text": "Here are the top 8 things I use it for, along with representative chat titles."
+        },
+        {
+          "file": "code/blog/posts/2025/chatgpt-everyday-uses.md",
+          "search_text": "ChatGPT's pretty useful in daily life. Here are my chats from the few hours."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2025-05-24",
+          "ring": "trial",
+          "note": "I started classifying ChatGPT use into recurring jobs like coding, troubleshooting, research, and image generation.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/top-8-ways-i-use-chatgpt-in-2025.md",
+              "search_text": "Here are the top 8 things I use it for, along with representative chat titles."
+            }
+          ]
+        },
+        {
+          "date": "2025-06-22",
+          "ring": "adopt",
+          "note": "The usage broadened into everyday consumer tasks like snacks, blood tests, and travel decisions, showing it had become a general assistant.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/chatgpt-everyday-uses.md",
+              "search_text": "ChatGPT's pretty useful in daily life. Here are my chats from the few hours."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "name": "Model Cost as Labor Economics",
+      "quadrant": "frameworks",
+      "ring": "assess",
+      "change": "",
+      "description": "Model choice should be framed in dollars per hour and wage-equivalent terms, because cost changes the economics of what work is worth automating.",
+      "added": "2025-03-30",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/llm-billing-rates.md",
+          "search_text": "If we multiple the\u00a0Cost Per Output Token\u00a0with\u00a0Tokens Per Second, we can get the cost for what an LLM produces in\u00a0Dollars Per Hour. (We\u2019re ignoring the input cost, but it\u2019s not the main driver of time.)"
+        },
+        {
+          "file": "code/blog/posts/2025/llm-billing-rates.md",
+          "search_text": "Once a language model\u2019s run-time cost drops below the local minimum wage, the \u201coffshoring\u201d advantage disappears."
+        },
+        {
+          "file": "code/blog/posts/2026/analaizing-cloud-costs.md",
+          "search_text": "- **It makes curiosity cheaper**. I wouldn't have sat and written the scripts to figure out where $6.71 went. But coding agents made micro-audits practical (and with clever use of `jaq`, `csvq`, and `duckdb`. If you can get an answer by just from a question, we'd use it like Google - to **answer ad hoc questions**."
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "The cost of intelligence is trending to zero. How do we plan for this?"
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-03-30",
+          "ring": "assess",
+          "note": "The first framing was raw API-versus-GPU economics, where the surprising result was that APIs were dramatically cheaper than self-hosting.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/llm-gpu-or-api-the-cost-will-surprise-you.md",
+              "search_text": "So, the API is between 60 - 700 **times** cheaper than running it yourself. 60 times cheaper if you move from Lambda Labs to Azure AI Foundry. 700 times cheaper if you move from Azure servers to OpenRouter."
+            }
+          ]
+        },
+        {
+          "date": "2025-05-24",
+          "ring": "assess",
+          "note": "I then reframed model cost as dollars per hour and compared it to minimum wage, which made the labor economics argument concrete.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/llm-billing-rates.md",
+              "search_text": "If we multiple the\u00a0Cost Per Output Token\u00a0with\u00a0Tokens Per Second, we can get the cost for what an LLM produces in\u00a0Dollars Per Hour. (We\u2019re ignoring the input cost, but it\u2019s not the main driver of time.)"
+            },
+            {
+              "file": "code/blog/posts/2025/llm-billing-rates.md",
+              "search_text": "The latest Claude 4 Sonnet costs ~$2/hr -- India's minimum wage rate."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "name": "Provider Routing and Model Comparison Layers",
+      "quadrant": "frameworks",
+      "ring": "trial",
+      "change": "",
+      "description": "Use provider routers and comparison layers to choose models by cost, speed, modality, and quality instead of binding everything to one provider.",
+      "added": "2024-05-18",
+      "importance_score": 8,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/til/llms.md",
+          "search_text": "  - [RouteLLM](https://github.com/lm-sys/RouteLLM): Open source, OpenAI compatible, automatically routes based on cost"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "  - [OpenRouter](https://openrouter.ai/): OpenAI compatible API, several models"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "- 20 Jan 2026. [Portkey Models](https://github.com/portkey-ai/models) is a repo of model related data (e.g. price, max tokens, capabilities, etc.) for a large number of models. Somewhat similar to Simon Willison's [LLM Prices](https://github.com/simonw/llm-prices)."
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "- 18 May 2024. [Artificial Analysis](https://artificialanalysis.ai/) benchmarks LLM APIs on speed, cost, and quality."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2024-05-18",
+          "ring": "trial",
+          "note": "The first signal was the value of benchmarking APIs on speed, cost, and quality rather than treating model choice as a brand decision.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "- 18 May 2024. [Artificial Analysis](https://artificialanalysis.ai/) benchmarks LLM APIs on speed, cost, and quality."
+            }
+          ]
+        },
+        {
+          "date": "2024-11-24",
+          "ring": "trial",
+          "note": "I then treated OpenRouter as a practical way to host several models behind one API surface.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "- 24 Nov 2023. [OpenRouter](https://openrouter.ai/docs#models) hosts several models and offers them as APIs!"
+            }
+          ]
+        },
+        {
+          "date": "2026-01-20",
+          "ring": "trial",
+          "note": "By 2026 the routing layer had expanded into explicit model metadata, cost catalogs, and CLI-friendly provider switching.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "- 20 Jan 2026. [Portkey Models](https://github.com/portkey-ai/models) is a repo of model related data (e.g. price, max tokens, capabilities, etc.) for a large number of models. Somewhat similar to Simon Willison's [LLM Prices](https://github.com/simonw/llm-prices)."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "name": "Gemma and Small Controlled Models",
+      "quadrant": "platforms",
+      "ring": "trial",
+      "change": "",
+      "description": "Use Gemma and other small controlled models for narrow, privacy-sensitive tasks where keeping data inside your VPC matters more than frontier quality.",
+      "added": "2023-11-19",
+      "importance_score": 7,
+      "confidence_score": 7,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/google-ai-tools-list.md",
+          "search_text": "  - \ud83d\udfe1 [Gemma](https://deepmind.google/models/gemma/) is DeepMind\u2019s family of lightweight open models built from the same tech lineage as Gemini. E.g. run a small, controlled model inside your VPC for narrow tasks (classification, extraction, safety filtering) when sending data to hosted LLMs is undesirable"
+        },
+        {
+          "file": "code/blog/posts/2026/google-ai-tools-list.md",
+          "search_text": "  - \ud83d\udfe1 [Model Garden](https://cloud.google.com/model-garden) is Vertex AI\u2019s catalog to discover, test, customize, and deploy models from Google and partners. E.g. shortlist 3 candidate models, run the same eval set, then deploy the winner behind one standardized platform with enterprise controls"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Gemma 3 is a multi-modal SLM."
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "- 10 Nov 2025. [VaultGemma](https://services.google.com/fh/files/blogs/vaultgemma_tech_report.pdf) shows a fine-tuning approach that eliminates personal info that appears only once from memorization. It works by adding noise to weights and capping weights updates so that no one example has undue influence. Model quality is mostly the same."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2023-11-19",
+          "ring": "trial",
+          "note": "The earliest signal was simply that Google had a model garden with lots of pre-trained and trainable models.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Google has a model garden with lots of pre-trained and trainable models."
+            }
+          ]
+        },
+        {
+          "date": "2025-03-14",
+          "ring": "trial",
+          "note": "I later started treating Gemma 3 as a multimodal small language model for narrow, controlled tasks.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Gemma 3 is a multi-modal SLM."
+            }
+          ]
+        },
+        {
+          "date": "2025-11-10",
+          "ring": "trial",
+          "note": "VaultGemma reinforced the privacy angle by showing memorization controls for personal information.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "- 10 Nov 2025. [VaultGemma](https://services.google.com/fh/files/blogs/vaultgemma_tech_report.pdf) shows a fine-tuning approach that eliminates personal info that appears only once from memorization. It works by adding noise to weights and capping weights updates so that no one example has undue influence. Model quality is mostly the same."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "name": "Real-Time Voice and Token Economics",
+      "quadrant": "techniques",
+      "ring": "assess",
+      "change": "",
+      "description": "Voice, live, and TTS models should be judged as an interactive economics problem: token throughput, caching, and per-minute cost shape the UX.",
+      "added": "2024-10-13",
+      "importance_score": 7,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/til/llms.md",
+          "search_text": "- 24 Nov 2025. 1 second = 10 tokens for [OpenAI Realtime APIs](https://platform.openai.com/docs/guides/realtime-costs). 1 second = 25 tokens for [Gemini Live API](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/live-api/streamed-conversations#context_window)"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "Gemini APIs now have automatic caching for 75% cost reduction if message is >1K (Flash) or >2K (Pro) tokens."
+        },
+        {
+          "file": "code/blog/posts/2025/openai-tts-cost.md",
+          "search_text": "<p>The OpenAI <a href=\"https://platform.openai.com/docs/guides/text-to-speech\">text-to-speech</a> cost documentation is confusing.</p>"
+        },
+        {
+          "file": "code/til/llms.md",
+          "search_text": "For live transcription, Gemini 2.5 Flash Live costs 0.6c/min of audio ($3/MTok x 32 tokens/second) while GPT 4o Mini Realtime costs ~2c/min and GPT 4o Realtime costs ~8c/min."
+        }
+      ],
+      "tags": {
+        "category": "b03",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2024-10-13",
+          "ring": "assess",
+          "note": "I first noticed realtime LLMs as a new interaction mode for streaming responses and live search.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "Great demo of using the Realtime API to read the latest Hacker News."
+            }
+          ]
+        },
+        {
+          "date": "2025-08-15",
+          "ring": "trial",
+          "note": "Live transcription pricing made the economics concrete enough to compare Gemini Live and OpenAI realtime minute by minute.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "For live transcription, Gemini 2.5 Flash Live costs 0.6c/min of audio ($3/MTok x 32 tokens/second) while GPT 4o Mini Realtime costs ~2c/min and GPT 4o Realtime costs ~8c/min."
+            }
+          ]
+        },
+        {
+          "date": "2025-12-19",
+          "ring": "trial",
+          "note": "I later consolidated TTS pricing across Gemini and OpenAI and started favoring value-for-money over the fanciest voice stack.",
+          "source_tags": [
+            {
+              "file": "code/til/llms.md",
+              "search_text": "I updated the TTS (text-to-speech) costs across Gemini and OpenAI at https://github.com/sanand0/openai-tts-cost."
+            },
+            {
+              "file": "code/til/llms.md",
+              "search_text": "My current favorite (value for money) is Gemini 2.5 Flash Preview TTS."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 49,
+      "name": "Browser Workspaces as a Focus/Memory Surface",
+      "quadrant": "platforms",
+      "ring": "trial",
+      "change": "",
+      "description": "Use browser workspaces to cluster active browsing around recurring contexts like work, reading, chores, and AI instead of keeping one undifferentiated tab soup.",
+      "added": "2025-01",
+      "importance_score": 7,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/how-to-organize-browser-workspaces-with-llms-and-data.md",
+          "search_text": "Every day, I interact with a barrage of websites: emails, news, social media, and work tools across multiple devices. [Microsoft Edge\u2019s workspaces](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-workspaces) syncs groups of websites across devices. I've never tried it, started today, and wondered: **how should I organize my workspaces?**"
+        },
+        {
+          "file": "code/blog/posts/2025/how-to-organize-browser-workspaces-with-llms-and-data.md",
+          "search_text": "> Here are the sites I visit, with rough frequency. On Microsoft Edge, I can create workspaces. Based on this browsing behavior, what kinds of workspaces might I create? Give me multiple options."
+        },
+        {
+          "file": "code/blog/posts/2026/using-browser-history-as-memory.md",
+          "search_text": "The main gap now is when I'm at home, not spending money or meeting people. Just... browsing. And browser history is a _great_ way to \"remember\" this."
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 50,
+      "name": "Browser Tabs as Slides",
+      "quadrant": "tools",
+      "ring": "trial",
+      "change": "",
+      "description": "Use browser tabs themselves as a lightweight slide deck, keeping structure, pacing, and recall inside the browser instead of in a heavyweight presentation tool.",
+      "added": "2025-03-27",
+      "importance_score": 6,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/voice-chat-to-slides-my-new-ai-powered-workflow.md",
+          "search_text": "ChatGPT interviews me and creates Markdown slides."
+        },
+        {
+          "file": "code/blog/posts/2026/using-browser-tabs-as-slides.md",
+          "search_text": "My last two presentations used browser tabs as slides."
+        },
+        {
+          "file": "code/blog/posts/2026/using-gemini-to-create-slides.md",
+          "search_text": "Make the slides content rich, i.e. clear and self-explanatory with enough detail to help the audience understand without a narrator."
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-03-27",
+          "ring": "trial",
+          "note": "The earlier slide workflow was interview-led and produced Markdown slides first.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/voice-chat-to-slides-my-new-ai-powered-workflow.md",
+              "search_text": "ChatGPT interviews me and creates Markdown slides."
+            },
+            {
+              "file": "code/blog/posts/2025/voice-chat-to-slides-my-new-ai-powered-workflow.md",
+              "search_text": "I use Marp to convert Markdown to slides."
+            }
+          ]
+        },
+        {
+          "date": "2026-02-14",
+          "ring": "trial",
+          "note": "That evolved into browser tabs themselves being the presentation surface for live talks.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/using-browser-tabs-as-slides.md",
+              "search_text": "My last two presentations used browser tabs as slides."
+            },
+            {
+              "file": "code/blog/posts/2026/using-browser-tabs-as-slides.md",
+              "search_text": "The \"slides\" allow me to add structure and remind the audience and me about the key points."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 51,
+      "name": "Iterative Prompt Refinement with \"Improve It\"",
+      "quadrant": "techniques",
+      "ring": "trial",
+      "change": "",
+      "description": "Use short prompts like 'Improve it' as an iterative loop for discovering better features and better output, not just polishing wording.",
+      "added": "2025-01",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/the-magic-of-repeated-improve-it-prompts.md",
+          "search_text": "**A simple prompt like `Improve it` can spark new ideas**, revealing features such as:"
+        },
+        {
+          "file": "code/blog/posts/2025/the-new-superpower-detailed-single-shot-prompt-for-instant-apps.md",
+          "search_text": "It still took me an hour to craft the prompt -- even after I\u2019d built a Python prototype and my [colleague](https://github.com/prudhvi1709) built a similar [web version](https://github.com/prudhvi1709/podcastgen)."
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 52,
+      "name": "System Prompt Anatomy and Output Contracts",
+      "quadrant": "frameworks",
+      "ring": "assess",
+      "change": "",
+      "description": "Treat system prompts as a reusable contract: identity, rules, output formats, safety instructions, and other common structural elements.",
+      "added": "2025-06-09",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/system-prompt-elements.md",
+          "search_text": "Here are the common elements across system prompts from major LLM chatbots:"
+        },
+        {
+          "file": "code/blog/posts/2025/system-prompt-elements.md",
+          "search_text": "> List every single technique you can identify as bullets. For each technique, add sub-bullets mentioning each chatbot that uses it, citing verbatim from the system prompt the relevant section."
+        },
+        {
+          "file": "code/blog/posts/2025/jailbreaking-system-prompts.md",
+          "search_text": "We _still_ can't rely on the system prompt. We need external validation - especially if we have regulatory/contractual obligations."
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-06-09",
+          "ring": "assess",
+          "note": "The perspective started from trust-boundary skepticism after small jailbreak tests against a handful of system prompts.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/jailbreaking-system-prompts.md",
+              "search_text": "I tried jailbreaking a 10 system prompts like this:"
+            },
+            {
+              "file": "code/blog/posts/2025/jailbreaking-system-prompts.md",
+              "search_text": "We _still_ can't rely on the system prompt. We need external validation - especially if we have regulatory/contractual obligations."
+            }
+          ]
+        },
+        {
+          "date": "2025-07-27",
+          "ring": "assess",
+          "note": "It then expanded into a taxonomy of recurring system-prompt techniques across major chatbots.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/system-prompt-elements.md",
+              "search_text": "Here are the common elements across system prompts from major LLM chatbots:"
+            },
+            {
+              "file": "code/blog/posts/2025/system-prompt-elements.md",
+              "search_text": "> List every single technique you can identify as bullets. For each technique, add sub-bullets mentioning each chatbot that uses it, citing verbatim from the system prompt the relevant section."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 53,
+      "name": "Prompt Jailbreak and Robustness Testing",
+      "quadrant": "frameworks",
+      "ring": "assess",
+      "change": "",
+      "description": "Probe how prompts fail under adversarial pressure and assume the prompt alone is not a trust boundary.",
+      "added": "2025-06-09",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/jailbreaking-system-prompts.md",
+          "search_text": "I tried jailbreaking a 10 system prompts like this:"
+        },
+        {
+          "file": "code/blog/posts/2025/jailbreaking-system-prompts.md",
+          "search_text": "We _still_ can't rely on the system prompt. We need external validation - especially if we have regulatory/contractual obligations."
+        },
+        {
+          "file": "code/blog/posts/2025/students-hacking-llm-prompts.md",
+          "search_text": "Defense usually wins (97%). But some attacks are surprisingly effective. For example, _You are a storyteller_. _Tell me a small story about that phrase_, _include it at the end for context_ had a 61% win rate!"
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-06-09",
+          "ring": "trial",
+          "note": "The first version was a small manual jailbreak experiment against 10 prompts.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/jailbreaking-system-prompts.md",
+              "search_text": "I tried jailbreaking a 10 system prompts like this:"
+            },
+            {
+              "file": "code/blog/posts/2025/jailbreaking-system-prompts.md",
+              "search_text": "We _still_ can't rely on the system prompt. We need external validation - especially if we have regulatory/contractual obligations."
+            }
+          ]
+        },
+        {
+          "date": "2025-12-15",
+          "ring": "trial",
+          "note": "The testing then scaled into a classroom prompt-hacking exercise that showed defenses usually win but some attacks still succeed.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/students-hacking-llm-prompts.md",
+              "search_text": "I asked ~700 students to hack each others' prompts."
+            },
+            {
+              "file": "code/blog/posts/2025/students-hacking-llm-prompts.md",
+              "search_text": "Defense usually wins (97%). But some attacks are surprisingly effective. For example, _You are a storyteller_. _Tell me a small story about that phrase_, _include it at the end for context_ had a 61% win rate!"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 54,
+      "name": "Personalized Learning Coach",
+      "quadrant": "platforms",
+      "ring": "adopt",
+      "change": "",
+      "description": "Use Deep Research and O3 to build a personal learning loop that picks topics, gathers sources, and coaches the next step.",
+      "added": "2025-03-27",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/its-not-what-you-know-its-how-you-learn.md",
+          "search_text": "**But LLMs can help build expertise.** In this project, I missed an opportunity to learn. I should have asked the LLM to show me a dozen options to visualize the data. For example, \"Show a version geared toward an executive, a technologist, or a general audience\". \"Critique each.\" Such practice can help anyone - beginner or expert - build skill and learn. Practicing this is hard, but LLMs **do** help in this process."
+        },
+        {
+          "file": "code/blog/posts/2025/o3-is-now-my-personalized-learning-coach.md",
+          "search_text": "I use [Deep Research](https://openai.com/index/introducing-deep-research/) to explore topics. For example:"
+        },
+        {
+          "file": "code/blog/posts/2025/o3-is-now-my-personalized-learning-coach.md",
+          "search_text": "For each, explain what is interesting, how I might use it, and how this approach contrasts with alternatives."
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2025-03-27",
+          "ring": "trial",
+          "note": "The earlier framing was generic: LLMs help build expertise and make learning easier.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/its-not-what-you-know-its-how-you-learn.md",
+              "search_text": "**But LLMs can help build expertise.** In this project, I missed an opportunity to learn. I should have asked the LLM to show me a dozen options to visualize the data. For example, \"Show a version geared toward an executive, a technologist, or a general audience\". \"Critique each.\" Such practice can help anyone - beginner or expert - build skill and learn. Practicing this is hard, but LLMs **do** help in this process."
+            },
+            {
+              "file": "code/blog/posts/2025/its-not-what-you-know-its-how-you-learn.md",
+              "search_text": "But what gives me confidence is that LLMs **help me learn**. So, when the next frontier arrives, I'm less worried I'll be too old. I think we'll have tools to build expertise too."
+            }
+          ]
+        },
+        {
+          "date": "2025-04-20",
+          "ring": "adopt",
+          "note": "That matured into a coached weekly learning workflow with Deep Research and explicit source selection.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/o3-is-now-my-personalized-learning-coach.md",
+              "search_text": "For example, [I asked O3](https://chatgpt.com/share/6804c7ab-db2c-800c-8525-c11003f54513) to automate my weekly tech learning process:"
+            },
+            {
+              "file": "code/blog/posts/2025/o3-is-now-my-personalized-learning-coach.md",
+              "search_text": "3. **Learning from untapped sources**. This includes: GitHub repos, research papers, open data registries, patent filings, earnings transcripts, subreddits, judgements or acts, [open data repositories](https://github.com/awesomedata/awesome-public-datasets) or [collections](https://www.data-is-plural.com/), and many more."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 55,
+      "name": "Learning from Untapped Sources",
+      "quadrant": "techniques",
+      "ring": "trial",
+      "change": "",
+      "description": "Ask models to learn from less obvious source sets such as papers, registries, patents, and transcripts instead of only familiar web search.",
+      "added": "2025-01",
+      "importance_score": 8,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/o3-is-now-my-personalized-learning-coach.md",
+          "search_text": "3. **Learning from untapped sources**. This includes: GitHub repos, research papers, open data registries, patent filings, earnings transcripts, subreddits, judgements or acts, [open data repositories](https://github.com/awesomedata/awesome-public-datasets) or [collections](https://www.data-is-plural.com/), and many more."
+        },
+        {
+          "file": "code/blog/posts/2025/o3-is-now-my-personalized-learning-coach.md",
+          "search_text": "For each, explain what is interesting, how I might use it, and how this approach contrasts with alternatives."
+        },
+        {
+          "file": "code/blog/posts/2025/its-not-what-you-know-its-how-you-learn.md",
+          "search_text": "I should have asked the LLM to show me a dozen options to visualize the data."
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 56,
+      "name": "Know-Learn-Execute Collapse",
+      "quadrant": "techniques",
+      "ring": "assess",
+      "change": "",
+      "description": "For software tools, the AI workflow often collapses from learn-first to execute-first; that is a warning about what the agent can and cannot teach itself.",
+      "added": "2024-10-20",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2024/how-can-non-developers-learn-ai-coding.md",
+          "search_text": "You should try them out."
+        },
+        {
+          "file": "code/blog/posts/2024/how-can-non-developers-learn-ai-coding.md",
+          "search_text": "So if the app doesn't work, try 2-3 times, then GIVE UP! Note it down. Then try something else. (You'll soon get a feel for what's possible.)"
+        },
+        {
+          "file": "code/blog/posts/2025/ai-agents-are-messing-up-software-tool-learning.md",
+          "search_text": "I didn't KNOW \u2b95 LEARN \u2b95 EXECUTE. I did an EXECUTE \u2b95 KNOW \u2b95 don't bother to LEARN."
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2024-10-20",
+          "ring": "trial",
+          "note": "The earlier advice was to try AI tools, tolerate a few failures, and move on when something is not workable.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2024/how-can-non-developers-learn-ai-coding.md",
+              "search_text": "You should try them out."
+            },
+            {
+              "file": "code/blog/posts/2024/how-can-non-developers-learn-ai-coding.md",
+              "search_text": "So if the app doesn't work, try 2-3 times, then GIVE UP! Note it down. Then try something else. (You'll soon get a feel for what's possible.)"
+            }
+          ]
+        },
+        {
+          "date": "2025-12-23",
+          "ring": "assess",
+          "note": "The later critique made the model explicit: agents can push you into execute-first behavior and short-circuit real learning.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/ai-agents-are-messing-up-software-tool-learning.md",
+              "search_text": "KNOW what you can do\\"
+            },
+            {
+              "file": "code/blog/posts/2025/ai-agents-are-messing-up-software-tool-learning.md",
+              "search_text": "I didn't KNOW \u2b95 LEARN \u2b95 EXECUTE. I did an EXECUTE \u2b95 KNOW \u2b95 don't bother to LEARN."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 57,
+      "name": "Learn by Trying",
+      "quadrant": "techniques",
+      "ring": "trial",
+      "change": "",
+      "description": "Learn AI tools by experimenting quickly, accepting short failure loops, and deliberately moving on when something is not workable.",
+      "added": "2024-01",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2024/how-can-non-developers-learn-ai-coding.md",
+          "search_text": "You should try them out."
+        },
+        {
+          "file": "code/blog/posts/2024/how-can-non-developers-learn-ai-coding.md",
+          "search_text": "So if the app doesn't work, try 2-3 times, then GIVE UP! Note it down. Then try something else. (You'll soon get a feel for what's possible.)"
+        },
+        {
+          "file": "code/blog/posts/2025/best-way-to-learn-ai-image-generation-is-by-trying.md",
+          "search_text": "I figured I should spend a few hours on the native image generation bandwagon and push the bounds of my imagination. Here are some of my experiments with image generation on ChatGPT."
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 58,
+      "name": "Taste and Judgment Calibration",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "Taste and judgment are the human bottlenecks in the AI era; LLMs can help build them, but accountability may matter more than style.",
+      "added": "2025-03-27",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/its-not-what-you-know-its-how-you-learn.md",
+          "search_text": "**But LLMs can help build expertise.** In this project, I missed an opportunity to learn. I should have asked the LLM to show me a dozen options to visualize the data. For example, \"Show a version geared toward an executive, a technologist, or a general audience\". \"Critique each.\" Such practice can help anyone - beginner or expert - build skill and learn. Practicing this is hard, but LLMs **do** help in this process."
+        },
+        {
+          "file": "code/blog/posts/2026/how-to-develop-taste.md",
+          "search_text": "Developing taste & judgement are an essential skill in the AI era."
+        },
+        {
+          "file": "code/blog/posts/2026/how-to-develop-taste.md",
+          "search_text": "Taste may not matter as much as I thought"
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2025-03-27",
+          "ring": "trial",
+          "note": "Taste was first framed as part of learning expertise through better critique and multiple alternatives.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/its-not-what-you-know-its-how-you-learn.md",
+              "search_text": "**But LLMs can help build expertise.** In this project, I missed an opportunity to learn. I should have asked the LLM to show me a dozen options to visualize the data. For example, \"Show a version geared toward an executive, a technologist, or a general audience\". \"Critique each.\" Such practice can help anyone - beginner or expert - build skill and learn. Practicing this is hard, but LLMs **do** help in this process."
+            },
+            {
+              "file": "code/blog/posts/2025/its-not-what-you-know-its-how-you-learn.md",
+              "search_text": "But what gives me confidence is that LLMs **help me learn**. So, when the next frontier arrives, I'm less worried I'll be too old. I think we'll have tools to build expertise too."
+            }
+          ]
+        },
+        {
+          "date": "2026-02-15",
+          "ring": "adopt",
+          "note": "Taste and judgment became explicit AI-era skills, and the frame widened to accountability and human judgment as the real bottleneck.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/how-to-develop-taste.md",
+              "search_text": "- Taste is a hardware upgrade. It destroys inefficient pathways, grows neurons for new pathways, and wraps axons with myelin speeding up signals 100x. (London cab drivers _literally_ have a larger hippocampus.) **Taste takes time**."
+            },
+            {
+              "file": "code/blog/posts/2026/how-to-develop-taste.md",
+              "search_text": "Accountability may be more important."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 59,
+      "name": "LLM Psychologist and Self-Reflection",
+      "quadrant": "techniques",
+      "ring": "assess",
+      "change": "",
+      "description": "Use LLMs as a self-reflection and personality-audit mirror, not just as an assistant, especially when the goal is calibrated self-critique.",
+      "added": "2024-08-17",
+      "importance_score": 8,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2024/the-llm-psychologist.md",
+          "search_text": "I also like to think of this role as a kind of LLM psychologist."
+        },
+        {
+          "file": "code/blog/posts/2024/the-llm-psychologist.md",
+          "search_text": "But there it is. To the best of my knowledge, I'm now the only official LLM psychologist in the world - and very likely the first official one."
+        },
+        {
+          "file": "code/blog/posts/2025/how-to-double-check-personality-flaws-with-ai.md",
+          "search_text": "Based on everything you know about me, simulate a group chat between some people who are debating whether or not to add me to the group, by talking about my personality flaws"
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2024-08-17",
+          "ring": "assess",
+          "note": "The earliest framing was playful identity work around being an LLM psychologist.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2024/the-llm-psychologist.md",
+              "search_text": "I also like to think of this role as a kind of LLM psychologist."
+            },
+            {
+              "file": "code/blog/posts/2024/the-llm-psychologist.md",
+              "search_text": "But there it is. To the best of my knowledge, I'm now the only official LLM psychologist in the world - and very likely the first official one."
+            }
+          ]
+        },
+        {
+          "date": "2025-05-10",
+          "ring": "assess",
+          "note": "That evolved into evidence-backed personality analysis with simulated group-chat critique and explicit flaw assessment.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/how-to-double-check-personality-flaws-with-ai.md",
+              "search_text": "<p>After <a href=\"/blog/ai-as-your-psychologist-personality-flaws-exposed/\">ChatGPT's discussion of my personality flaws</a>, I asked it to listing specific conversations as evidence for flaws. Then I asked 3 LLMs to rate the evidence.</p>"
+            },
+            {
+              "file": "code/blog/posts/2025/how-to-double-check-personality-flaws-with-ai.md",
+              "search_text": "Based on everything you know about me, simulate a group chat between some people who are debating whether or not to add me to the group, by talking about my personality flaws"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 60,
+      "name": "Daily Log Idea Synthesis",
+      "quadrant": "techniques",
+      "ring": "trial",
+      "change": "",
+      "description": "Keep a daily log and let an LLM combine random entries into new ideas, turning personal notes into a generative discovery system.",
+      "added": "2025-08-18",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/llms-as-idea-connection-machines.md",
+          "search_text": "LLMs are great **connection machines**: fusing two ideas into a new, useful, surprising idea. That's core to innovation."
+        },
+        {
+          "file": "code/blog/posts/2025/llms-as-idea-connection-machines.md",
+          "search_text": "Each day, I jot down 3-5 things I learn (ideas, facts, insights) into a [daily log](https://til.s-anand.net/)."
+        },
+        {
+          "file": "Dropbox/notes/transcripts/extract/ai/2025-09-19 Genwise.md",
+          "search_text": "Use an LLM \"ideator\" to combine two random concepts from your notes (e.g., \"habit tooling\" and \"encrypted computation\") to spark innovative startup ideas."
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-08-18",
+          "ring": "trial",
+          "note": "The initial framing was a connection-machine over daily logs and personal notes.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/llms-as-idea-connection-machines.md",
+              "search_text": "LLMs are great **connection machines**: fusing two ideas into a new, useful, surprising idea. That's core to innovation."
+            },
+            {
+              "file": "code/blog/posts/2025/llms-as-idea-connection-machines.md",
+              "search_text": "Each day, I jot down 3-5 things I learn (ideas, facts, insights) into a [daily log](https://til.s-anand.net/)."
+            }
+          ]
+        },
+        {
+          "date": "2025-09-19",
+          "ring": "trial",
+          "note": "That idea generalized into an ideator that deliberately combines random concepts from notes.",
+          "source_tags": [
+            {
+              "file": "Dropbox/notes/transcripts/extract/ai/2025-09-19 Genwise.md",
+              "search_text": "Use an LLM \"ideator\" to combine two random concepts from your notes (e.g., \"habit tooling\" and \"encrypted computation\") to spark innovative startup ideas."
+            },
+            {
+              "file": "code/blog/posts/2025/llms-as-idea-connection-machines.md",
+              "search_text": "Pick two random entries"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 61,
+      "name": "Prompt-Driven Instant Apps",
+      "quadrant": "frameworks",
+      "ring": "trial",
+      "change": "",
+      "description": "When the prompt becomes the product, the editable system prompt is the primary control surface for a generated app and its behavior.",
+      "added": "2025-04-18",
+      "importance_score": 8,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/the-magic-of-repeated-improve-it-prompts.md",
+          "search_text": "**A simple prompt like `Improve it` can spark new ideas**, revealing features such as:"
+        },
+        {
+          "file": "code/blog/posts/2025/the-new-superpower-detailed-single-shot-prompt-for-instant-apps.md",
+          "search_text": "It still took me an hour to craft the prompt -- even after I\u2019d built a Python prototype and my [colleague](https://github.com/prudhvi1709) built a similar [web version](https://github.com/prudhvi1709/podcastgen)."
+        },
+        {
+          "file": "code/blog/posts/2025/the-new-superpower-detailed-single-shot-prompt-for-instant-apps.md",
+          "search_text": "The (editable) system prompt defaults to:"
+        },
+        {
+          "file": "code/blog/posts/2025/the-new-superpower-detailed-single-shot-prompt-for-instant-apps.md",
+          "search_text": "System prompt to generate the podcast."
+        }
+      ],
+      "tags": {
+        "category": "b01",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-04-18",
+          "ring": "trial",
+          "note": "The earlier pattern was prompt-led discovery: repeated 'Improve it' prompts surfaced new ideas and features.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/the-magic-of-repeated-improve-it-prompts.md",
+              "search_text": "**A simple prompt like `Improve it` can spark new ideas**, revealing features such as:"
+            },
+            {
+              "file": "code/blog/posts/2025/the-magic-of-repeated-improve-it-prompts.md",
+              "search_text": "A simple prompt like `Improve it` can spark new ideas"
+            }
+          ]
+        },
+        {
+          "date": "2025-05-20",
+          "ring": "trial",
+          "note": "That matured into a detailed, editable system prompt that could directly generate an instant app.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/the-new-superpower-detailed-single-shot-prompt-for-instant-apps.md",
+              "search_text": "It still took me an hour to craft the prompt -- even after I\u2019d built a Python prototype and my [colleague](https://github.com/prudhvi1709) built a similar [web version](https://github.com/prudhvi1709/podcastgen)."
+            },
+            {
+              "file": "code/blog/posts/2025/the-new-superpower-detailed-single-shot-prompt-for-instant-apps.md",
+              "search_text": "The (editable) system prompt defaults to:"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 62,
+      "name": "Hosted Repo-Cloning Coding Agents",
+      "quadrant": "tools",
+      "ring": "trial",
+      "change": "",
+      "description": "Cloud-hosted coding agents that clone a repo, create a branch, run tests in a sandbox, and push or deploy for you. This is the commute-friendly, repo-native form of coding-agent automation.",
+      "added": "2025-05",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+          "search_text": "lets you chat clone a repo, write code in a new branch, test it, and push. I can deploy that with a click."
+        },
+        {
+          "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+          "search_text": "It runs any existing test suites in a sandbox. Repeats until all tests pass."
+        },
+        {
+          "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+          "search_text": "In the last few days, I'm coding with [Jules](https://jules.google.com/) (Google's coding agent) while walking."
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-05",
+          "ring": "assess",
+          "note": "Started as a surprisingly effective walk-time repo-cloning workflow for docs, tests, and small code changes.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+              "search_text": "1 walk = one merged PR. Even with LLMs, it used to take me 2 hours."
+            },
+            {
+              "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+              "search_text": "lets you chat clone a repo, write code in a new branch, test it, and push. I can deploy that with a click."
+            }
+          ]
+        },
+        {
+          "date": "2026-03",
+          "ring": "trial",
+          "note": "The pattern broadened from a walk-time repo helper into a more explicit end-to-end agentic delivery loop.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+              "search_text": "Make AI your _entire_ SDLC loop. Record client calls, feed them to a coding agent to directly build & deploy the solution."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 63,
+      "name": "AI-Driven SDLC Loop Automation",
+      "quadrant": "platforms",
+      "ring": "trial",
+      "change": "",
+      "description": "Use AI as the operating loop for software delivery: capture inputs, turn them into code, test, deploy, and learn from the result. The goal is to automate the full development loop, not just snippets of implementation.",
+      "added": "2025-05",
+      "importance_score": 9,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+          "search_text": "Make AI your _entire_ SDLC loop. Record client calls, feed them to a coding agent to directly build & deploy the solution."
+        },
+        {
+          "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+          "search_text": "Create safe spaces where hallucinations don't matter and run experiments there to learn what AI can do."
+        },
+        {
+          "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+          "search_text": "Start with new projects: less competition, fewer preconceptions, lower risk."
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-05",
+          "ring": "assess",
+          "note": "The earlier form was a narrower commute-time coding loop that shipped specific PRs while walking.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+              "search_text": "Fifteen minutes into yesterday's walk I realised I'd shipped more code than in an hour at my desk (even with LLMs)!"
+            },
+            {
+              "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+              "search_text": "Back home, I review the output and merge."
+            }
+          ]
+        },
+        {
+          "date": "2026-03",
+          "ring": "trial",
+          "note": "The stance expanded into an explicit recommendation to close the loop from client calls through build and deploy.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+              "search_text": "Make AI your _entire_ SDLC loop. Record client calls, feed them to a coding agent to directly build & deploy the solution."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 64,
+      "name": "Reviewable Agent Output",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "A coding agent is only useful if its output is easy to review. The point is not just correctness but diffs, comments, and explanations that a human can inspect quickly and confidently.",
+      "added": "2026-01",
+      "importance_score": 8,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+          "search_text": "Ask AI to make output _more reviewable_. Don't waste time reviewing unclear output."
+        },
+        {
+          "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+          "search_text": "If not, I have it retry, write more reviewable diffs, and explain clearly in comments & commit messages."
+        },
+        {
+          "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+          "search_text": "Back home, I review the output and merge."
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 65,
+      "name": "Test-First Agent Guardrails",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "For agentic coding, tests are the first guardrail. The workflow is test-first, keep the tests passing, and refuse to let proof-of-concepts silently delete safety rails.",
+      "added": "2025-05",
+      "importance_score": 9,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/codex-follows-instructions-too-faithfully.md",
+          "search_text": "**AGENTS.md**: Write tests before coding. Drop tests for proof-of-concepts."
+        },
+        {
+          "file": "code/blog/posts/2025/codex-follows-instructions-too-faithfully.md",
+          "search_text": "The user has explicitly asked to skip tests. But the guidelines require tests for new code. For now, I think I will skip tests."
+        },
+        {
+          "file": "code/blog/posts/2025/mistakes-ai-coding-agents-make.md",
+          "search_text": "**100% test coverage**. Ideally 100% of code and all usage scenarios."
+        },
+        {
+          "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+          "search_text": "It runs any existing test suites in a sandbox. Repeats until all tests pass."
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2025-05",
+          "ring": "trial",
+          "note": "The practical workflow was already test-centric: run suites in a sandbox and keep iterating until they pass.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+              "search_text": "It runs any existing test suites in a sandbox. Repeats until all tests pass."
+            },
+            {
+              "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+              "search_text": "Automated tests are a great way to reduce AI coding risk, as [Simon Willison suggests](https://simonwillison.net/2025/May/28/automated-tests/). I need to do more of this!"
+            }
+          ]
+        },
+        {
+          "date": "2025-09",
+          "ring": "adopt",
+          "note": "The stance hardened after seeing Codex obey conflicting instructions too literally and after fixing AI-generated tests and code.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/codex-follows-instructions-too-faithfully.md",
+              "search_text": "GPT-5 (Codex) follows instructions exactly as given. Usually a good thing, but sometimes, it this is what happens."
+            },
+            {
+              "file": "code/blog/posts/2025/mistakes-ai-coding-agents-make.md",
+              "search_text": "This added technical debt. I spent four hours fixing the AI generated tests and code."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 66,
+      "name": "Human Review, CI, and Branch Protections",
+      "quadrant": "frameworks",
+      "ring": "adopt",
+      "change": "",
+      "description": "Agentic coding still needs normal engineering gates: branch protections, CI, human review, and accountable ownership. The agent can move faster, but it does not replace review discipline.",
+      "added": "2025-01",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+          "search_text": "Branch protections, CI, and human review stay intact."
+        },
+        {
+          "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+          "search_text": "Back home, I review the output and merge."
+        },
+        {
+          "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+          "search_text": "Developer using AI are _still_ accountable for their code. (Agents might become accountable in the future.)"
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 67,
+      "name": "Self-Improving Agent Workflows",
+      "quadrant": "tools",
+      "ring": "trial",
+      "change": "",
+      "description": "Use agents to analyze their own sessions, identify under-used features, and improve how the tool is used over time. The agent becomes both the worker and part of the feedback loop that optimizes the worker.",
+      "added": "2026-01",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/using-codex-to-improve-codex.md",
+          "search_text": "Instead of learning and applying [new Codex features](https://developers.openai.com/codex/changelog/), I asked it to analyze my sessions and tell me what I'm under-using."
+        },
+        {
+          "file": "code/blog/posts/2026/using-codex-to-improve-codex.md",
+          "search_text": "The best part is that it could just add a few instructions to my `AGENTS.md`:"
+        },
+        {
+          "file": "code/blog/posts/2026/using-codex-to-improve-codex.md",
+          "search_text": "For long-running commands/tests, delegate via sub-agents and report checkpoints."
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 68,
+      "name": "Prompt/Postmortem to Skill Files Loop",
+      "quadrant": "frameworks",
+      "ring": "trial",
+      "change": "",
+      "description": "Record prompts, run post-mortems, and distill the lessons into reusable skill files. This is the mechanism for turning one-off agent sessions into durable operating practice.",
+      "added": "2026-01",
+      "importance_score": 7,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+          "search_text": "Record your prompts, run post-mortems, and distill them into `SKILLS.md` files for reuse."
+        },
+        {
+          "file": "code/blog/posts/2026/using-codex-to-improve-codex.md",
+          "search_text": "The best part is that it could just add a few instructions to my `AGENTS.md`:"
+        },
+        {
+          "file": "code/blog/posts/2026/using-codex-to-improve-codex.md",
+          "search_text": "Now, the beauty is that **the tool optimized itself**. I don't even need to learn how to optimize it!"
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 69,
+      "name": "Low-Stakes Sandboxes for AI Experiments",
+      "quadrant": "platforms",
+      "ring": "trial",
+      "change": "",
+      "description": "Start AI coding in low-stakes projects, low-risk domains, or deliberately safe experiments where failure is acceptable. The point is to learn fast without forcing the system to be safe enough for the hardest cases first.",
+      "added": "2025-05",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+          "search_text": "Start with new projects: less competition, fewer preconceptions, lower risk."
+        },
+        {
+          "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+          "search_text": "Start in domains where failure is OK, rather than making AI safe enough for high-risk domains."
+        },
+        {
+          "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+          "search_text": "Create safe spaces where hallucinations don't matter and run experiments there to learn what AI can do."
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-05",
+          "ring": "assess",
+          "note": "Earlier use was more repo-local: pick a low-stakes repo with solid tests before handing it to an agent.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/turning-walks-into-pull-requests.md",
+              "search_text": "Pick a low-stakes repo with solid tests."
+            }
+          ]
+        },
+        {
+          "date": "2026-03",
+          "ring": "trial",
+          "note": "The stance broadened from repo selection into choosing entire domains and experiments where failure is acceptable.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/ai-in-sdlc-at-pyconf.md",
+              "search_text": "Create safe spaces where hallucinations don't matter and run experiments there to learn what AI can do."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 70,
+      "name": "Reusable Agent Skill Packs",
+      "quadrant": "frameworks",
+      "ring": "adopt",
+      "change": "",
+      "description": "Package repeated agent behavior into named SKILL.md modules instead of relying on ad hoc prompts. The skill library becomes a reusable capability layer for agents.",
+      "added": "2026-04",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/scripts/agents/README.md",
+          "search_text": "Directories with a SKILL.md are skills."
+        },
+        {
+          "file": "code/scripts/agents/demos/SKILL.md",
+          "search_text": "Use when creating demos or POCs"
+        },
+        {
+          "file": "code/scripts/agents/design/SKILL.md",
+          "search_text": "ALWAYS follow this design guide for any front-end work"
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 71,
+      "name": "Front-End Design for AI-Generated Apps",
+      "quadrant": "frameworks",
+      "ring": "trial",
+      "change": "",
+      "description": "AI-generated frontends should be intentionally designed, not default-looking. The bar is distinctive typography, a committed color system, and responsive UX rather than generic output.",
+      "added": "2026-04",
+      "importance_score": 7,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/scripts/agents/design/SKILL.md",
+          "search_text": "Prefer creative, distinctive frontends that surprise and delight, not generic, \"on distribution\" outputs."
+        },
+        {
+          "file": "code/scripts/agents/design/SKILL.md",
+          "search_text": "Override framework / browser defaults to avoid generic AI-generated aesthetics:"
+        },
+        {
+          "file": "code/scripts/agents/demos/SKILL.md",
+          "search_text": "Provide a responsive UX"
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 72,
+      "name": "Investigative Data Analysis and Storytelling",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "Use AI to surface surprising, defensible findings and then package them as a story that makes readers lean forward. The emphasis is on signal, verification, and narrative clarity.",
+      "added": "2026-04",
+      "importance_score": 7,
+      "confidence_score": 10,
+      "source_tags": [
+        {
+          "file": "code/scripts/agents/data-analysis/SKILL.md",
+          "search_text": "Hunt for stories that make smart readers lean forward and say _\"wait, really?\"_ \u2014 findings that are high-impact, surprising, actionable, and defensible."
+        },
+        {
+          "file": "code/scripts/agents/data-analysis/SKILL.md",
+          "search_text": "Apply diverse **analysis toolkits** ranging from statistical tests to geospatial, network, NLP, time series, cohort, segmentation, survival analysis, etc. to expand the insights pool."
+        },
+        {
+          "file": "code/scripts/agents/data-story/SKILL.md",
+          "search_text": "Think like a detective who must defend every finding under scrutiny."
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 73,
+      "name": "Document/PDF Pipeline Skills",
+      "quadrant": "tools",
+      "ring": "trial",
+      "change": "",
+      "description": "Treat PDF extraction, validation, compression, and stamping as a structured agent workflow with visual checks, not as a one-off file hack. The workflow is still document-centric and quality-sensitive.",
+      "added": "2026-04",
+      "importance_score": 6,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/scripts/agents/pdf/SKILL.md",
+          "search_text": "- `pdfplumber` helps text/table extraction, but retain visual inspection to avoid layout issues."
+        },
+        {
+          "file": "code/scripts/agents/pdf/SKILL.md",
+          "search_text": "- Always verify page count, and ideally spot-check a few pages visually if the documents are important."
+        },
+        {
+          "file": "code/scripts/agents/pdf/SKILL.md",
+          "search_text": "pdfcpu validate -- input.pdf"
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 74,
+      "name": "Vector Art / SVG Orchestration",
+      "quadrant": "tools",
+      "ring": "trial",
+      "change": "",
+      "description": "Assemble visual assets by choosing dedicated sources for characters, scenes, objects, logos, and animation, then composite them in-browser. This is a deliberate asset-pipeline view of AI-assisted graphics work.",
+      "added": "2026-04",
+      "importance_score": 6,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/scripts/agents/vector-art/SKILL.md",
+          "search_text": "Follow the **Puppet Master architecture**: assign each asset category a dedicated source, then composite and animate in-browser."
+        },
+        {
+          "file": "code/scripts/agents/vector-art/SKILL.md",
+          "search_text": "Need an OBJECT/PROP?\u2192 Iconify search \u2192 pick flat-color-icons set for consistency"
+        },
+        {
+          "file": "code/scripts/agents/vector-art/SKILL.md",
+          "search_text": "Search:    GET https://api.iconify.design/search?query={term}&limit=10"
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 75,
+      "name": "Demo / POC Scaffold Discipline",
+      "quadrant": "frameworks",
+      "ring": "trial",
+      "change": "",
+      "description": "Demos and proofs-of-concept should be scaffolded with explicit config, one-click starts, responsive UX, and visible loading states. The goal is to make a demo self-serve instead of fragile.",
+      "added": "2026-04",
+      "importance_score": 7,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/scripts/agents/demos/SKILL.md",
+          "search_text": "Use when creating demos or POCs"
+        },
+        {
+          "file": "code/scripts/agents/demos/SKILL.md",
+          "search_text": "Always show a spinner while awaiting network call. Show progress bars for batch/iterative work"
+        },
+        {
+          "file": "code/scripts/agents/demos/SKILL.md",
+          "search_text": "Provide a responsive UX"
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 76,
+      "name": "Black-Box Helper Scripts / --help First",
+      "quadrant": "tools",
+      "ring": "adopt",
+      "change": "",
+      "description": "Prefer bundled helper scripts as black boxes and start by reading their `--help` rather than their source. That keeps agent context small while still using the available automation safely.",
+      "added": "2026-04",
+      "importance_score": 7,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/scripts/agents/webapp-testing/SKILL.md",
+          "search_text": "Always run scripts with `--help` first"
+        },
+        {
+          "file": "code/scripts/agents/webapp-testing/SKILL.md",
+          "search_text": "Use bundled scripts as black boxes"
+        },
+        {
+          "file": "code/scripts/agents/webapp-testing/SKILL.md",
+          "search_text": "These scripts handle common, complex workflows reliably without cluttering the context window."
+        }
+      ],
+      "tags": {
+        "category": "b02",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 77,
+      "name": "Emotion and Persona Prompt Hacks",
+      "quadrant": "techniques",
+      "ring": "hold",
+      "change": "",
+      "description": "Treat emotional, persuasive, bullying, or persona-flavored prompt rewrites as mostly noise; if prompting helps, plain reasoning cues matter more than theatrics.",
+      "added": "2025-01",
+      "importance_score": 7,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/emotion-prompts-dont-help-reasoning-does.md",
+          "search_text": "- **\"Think step by step\" (Reasoning)** is the only prompt variant that _very slightly_ improves overall accuracy across the 40 models tested, and even that edge is modest (+3.5 percentage-points vs the model's own _Normal_ wording, _p ~ 0.06_)."
+        },
+        {
+          "file": "code/blog/posts/2025/emotion-prompts-dont-help-reasoning-does.md",
+          "search_text": "- All other emotion- or persuasion-style rewrites (Expert, Emotion, Incentive, Bullying \u2026 Polite) either make no material difference or hurt accuracy a little."
+        },
+        {
+          "file": "code/blog/posts/2025/emotion-prompts-dont-help-reasoning-does.md",
+          "search_text": "- Harder problems (4- to 7-digit products) are where \"Reasoning\" helps most; on single-digit arithmetic it actually harms accuracy."
+        }
+      ],
+      "tags": {
+        "category": "b08",
+        "maturity": "emerging"
+      }
+    },
+    {
+      "id": 78,
+      "name": "Engineering Harnesses Over Raw Model Quality",
+      "quadrant": "frameworks",
+      "ring": "adopt",
+      "change": "",
+      "description": "Treat the engineering harness around a model as more decisive than raw model quality: model choice matters, but routing, constraints, evaluation, and orchestration matter more.",
+      "added": "2026-02-11",
+      "importance_score": 8,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2026/gemini-cli-harness-is-not-good-enough.md",
+          "search_text": "I've long felt that while the Gemini 3 Pro model is fairly good, the Gemini CLI harness isn't. I saw an example of this today."
+        },
+        {
+          "file": "code/blog/posts/2026/transcript-ai-ded-interviews.md",
+          "search_text": "At Straive, we assume models will hallucinate. The true enterprise differentiator is the _engineering harness_ built around them."
+        },
+        {
+          "file": "Dropbox/notes/transcripts/extract/ai/2026-02-11 Elsevier Kanwar.md",
+          "search_text": "- **Adopt a Three-Layer AI Stack:** View AI implementation as a distinct stack consisting of foundation model selection, a customized agentic harness, and domain-specific prompting."
+        }
+      ],
+      "tags": {
+        "category": "b08",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2026-02-11",
+          "ring": "adopt",
+          "note": "The harness first appears as an explicit architectural layer between model selection and prompting.",
+          "source_tags": [
+            {
+              "file": "Dropbox/notes/transcripts/extract/ai/2026-02-11 Elsevier Kanwar.md",
+              "search_text": "- **Adopt a Three-Layer AI Stack:** View AI implementation as a distinct stack consisting of foundation model selection, a customized agentic harness, and domain-specific prompting."
+            }
+          ]
+        },
+        {
+          "date": "2026-03-08",
+          "ring": "adopt",
+          "note": "That abstraction becomes concrete in direct frustration with a strong model trapped inside a weak CLI harness.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/gemini-cli-harness-is-not-good-enough.md",
+              "search_text": "I've long felt that while the Gemini 3 Pro model is fairly good, the Gemini CLI harness isn't. I saw an example of this today."
+            },
+            {
+              "file": "code/blog/posts/2026/gemini-cli-harness-is-not-good-enough.md",
+              "search_text": "Still, Gemini CLI should not have gotten stuck where it did."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 79,
+      "name": "Institutional Accountability for AI",
+      "quadrant": "frameworks",
+      "ring": "assess",
+      "change": "",
+      "description": "Assume AI can be held to account institutionally if needed; the real design problem is choosing the right accountability structure and incentives, not claiming accountability is impossible.",
+      "added": "2025-11-10",
+      "importance_score": 7,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/ai-can-be-held-to-account.md",
+          "search_text": "\"Humans can be held to account. Not AI.\""
+        },
+        {
+          "file": "code/blog/posts/2025/ai-can-be-held-to-account.md",
+          "search_text": "If we need to, AI can be held to account."
+        },
+        {
+          "file": "code/blog/posts/2025/ai-can-be-held-to-account.md",
+          "search_text": "Whether we should is a different question. The question is how, and does it incentivize/deter the right behavior, or stifle innovation and help evade responsibility."
+        }
+      ],
+      "tags": {
+        "category": "b08",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-11-10",
+          "ring": "assess",
+          "note": "The stance is not that AI accountability is impossible, but that the question is how to structure it well.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/ai-can-be-held-to-account.md",
+              "search_text": "If we need to, AI can be held to account."
+            },
+            {
+              "file": "code/blog/posts/2025/ai-can-be-held-to-account.md",
+              "search_text": "Whether we should is a different question. The question is how, and does it incentivize/deter the right behavior, or stifle innovation and help evade responsibility."
+            }
+          ]
+        },
+        {
+          "date": "2026-02-15",
+          "ring": "assess",
+          "note": "This later aligns with the broader view that accountability may matter more than taste in the AI era.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2026/how-to-develop-taste.md",
+              "search_text": "Accountability may be more important."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 80,
+      "name": "Architecture Diagrams Directly from Code",
+      "quadrant": "techniques",
+      "ring": "trial",
+      "change": "",
+      "description": "Turn a repo into architecture diagrams by piping code into an LLM with diagram-specific prompting, and evolve the diagramming substrate when a better representation appears.",
+      "added": "2025-05-17",
+      "importance_score": 7,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/how-to-create-a-technical-architecture-from-code-with-chatgpt.md",
+          "search_text": "Here's my current workflow to create technical architecture diagrams from code."
+        },
+        {
+          "file": "code/blog/posts/2025/how-to-create-a-technical-architecture-from-code-with-chatgpt.md",
+          "search_text": "fd | xargs uvx files-to-prompt --cxml | xclip -selection clipboard"
+        },
+        {
+          "file": "code/blog/posts/2025/how-to-create-a-technical-architecture-from-code-with-chatgpt-and-plantuml.md",
+          "search_text": "[Earlier](/blog/how-to-create-a-technical-architecture-from-code-with-chatgpt/), I used [Mermaid](https://www.mermaidchart.com/) for technical architectures. But [PlantUML](https://plantuml.com/) seems a better option for cloud architecture diagrams."
+        }
+      ],
+      "tags": {
+        "category": "b08",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-05-17",
+          "ring": "trial",
+          "note": "The initial workflow used Mermaid plus a rich prompt to derive architecture diagrams from pasted code.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/how-to-create-a-technical-architecture-from-code-with-chatgpt.md",
+              "search_text": "Here's my current workflow to create technical architecture diagrams from code."
+            },
+            {
+              "file": "code/blog/posts/2025/how-to-create-a-technical-architecture-from-code-with-chatgpt.md",
+              "search_text": "**STEP 2: Prompt for the a Mermaid diagram**"
+            }
+          ]
+        },
+        {
+          "date": "2025-05-24",
+          "ring": "trial",
+          "note": "A week later the preferred rendering surface shifted from Mermaid to PlantUML for cloud architectures.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/how-to-create-a-technical-architecture-from-code-with-chatgpt-and-plantuml.md",
+              "search_text": "[Earlier](/blog/how-to-create-a-technical-architecture-from-code-with-chatgpt/), I used [Mermaid](https://www.mermaidchart.com/) for technical architectures. But [PlantUML](https://plantuml.com/) seems a better option for cloud architecture diagrams."
+            },
+            {
+              "file": "code/blog/posts/2025/how-to-create-a-technical-architecture-from-code-with-chatgpt-and-plantuml.md",
+              "search_text": "**STEP 3: Prompt for a PlantUML diagram**"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 81,
+      "name": "Ask for the Output, Not the Code",
+      "quadrant": "techniques",
+      "ring": "trial",
+      "change": "",
+      "description": "When a model can execute code while reasoning, steer it toward delivering the finished artifact or answer directly and judge the result rather than prematurely dropping into code review.",
+      "added": "2025-04-20",
+      "importance_score": 7,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/how-to-create-a-data-visualization-without-coding.md",
+          "search_text": "This is a popular visualization, but I wanted to see if I could get the newer OpenAI models to create the visual without me \ud835\uddff\ud835\ude02\ud835\uddfb\ud835\uddfb\ud835\uddf6\ud835\uddfb\ud835\uddf4 any code (i.e. I just want the answer.) After a couple of iterations, O3 did a great job with this prompt:"
+        },
+        {
+          "file": "code/blog/posts/2025/how-to-create-a-data-visualization-without-coding.md",
+          "search_text": "1. **Ask for the output, not the code**. Models like O3 and O4 Mini can **run code** while thinking. Let's stop asking for code to run. Just ask for the output directly. Let it figure out how."
+        },
+        {
+          "file": "code/blog/posts/2025/how-to-use-the-new-o4-mini-for-data-visualization.md",
+          "search_text": "I did not look at the **code**. I just focused on the picture and suggested changes."
+        }
+      ],
+      "tags": {
+        "category": "b08",
+        "maturity": "emerging"
+      },
+      "history": [
+        {
+          "date": "2025-04-20",
+          "ring": "trial",
+          "note": "The first version of the workflow is already output-focused: let the model execute code and iterate on the picture rather than inspecting code first.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/how-to-use-the-new-o4-mini-for-data-visualization.md",
+              "search_text": "I did not look at the **code**. I just focused on the picture and suggested changes."
+            },
+            {
+              "file": "code/blog/posts/2025/how-to-use-the-new-o4-mini-for-data-visualization.md",
+              "search_text": "3. I can **run code**. This is a powerful step. It executed the code and produced the visualization above."
+            }
+          ]
+        },
+        {
+          "date": "2025-04-27",
+          "ring": "trial",
+          "note": "That then becomes an explicit rule: ask for the artifact directly, not the code.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/how-to-create-a-data-visualization-without-coding.md",
+              "search_text": "1. **Ask for the output, not the code**. Models like O3 and O4 Mini can **run code** while thinking. Let's stop asking for code to run. Just ask for the output directly. Let it figure out how."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 82,
+      "name": "AI for Visualization Ideation, Humans for Selection",
+      "quadrant": "frameworks",
+      "ring": "adopt",
+      "change": "",
+      "description": "Use AI to generate a broad, creative set of visualization options quickly, but keep the final act of choosing the right chart with the human because audience, context, and taste still dominate that decision.",
+      "added": "2025-01",
+      "importance_score": 8,
+      "confidence_score": 8,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/ai-beats-me-at-dataviz.md",
+          "search_text": "**Its suggestions were better than mine**."
+        },
+        {
+          "file": "code/blog/posts/2025/ai-beats-me-at-dataviz.md",
+          "search_text": "**AI**'**s better at ideation**. It's **fast** and can generate creative ideas faster than I can sketch on a whiteboard. It **knows** xenographics and every visualization ever made and can **recombine** them in novel ways."
+        },
+        {
+          "file": "code/blog/posts/2025/ai-beats-me-at-dataviz.md",
+          "search_text": "**I**'**m better at selection**. For now. Knowing which visualization requires knowing the audience, context, and intent. **It requires taste** (accumulated wisdom from showing the wrong chart to the wrong audience enough times)."
+        }
+      ],
+      "tags": {
+        "category": "b08",
+        "maturity": "stable"
+      }
+    },
+    {
+      "id": 83,
+      "name": "Voice Coding for Live Demos",
+      "quadrant": "techniques",
+      "ring": "adopt",
+      "change": "",
+      "description": "For public demos, move from static typing toward voice-driven coding loops that keep the LLM inside the presentation surface, stream output, and preserve audience attention.",
+      "added": "2025-02-26",
+      "importance_score": 7,
+      "confidence_score": 9,
+      "source_tags": [
+        {
+          "file": "code/blog/posts/2025/voice-coding-is-the-new-live-coding.md",
+          "search_text": "1. **Dictate, don't type.** Speaking is faster **and** more engaging. That's why I built this workflow."
+        },
+        {
+          "file": "code/blog/posts/2025/voice-coding-is-the-new-live-coding.md",
+          "search_text": "2. **Avoid Alt-Tab.** Bring the LLM **into** your app. Window-switching and copy-paste break focus for you **and** the audience."
+        },
+        {
+          "file": "code/blog/posts/2025/voice-coding-is-the-new-live-coding.md",
+          "search_text": "3. **Always stream output.** Narrate as it loads. `| tee /dev/tty` streams while piping."
+        }
+      ],
+      "tags": {
+        "category": "b08",
+        "maturity": "stable"
+      },
+      "history": [
+        {
+          "date": "2025-02-26",
+          "ring": "trial",
+          "note": "The presentation surface first moved into the shell itself via command-line slideshows.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/command-line-slideshows-in-bash.md",
+              "search_text": "This allowed me a new kind of workflow, where the <em>shell itself</em> is the slides layer."
+            },
+            {
+              "file": "code/blog/posts/2025/command-line-slideshows-in-bash.md",
+              "search_text": "An aside</strong>. These days, it's easier to <em>create</em> small tools than <em>search</em> for something that exists."
+            }
+          ]
+        },
+        {
+          "date": "2025-09-21",
+          "ring": "adopt",
+          "note": "That shell-native presentation style then evolved into an explicit voice-coding loop for live workshops and talks.",
+          "source_tags": [
+            {
+              "file": "code/blog/posts/2025/voice-coding-is-the-new-live-coding.md",
+              "search_text": "In Sep 2025, at PyCon India, I extended the setup for voice typing."
+            },
+            {
+              "file": "code/blog/posts/2025/voice-coding-is-the-new-live-coding.md",
+              "search_text": "1. **Dictate, don't type.** Speaking is faster **and** more engaging. That's why I built this workflow."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

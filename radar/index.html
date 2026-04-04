@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Technology Radar</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20fill%3D%22%231a7a8a%22%20rx%3D%2210%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%2220%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%2212%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%222%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%224%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+
+  <!-- Loading screen -->
+  <div id="loading" class="loading-screen" role="status" aria-live="polite">
+    <div class="loading-content">
+      <svg class="loading-radar" viewBox="0 0 80 80" width="80" height="80">
+        <circle cx="40" cy="40" r="34" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.3" />
+        <circle cx="40" cy="40" r="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.5" />
+        <circle cx="40" cy="40" r="10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.7" />
+      </svg>
+      <p class="loading-label">Loading radar…</p>
+    </div>
+  </div>
+
+  <!-- App root: filter bar at top, then radar + sidebar side by side -->
+  <div id="app" class="app" hidden>
+
+    <!-- Full-width filter row (filter controls + dark mode toggle) -->
+    <div class="filter-row">
+      <div id="filter-bar" class="filter-bar" role="search"></div>
+      <!-- Static dark mode toggle — must be in DOM before bootstrap-dark-theme module runs -->
+      <div class="header-dark-theme-slot">
+        <div class="bootstrap-dark-theme"></div>
+      </div>
+    </div>
+
+    <!-- Main content row: radar left, sidebar right -->
+    <div class="main-row">
+      <main id="radar-main" class="radar-main">
+        <div id="radar-container" class="radar-container" aria-label="Technology radar visualization"></div>
+        <div id="tooltip" class="node-tooltip" role="tooltip" aria-hidden="true"></div>
+      </main>
+
+      <!-- Right sidebar: title, how-to explanation, legend -->
+      <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+          <div id="sidebar-logo" class="sidebar-logo-wrap"></div>
+          <div id="sidebar-title-text"></div>
+        </div>
+        <div class="sidebar-scroll">
+          <div id="sidebar-info" class="sidebar-info"></div>
+          <div id="sidebar-legend" class="sidebar-legend-section"></div>
+        </div>
+      </aside>
+    </div>
+
+  </div>
+
+  <!-- Detail panel (fixed overlay) -->
+  <div id="panel-scrim" class="panel-scrim" aria-hidden="true"></div>
+  <aside id="detail-panel" class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="panel-node-name" hidden>
+    <div class="panel-header">
+      <div id="panel-nav" class="panel-nav"></div>
+      <button id="panel-close" class="panel-close-btn" aria-label="Close panel">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div id="panel-content" class="panel-content" tabindex="-1"></div>
+  </aside>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
+  <!-- DOMPurify as global (no ESM export) -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js" crossorigin="anonymous"></script>
+  <!-- App: ES module, imports D3 + marked from CDN -->
+  <script type="module" src="radar.js"></script>
+
+</body>
+
+</html>
