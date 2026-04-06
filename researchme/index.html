@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Me</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d6efd'/%3E%3Cpath fill='%23fff' d='M27.5 14a17.5 17.5 0 1 0 10.89 31.2l9.2 9.2 3.18-3.18-9.2-9.2A17.5 17.5 0 0 0 27.5 14Zm0 4.5a13 13 0 1 1 0 26 13 13 0 0 1 0-26Z'/%3E%3C/svg%3E" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" crossorigin="anonymous" />
+  <style>
+    .provider-button svg {
+      width: 1rem;
+      height: 1rem;
+      fill: currentColor;
+      flex: 0 0 auto;
+    }
+
+  </style>
+</head>
+
+<body class="bg-body-tertiary">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-person-vcard-fill me-2"></i>
+        Research Me
+      </a>
+      <div class="bootstrap-dark-theme"></div>
+    </div>
+  </nav>
+
+  <main class="container pb-5">
+    <header class="mt-4 mb-4">
+      <h1 class="fs-2 mb-3">What does AI know about you — and what has it gotten wrong?</h1>
+      <p class="lead text-secondary mb-0">
+        Run a quick self-audit with the strongest public-web research prompt on this page. Enter your name and role,
+        then open ChatGPT or Claude with the prompt already filled in.
+      </p>
+    </header>
+
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="card shadow-sm h-100">
+          <div class="card-body p-4">
+            <h2 class="h4 mb-3">How it works</h2>
+            <ol class="mb-4">
+              <li class="mb-2">Fill in your <strong>name</strong> and <strong>role</strong>.</li>
+              <li class="mb-2">Click <strong>ChatGPT</strong> or <strong>Claude</strong> to open a new tab with a pre-filled prompt.</li>
+              <li>For best results, pick the strongest model available and turn on <strong>Extended thinking</strong>.</li>
+            </ol>
+
+            <div class="alert alert-warning mb-0" role="alert">
+              You will get an AI dossier covering roles, public records, and media mentions it can find, plus places
+              where sources contradict each other. Most people find at least one factual error. Some find more.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+          <div class="card-body p-4">
+            <form id="researchme-form">
+              <div class="mb-3">
+                <label class="form-label" for="name-input">Your full name</label>
+                <input id="name-input" name="name" class="form-control" type="text" placeholder="Ada Lovelace" autocomplete="name" inputmode="text" enterkeyhint="next" spellcheck="false" />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="role-input">Your role / any other info</label>
+                <input id="role-input" name="role" class="form-control" type="text" placeholder="Chief Technology Officer" autocomplete="organization-title" inputmode="text" enterkeyhint="go" spellcheck="false" />
+              </div>
+
+              <p id="launch-status" class="text-secondary small mb-3" aria-live="polite">Add both fields to unlock the launch buttons.</p>
+
+              <div class="d-grid gap-2 d-lg-flex">
+                <button id="chatgpt-button" type="button" class="provider-button btn btn-success flex-fill" disabled>
+                  <!-- Source: Simple Icons -->
+                  <svg viewBox="0 0 24 24" aria-hidden="true" style="margin-bottom: 2px">
+                    <path d="M22.281 9.82a5.985 5.985 0 0 0-.516-4.91 6.047 6.047 0 0 0-6.51-2.9A6.067 6.067 0 0 0 4.98 4.18a5.985 5.985 0 0 0-3.997 2.9 6.046 6.046 0 0 0 .743 7.098 5.98 5.98 0 0 0 .51 4.91 6.051 6.051 0 0 0 6.515 2.9A5.984 5.984 0 0 0 13.26 24a6.056 6.056 0 0 0 5.771-4.206 5.99 5.99 0 0 0 3.998-2.9 6.056 6.056 0 0 0-.747-7.073Zm-9.021 12.61a4.476 4.476 0 0 1-2.876-1.04l.14-.081 4.78-2.758a.795.795 0 0 0 .391-.681v-6.737l2.021 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494ZM3.6 18.304a4.47 4.47 0 0 1-.536-3.014l.143.085 4.782 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.739 19.95a4.5 4.5 0 0 1-6.14-1.646ZM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .387.676l5.816 3.355-2.02 1.168a.076.076 0 0 1-.072 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872Zm16.597 3.855-5.843-3.371 2.02-1.168a.076.076 0 0 1 .07 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105V12.43a.79.79 0 0 0-.401-.679Zm2.01-3.023-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .029-.061l4.83-2.787a4.5 4.5 0 0 1 6.679 4.66Zm-12.64 4.135-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.703 5.46a.795.795 0 0 0-.392.681v6.722Zm1.097-2.365 2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5Z" />
+                  </svg>
+                  ChatGPT
+                </button>
+
+                <button id="claude-button" type="button" class="provider-button btn btn-success flex-fill" disabled>
+                  <!-- Source: https://brandfetch.com/anthropic.com?library=default&collection=logos&asset=idTdWRXggY -->
+                  <svg viewBox="0 0 92.2 65" aria-hidden="true" style="margin-bottom: 2px">
+                    <path d="M66.5,0H52.4l25.7,65h14.1L66.5,0z M25.7,0L0,65h14.4l5.3-13.6h26.9L51.8,65h14.4L40.5,0C40.5,0,25.7,0,25.7,0z M24.3,39.3l8.8-22.8l8.8,22.8H24.3z" />
+                  </svg>
+                  Claude
+                </button>
+              </div>
+            </form>
+
+            <p class="text-secondary small mt-4 mb-0">
+              This page does not send your details anywhere. It only prepares the prompt and opens the provider you choose.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>

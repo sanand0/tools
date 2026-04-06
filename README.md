@@ -6,6 +6,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 
 ## Available Tools
 
+- **[Research Me](./researchme/)**: Launch a self-research AI dossier prompt in ChatGPT or Claude using your name and role.
 - **[Unicoder](./unicoder/)**: Converts standard Markdown syntax into text styled with special Unicode characters to create "fancy text" for platforms without rich text support.
 - **[Recall](./recall/)**: Randomly recall list items from Markdown.
 - **[Ideator](./ideator/)**: Fuse notes into a ChatGPT ideation prompt.

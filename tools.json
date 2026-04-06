@@ -1,6 +1,13 @@
 {
   "tools": [
     {
+      "icon": "bi-person-vcard",
+      "title": "Research Me",
+      "description": "Launch a public-dossier research prompt in ChatGPT or Claude using your name and role.",
+      "url": "researchme",
+      "created": "2026-04-06T00:00:00+00:00"
+    },
+    {
       "icon": "bi-bullseye",
       "title": "Technology Radar",
       "description": "Track technology adoption across four quadrants (Techniques, Tools, Platforms, Frameworks) and four rings (Adopt, Trial, Assess, Hold).",
