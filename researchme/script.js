@@ -21,12 +21,12 @@ const providers = {
   chatgpt: {
     buttonId: "chatgpt-button",
     label: "ChatGPT",
-    url: "https://chatgpt.com/?q=%s&model=gpt-5.4",
+    url: "https://chatgpt.com/?q=%s",
   },
   claude: {
     buttonId: "claude-button",
     label: "Claude",
-    url: "https://claude.ai/new?q=%s&model=claude-sonnet-4.6",
+    url: "https://claude.ai/new?q=%s",
   },
 };
 
