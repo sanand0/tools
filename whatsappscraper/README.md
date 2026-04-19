@@ -46,7 +46,7 @@ Each entry in the JSON array is a “message-like row” from WhatsApp Web’s `
 ```ts
 type WhatsAppScrapedMessage = {
   messageId: string;
-  userId: string;
+  userId?: string;
   isOutgoing?: true;
   isRecalled?: true;
 
@@ -78,8 +78,8 @@ type WhatsAppScrapedMessage = {
 ### Field semantics
 
 - `messageId`: Message identifier parsed from the row’s `data-id`. Used as the primary key for de-duplication and merging. Format is not documented by WhatsApp; it may change.
-- `userId`: Chat identifier parsed from the row’s `data-id` (the chat JID “user” part, without the domain). Despite the name, this is **not** the message author; it’s the currently-open chat/thread id (often constant across all rows you scrape).
-- `isOutgoing`: Present only when WhatsApp marks the row as sent by the currently logged-in account (`data-id` starts with `true_`).
+- `userId`: Best-effort chat identifier for the currently open thread. In older WhatsApp Web DOMs this was parsed from the row `data-id`; in newer DOMs it may be missing when WhatsApp no longer exposes the current chat JID cleanly in the visible DOM. Despite the name, this is **not** the message author.
+- `isOutgoing`: Present only when WhatsApp marks the row as sent by the currently logged-in account. In older DOMs this came from the packed `data-id`; in newer DOMs it is inferred from the row structure such as `.message-out`.
 - `isRecalled`: Present only when the row is a recalled/deleted message. Detected via `[data-icon="recalled"]`.
 - `time`: Message timestamp as an ISO 8601 string. Parsed from `data-pre-plain-text` when available, otherwise inferred from the visible `HH:MM` / `H:MM am|pm` timestamp using the previous message date.
 - `author`: Display name shown by WhatsApp for the sender. In group chats, WhatsApp sometimes omits the author UI for consecutive messages; the scraper inherits the previous author when WhatsApp clearly rendered the row as a continuation.
@@ -111,7 +111,8 @@ WhatsApp sometimes shows a “preview card” even when the message text is just
 
 These are the observable invariants from the current implementation:
 
-- Always emit `messageId` and `userId` for every captured row.
+- Always emit `messageId` for every captured row.
+- `userId` is best-effort and may be omitted when WhatsApp no longer exposes the current chat id cleanly.
 - Only emit boolean flags when they are `true`.
 - If `linkUrl` is present, `linkSite` should also be present and should correspond to `new URL(linkUrl).hostname` (minus `www.`).
 - If `quoteText` is present, `quoteAuthor` should usually be present, but `quoteAuthorPhone` and `quoteMessageId` are **optional** and best-effort.

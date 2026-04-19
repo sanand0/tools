@@ -24,6 +24,7 @@ export function createScraperState(seed) {
 
 export function whatsappMessages(rootDocument = document) {
   const messages = [];
+  const chatId = resolveCurrentChatId(rootDocument);
   const context = {
     lastAuthor: null,
     lastAuthorPhone: null,
@@ -32,15 +33,10 @@ export function whatsappMessages(rootDocument = document) {
   };
 
   for (const row of rootDocument.querySelectorAll('#main [role="row"]')) {
-    const messageNode = row.querySelector("[data-id]");
-    const id = parseDataId(messageNode?.dataset.id);
+    const id = parseRowIdentity(row, chatId);
     if (!id) continue;
 
-    const message = compactMessage({
-      messageId: id.messageId,
-      userId: id.userId,
-      ...(id.isOutgoing ? { isOutgoing: true } : {}),
-    });
+    const message = compactMessage(id);
 
     const prePlainText = row.querySelector("[data-pre-plain-text]")?.dataset
       .prePlainText;
@@ -106,15 +102,72 @@ export function whatsappMessages(rootDocument = document) {
   return messages;
 }
 
+function parseRowIdentity(row, chatId) {
+  const messageNode = row.querySelector("[data-id]");
+  const parsed = parseDataId(messageNode?.dataset.id);
+  if (!parsed?.messageId) return null;
+  return compactMessage({
+    messageId: parsed.messageId,
+    userId: parsed.userId || chatId,
+    ...(parsed.isOutgoing || isOutgoingRow(row) ? { isOutgoing: true } : {}),
+  });
+}
+
 function parseDataId(value) {
   if (!value) return null;
   const match = value.match(/^(true|false)_([^@]+)@[^_]+_([^_]+)/i);
-  if (!match) return null;
-  return {
-    isOutgoing: match[1] === "true",
-    userId: match[2],
-    messageId: match[3],
-  };
+  if (match) {
+    return {
+      isOutgoing: match[1] === "true",
+      userId: match[2],
+      messageId: match[3],
+    };
+  }
+
+  const bareMessageId = parseBareMessageId(value);
+  if (!bareMessageId) return null;
+  return { messageId: bareMessageId };
+}
+
+function parseBareMessageId(value) {
+  const trimmed = normalizeInlineText(value);
+  if (!trimmed || /\s/.test(trimmed)) return null;
+  if (!/^[a-z0-9._:-]{8,}$/i.test(trimmed)) return null;
+  return trimmed;
+}
+
+function isOutgoingRow(row) {
+  return !!row.querySelector(".message-out");
+}
+
+function resolveCurrentChatId(rootDocument) {
+  const candidates = [
+    ['#main header [data-chat-id]', "data-chat-id"],
+    ['#main header [data-contact-id]', "data-contact-id"],
+    ['#main header [data-jid]', "data-jid"],
+    ['#pane-side [aria-selected="true"] [data-chat-id]', "data-chat-id"],
+    ['#pane-side [aria-selected="true"] [data-contact-id]', "data-contact-id"],
+    ['#pane-side [aria-selected="true"] [data-jid]', "data-jid"],
+  ];
+
+  for (const [selector, attribute] of candidates) {
+    const value = rootDocument.querySelector(selector)?.getAttribute(attribute);
+    const chatId = normalizeChatId(value);
+    if (chatId) return chatId;
+  }
+
+  return undefined;
+}
+
+function normalizeChatId(value) {
+  const trimmed = normalizeInlineText(value).replace(/\u200b/g, "");
+  if (!trimmed) return undefined;
+
+  const jidMatch = trimmed.match(/^([^@\s]+)@[^@\s]+$/);
+  if (jidMatch) return jidMatch[1];
+
+  if (/^[a-z0-9._:-]{6,}$/i.test(trimmed)) return trimmed;
+  return undefined;
 }
 
 function parsePrePlainText(value) {

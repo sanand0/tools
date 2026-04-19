@@ -230,6 +230,38 @@ describe("whatsappscraper", () => {
     expect(messages[8].text).toBeUndefined();
   });
 
+  it("extracts Apr 19 2026 bare-data-id rows and makes userId optional", async () => {
+    const { page: fixturePage, document: fixtureDocument } = await loadFrom(
+      __dirname,
+      "test-messages-2026-04.html",
+    );
+    const messages = whatsappMessages(fixtureDocument);
+    fixturePage.close();
+
+    expect(messages).toHaveLength(2);
+
+    expect(messages[0]).toMatchObject({
+      messageId: "3EB0041865291286CF6A5D",
+      author: "Ashith",
+      authorPhone: "+91 70928 62522",
+      time: "2026-04-18T13:32:00.000Z",
+      text: "need to try out\nhttps://specstory.com/",
+      linkUrl: "https://specstory.com/",
+      linkSite: "specstory.com",
+    });
+    expect(messages[0]).not.toHaveProperty("userId");
+    expect(messages[0]).not.toHaveProperty("isOutgoing");
+
+    expect(messages[1]).toMatchObject({
+      messageId: "3AOUTGOINGAPR2026",
+      author: "Jordan Poe",
+      isOutgoing: true,
+      time: "2026-04-19T20:05:00.000Z",
+      text: "Will try this tonight.",
+    });
+    expect(messages[1]).not.toHaveProperty("userId");
+  });
+
   it("extracts image captions and dimensions from media messages", () => {
     const messages = messagesFrom(`
       <div id="main">

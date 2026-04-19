@@ -1,4 +1,4 @@
-# WhatsApp Scraper Rewrite, 28 Mar 2026
+9# WhatsApp Scraper Rewrite, 28 Mar 2026
 
 <!--
 cd ~/code/tools
@@ -61,4 +61,22 @@ Create `post-mortem.md` and add `## Post mortem (%d %b %Y)` with today's date.
 
 Commit all files (including the prompts.md I was editing).
 
-<!-- codex resume 'WhatsApp scraper rewrite' -->
+--- <!-- 19 Apr 2026 -->
+
+The scraper was working fine from 28 Mar 2026 until recently. Today (19 Apr 2026), it fails and shows "Copy 0 messages" and the output is an empty array.
+
+Find out what changed in the WhatsApp Web UI. CDP is still at localhost:9222 and WhatsApp is running and logged in.
+
+Plan about the best way to fix this, and to make it easy to detect and fix such breakages in the future. Await my input before implementing.
+
+---
+
+Implement the change.
+Make userId optional when WhatsApp no longer exposes it cleanly with the code structured so userId can be upgraded later if we find a stable source.
+
+Then, create a whatsappscraper/notes.md and concisely document the DOM structure to make it easier for your own future self or other agents to understand changes and resolve them.
+
+- Document the old DOM structure in a section dated 28 Mar 2026.
+- Document the new DOM structure in a section dated 19 Apr 2026, as well as the what changed.
+
+<!-- codex resume 'WhatsApp scraper rewrite' --yolo -->
