@@ -1,6 +1,6 @@
-# AI-Powered Podcast Generator
+# Podcast Generator
 
-This tool automates the creation of a two-person podcast episode, from script generation to audio synthesis, using Large Language Models (LLMs).
+Generate podcasts from text using LLMs.
 
 ![Screenshot](screenshot.webp)
 

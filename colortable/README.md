@@ -1,6 +1,6 @@
 # Color Table Builder
 
-Paste a delimited table and get a minimal HTML table with value-based cell colors.
+Paste a delimited table and get a colored HTML table.
 
 ## What it does
 

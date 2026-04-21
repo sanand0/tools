@@ -1,6 +1,6 @@
 # Data Extractor
 
-Turn chart or table images into structured CSV data using OpenAI vision.
+Extract chart and table data from images into CSV.
 
 ![Screenshot](screenshot.webp)
 

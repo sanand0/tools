@@ -1,6 +1,6 @@
 # Codex Log Converter
 
-Convert a Codex CLI session log (`.jsonl`) into a readable Markdown recap (messages, reasoning blocks, and tool calls).
+Turn Codex CLI session JSONL logs into Markdown recaps.
 
 ## How to use
 

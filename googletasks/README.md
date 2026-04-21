@@ -1,7 +1,6 @@
-# Google Tasks Exporter
+# Google Tasks
 
-This tool lets you sign in with your Google account and download all of your tasks as a CSV file.
-It also lets you copy the results straight into Excel or Markdown, and delete all completed tasks.
+Download all your Google Tasks as CSV or Markdown and delete completed tasks.
 
 ![Screenshot](screenshot.webp)
 

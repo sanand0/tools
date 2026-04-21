@@ -1,6 +1,6 @@
-# Hacker News Thread Markdown (Bookmarklet)
+# Hacker News Thread Markdown
 
-Copy any Hacker News post—story plus all nested comments—as a Markdown list of lists. The bookmarklet copies the formatted thread straight to your clipboard.
+Bookmarklet to copy a Hacker News thread as nested Markdown bullets.
 
 ## Usage
 

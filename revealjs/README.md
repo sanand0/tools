@@ -1,6 +1,6 @@
-# Markdown to Reveal.js Presentation Generator
+# RevealJS Slides
 
-This tool provides a simple web interface to convert Markdown text into a Reveal.js HTML slideshow. It allows users to quickly create web-based presentations using familiar Markdown syntax.
+Convert Markdown to RevealJS HTML.
 
 ![Screenshot](screenshot.webp)
 

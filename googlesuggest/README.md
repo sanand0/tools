@@ -1,6 +1,6 @@
 # Google Suggest Explorer
 
-Explore Google autocomplete suggestions for a query across multiple English-speaking countries, then optionally generate a short LLM explanation of the patterns.
+Explore Google Search suggestions from different countries and get AI-powered humorous explanations.
 
 ## How to use
 

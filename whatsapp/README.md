@@ -1,6 +1,6 @@
-# WhatsApp Direct Message Link Generator
+# WhatsApp
 
-This tool generates a direct WhatsApp API link (`wa.me`) to start a chat with a given phone number. This allows users to send a WhatsApp message to a number without first needing to save it to their contacts list.
+Enter a mobile number and open a WhatsApp chat to them.
 
 ## What it does
 

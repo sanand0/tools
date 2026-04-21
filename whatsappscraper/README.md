@@ -1,6 +1,6 @@
-# WhatsApp Chat Scraper Bookmarklet
+# WhatsApp Scraper
 
-This tool is a browser bookmarklet that allows users to scrape messages from an active WhatsApp Web chat session. The extracted messages are compiled into a JSON format and copied to the user's clipboard.
+Scrape WhatsApp chat messages into JSON.
 
 ![Screenshot](screenshot.webp)
 

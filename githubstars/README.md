@@ -1,6 +1,6 @@
-# GitHub Stars Link Updater
+# GitHub Stars
 
-This tool updates GitHub repository links in Markdown text. It replaces the link text with the repository's name, star count, and the last pushed date.
+Replaces GitHub links in Markdown with the repo name, stars, and last pushed date.
 
 ![Screenshot](screenshot.webp)
 

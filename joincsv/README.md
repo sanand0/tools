@@ -1,6 +1,6 @@
 # Join CSV Tables
 
-Paste multiple CSV tables and join them by the first column (the key). This is useful when you have “wide” data split across multiple exports and want a single combined table.
+Join multiple tables on the first column.
 
 ## How to use
 

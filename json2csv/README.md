@@ -1,6 +1,6 @@
-# JSON to CSV Converter
+# JSON to CSV
 
-This tool converts JSON data into Comma Separated Values (CSV) format. It can also prepare the data for easy pasting into spreadsheet applications like Excel by converting it to Tab Separated Values (TSV).
+Convert arrays of JSON objects to CSV format.
 
 ![Screenshot](screenshot.webp)
 

@@ -1,6 +1,6 @@
 # What Next?
 
-"What Next?" is a flexible, offline-first single-page application for visual prioritization. It allows you to organize tasks, ideas, or any items on a customizable grid, classically known as an Eisenhower (Urgency/Importance) Matrix, to help you decide what to focus on next.
+Prioritization matrix helping you pick what to do next.
 
 One classic approach is to list all your items, rate them on an urgency and
 importance scale, and pick those on the top right quadrant. Stephen Covey

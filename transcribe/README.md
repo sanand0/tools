@@ -1,6 +1,6 @@
-# Real-Time Speech Transcription Tool
+# Transcribe Audio
 
-This tool provides real-time speech-to-text transcription using the browser's built-in SpeechRecognition API. It captures audio from the user's microphone and displays the recognized text on the screen.
+Transcribe audio from the speakers and microphone.
 
 ![Screenshot](screenshot.webp)
 

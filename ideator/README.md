@@ -1,6 +1,6 @@
-# Ideator - AI Concept Synthesizer
+# Ideator
 
-Break free from creative blocks by mashing up unexpected ideas.
+Fuse notes into a ChatGPT ideation prompt.
 
 ![Ideator Screenshot](https://via.placeholder.com/800x400/0d6efd/ffffff?text=Ideator+Screenshot)
 

@@ -1,6 +1,6 @@
-# Quotes Arena: AI-Generated Quote Comparison
+# Quotes arena
 
-Quotes Arena is a web application that allows users to compare short, AI-generated quotes side-by-side and vote for their preferred one. It also tracks and displays the performance (win percentages) of the different AI models that generated these quotes.
+Evaluate quotes from different models and see which one wins.
 
 ![Screenshot](screenshot.webp)
 

@@ -1,6 +1,6 @@
-# JSON String Trimmer
+# JSON Trimmer
 
-This tool recursively traverses a JSON object or array and truncates string values that exceed a user-specified maximum length.
+Trim JSON strings to a specified length.
 
 ![Screenshot](screenshot.webp)
 

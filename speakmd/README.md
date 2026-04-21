@@ -1,6 +1,6 @@
 # SpeakMD
 
-SpeakMD converts Markdown into a conversational script that is easy to narrate aloud. It streams the conversion through a Large Language Model so you can watch the text appear in real time.
+Turn Markdown into conversational text. Useful to read out copied ChatGPT output.
 
 ![Screenshot](screenshot.webp)
 

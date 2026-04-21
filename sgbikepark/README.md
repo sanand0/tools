@@ -1,6 +1,6 @@
-# Singapore Bike Parking Locator
+# SG Bike Park
 
-This web application displays bicycle parking locations in Singapore on an interactive map. It helps users find nearby bike parking facilities.
+Find out where to park your bicycle nearby in Singapore.
 
 ## What it does
 

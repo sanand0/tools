@@ -1,6 +1,6 @@
 # Findsongs
 
-Build AI-powered playlists from a short description, rate the results, and refine the mix while keeping your favourites.
+Generate playlists from your favourite songs, rate them, and refine picks.
 
 ## What it does
 

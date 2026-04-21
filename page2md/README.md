@@ -1,6 +1,6 @@
-# Page to Markdown Bookmarklet
+# Page to Markdown
 
-This tool is a browser bookmarklet that converts the content of the current web page, or a user's selection on that page, into Markdown format. The resulting Markdown is automatically copied to the clipboard.
+Bookmarklet to copy a web page or selection as Markdown.
 
 ![Screenshot](screenshot.webp)
 

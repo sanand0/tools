@@ -1,6 +1,6 @@
-# LLM-Powered Object Detection and Bounding Box Tool
+# LLM Bounding Boxes
 
-This tool uploads an image and uses various Large Language Models (LLMs) via the LLM Foundry service to perform object detection. It then displays the original image with bounding boxes and labels overlaid for each model used, and provides a table of detected objects, their colors, and coordinates.
+Check how well LLMs draw object bounding boxes in images.
 
 ## What it does
 

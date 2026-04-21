@@ -1,6 +1,6 @@
-# GitHub User Activity Summarizer
+# GitHub Summary
 
-This tool generates a blog-post-style summary of a GitHub user's activity within a specified date range.
+Summarize all activity by a user over a time period.
 
 ![Screenshot](screenshot.webp)
 

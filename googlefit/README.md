@@ -1,6 +1,6 @@
-# Google Fit Activity Viewer
+# Google Fit
 
-This tool allows you to view and summarize your Google Fit activity data obtained from Google Takeout.
+Upload Google Fit activity data and see a summary of the activity data by date.
 
 ![Screenshot](screenshot.webp)
 

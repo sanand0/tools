@@ -17,6 +17,21 @@
 
 Common layout: each tool has `index.html` linking Bootstrap 5, bootstrap-icons@1.13.1, a base64 favicon, a container with headers and forms, and a `<script type="module" src="script.js"></script>` that manipulates the DOM with Bootstrap classes.
 
+## Tool metadata and docs
+
+- `tools.json` is the source of truth for the tool registry. When adding, renaming, or changing a tool, update the matching `tools.json` entry in the same change.
+- Every local tool listed in `tools.json` must have a `README.md` at `${tool}/README.md`.
+- Keep each tool `README.md` in sync with `tools.json`:
+  line 1 must be `# ${title}`
+  line 3 must be the one-line `${description}`
+- New tools must follow the same README format:
+
+  ```md
+  # Tool Name
+
+  One-line tool description.
+  ```
+
 ## Writing tests
 
 - Use [vitest](http://npmjs.com/package/vitest) and [happy-dom](https://www.npmjs.com/package/happy-dom) for front-end testing.

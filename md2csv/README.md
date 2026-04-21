@@ -1,6 +1,6 @@
-# Markdown Table to CSV
+# Markdown to CSV
 
-Extract the first table from Markdown and convert it to CSV. Links become their text and images are removed.
+Extract the first Markdown table and download it as CSV. Useful to extract from ChatGPT
 
 ![Screenshot](screenshot.webp)
 

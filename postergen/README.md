@@ -1,6 +1,6 @@
-# PosterGen
+# Postergen
 
-PosterGen is an AI-powered tool that combines templated designs with generative AI to create professional posters from simple text prompts. It solves common challenges with AI image generation by using predefined templates while leveraging AI to fill in content.
+Create posters and social media banners based on templates
 
 ## Features
 

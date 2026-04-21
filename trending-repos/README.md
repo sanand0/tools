@@ -1,3 +1,3 @@
-# Trending Repositories Radar
+# Trending Repositories
 
-Weekly view of curated GitHub repositories from the [TIL trending list](https://raw.githubusercontent.com/sanand0/til/refs/heads/live/trending-repos.tsv). Filter by status or language, scan summaries, and jump straight into each project.
+Scan weekly trending GitHub repos with status and language filters.

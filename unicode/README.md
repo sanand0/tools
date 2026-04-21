@@ -1,6 +1,6 @@
-# Unicode Character Viewer
+# Unicode Characters
 
-This tool helps users identify, view, and copy non-ASCII Unicode characters present in a given text. It provides a clear display of each unique non-ASCII character along with its hexadecimal and decimal Unicode code points.
+Find non-ASCII Unicode characters in the clipboard.
 
 ![Screenshot](screenshot.webp)
 

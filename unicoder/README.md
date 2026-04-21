@@ -1,6 +1,6 @@
-# Markdown ↔ Unicode "Fancy Text" Converter
+# Unicoder
 
-This tool converts between standard Markdown syntax and text styled with special Unicode characters in both directions. This allows you to create visually distinct text (e.g., bold, italic, monospace) that can be used on platforms that don't support traditional rich text formatting but do render a wide range of Unicode characters.
+Convert Markdown to text to unicode equivalent with formatting.
 
 ![Screenshot](screenshot.webp)
 

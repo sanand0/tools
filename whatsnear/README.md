@@ -1,6 +1,6 @@
-# Nearby Attractions Explorer
+# What's Near Me?
 
-This web application helps users discover nearby tourist attractions based on their current geolocation. It displays these attractions on a map, provides AI-generated descriptions for them, and offers a text-to-speech feature to read these descriptions aloud.
+Find nearby attractions and places of interest.
 
 ![Screenshot](screenshot.webp)
 

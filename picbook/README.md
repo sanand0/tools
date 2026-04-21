@@ -1,6 +1,6 @@
 # PicBook
 
-PicBook turns a list of short captions into a sequence of images while keeping the style consistent. You can provide a reference image or URL as inspiration, add some context about the story and desired style, and then generate one panel per line.
+Create a sequence of images from captions.
 
 ![Screenshot](screenshot.webp)
 

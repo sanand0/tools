@@ -1,6 +1,6 @@
-# Hacker News to Markdown Converter
+# Hacker News Extractor
 
-This tool fetches top or best stories from Hacker News, converts their linked content to Markdown, and prepends Hacker News metadata as frontmatter. The primary intended use is for importing into NotebookLM.
+Extract Hacker News articles to Markdown format for NotebookLM.
 
 ![Screenshot](screenshot.webp)
 

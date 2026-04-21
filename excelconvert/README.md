@@ -1,6 +1,6 @@
 # Excel Converter
 
-Convert pasted Excel (TSV) data to JSONL, YAML, XML, or TOML.
+Convert Excel data to JSONL, YAML, XML, or TOML.
 
 ![Screenshot](screenshot.webp)
 
