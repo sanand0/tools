@@ -41,6 +41,19 @@ Custom slide:
 /slide/#?title=%23%20My%20Presentation&subtitle=A%20professional%20slide&font=Poppins&titleScale=2&subtitleScale=0&fgColor=%23ffffff&bgColor=%231a1a2e&bgSearch=https://images.unsplash.com/photo-1506905925346-21bda4d32df4
 ```
 
+## Rendering
+
+To embed the slide as HTML, use this template, replacing the `$` variables:
+
+```html
+<div style="all: initial; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 100vw; height: 100vh; background-size: cover; background-position: center; background-repeat: no-repeat; background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('$bgSearch'); background-color: $bgColor; font-family: '$font', sans-serif; box-sizing: border-box;">
+  <div style="position: relative; z-index: 1; text-align: center; padding: 2rem; max-width: 90%; box-sizing: border-box;">
+    <h1 style="margin: 0 0 1.5rem 0; font-weight: 700; line-height: 1.2; font-size: $titleSize; color: $fgColor;">$markdown(title)</h1>
+    <h2 style="margin: 0; font-weight: 400; line-height: 1.4; font-size: $subtitleSize; color: $fgColor;">$markdown(subtitle)</h2>
+  </div>
+</div>
+```
+
 ## Tips
 
 - Use Markdown in title/subtitle for **bold**, _italic_, or other formatting
