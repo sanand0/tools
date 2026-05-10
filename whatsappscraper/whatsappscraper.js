@@ -36,10 +36,13 @@ export function whatsappMessages(rootDocument = document) {
     const id = parseRowIdentity(row, chatId);
     if (!id) continue;
 
-    const message = compactMessage(id);
-
     const prePlainText = row.querySelector("[data-pre-plain-text]")?.dataset
       .prePlainText;
+    const dataId = row.querySelector("[data-id]")?.dataset.id;
+    if (!prePlainText && !matchPackedDataId(dataId || "")) continue;
+
+    const message = compactMessage(id);
+
     const meta = parsePrePlainText(prePlainText);
     if (meta.time) message.time = meta.time;
     if (meta.authorPhone) message.authorPhone = meta.authorPhone;
@@ -115,7 +118,7 @@ function parseRowIdentity(row, chatId) {
 
 function parseDataId(value) {
   if (!value) return null;
-  const match = value.match(/^(true|false)_([^@]+)@[^_]+_([^_]+)/i);
+  const match = matchPackedDataId(value);
   if (match) {
     return {
       isOutgoing: match[1] === "true",
@@ -127,6 +130,10 @@ function parseDataId(value) {
   const bareMessageId = parseBareMessageId(value);
   if (!bareMessageId) return null;
   return { messageId: bareMessageId };
+}
+
+function matchPackedDataId(value) {
+  return value.match(/^(true|false)_([^@]+)@[^_]+_([^_]+)/i);
 }
 
 function parseBareMessageId(value) {

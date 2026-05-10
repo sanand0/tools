@@ -262,6 +262,64 @@ describe("whatsappscraper", () => {
     expect(messages[1]).not.toHaveProperty("userId");
   });
 
+  it("extracts May 10 2026 rows without treating contact rows as messages", async () => {
+    const { page: fixturePage, document: fixtureDocument } = await loadFrom(
+      __dirname,
+      "test-messages-2026-05-10.html",
+    );
+    const messages = whatsappMessages(fixtureDocument);
+    fixturePage.close();
+
+    expect(messages).toHaveLength(3);
+
+    expect(messages[0]).toMatchObject({
+      messageId: "3EB00298006A5DC1795156",
+      author: "Nirant",
+      authorPhone: "+91 77378 87058",
+      time: "2026-05-10T12:19:00.000Z",
+      reactions: "❤ 2",
+      linkUrl: "https://x.com/vercel_dev/status/2051381241283539255",
+      linkSite: "x.com",
+    });
+    expect(messages[0].text).toContain(
+      "Everyone is preparing for Mythos with dedicated security harnesses",
+    );
+    expect(messages[0]).not.toHaveProperty("userId");
+    expect(messages[0]).not.toHaveProperty("isOutgoing");
+
+    expect(messages[1]).toMatchObject({
+      messageId: "3B88182701DE2BD54718",
+      author: "Sanjeed",
+      authorPhone: "+91 97477 18688",
+      quoteAuthor: "Nirant",
+      quoteAuthorPhone: "917737887058",
+      time: "2026-05-10T13:57:00.000Z",
+      reactions: "👍",
+      linkUrl: "https://github.com/vercel/chatbot",
+      linkSite: "github.com",
+    });
+    expect(messages[1].text).toContain(
+      "https://github.com/vercel/chatbot - hackable enough",
+    );
+    expect(messages[1].text).toContain("https://elements.ai-sdk.dev/");
+    expect(messages[1].text).not.toContain("Nirant");
+    expect(messages[1].text).not.toContain("13:57");
+
+    expect(messages[2]).toMatchObject({
+      messageId: "3EB03E69F79F3EADD4F87E",
+      author: "Nirant",
+      authorPhone: "+91 77378 87058",
+      quoteAuthor: "Sanjeed",
+      quoteAuthorPhone: "919747718688",
+      quoteMessageId: "3B88182701DE2BD54718",
+      quoteText:
+        "https://github.com/vercel/chatbot - hackable enough, has artifacts support, etc.\n\nBut since you only need UI, best is to create something simple using\nhttps://elements.ai-sdk.dev/ which are some really good components",
+      time: "2026-05-10T14:14:00.000Z",
+      reactions: "❤ 2",
+      text: "very helpful, will checkout both",
+    });
+  });
+
   it("extracts image captions and dimensions from media messages", () => {
     const messages = messagesFrom(`
       <div id="main">

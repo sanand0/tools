@@ -1,4 +1,25 @@
-9# WhatsApp Scraper Rewrite, 28 Mar 2026
+# WhatsApp Scraper
+
+## WhatsApp Scraper Rewrite, 10 May 2026
+
+<!--
+cd ~/code/tools
+dev.sh
+codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
+-->
+
+The current whatsappscraper/ script works but gets the user name wrong.
+The current code has a number of past layers of "fixes" - some of which may still be relevant, some may be outdated. See whatsappscraper/notes.md.
+
+CDP is available at localhost:9222 and WhatsApp is running and logged in. You can use `agent-browser` or `uvx playwright` (not npx playwright) to inspect.
+
+First, create a HTML test set, whatsappscraper/test-messages-2026-05-10.html. Run against that and make sure all output is correct. THEN convert into the bookmarklet structure.
+
+Run, test, finalize, and document in whatsappscraper/notes.md.
+
+<!-- codex resume 019e1142-fedd-7463-844b-8c0fab9d9dc9 --yolo -->
+
+## WhatsApp Scraper Rewrite, 28 Mar 2026
 
 <!--
 cd ~/code/tools

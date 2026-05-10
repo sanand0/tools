@@ -75,6 +75,32 @@ Current parsing strategy after the fix:
   - If WhatsApp exposes a stable current-chat id later, it should be wired into `resolveCurrentChatId()`.
   - If not, `userId` remains optional and must not block message capture.
 
+## 10 May 2026
+
+Observed in the live WhatsApp Web tab after the scraper returned a bad user/name entry.
+
+- Real message rows still use `#main [role="row"]` with a descendant `data-id`.
+- Current `data-id` values are still bare message ids, not packed chat ids.
+- Real message rows still include `data-pre-plain-text`, for example:
+  - `[12:19, 10/05/2026] +91 ...: `
+- Sender display names and phones appear in the first non-quoted `[role=""]` block, with:
+  - `span[data-testid="author"][aria-label="Maybe ..."]`
+  - a nearby phone span with class `_ahx_`
+- Some non-message/contact-style rows also have a bare `data-id`, but no `data-pre-plain-text`.
+  - These rows can contain a display name and phone, but they are not chat messages and must be skipped.
+
+Current parsing strategy after the fix:
+
+- Keep supporting legacy packed ids, including older fixture rows that lack `data-pre-plain-text`.
+- For current bare-id rows, require `data-pre-plain-text` before treating the row as a message.
+- Continue resolving sender name from the visible author block, with `data-pre-plain-text` as phone/timestamp metadata.
+- Added `test-messages-2026-05-10.html` to cover:
+  - current author block markup
+  - quoted messages
+  - link previews with auto-linked URLs
+  - reaction labels
+  - a bare-id non-message row that must not be emitted
+
 ## Quick Debug Checklist
 
 When the scraper breaks again, check these first in the live tab:
@@ -84,4 +110,5 @@ When the scraper breaks again, check these first in the live tab:
 3. Inspect a few raw `data-id` values.
 4. Check whether `data-pre-plain-text` still exists on visible rows.
 5. Check whether outgoing rows still use `.message-out`.
-6. If rows exist but parsed messages are `0`, the row identity parser is the first suspect.
+6. Check whether any bare-id rows without `data-pre-plain-text` are non-message/contact rows.
+7. If rows exist but parsed messages are `0`, the row identity parser is the first suspect.
