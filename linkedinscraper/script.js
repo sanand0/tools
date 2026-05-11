@@ -5,8 +5,10 @@ async function loadBookmarklet() {
     const response = await fetch("linkedinscraper.min.js");
     if (!response.ok) throw new Error(`Failed to load bookmarklet: ${response.status}`);
     const code = await response.text();
-    const bookmarklet = document.getElementById("invite-bookmarklet");
-    bookmarklet.href = `javascript:${encodeURIComponent(`${code};linkedinscraper.scrapeInvites();`)}`;
+    const inviteBookmarklet = document.getElementById("invite-bookmarklet");
+    const profileBookmarklet = document.getElementById("profile-bookmarklet");
+    inviteBookmarklet.href = `javascript:${encodeURIComponent(`${code};linkedinscraper.scrapeInvites();`)}`;
+    profileBookmarklet.href = `javascript:${encodeURIComponent(`${code};linkedinscraper.scrapeProfile();`)}`;
   } catch (error) {
     document
       .querySelector("main")

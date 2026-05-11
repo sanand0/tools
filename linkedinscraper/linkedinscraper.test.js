@@ -2,10 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Window } from "happy-dom";
 import {
   createInviteScraperState,
+  createProfileScraperState,
   invitationMonthFromAge,
   linkedinInvites,
+  linkedinProfileMarkdown,
   mergeInvites,
   scrapeInvites,
+  scrapeProfile,
 } from "./linkedinscraper.js";
 
 describe("linkedinscraper invite scraper", () => {
@@ -219,5 +222,187 @@ describe("linkedinscraper invite scraper", () => {
         2,
       ),
     );
+  });
+});
+
+describe("linkedinscraper profile scraper", () => {
+  let window;
+  let document;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    window = new Window({ url: "https://www.linkedin.com/in/alex-example/" });
+    document = window.document;
+    window.scrollTo = vi.fn();
+    window.scrollBy = vi.fn();
+    window.setInterval = setInterval;
+    window.clearInterval = clearInterval;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("copies visible profile sections as Markdown", () => {
+    document.body.innerHTML = `
+      <main>
+        <section class="artdeco-card">
+          <h1>Alex Example</h1>
+          <div class="text-body-medium break-words">Founder at Example Labs</div>
+          <button>Connect</button>
+        </section>
+        <section class="artdeco-card">
+          <h2>About</h2>
+          <div>I build practical AI systems for research teams.</div>
+          <button>Show more</button>
+        </section>
+        <section class="artdeco-card">
+          <h2>Experience</h2>
+          <div>Example Labs</div>
+          <div>Founder</div>
+          <a href="/company/example-labs/">Example Labs</a>
+        </section>
+      </main>
+    `;
+
+    expect(linkedinProfileMarkdown(document)).toBe(`# Alex Example
+
+Source: https://www.linkedin.com/in/alex-example/
+
+## Profile Summary
+
+- **Headline:** Founder at Example Labs
+
+## About
+
+I build practical AI systems for research teams.
+
+## Experience
+
+- Example Labs
+- Founder
+`);
+  });
+
+  it("formats list-item sections as readable records without dropping details", () => {
+    document.body.innerHTML = `
+      <main>
+        <section class="artdeco-card">
+          <h1>Alex Example</h1>
+          <div class="text-body-medium break-words">Founder at Example Labs</div>
+        </section>
+        <section class="artdeco-card">
+          <h2>Experience</h2>
+          <ul>
+            <li>
+              <div>Founder</div>
+              <div>Example Labs · Full-time</div>
+              <div>Jan 2024 - Present · 2 yrs</div>
+              <div>Singapore</div>
+              <div>Building practical AI tools.</div>
+            </li>
+            <li>
+              <div>Advisor</div>
+              <div>Sample Capital</div>
+              <div>2021 – 2023</div>
+              <div>Early-stage investing.</div>
+            </li>
+          </ul>
+        </section>
+        <section class="artdeco-card">
+          <h2>Education</h2>
+          <ul>
+            <li>
+              <div>Example University</div>
+              <div>MBA</div>
+              <div>2018 – 2020</div>
+            </li>
+          </ul>
+        </section>
+      </main>
+    `;
+
+    expect(linkedinProfileMarkdown(document)).toContain(`## Experience
+
+- **Founder**
+  - Organization: Example Labs · Full-time
+  - Dates: Jan 2024 - Present · 2 yrs
+  - Location: Singapore
+  - Details: Building practical AI tools.
+
+- **Advisor**
+  - Details: Sample Capital
+  - Dates: 2021 – 2023
+  - Details: Early-stage investing.`);
+    expect(linkedinProfileMarkdown(document)).toContain(`## Education
+
+- **Example University**
+  - Details: MBA
+  - Dates: 2018 – 2020`);
+  });
+
+  it("keeps flat section lines that LinkedIn list items do not cover", () => {
+    document.body.innerHTML = `
+      <main>
+        <section class="artdeco-card">
+          <h1>Alex Example</h1>
+          <div class="text-body-medium break-words">Founder at Example Labs</div>
+        </section>
+        <section class="artdeco-card">
+          <h2>Experience</h2>
+          <div>Founder</div>
+          <div>Example Labs · Full-time</div>
+          <div>Jan 2024 - Present · 2 yrs</div>
+          <ul>
+            <li>
+              <div>Advisor</div>
+              <div>Sample Capital</div>
+              <div>2021 – 2023</div>
+            </li>
+          </ul>
+        </section>
+      </main>
+    `;
+
+    const markdown = linkedinProfileMarkdown(document);
+    expect(markdown).toContain(`- **Advisor**
+  - Details: Sample Capital
+  - Dates: 2021 – 2023`);
+    expect(markdown).toContain(`- **Additional visible details**
+  - Founder
+  - Example Labs · Full-time
+  - Jan 2024 - Present · 2 yrs`);
+  });
+
+  it("scrolls before enabling the profile copy button", async () => {
+    document.body.innerHTML = `
+      <main>
+        <section class="artdeco-card">
+          <h1>Rio Sample</h1>
+          <div class="text-body-medium break-words">Product leader</div>
+        </section>
+        <section class="artdeco-card">
+          <h2>About</h2>
+          <div>Works on thoughtful product systems.</div>
+        </section>
+      </main>
+    `;
+    const clipboard = { writeText: vi.fn().mockResolvedValue(undefined) };
+    const state = createProfileScraperState();
+    scrapeProfile({ document, navigator: { clipboard }, state });
+
+    const button = document.getElementById("linkedinscraper-profile-copy-btn");
+    expect(button.disabled).toBe(true);
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+
+    state.done = true;
+    vi.advanceTimersByTime(600);
+    expect(button.disabled).toBe(false);
+    expect(button.textContent).toBe("Copy profile Markdown");
+
+    button.click();
+    await Promise.resolve();
+    expect(clipboard.writeText.mock.calls[0][0]).toContain("# Rio Sample");
+    expect(clipboard.writeText.mock.calls[0][0]).toContain("## About");
   });
 });

@@ -1,5 +1,52 @@
 # Prompts
 
+## Page scraper, 11 May 2026
+
+<!--
+
+cd /home/sanand/code/tools
+dev.sh
+codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
+
+-->
+
+We will be adding a LinkedIn Profile Scraper to linkedinscraper/ that can scrape all profile information from a LinkedIn profile page.
+
+This will sit alongside the invite scraper.
+First, rename the label for the invite scraper to "LinkedIn Invite Scraper" instead of just "Invite Scraper" for clarity.
+
+Some content automatically loads when we scroll. So ensure that the scraper scrolls through the entire page to load all content before extracting.
+
+Create a button (like the invite scraper) to copy the information as AI-agent friendly Markdown (not JSON). The bulk of the information may be available in the DOM and could be used as-is, perhaps just by ignoring some irrelevant sections, tags, etc. Keep it simple and robust.
+
+There are several LinkedIn profiles open on CDP 9222 (use agent-browser, rodney or uvx playwright). Some are scrolled to the end, some are not. Test on a good sample. Save the output in linkedinscraper/sample/\*.md for review. Then I'll guide you.
+
+---
+
+Read through the output yourself. Is this what will be meaningful to a human or an AI agent to understand the profile of a person?
+For example, will any of the links be at all useful?
+Will this structure be confusing or clear? Research what modern LLMs and AI agents can read well - and their capabilities are growing.
+Use `copilot` CLI to check with a few other smart models that copilot supports to see what they think of the output structuring, e.g. testing if they are able to infer correctly and if they believe a different structure would help them.
+Keep in mind the ease of implementation. Just a simple copy-paste of visible text might actually work, too.
+Think about the best way to structure the experiments and run them.
+Consolidate and share their feedback with me, prioritized, on how to structure the output better - factoring in ease + impact.
+Then I'll suggest what to do.
+
+---
+
+Go ahead with your recommendation and show me the sample output. Also, there's more material on Amit Gupta. Write the scraper to ensure that it scrolls till the end, awaits the information, then copies.
+
+---
+
+How can we make all sections more human-readable the way the profile summary is structured, keeping the code small and light, as well as robust for new features / sections / etc.?
+Priorities: Don't miss anything > format well > keep it simple.
+
+Using these principles, create the bookmarklet, add it to linkedinscraper/ as profile scraper.
+
+Include test cases. Run and test on actual profiles.
+
+<!-- codex resume 019e1522-11d1-7ef3-b144-0b08d4d6e5e6 --yolo -->
+
 ## Invite scraper, 11 May 2026
 
 <!--
