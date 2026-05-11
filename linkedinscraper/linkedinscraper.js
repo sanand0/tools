@@ -30,6 +30,7 @@ function extractInvite(card, rootDocument) {
   const followsYou = rawLines.some((line) => /follows you/i.test(line));
   const invitationAge = rawLines.find(isAgeLine);
   const ageIndex = rawLines.findIndex((line) => line === invitationAge);
+  const invitationMonth = invitationMonthFromAge(invitationAge);
   const linesBeforeAge = (ageIndex >= 0 ? rawLines.slice(0, ageIndex) : rawLines).filter((line) =>
     isProfileDetailLine(line, name),
   );
@@ -45,7 +46,7 @@ function extractInvite(card, rootDocument) {
     description,
     profileUrl,
     followsYou,
-    invitationAge,
+    invitationMonth,
     connections,
     connectionsCount,
     commonOrgs,
@@ -89,6 +90,34 @@ function isAgeLine(line) {
 
 function isMutualConnectionLine(line) {
   return /\bmutual connections?\b/i.test(line);
+}
+
+export function invitationMonthFromAge(ageText, now = new Date()) {
+  const age = normalizeInlineText(ageText).toLowerCase();
+  if (!age) return undefined;
+
+  const date = new Date(now);
+  if (age === "today") return formatMonth(date);
+  if (age === "yesterday") {
+    date.setDate(date.getDate() - 1);
+    return formatMonth(date);
+  }
+  const match = age.match(/^(\d+)\s+(second|minute|hour|day|week|month|year)s? ago$/i);
+  if (!match) return undefined;
+  const count = Number(match[1]);
+  const unit = match[2].toLowerCase();
+  if (unit === "day") date.setDate(date.getDate() - count);
+  if (unit === "week") date.setDate(date.getDate() - count * 7);
+  if (unit === "month") date.setMonth(date.getMonth() - count);
+  if (unit === "year") date.setFullYear(date.getFullYear() - count);
+
+  return formatMonth(date);
+}
+
+function formatMonth(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
 }
 
 function parseMutualConnections(line) {

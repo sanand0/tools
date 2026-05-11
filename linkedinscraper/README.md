@@ -14,7 +14,7 @@ The invite scraper copies a JSON array. Each object may include:
 - `description`
 - `profileUrl`
 - `followsYou`
-- `invitationAge`
+- `invitationMonth`
 - `connections`
 - `connectionsCount`
 - `commonOrgs`
@@ -22,3 +22,6 @@ The invite scraper copies a JSON array. Each object may include:
 - `message`
 
 The bookmarklet auto-scrolls from the top of the invitation page and keeps merging newly loaded invitations until you click the floating copy button.
+
+`invitationMonth` is a best-guess `YYYY-MM` value based on LinkedIn's relative text, for example `Yesterday`,
+`2 weeks ago`, or `3 months ago`, evaluated at scrape time.

@@ -71,4 +71,10 @@ Looks good. Generate the bookmarklet. Keep this similar to whatsappscraper/. Rem
 Document in linkedinscraper/README.md.
 Update ./tools.json and ./README.md.
 
+---
+
+Replace "invitationAge" with "invitationMonth" as a best guess month (YYYY-MM) of the invitation. Feel free to use a reasonable heuristic to convert "3 months ago", "Yesterday", "2 weeks ago", etc. into an actual month.
+
+Run and test. Revise tests and docs as required.
+
 <!-- codex resume 019e14e7-ade7-7e21-8d40-e9da9405f51d --yolo -->

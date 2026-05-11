@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Window } from "happy-dom";
-import { createInviteScraperState, linkedinInvites, mergeInvites, scrapeInvites } from "./linkedinscraper.js";
+import {
+  createInviteScraperState,
+  invitationMonthFromAge,
+  linkedinInvites,
+  mergeInvites,
+  scrapeInvites,
+} from "./linkedinscraper.js";
 
 describe("linkedinscraper invite scraper", () => {
   let window;
@@ -8,6 +14,7 @@ describe("linkedinscraper invite scraper", () => {
 
   beforeEach(() => {
     vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-05-11T12:00:00Z"));
     window = new Window({ url: "https://www.linkedin.com/mynetwork/invitation-manager/received/" });
     document = window.document;
     window.scrollTo = vi.fn();
@@ -44,7 +51,7 @@ describe("linkedinscraper invite scraper", () => {
         description: "Institute Alpha | University Beta | ARN-123",
         profileUrl: "https://www.linkedin.com/in/alex-example/",
         followsYou: true,
-        invitationAge: "Yesterday",
+        invitationMonth: "2026-05",
         connectionsCount: 0,
         commonOrgs: ["Institute Alpha"],
         badges: ["verified"],
@@ -83,13 +90,16 @@ describe("linkedinscraper invite scraper", () => {
     expect(invites[0]).toMatchObject({
       connections: ["Casey Ray"],
       connectionsCount: 9,
+      invitationMonth: "2026-05",
     });
     expect(invites[1]).toMatchObject({
       connections: ["Drew Stone"],
       connectionsCount: 1,
+      invitationMonth: "2026-02",
     });
     expect(invites[2]).toMatchObject({
       connectionsCount: 1,
+      invitationMonth: "2026-05",
     });
     expect(invites[2]).not.toHaveProperty("connections");
   });
@@ -116,15 +126,26 @@ describe("linkedinscraper invite scraper", () => {
       name: "Priya Sample",
       commonOrgs: ["ExampleCo"],
       badges: ["openToWork", "premium"],
+      invitationMonth: "2026-04",
       message: "Hi Anand, I recently joined ExampleCo. Happy to connect.",
     });
+  });
+
+  it("converts relative invitation ages to best-guess months", () => {
+    const now = new Date("2026-05-11T12:00:00Z");
+
+    expect(invitationMonthFromAge("12 hours ago", now)).toBe("2026-05");
+    expect(invitationMonthFromAge("Yesterday", now)).toBe("2026-05");
+    expect(invitationMonthFromAge("2 weeks ago", now)).toBe("2026-04");
+    expect(invitationMonthFromAge("3 months ago", now)).toBe("2026-02");
+    expect(invitationMonthFromAge("1 year ago", now)).toBe("2025-05");
   });
 
   it("merges invite updates while preserving first-seen order", () => {
     const state = createInviteScraperState();
     mergeInvites(
       [
-        { name: "First Person", profileUrl: "https://www.linkedin.com/in/first/", invitationAge: "1 week ago" },
+        { name: "First Person", profileUrl: "https://www.linkedin.com/in/first/", invitationMonth: "2026-05" },
         { name: "Second Person", profileUrl: "https://www.linkedin.com/in/second/", message: "Short" },
       ],
       state,
@@ -145,7 +166,7 @@ describe("linkedinscraper invite scraper", () => {
       {
         name: "First Person",
         profileUrl: "https://www.linkedin.com/in/first/",
-        invitationAge: "1 week ago",
+        invitationMonth: "2026-05",
         _order: 0,
       },
       {
@@ -190,7 +211,7 @@ describe("linkedinscraper invite scraper", () => {
             description: "Designer",
             profileUrl: "https://www.linkedin.com/in/rio-sample/",
             followsYou: true,
-            invitationAge: "12 hours ago",
+            invitationMonth: "2026-05",
             connectionsCount: 0,
           },
         ],
