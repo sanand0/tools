@@ -29,6 +29,13 @@
       "created": "2025-10-26T00:00:00+00:00"
     },
     {
+      "icon": "bi-linkedin",
+      "title": "LinkedIn Scraper Bookmarklets",
+      "description": "Collection of LinkedIn bookmarklets that copy structured page data from your browser.",
+      "url": "linkedinscraper",
+      "created": "2026-05-11T00:00:00+00:00"
+    },
+    {
       "icon": "bi-chat-dots",
       "title": "Discourse Thread Scraper",
       "description": "Bookmarklet to copy a Discourse topic and replies as JSON.",

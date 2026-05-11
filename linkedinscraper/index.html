@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkedIn Scraper Bookmarklets</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2212%22%20fill%3D%22%230a66c2%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20fill%3D%22white%22%20font-family%3D%22Arial%2Csans-serif%22%20font-size%3D%2238%22%20font-weight%3D%22700%22%20text-anchor%3D%22middle%22%3Ein%3C%2Ftext%3E%3C%2Fsvg%3E" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" />
+</head>
+
+<body class="bg-body-tertiary">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="../">
+        <i class="bi bi-linkedin me-2"></i>
+        LinkedIn Scraper Bookmarklets
+      </a>
+      <div class="bootstrap-dark-theme"></div>
+    </div>
+  </nav>
+  <main class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 col-xl-7">
+        <header class="text-center mb-5">
+          <h1 class="display-5 mb-2">LinkedIn Scraper Bookmarklets</h1>
+          <p class="lead text-secondary">Copy structured LinkedIn page data from your browser</p>
+        </header>
+
+        <section class="bg-body shadow-sm border rounded-3 p-4 mb-4">
+          <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+            <div>
+              <h2 class="h4 mb-2">Received Invite Scraper</h2>
+              <p class="text-secondary mb-0">Scrape received connection invitations into JSON for later review.</p>
+            </div>
+            <a href="" id="invite-bookmarklet" class="btn btn-primary btn-lg shadow-sm">
+              <i class="bi bi-person-plus me-2"></i>Invite Scraper
+            </a>
+          </div>
+        </section>
+
+        <section class="bg-body shadow-sm border rounded-3 p-4">
+          <h2 class="h5 text-secondary text-center mb-3">Usage</h2>
+          <ol class="mb-0 ps-3">
+            <li>Drag <kbd>Invite Scraper</kbd> to your bookmarks bar</li>
+            <li>Open <kbd>linkedin.com/mynetwork/invitation-manager/received/</kbd></li>
+            <li>Click the bookmarklet and let it scan the page as it scrolls</li>
+            <li>Click the floating <kbd>Copy … invites</kbd> button to copy JSON</li>
+          </ol>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>

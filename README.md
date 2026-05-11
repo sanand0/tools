@@ -24,6 +24,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[WhatsApp Scraper](./whatsappscraper/)**: A browser bookmarklet that allows users to scrape messages from an active WhatsApp Web chat session into JSON format.
 - **[Discourse Thread Scraper](./discoursescraper/)**: Bookmarklet that copies every post in a Discourse topic into structured JSON with replies, reactions, and metadata.
 - **[X Thread Scraper](./xscraper/)**: Bookmarklet to copy a tweet and all its replies into JSON (ads dropped), including metrics and computed buzz/keep scores.
+- **[LinkedIn Scraper Bookmarklets](./linkedinscraper/)**: Collection of LinkedIn bookmarklets that copy structured page data from your browser.
 - **[Gemini Conversation Scraper](./geminiscraper/)**: Copy a Gemini conversation as Markdown with YAML frontmatter via a console script.
 - **[Copy Links](./copylinks/)**: Bookmarklet to copy all page URLs and asset links as TSV.
 - **[Google Meet Captions](./gmeetcaptions/)**: Bookmarklet to copy the visible Google Meet captions as Markdown.
