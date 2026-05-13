@@ -124,4 +124,16 @@ Replace "invitationAge" with "invitationMonth" as a best guess month (YYYY-MM) o
 
 Run and test. Revise tests and docs as required.
 
+--- <!-- 13 May 2026 -->
+
+Looks like LinkedIn has changed the invite page structure. I no longer see WHEN the invite was sent.
+
+See if you can find it anywhere in the DOM. Update the script to use it if possible. Else default "invitationMonth" to the current month with a question mark, e.g. "2026-05?" to indicate uncertainty.
+
+Update tests.
+
+---
+
+/compact
+
 <!-- codex resume 019e14e7-ade7-7e21-8d40-e9da9405f51d --yolo -->

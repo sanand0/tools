@@ -45,15 +45,15 @@ function extractInvite(card, rootDocument) {
   const invitationAge = rawLines.find(isAgeLine);
   const ageIndex = rawLines.findIndex((line) => line === invitationAge);
   const invitationMonth = invitationMonthFromAge(invitationAge);
-  const linesBeforeAge = (ageIndex >= 0 ? rawLines.slice(0, ageIndex) : rawLines).filter((line) =>
-    isProfileDetailLine(line, name),
-  );
-  const description = linesBeforeAge.find((line) => !isMutualConnectionLine(line));
-  const contextLines = linesBeforeAge.filter((line) => line !== description);
+  const firstActionIndex = rawLines.findIndex(isActionLine);
+  const detailsEndIndex = ageIndex >= 0 ? ageIndex : firstActionIndex >= 0 ? firstActionIndex : rawLines.length;
+  const detailLines = rawLines.slice(0, detailsEndIndex).filter((line) => isProfileDetailLine(line, name));
+  const description = detailLines.find((line) => !isMutualConnectionLine(line));
+  const contextLines = detailLines.filter((line) => line !== description);
   const mutualLine = contextLines.find(isMutualConnectionLine);
   const { connections, connectionsCount } = parseMutualConnections(mutualLine);
   const commonOrgs = contextLines.filter((line) => !isMutualConnectionLine(line));
-  const message = extractMessage(rawLines, ageIndex);
+  const message = extractMessage(rawLines, ageIndex >= 0 ? ageIndex : firstActionIndex);
 
   return {
     name,
@@ -108,7 +108,7 @@ function isMutualConnectionLine(line) {
 
 export function invitationMonthFromAge(ageText, now = new Date()) {
   const age = normalizeInlineText(ageText).toLowerCase();
-  if (!age) return undefined;
+  if (!age) return `${formatMonth(new Date(now))}?`;
 
   const date = new Date(now);
   if (age === "today") return formatMonth(date);
@@ -117,7 +117,7 @@ export function invitationMonthFromAge(ageText, now = new Date()) {
     return formatMonth(date);
   }
   const match = age.match(/^(\d+)\s+(second|minute|hour|day|week|month|year)s? ago$/i);
-  if (!match) return undefined;
+  if (!match) return `${formatMonth(date)}?`;
   const count = Number(match[1]);
   const unit = match[2].toLowerCase();
   if (unit === "day") date.setDate(date.getDate() - count);
@@ -500,8 +500,9 @@ function recordLineLabel(line, sectionTitle) {
 function activityMarkdown(records, lines, sectionTitle) {
   if (records?.length) {
     const items = records.map((record) => {
-      const excerpt = sectionLinesForOutput({ title: "Activity", lines: record })
-        .filter((line) => !isEngagementLine(line) && !/^\d[\d,]*$/.test(line));
+      const excerpt = sectionLinesForOutput({ title: "Activity", lines: record }).filter(
+        (line) => !isEngagementLine(line) && !/^\d[\d,]*$/.test(line),
+      );
       return excerpt.map((line, index) => (index === 0 ? `- **${line}**` : `  - ${line}`)).join("\n");
     });
     const covered = new Set(records.flat());

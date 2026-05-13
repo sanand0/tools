@@ -134,9 +134,34 @@ describe("linkedinscraper invite scraper", () => {
     });
   });
 
+  it("uses uncertain current month when LinkedIn omits invite age", () => {
+    const invites = renderInvites(`
+      <div role="listitem" componentkey="urn:li:invitation:7">
+        <a href="/in/no-age-sample/"><strong>No Age Sample</strong></a>
+        <p>No Age Sample follows you and is inviting you to connect</p>
+        <p>Engineer at Example Labs</p>
+        <p>Example Labs</p>
+        <button>Ignore</button>
+        <button>Accept</button>
+        <p>Hi Anand, happy to connect.</p>
+        <button>Reply to No Age</button>
+      </div>
+    `);
+
+    expect(invites[0]).toMatchObject({
+      name: "No Age Sample",
+      description: "Engineer at Example Labs",
+      commonOrgs: ["Example Labs"],
+      invitationMonth: "2026-05?",
+      message: "Hi Anand, happy to connect.",
+    });
+  });
+
   it("converts relative invitation ages to best-guess months", () => {
     const now = new Date("2026-05-11T12:00:00Z");
 
+    expect(invitationMonthFromAge(undefined, now)).toBe("2026-05?");
+    expect(invitationMonthFromAge("not shown", now)).toBe("2026-05?");
     expect(invitationMonthFromAge("12 hours ago", now)).toBe("2026-05");
     expect(invitationMonthFromAge("Yesterday", now)).toBe("2026-05");
     expect(invitationMonthFromAge("2 weeks ago", now)).toBe("2026-04");
