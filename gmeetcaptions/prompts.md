@@ -69,6 +69,8 @@ In case Google Meet changes class names, etc. is there a stabler way to identify
 
 Document the functionality and how the bookmarklet works in gmeetcaptions/README.md.
 
+<!-- copilot --resume=a508ef92-06c6-4d97-aa98-11435614b532 --yolo -->
+
 ## Google Meet Captions bookmarklet (Codex Yolo - GPT 5.4 high)
 
 Create a bookmarklet in gmeetcaptions/ that, when clicked, copies the contents of the Google Meet captions to the clipboard as Markdown.
