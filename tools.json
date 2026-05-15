@@ -59,7 +59,7 @@
     {
       "icon": "bi-badge-cc",
       "title": "Google Meet Captions",
-      "description": "Bookmarklet to copy the visible Google Meet captions as Markdown.",
+      "description": "Bookmarklet to record and save Google Meet captions as Markdown, with speaker names, timestamps, and meeting metadata.",
       "url": "gmeetcaptions",
       "created": "2026-03-24T00:00:00+00:00"
     },
