@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>ChatGPT Fixture - ChatGPT</title>
+</head>
+
+<body>
+  <main>
+    <section data-testid="conversation-turn-1">
+      <div data-message-author-role="user">
+        <div data-testid="collapsible-user-message-root">
+          <input id="chatgpt-more" data-testid="collapsible-user-message-toggle-checkbox" type="checkbox" />
+          <div data-testid="collapsible-user-message-content">
+            <p>Give me a compact table.</p>
+            <p class="hidden-user" hidden>Include code too.</p>
+          </div>
+          <label for="chatgpt-more" data-testid="collapsible-user-message-toggle">Show more</label>
+        </div>
+      </div>
+      <button data-testid="copy-turn-action-button" aria-label="Copy message"></button>
+    </section>
+    <section data-testid="conversation-turn-2">
+      <div data-message-author-role="assistant" data-message-model-slug="gpt-5-5-thinking">
+        <div class="markdown">
+          <p>I will answer directly.</p>
+          <button type="button" aria-expanded="false" class="reasoning-toggle">Thought for 12s</button>
+          <div class="reasoning" hidden>
+            <p>I checked the shape first.</p>
+          </div>
+          <span class="group/tool-message">
+            <span>Called tool</span>
+            <div>
+              <div>
+                <div>Local MCP</div>
+                <div>Bash</div>
+              </div>
+              <div>
+                <div>Request</div>
+                <button aria-label="Copy">Copy</button>
+                <span>{
+                  commands:
+                  "set -euo pipefail
+                  printf 'Now: '; date"
+                  }</span>
+              </div>
+              <div>
+                <div>Response</div>
+                <button aria-label="Copy">Copy</button>
+                <span>{
+                  result:
+                  "Now: Sat May 16 12:28:03 PM +08 2026"
+                  }</span>
+              </div>
+            </div>
+          </span>
+          <table>
+            <thead>
+              <tr>
+                <th>Tool</th>
+                <th>Use</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ChatGPT</td>
+                <td>Conversation export</td>
+              </tr>
+            </tbody>
+          </table>
+          <pre><code>const scraper = true;</code></pre>
+        </div>
+      </div>
+      <button data-testid="copy-turn-action-button" aria-label="Copy response"></button>
+      <button aria-label="More actions" aria-expanded="false"></button>
+    </section>
+  </main>
+  <div id="thought-flyout"></div>
+  <script>
+    document.querySelector("[data-testid='collapsible-user-message-toggle']").addEventListener("click", () => {
+      document.querySelector("#chatgpt-more").checked = true;
+      document.querySelector(".hidden-user").hidden = false;
+    });
+    document.querySelector(".reasoning-toggle").addEventListener("click", (event) => {
+      event.currentTarget.setAttribute("aria-expanded", "true");
+      document.querySelector(".reasoning").hidden = false;
+      document.querySelector("#thought-flyout").replaceChildren();
+      document.querySelector("#thought-flyout").insertAdjacentHTML("beforeend", `
+        <section aria-label="Reasoning details" data-testid="screen-threadFlyOut">
+          <div data-testid="bar-search-sources-header">Activity · 12s<button aria-label="Close"></button></div>
+          <h3>Thinking</h3>
+          <p>I checked the sidebar trace.</p>
+          <p>Then I wrote the answer.</p>
+        </section>
+      `);
+    });
+
+  </script>
+  <script src="../chatgptscraper.js"></script>
+</body>
+
+</html>

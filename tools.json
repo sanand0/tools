@@ -44,9 +44,9 @@
     },
     {
       "icon": "bi-stars",
-      "title": "Gemini Conversation Scraper",
-      "description": "Copy a Gemini conversation as Markdown with YAML frontmatter.",
-      "url": "geminiscraper",
+      "title": "AI Conversation Scrapers",
+      "description": "Copy AI conversations as Markdown with YAML frontmatter.",
+      "url": "aiscrapers",
       "created": "2026-01-11T12:22:42+08:00"
     },
     {

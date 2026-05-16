@@ -20,8 +20,8 @@ Use CDP as required - I have a Google Meet running now.
 I get this error when I click the bookmarklet:
 
 VM465:314 This document requires 'TrustedHTML' assignment. The action has been blocked.
-showPanel	@	VM465:314
-(anonymous)	@	VM465:345
+showPanel @ VM465:314
+(anonymous) @ VM465:345
 
 ---
 
@@ -82,7 +82,7 @@ See these tools to understand how we create bookmarklets and align with the styl
 bootstrappicker/
 copylinks/
 discoursescraper/
-geminiscraper/
+aiscrapers/
 hnmd/
 page2md/
 straivecodex/
@@ -90,7 +90,7 @@ whatsappscraper/
 xscraper/
 
 You don't have to read all of them - prefer the later ones, get a sense, prioritize best practices.
-Note how they copy Markdown (e.g. geminiscraper/ or hnmd/ or page2md/ or discoursescraper/) to the clipboard.
+Note how they copy Markdown (e.g. aiscrapers/ or hnmd/ or page2md/ or discoursescraper/) to the clipboard.
 Note how they re-use code across tools.
 
 Write test cases first by creating ANONYMIZED test snippets, run them, and ensure they pass.

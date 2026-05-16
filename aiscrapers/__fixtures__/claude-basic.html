@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Claude Fixture - Claude</title>
+</head>
+
+<body>
+  <header data-testid="page-header">
+    <button data-testid="chat-title-button">Claude Fixture</button>
+  </header>
+  <div>
+    <div data-testid="user-message">
+      <p class="whitespace-pre-wrap break-words">Give me a short plan.</p>
+    </div>
+    <div data-is-streaming="false" class="group relative pb-3">
+      <h2 class="sr-only">Claude responded:</h2>
+      <div class="font-claude-response relative">
+        <div>
+          <div class="grid grid-rows-[auto_auto] min-w-0">
+            <div>
+              <button class="group/status" aria-expanded="false" type="button">
+                Checked assumptions before answering
+              </button>
+            </div>
+            <div class="grid" style="grid-template-rows: 0fr;">
+              <div class="overflow-hidden min-w-0">
+                <p>First I checked the brief.</p>
+                <div class="search-results">
+                  <a href="https://www.bluehost.com/blog/what-is-llms-txt/">
+                    <div></div>
+                    <div>What is llms.txt? How the New AI Standard Works (2026 Guide)</div>
+                    <div>www.bluehost.com</div>
+                  </a>
+                  <a href="https://webscraft.org/blog/llmstxt-povniy-gayd-dlya-vebrozrobnikiv-2026?lang=en">
+                    <div></div>
+                    <div>LLMS.txt 2026 Guide AI Agents &amp; GEO Optimization</div>
+                    <div>webscraft.org</div>
+                  </a>
+                </div>
+                <button type="button" class="show-more">Show more</button>
+                <div class="more-thinking" hidden>
+                  <p>Then I compared the options.</p>
+                  <button type="button" aria-expanded="false" class="nested-thinking">Nested trace</button>
+                  <div class="overflow-hidden" hidden>
+                    <p>Nested hidden rationale.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row-start-2 col-start-1">
+              <div class="standard-markdown">
+                <p>The preserved answer is inside the same grid as the thinking trace.</p>
+              </div>
+            </div>
+          </div>
+          <div class="standard-markdown">
+            <p class="font-claude-response-body">Start with the narrowest useful version.</p>
+            <div class="tool-run">
+              <div>
+                <button type="button" class="tool-toggle">Bash</button>
+              </div>
+              <div class="tool-detail" hidden>
+                <div>Request</div>
+                <pre>{
+  "commands": "printf 'Now: '; date"
+}</pre>
+                <div>Response</div>
+                <pre>Now: Sat May 16 12:28:03 PM +08 2026</pre>
+              </div>
+            </div>
+            <ul>
+              <li>Test it with one real page.</li>
+              <li>Keep the output readable.</li>
+            </ul>
+            <pre><code>const ok = true;</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div data-testid="user-message">
+      <p>Now add a table.</p>
+    </div>
+    <div data-is-streaming="false" class="group relative pb-3">
+      <div class="font-claude-response relative">
+        <div class="standard-markdown">
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Claude</td>
+                <td>Done</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.querySelector(".group\\/status").addEventListener("click", (event) => {
+      event.currentTarget.setAttribute("aria-expanded", "true");
+      event.currentTarget.closest(".grid").querySelector(".grid").style.gridTemplateRows = "1fr";
+    });
+    document.querySelector(".show-more").addEventListener("click", (event) => {
+      event.currentTarget.hidden = true;
+      document.querySelector(".more-thinking").hidden = false;
+    });
+    document.querySelector(".nested-thinking").addEventListener("click", (event) => {
+      event.currentTarget.setAttribute("aria-expanded", "true");
+      event.currentTarget.nextElementSibling.hidden = false;
+    });
+    document.querySelector(".tool-toggle").addEventListener("click", (event) => {
+      event.currentTarget.closest(".tool-run").querySelector(".tool-detail").hidden = false;
+    });
+
+  </script>
+  <script src="../claudescraper.js"></script>
+</body>
+
+</html>

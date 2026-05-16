@@ -9,7 +9,7 @@ See these tools to understand how we create bookmarklets and align with the styl
 bootstrappicker/
 copylinks/
 discoursescraper/
-geminiscraper/
+aiscrapers/
 hnmd/
 page2md/
 straivecodex/
@@ -32,7 +32,7 @@ See these tools to understand how we create bookmarklets and align with the styl
 bootstrappicker/
 copylinks/
 discoursescraper/
-geminiscraper/
+aiscrapers/
 hnmd/
 page2md/
 straivecodex/

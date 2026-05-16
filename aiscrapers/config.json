@@ -1,0 +1,13 @@
+{
+  "scrapers": {
+    "gemini": {
+      "scriptPath": "geminiscraper.js"
+    },
+    "claude": {
+      "scriptPath": "claudescraper.js"
+    },
+    "chatgpt": {
+      "scriptPath": "chatgptscraper.js"
+    }
+  }
+}

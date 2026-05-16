@@ -1,12 +1,28 @@
 // @ts-check
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 
-const bookmarkletButton = document.getElementById("bookmarklet");
+const bookmarkletButtons = Array.from(document.querySelectorAll("[data-scraper]"));
 const statusText = document.getElementById("bookmarklet-status-text");
 const spinner = document.getElementById("bookmarklet-spinner");
 const errorText = document.getElementById("bookmarklet-error");
 
-let bookmarkletHref = "";
+const scrapers = {
+  gemini: {
+    label: "Gemini",
+    scriptPath: "geminiscraper.js",
+    call: "geminiscraper.scrape();",
+  },
+  claude: {
+    label: "Claude",
+    scriptPath: "claudescraper.js",
+    call: "claudescraper.scrape();",
+  },
+  chatgpt: {
+    label: "ChatGPT",
+    scriptPath: "chatgptscraper.js",
+    call: "chatgptscraper.scrape();",
+  },
+};
 
 const setLoading = (isLoading) => {
   if (spinner) spinner.classList.toggle("d-none", !isLoading);
@@ -26,30 +42,39 @@ const loadConfig = async () => {
   return response.json();
 };
 
+const loadScraper = async (scraper) => {
+  const response = await fetch(scraper.scriptPath, { cache: "no-store" });
+  if (!response.ok) throw new Error(`Unable to load ${scraper.label} bookmarklet (${response.status})`);
+  const code = await response.text();
+  return `javascript:${encodeURIComponent(`${code};${scraper.call}`)}`;
+};
+
 const loadBookmarklet = async () => {
   setLoading(true);
-  updateStatus("Loading bookmarklet...");
+  updateStatus("Loading bookmarklets...");
   showError("");
   try {
-    let scriptPath = "geminiscraper.js";
     try {
       const config = await loadConfig();
-      if (config?.scriptPath) scriptPath = config.scriptPath;
+      Object.entries(config?.scrapers || {}).forEach(([key, value]) => {
+        if (scrapers[key] && value?.scriptPath) scrapers[key].scriptPath = value.scriptPath;
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to load config";
       bootstrapAlert({ title: "Config warning", body: message, color: "warning" });
     }
 
-    const response = await fetch(scriptPath, { cache: "no-store" });
-    if (!response.ok) throw new Error(`Unable to load bookmarklet (${response.status})`);
-    const code = await response.text();
-    const bookmarkletCode = `${code};geminiscraper.scrape();`;
-    bookmarkletHref = `javascript:${encodeURIComponent(bookmarkletCode)}`;
-    if (bookmarkletButton) bookmarkletButton.href = bookmarkletHref;
-    updateStatus("Drag the button to your bookmarks bar, then click it on a Gemini conversation.");
+    await Promise.all(
+      bookmarkletButtons.map(async (button) => {
+        const scraper = scrapers[button.dataset.scraper];
+        if (!scraper) return;
+        button.href = await loadScraper(scraper);
+      }),
+    );
+    updateStatus("Drag a button to your bookmarks bar, then click it on the matching AI conversation.");
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
-    updateStatus("Unable to load bookmarklet.");
+    updateStatus("Unable to load bookmarklets.");
     showError(message);
     bootstrapAlert({ title: "Load error", body: message, color: "danger" });
   } finally {
