@@ -21,6 +21,15 @@
       .replace(/\r?\n/g, " ");
   }
 
+  const cleanText = (value) =>
+    String(value || "")
+      .replace(/\s+/g, " ")
+      .trim();
+  const cleanTitle = (value, product = "Gemini") => {
+    const title = cleanText(value).replace(new RegExp(`\\s+-\\s+${product}$`, "i"), "");
+    return title && !new RegExp(`^(?:${product}|${product} Conversation|New chat)$`, "i").test(title) ? title : "";
+  };
+
   const blockTags = new Set(["p", "ul", "ol", "li", "table", "hr", "code-block"]);
   const headingPattern = /^h[1-6]$/;
   const isBlockElement = (node) => {
@@ -148,7 +157,9 @@
 
   function extractConversation(doc = root.document) {
     const title =
-      $(".conversation-title-container .conversation-title", doc)?.textContent?.trim() || "Gemini Conversation";
+      cleanTitle($(".conversation-title-container .conversation-title", doc)?.textContent) ||
+      cleanTitle(root.title || doc.title) ||
+      "Gemini Conversation";
     const date = formatLocalIso(new Date());
     const source = doc.location?.href || "";
     const conversations = doc.querySelectorAll(".conversation-container");

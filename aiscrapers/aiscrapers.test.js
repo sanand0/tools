@@ -85,6 +85,16 @@ describe("claudescraper conversation extraction", () => {
 describe("chatgptscraper conversation extraction", () => {
   it("extracts semantic ChatGPT turns without action controls", async () => {
     const { window, document } = await loadFrom(import.meta.dirname, "__fixtures__/chatgpt-basic.html");
+    const ogTitle = document.createElement("meta");
+    ogTitle.setAttribute("property", "og:title");
+    ogTitle.content = "ChatGPT";
+    document.head.appendChild(ogTitle);
+    document.querySelector('[data-message-author-role="assistant"] .markdown').insertAdjacentHTML(
+      "beforeend",
+      `<div>Inspecting files</div>
+      <div>Called toolCalled tool</div>
+      <pre class="overflow-visible"><div><div>Python</div><button>Run</button><pre><code><span>bash -lc ls -la</span><br><span>printf done</span></code></pre></div></pre>`,
+    );
     const markdown = window.chatgptscraper.extractConversation(document);
 
     expect(markdown).toContain('title: "ChatGPT Fixture"');
@@ -94,6 +104,9 @@ describe("chatgptscraper conversation extraction", () => {
     expect(markdown).toContain("<summary>Called tool: Local MCP - Bash</summary>");
     expect(markdown).toContain("Request\n\n```\n{commands:");
     expect(markdown).toContain("Response\n\n```\n{result:");
+    expect(markdown).toMatch(/Inspecting files\s+```\nbash -lc ls -la\nprintf done\n```/);
+    expect(markdown).not.toContain("Pythonbash -lc");
+    expect(markdown).not.toContain("Called toolCalled tool");
     expect(markdown).toContain("```");
     expect(markdown).not.toContain("Copy response");
     expect(markdown).not.toContain("More actions");

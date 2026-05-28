@@ -23,6 +23,10 @@
     String(value || "")
       .replace(/\s+/g, " ")
       .trim();
+  const cleanTitle = (value, product = "Claude") => {
+    const title = cleanText(value).replace(new RegExp(`\\s+-\\s+${product}$`, "i"), "");
+    return title && !new RegExp(`^(?:${product}|${product} Conversation|New chat)$`, "i").test(title) ? title : "";
+  };
   const isHidden = (node) => node.hidden || node.closest?.("[hidden], .sr-only, [aria-hidden='true']");
   const isBlockTag = (tag) =>
     /^(p|div|section|article|ul|ol|li|table|thead|tbody|tr|blockquote|pre|hr|h[1-6])$/.test(tag);
@@ -276,9 +280,9 @@
 
   function extractConversation(doc = root.document) {
     const title =
-      $('[data-testid="chat-title-button"]', doc)?.textContent?.trim() ||
-      $('[data-testid="page-header"]', doc)?.textContent?.trim() ||
-      doc.title?.replace(/\s+-\s+Claude$/i, "").trim() ||
+      cleanTitle($('[data-testid="chat-title-button"]', doc)?.textContent) ||
+      cleanTitle($('[data-testid="page-header"]', doc)?.textContent) ||
+      cleanTitle(root.title || doc.title) ||
       "Claude Conversation";
     const date = formatLocalIso(new Date());
     const source = doc.location?.href || "";

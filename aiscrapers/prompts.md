@@ -1,13 +1,26 @@
 # Prompts
 
-## Add AI scrapers
+## Improve scrapers, 28 May 2026
 
 <!--
-
 cd ~/code/tools/
 dev.sh
 codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
+-->
+Modify the AI scrapers so that if the title can't be retrieved from the chat, default to the title from window.title
 
+Run the ChatGPT scraper on the last 15 ChatGPT chats and test. On a few instances, I found "```Bashls -la ..." or some version of this, i.e. "Bash" not "bash", the actual command on the same line, not next line, etc. There may be other errors too. Take a close look. Catalog the errors you find and fix them.
+
+If my intent is unclear, investigate, ask me questions most narrow the direction and define "done" clearly. Skip questioning if/when my needs are clear.
+
+<!-- codex resume 019e6d83-104a-78c0-9191-8f9d665bf751 --yolo -->
+
+## Add AI scrapers, 16 May 2026
+
+<!--
+cd ~/code/tools/
+dev.sh
+codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
 -->
 
 Rename the geminiscraper/ directory to aiscrapers/ and change references as required. We will be extending it to cover Claude and ChatGPT as well.
@@ -103,6 +116,8 @@ On https://claude.ai/chat/9e1f58cd-003a-4160-b753-60498fe0230c I get this output
 > www.bluehost.com](https://www.bluehost.com/blog/what-is-llms-txt/)[LLMS.txt 2026 Guide AI Agents & GEO Optimization
 
 There may be other such errors in other chats. Take a look and fix as required.
+
+<!-- codex resume 019e2fb3-4448-7961-89ca-c7fb18c03340 --yolo -->
 
 ## Revise working code
 
