@@ -10,29 +10,44 @@ describe("askai", () => {
     window.localStorage.clear();
   });
 
-  it("opens the selected AI and stores preference", () => {
+  it("selects an AI and stores preference without opening it", () => {
     document.getElementById("question").value = "What is life";
     document.getElementById("ask-claude").click();
 
     expect(window.localStorage.getItem("askai:lastProvider")).toBe("claude");
-    expect(window.__askaiRedirectTarget).toBe("https://claude.ai/new?q=What%20is%20life");
+    expect(window.__askaiRedirectTarget).toBeUndefined();
+    expect(window.__askaiOpenTarget).toBeUndefined();
+    expect(document.getElementById("ask-claude").classList.contains("btn-primary")).toBe(true);
+    expect(document.getElementById("status").textContent).toBe("Selected claude.");
   });
 
-  it("opens the new Phind provider", () => {
+  it("selects the new Phind provider", () => {
     document.getElementById("question").value = "debug a stack trace";
     document.getElementById("ask-phind").click();
 
     expect(window.localStorage.getItem("askai:lastProvider")).toBe("phind");
-    expect(window.__askaiRedirectTarget).toBe("https://www.phind.com/search?q=debug%20a%20stack%20trace");
+    expect(window.__askaiOpenTarget).toBeUndefined();
+    expect(document.getElementById("ask-phind").classList.contains("btn-primary")).toBe(true);
   });
 
-  it("copies a share link with q parameter", async () => {
+  it("copies a share link with q and ai parameters", async () => {
     document.getElementById("question").value = "hello world";
+    document.getElementById("ask-claude").click();
 
     document.getElementById("copy-link").click();
 
-    expect(await window.navigator.clipboard.readText()).toBe("https://test/askai/index.html?q=hello+world");
+    expect(await window.navigator.clipboard.readText()).toBe("https://test/askai/index.html?q=hello+world&ai=claude");
     expect(document.getElementById("status").textContent).toBe("Link copied.");
+  });
+
+  it("opens a share link in a new tab", () => {
+    document.getElementById("question").value = "hello world";
+    document.getElementById("ask-grok").click();
+
+    document.getElementById("open-link").click();
+
+    expect(window.__askaiOpenTarget).toBe("https://test/askai/index.html?q=hello+world&ai=grok");
+    expect(document.getElementById("status").textContent).toBe("Link opened.");
   });
 
   it("redirects immediately to Google by default when q is present", async () => {

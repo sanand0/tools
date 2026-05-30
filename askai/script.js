@@ -3,7 +3,7 @@ const questionInput = document.getElementById("question");
 const status = document.getElementById("status");
 
 const pickProvider = (provider) => (providers[provider] ? provider : defaultProvider);
-const toUrl = (provider, question) => providers[provider].replace("%s", encodeURIComponent(question));
+let selectedProvider = pickProvider(localStorage.getItem(storageKey));
 const showProvider = (provider) => {
   document.querySelectorAll("[data-ai]").forEach((button) => {
     const active = button.dataset.ai === provider;
@@ -11,30 +11,32 @@ const showProvider = (provider) => {
     button.classList.toggle("btn-outline-primary", !active);
   });
 };
-const navigate = (url) => {
+const openInNewTab = (url) => {
   if (window.location.hostname === "test") {
-    window.__askaiRedirectTarget = url;
+    window.__askaiOpenTarget = url;
     return;
   }
-  window.location.href = url;
+  window.open(url, "_blank", "noopener");
 };
 
-function ask(provider) {
-  const question = questionInput.value.trim();
-  if (!question) {
-    status.textContent = "Type a question first.";
-    return;
-  }
-
+function selectProvider(provider) {
   const resolvedProvider = pickProvider(provider);
+  selectedProvider = resolvedProvider;
   localStorage.setItem(storageKey, resolvedProvider);
   showProvider(resolvedProvider);
-  status.textContent = `Opening ${resolvedProvider}...`;
-  navigate(toUrl(resolvedProvider, question));
+  status.textContent = `Selected ${resolvedProvider}.`;
+}
+
+function buildShareUrl(question) {
+  const shareUrl = new URL(window.location.href);
+  shareUrl.search = "";
+  shareUrl.searchParams.set("q", question);
+  shareUrl.searchParams.set("ai", selectedProvider);
+  return shareUrl.toString();
 }
 
 document.querySelectorAll("[data-ai]").forEach((button) => {
-  button.addEventListener("click", () => ask(button.dataset.ai));
+  button.addEventListener("click", () => selectProvider(button.dataset.ai));
 });
 
 document.getElementById("copy-link").addEventListener("click", async () => {
@@ -44,18 +46,24 @@ document.getElementById("copy-link").addEventListener("click", async () => {
     return;
   }
 
-  const shareUrl = new URL(window.location.href);
-  shareUrl.search = "";
-  shareUrl.searchParams.set("q", question);
-
   try {
-    await navigator.clipboard.writeText(shareUrl.toString());
+    await navigator.clipboard.writeText(buildShareUrl(question));
     status.textContent = "Link copied.";
   } catch {
     status.textContent = "Could not copy link.";
   }
 });
 
-const preferredProvider = pickProvider(localStorage.getItem(storageKey));
-showProvider(preferredProvider);
-document.querySelector(`[data-ai="${preferredProvider}"]`)?.focus();
+document.getElementById("open-link").addEventListener("click", () => {
+  const question = questionInput.value.trim();
+  if (!question) {
+    status.textContent = "Type a question first.";
+    return;
+  }
+
+  openInNewTab(buildShareUrl(question));
+  status.textContent = "Link opened.";
+});
+
+showProvider(selectedProvider);
+document.querySelector(`[data-ai="${selectedProvider}"]`)?.focus();
