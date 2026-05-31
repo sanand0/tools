@@ -39,7 +39,7 @@ export function linkedinInvites(rootDocument = document) {
 
 function extractInvite(card, rootDocument) {
   const name = extractName(card);
-  const rawLines = textLines(card.innerText);
+  const rawLines = inviteTextLines(card);
   const profileUrl = cleanUrl(card.querySelector('a[href*="/in/"]')?.href, rootDocument);
   const followsYou = rawLines.some((line) => /follows you/i.test(line));
   const invitationAge = rawLines.find(isAgeLine);
@@ -48,11 +48,16 @@ function extractInvite(card, rootDocument) {
   const firstActionIndex = rawLines.findIndex(isActionLine);
   const detailsEndIndex = ageIndex >= 0 ? ageIndex : firstActionIndex >= 0 ? firstActionIndex : rawLines.length;
   const detailLines = rawLines.slice(0, detailsEndIndex).filter((line) => isProfileDetailLine(line, name));
-  const description = detailLines.find((line) => !isMutualConnectionLine(line));
+  const explicitCommonOrgs = extractCommonOrgs(card, name);
+  const description = detailLines.find(
+    (line) => !isMutualConnectionLine(line) && !explicitCommonOrgs.includes(line),
+  );
   const contextLines = detailLines.filter((line) => line !== description);
-  const mutualLine = contextLines.find(isMutualConnectionLine);
+  const mutualLine = detailLines.find(isMutualConnectionLine);
   const { connections, connectionsCount } = parseMutualConnections(mutualLine);
-  const commonOrgs = contextLines.filter((line) => !isMutualConnectionLine(line));
+  const commonOrgs = explicitCommonOrgs.length
+    ? explicitCommonOrgs
+    : contextLines.filter((line) => isLikelyCommonOrgLine(line, name));
   const message = extractMessage(rawLines, ageIndex >= 0 ? ageIndex : firstActionIndex);
 
   return {
@@ -73,7 +78,10 @@ function extractName(card) {
   const acceptLabel = card.querySelector('button[aria-label^="Accept "]')?.getAttribute("aria-label") || "";
   const acceptMatch = acceptLabel.match(/^Accept (.+?)(?:'|’|\u2019)s invitation$/i);
   if (acceptMatch) return normalizeInlineText(acceptMatch[1]);
-  return normalizeInlineText(card.querySelector('a[href*="/in/"] strong, a[href*="/in/"]')?.textContent);
+  const profileLink = [...card.querySelectorAll('a[href*="/in/"]')].find((link) => normalizeInlineText(link.textContent));
+  const image = card.querySelector('img[alt*="profile picture"], svg[aria-label*="profile picture"]');
+  const imageName = image?.getAttribute("alt") || image?.getAttribute("aria-label");
+  return normalizeInlineText(profileLink?.textContent || imageName?.replace(/\s*(?:open to work,\s*)?profile picture.*$/i, ""));
 }
 
 function isProfileDetailLine(line, name) {
@@ -85,6 +93,7 @@ function isProfileDetailLine(line, name) {
 
 function isInviteLine(line) {
   return (
+    /\bwants to connect\b/i.test(line) ||
     /(?:follows you and is )?inviting you to connect/i.test(line) ||
     /^follows you and is inviting you to connect$/i.test(line)
   );
@@ -104,6 +113,53 @@ function isAgeLine(line) {
 
 function isMutualConnectionLine(line) {
   return /\bmutual connections?\b/i.test(line);
+}
+
+function extractCommonOrgs(card, name) {
+  const orgs = [];
+  for (const icon of card.querySelectorAll("svg[id], use[href], [data-test-icon]")) {
+    if (!isCommonOrgIcon(icon)) continue;
+    const org = closestTextRow(icon, card)
+      .find((line) => isCommonOrgLine(line, name))
+      ?.replace(/\s+common organization$/i, "");
+    if (org) orgs.push(org);
+  }
+  return unique(orgs);
+}
+
+function isCommonOrgIcon(icon) {
+  const marker = [
+    icon.id,
+    icon.getAttribute("href"),
+    icon.getAttribute("aria-label"),
+    icon.getAttribute("data-test-icon"),
+  ]
+    .join(" ")
+    .toLowerCase();
+  if (/\b(person|profile|verified|premium|linkedin-bug|in-common|overflow)\b/.test(marker)) return false;
+  return /\b(company|school|education|organization|institution)(?:-accent)?\b/.test(marker);
+}
+
+function closestTextRow(element, card) {
+  for (let row = element.parentElement; row && row !== card; row = row.parentElement) {
+    const lines = textLines(row.innerText || row.textContent).filter((line) => !isActionLine(line));
+    if (lines.length && lines.length <= 3) return lines;
+  }
+  return [];
+}
+
+function isCommonOrgLine(line, name) {
+  if (!line || line === name) return false;
+  if (isInviteLine(line) || isActionLine(line) || isAgeLine(line) || isMutualConnectionLine(line)) return false;
+  return true;
+}
+
+function isLikelyCommonOrgLine(line, name) {
+  if (!isCommonOrgLine(line, name)) return false;
+  if (line.includes("|")) return false;
+  if (/\b(?:engineer|developer|student|founder|manager|director|analyst|consultant|specialist|strategist)\b/i.test(line))
+    return false;
+  return line.length <= 80;
 }
 
 export function invitationMonthFromAge(ageText, now = new Date()) {
@@ -778,6 +834,12 @@ function cleanUrl(value, rootDocument) {
   } catch {
     return value;
   }
+}
+
+function inviteTextLines(card) {
+  const elements = [...card.querySelectorAll("p, button, [role='button']")];
+  if (!elements.length) return textLines(card.innerText || card.textContent);
+  return elements.flatMap((element) => textLines(element.innerText || element.textContent));
 }
 
 function textLines(value) {

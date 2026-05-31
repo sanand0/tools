@@ -62,6 +62,50 @@ describe("linkedinscraper invite scraper", () => {
     ]);
   });
 
+  it("keeps invite status and multiline taglines out of descriptions and common organizations", () => {
+    const invites = renderInvites(`
+      <div role="listitem" componentkey="urn:li:invitation:8">
+        <a href="/in/dev-example/"><strong>Dev Example</strong></a>
+        <p>
+          <span><a href="/in/dev-example/"><strong>Dev Example</strong></a> wants to connect</span>
+          <span aria-hidden="true"><a href="/in/dev-example/"><strong>Dev Example</strong></a> wants to connect</span>
+        </p>
+        <p>Dual Degree Student | 2nd year BS Data Science @IIT MADRAS| Student by heart</p>
+        <p>| Coder | AI Enthusiast | MS Excel | SQL | Python</p>
+        <div><svg id="company-accent-4" role="img"></svg><p>Indian Institute of Technology, Madras</p></div>
+        <p>4 hours ago</p>
+        <button>Ignore</button>
+        <button>Accept</button>
+      </div>
+    `);
+
+    expect(invites[0]).toMatchObject({
+      name: "Dev Example",
+      description: "Dual Degree Student | 2nd year BS Data Science @IIT MADRAS| Student by heart",
+      commonOrgs: ["Indian Institute of Technology, Madras"],
+    });
+    expect(invites[0].commonOrgs).not.toContain("wants to connect");
+    expect(invites[0].commonOrgs).not.toContain("| Coder | AI Enthusiast | MS Excel | SQL | Python");
+  });
+
+  it("does not use an empty profile-photo link as the invite name", () => {
+    const invites = renderInvites(`
+      <div role="listitem" componentkey="urn:li:invitation:9">
+        <a href="/in/photo-first/"><img alt="Photo First’s profile picture"></a>
+        <p><a href="/in/photo-first/"><strong>Photo First</strong></a> wants to connect</p>
+        <p>BI Data Science Engineer | Power BI | AI-Powered Analytics</p>
+        <p>2 days ago</p>
+        <button>Ignore</button>
+        <button>Accept</button>
+      </div>
+    `);
+
+    expect(invites[0]).toMatchObject({
+      name: "Photo First",
+      description: "BI Data Science Engineer | Power BI | AI-Powered Analytics",
+    });
+  });
+
   it("parses mutual connection names and total counts", () => {
     const invites = renderInvites(`
       <div role="listitem" componentkey="urn:li:invitation:2">

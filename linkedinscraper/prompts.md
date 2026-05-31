@@ -1,13 +1,28 @@
 # Prompts
 
-## Page scraper, 11 May 2026
+## Invite scraper update, 01 Jun 2026
 
 <!--
-
 cd /home/sanand/code/tools
 dev.sh
 codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
+-->
 
+The invite scraper in linkedinscraper/ has some issues.
+
+- "description" is typically "XXX wants to connect" instead of their tagline
+- "commonOrgs" includes "wants to connect" and their taglines apart from the actual common orgs
+
+Fix this robustly, in a future-proof way.
+
+<!-- codex resume 019e8071-5fab-7f60-b201-5f61c4091308 --yolo -->
+
+## Page scraper, 11 May 2026
+
+<!--
+cd /home/sanand/code/tools
+dev.sh
+codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
 -->
 
 We will be adding a LinkedIn Profile Scraper to linkedinscraper/ that can scrape all profile information from a LinkedIn profile page.
