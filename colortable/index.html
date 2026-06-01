@@ -170,12 +170,6 @@
                 <div class="input-group">
                   <select id="gradient-select" class="form-select">
                     <option value="rdylgn">Red-Yellow-Green</option>
-                    <option value="viridis">Viridis</option>
-                    <option value="turbo">Turbo</option>
-                    <option value="plasma">Plasma</option>
-                    <option value="cool">Cool</option>
-                    <option value="warm">Warm</option>
-                    <option value="blues">Blues</option>
                   </select>
                   <span id="gradient-preview" class="input-group-text gradient-preview" aria-label="Gradient preview"></span>
                 </div>
@@ -184,6 +178,11 @@
               <div class="form-check form-switch mb-3">
                 <input class="form-check-input" type="checkbox" id="use-custom-colors" />
                 <label class="form-check-label" for="use-custom-colors">Use custom colors</label>
+              </div>
+
+              <div class="form-check form-switch mb-3">
+                <input class="form-check-input" type="checkbox" id="reverse-scale" />
+                <label class="form-check-label" for="reverse-scale">Reverse color scale</label>
               </div>
 
               <div class="row g-3">

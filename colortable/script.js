@@ -1,13 +1,5 @@
 import { dsvFormat } from "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm";
-import {
-  interpolateBlues,
-  interpolateCool,
-  interpolatePlasma,
-  interpolateRdYlGn,
-  interpolateTurbo,
-  interpolateViridis,
-  interpolateWarm,
-} from "https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3/+esm";
+import * as chromatic from "https://cdn.jsdelivr.net/npm/d3-scale-chromatic@3/+esm";
 import { interpolateRgb } from "https://cdn.jsdelivr.net/npm/d3-interpolate@3/+esm";
 import { rgb } from "https://cdn.jsdelivr.net/npm/d3-color@3/+esm";
 import saveform from "https://cdn.jsdelivr.net/npm/saveform@1";
@@ -24,6 +16,7 @@ const rangeMaxInput = $("#range-max");
 const rangeHint = $("#range-hint");
 const gradientSelect = $("#gradient-select");
 const gradientPreview = $("#gradient-preview");
+const reverseScaleInput = $("#reverse-scale");
 const customToggle = $("#use-custom-colors");
 const lowColorInput = $("#low-color");
 const highColorInput = $("#high-color");
@@ -33,16 +26,66 @@ const alertContainer = $("#alert-container");
 
 saveform("#colortable-form");
 
-const gradients = [
-  { id: "rdylgn", label: "Red-Yellow-Green", interpolator: interpolateRdYlGn },
-  { id: "viridis", label: "Viridis", interpolator: interpolateViridis },
-  { id: "turbo", label: "Turbo", interpolator: interpolateTurbo },
-  { id: "plasma", label: "Plasma", interpolator: interpolatePlasma },
-  { id: "cool", label: "Cool", interpolator: interpolateCool },
-  { id: "warm", label: "Warm", interpolator: interpolateWarm },
-  { id: "blues", label: "Blues", interpolator: interpolateBlues },
+const gradientGroups = [
+  {
+    label: "Sequential",
+    gradients: [
+      ["blues", "Blues", "interpolateBlues"],
+      ["greens", "Greens", "interpolateGreens"],
+      ["greys", "Greys", "interpolateGreys"],
+      ["oranges", "Oranges", "interpolateOranges"],
+      ["purples", "Purples", "interpolatePurples"],
+      ["reds", "Reds", "interpolateReds"],
+      ["turbo", "Turbo", "interpolateTurbo"],
+      ["viridis", "Viridis", "interpolateViridis"],
+      ["inferno", "Inferno", "interpolateInferno"],
+      ["magma", "Magma", "interpolateMagma"],
+      ["plasma", "Plasma", "interpolatePlasma"],
+      ["cividis", "Cividis", "interpolateCividis"],
+      ["warm", "Warm", "interpolateWarm"],
+      ["cool", "Cool", "interpolateCool"],
+      ["cubehelix", "Cubehelix Default", "interpolateCubehelixDefault"],
+      ["bugn", "Blue-Green", "interpolateBuGn"],
+      ["bupu", "Blue-Purple", "interpolateBuPu"],
+      ["gnbu", "Green-Blue", "interpolateGnBu"],
+      ["orrd", "Orange-Red", "interpolateOrRd"],
+      ["pubugn", "Purple-Blue-Green", "interpolatePuBuGn"],
+      ["pubu", "Purple-Blue", "interpolatePuBu"],
+      ["purd", "Purple-Red", "interpolatePuRd"],
+      ["rdpu", "Red-Purple", "interpolateRdPu"],
+      ["ylgnbu", "Yellow-Green-Blue", "interpolateYlGnBu"],
+      ["ylgn", "Yellow-Green", "interpolateYlGn"],
+      ["ylorbr", "Yellow-Orange-Brown", "interpolateYlOrBr"],
+      ["ylorrd", "Yellow-Orange-Red", "interpolateYlOrRd"],
+    ],
+  },
+  {
+    label: "Diverging",
+    gradients: [
+      ["brbg", "Brown-Blue-Green", "interpolateBrBG"],
+      ["prgn", "Purple-Green", "interpolatePRGn"],
+      ["piyg", "Pink-Yellow-Green", "interpolatePiYG"],
+      ["puor", "Purple-Orange", "interpolatePuOr"],
+      ["rdbu", "Red-Blue", "interpolateRdBu"],
+      ["rdgy", "Red-Grey", "interpolateRdGy"],
+      ["rdylbu", "Red-Yellow-Blue", "interpolateRdYlBu"],
+      ["rdylgn", "Red-Yellow-Green", "interpolateRdYlGn"],
+      ["spectral", "Spectral", "interpolateSpectral"],
+    ],
+  },
+  {
+    label: "Cyclical",
+    gradients: [
+      ["rainbow", "Rainbow", "interpolateRainbow"],
+      ["sinebow", "Sinebow", "interpolateSinebow"],
+    ],
+  },
 ];
+const gradients = gradientGroups.flatMap((group) =>
+  group.gradients.map(([id, label, interpolator]) => ({ id, label, interpolator: chromatic[interpolator] })),
+);
 const gradientMap = new Map(gradients.map((item) => [item.id, item]));
+const defaultGradient = "rdylgn";
 
 let lastAutoRange = { min: null, max: null };
 let lastHtml = "";
@@ -83,6 +126,45 @@ const parseNumericValue = (raw) => {
   return isPercent ? number / 100 : number;
 };
 
+const parseAffixedValue = (raw) => {
+  const trimmed = trimCell(raw);
+  if (!trimmed) return null;
+  const match = trimmed.match(/^([^\d+-]*)([-+]?(?:\d[\d,]*(?:\.\d+)?|\.\d+)(?:e[-+]?\d+)?)([^\d]*)$/i);
+  if (!match) return null;
+  const [, prefix, numberText, suffix] = match;
+  const number = Number(numberText.replace(/,/g, ""));
+  if (!Number.isFinite(number)) return null;
+  return {
+    number: suffix.trim() === "%" ? number / 100 : number,
+    prefix,
+    suffix,
+  };
+};
+
+const buildColumnNumericParsers = (rows) => {
+  const maxCols = Math.max(0, ...rows.map((row) => row.length));
+  return Array.from({ length: maxCols }, (_, colIndex) => {
+    const parsed = rows
+      .map((row) => ({ raw: trimCell(row[colIndex] ?? ""), parsed: parseAffixedValue(row[colIndex]) }))
+      .filter(({ raw }) => raw !== "");
+    if (!parsed.length || parsed.some(({ parsed: value }) => value === null)) return () => null;
+
+    const prefixes = new Set(parsed.map(({ parsed: value }) => value.prefix).filter(Boolean));
+    const suffixes = new Set(parsed.map(({ parsed: value }) => value.suffix).filter(Boolean));
+    if (prefixes.size > 1 || suffixes.size > 1) return () => null;
+
+    const allowedPrefix = prefixes.values().next().value ?? "";
+    const allowedSuffix = suffixes.values().next().value ?? "";
+    return (raw) => {
+      const value = parseAffixedValue(raw);
+      if (value === null) return null;
+      if (value.prefix && value.prefix !== allowedPrefix) return null;
+      if (value.suffix && value.suffix !== allowedSuffix) return null;
+      return value.number;
+    };
+  });
+};
+
 const parseRangeInput = (value) => {
   const trimmed = trimCell(value);
   if (!trimmed) return null;
@@ -117,11 +199,17 @@ const buildScale = (min, max, interpolator) => {
   if (!Number.isFinite(min) || !Number.isFinite(max)) return null;
   if (min === max) return () => interpolator(0.5);
   const span = max - min;
-  return (value) => interpolator(Math.min(1, Math.max(0, (value - min) / span)));
+  return (value) => {
+    const ratio = Math.min(1, Math.max(0, (value - min) / span));
+    return interpolator(reverseScaleInput?.checked ? 1 - ratio : ratio);
+  };
 };
 
 const buildGradientCss = (interpolator) => {
-  const steps = Array.from({ length: 6 }, (_, i) => rgb(interpolator(i / 5)).formatHex());
+  const steps = Array.from({ length: 6 }, (_, i) => {
+    const ratio = i / 5;
+    return rgb(interpolator(reverseScaleInput?.checked ? 1 - ratio : ratio)).formatHex();
+  });
   return `linear-gradient(90deg, ${steps.join(", ")})`;
 };
 
@@ -134,6 +222,26 @@ const getInterpolator = () => {
 };
 
 const getColorMode = () => colorModeSelect?.value || "table";
+
+const renderGradientOptions = () => {
+  const selected = gradientSelect.value;
+  gradientSelect.replaceChildren(
+    ...gradientGroups.map((group) => {
+      const optgroup = document.createElement("optgroup");
+      optgroup.label = group.label;
+      optgroup.replaceChildren(
+        ...group.gradients.map(([id, label]) => {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = label;
+          return option;
+        }),
+      );
+      return optgroup;
+    }),
+  );
+  gradientSelect.value = gradientMap.has(selected) ? selected : defaultGradient;
+};
 
 const updateGradientPreview = () => {
   gradientPreview.style.backgroundImage = buildGradientCss(getInterpolator());
@@ -165,10 +273,14 @@ const parseTable = (text) => {
   const parser = dsvFormat(delimiter);
   const rows = parser.parseRows(text);
   if (!rows.length) throw new Error("No rows found. Paste a table to begin.");
-  const trimmedRows = rows.map((row) => row.map(trimCell));
+  const isMarkdownTable =
+    delimiter === "|" && rows.some((row) => trimCell(row[0] ?? "") === "" && trimCell(row.at(-1) ?? "") === "");
+  const normalizedRows = isMarkdownTable ? rows.map((row) => row.slice(1, -1)) : rows;
+  const trimmedRows = normalizedRows.map((row) => row.map(trimCell));
   const filteredRows = trimmedRows.filter((row, index) => index === 0 || row.some((cell) => cell !== ""));
   if (!filteredRows.length) throw new Error("No usable rows found.");
   let [header, ...body] = filteredRows;
+  if (isMarkdownTable) body = body.filter((row) => !row.every((cell) => /^:?-{3,}:?$/.test(cell)));
   const maxCols = Math.max(header.length, ...body.map((row) => row.length));
   if (!maxCols) throw new Error("No columns found in the table.");
   if (header.length < maxCols) {
@@ -180,12 +292,14 @@ const parseTable = (text) => {
   return { header, rows: paddedBody };
 };
 
-const detectRowHeaders = (rows) => {
+const detectRowHeaders = (rows, numericParsers) => {
   if (!rows.length) return false;
   const firstColumn = rows.map((row) => trimCell(row[0] ?? "")).filter((value) => value !== "");
   if (!firstColumn.length) return false;
-  const nonNumeric = firstColumn.filter((value) => parseNumericValue(value) === null).length;
-  const otherNumeric = rows.some((row) => row.slice(1).some((cell) => parseNumericValue(cell) !== null));
+  const nonNumeric = firstColumn.filter((value) => numericParsers[0]?.(value) === null).length;
+  const otherNumeric = rows.some((row) =>
+    row.slice(1).some((cell, index) => numericParsers[index + 1]?.(cell) !== null),
+  );
   return nonNumeric / firstColumn.length >= 0.8 && otherNumeric;
 };
 
@@ -248,11 +362,12 @@ const renderTable = () => {
 
   try {
     const { header, rows } = parseTable(raw);
-    const hasRowHeaders = detectRowHeaders(rows);
+    const numericParsers = buildColumnNumericParsers(rows);
+    const hasRowHeaders = detectRowHeaders(rows, numericParsers);
     const numericGrid = rows.map((row) =>
       row.map((cell, colIndex) => {
         if (hasRowHeaders && colIndex === 0) return null;
-        return parseNumericValue(cell);
+        return numericParsers[colIndex]?.(cell) ?? parseNumericValue(cell);
       }),
     );
     const numericValues = numericGrid.flat().filter((value) => Number.isFinite(value));
@@ -345,7 +460,7 @@ const handleCopy = async () => {
   }
 };
 
-if (!gradientSelect.value) gradientSelect.value = gradients[0].id;
+renderGradientOptions();
 updateCustomInputsState();
 updateGradientPreview();
 renderTable();
@@ -356,6 +471,10 @@ colorModeSelect?.addEventListener("change", renderTable);
 rangeMinInput.addEventListener("input", renderTable);
 rangeMaxInput.addEventListener("input", renderTable);
 gradientSelect.addEventListener("change", () => {
+  updateGradientPreview();
+  renderTable();
+});
+reverseScaleInput?.addEventListener("input", () => {
   updateGradientPreview();
   renderTable();
 });

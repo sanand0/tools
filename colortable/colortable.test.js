@@ -81,6 +81,88 @@ describe("Color Table Builder", async () => {
     expect(rows[1].textContent).toContain("B");
   });
 
+  it("lists D3 continuous color scales by type", () => {
+    const groups = [...document.querySelectorAll("#gradient-select optgroup")];
+    const groupLabels = groups.map((group) => group.label);
+    const options = [...document.querySelectorAll("#gradient-select option")];
+
+    expect(groupLabels).toEqual(["Sequential", "Diverging", "Cyclical"]);
+    expect(document.getElementById("gradient-select").value).toBe("rdylgn");
+    expect(options).toHaveLength(38);
+    expect(groups[0].querySelector('option[value="reds"]').textContent).toBe("Reds");
+    expect(groups[1].querySelector('option[value="rdbu"]').textContent).toBe("Red-Blue");
+    expect(groups[2].querySelector('option[value="rainbow"]').textContent).toBe("Rainbow");
+  });
+
+  it("supports Markdown tables", () => {
+    delimiterInput.value = "pipe";
+    delimiterInput.dispatchEvent(new window.Event("input", { bubbles: true }));
+    setTableInput("| Name | Value |\n| --- | ---: |\n| Alpha | 1 |\n| Beta | 2 |");
+
+    const headers = [...preview.querySelectorAll("thead th")].map((cell) => cell.textContent);
+    const rows = [...preview.querySelectorAll("tbody tr")].map((row) =>
+      [...row.children].map((cell) => cell.textContent),
+    );
+
+    expect(headers).toEqual(["Name", "Value"]);
+    expect(rows).toEqual([
+      ["Alpha", "1"],
+      ["Beta", "2"],
+    ]);
+  });
+
+  it("treats consistent currency prefixes as numeric values", () => {
+    delimiterInput.value = "pipe";
+    delimiterInput.dispatchEvent(new window.Event("input", { bubbles: true }));
+    setTableInput("Name|Revenue\nA|$1,000\nB|$2,500\nC|");
+
+    expect(rangeMinInput.value).toBe("1000");
+    expect(rangeMaxInput.value).toBe("2500");
+
+    const cells = preview.querySelectorAll("tbody tr td");
+    expect(cells[0].textContent).toBe("$1,000");
+    expect(cells[0].style.textAlign).toBe("right");
+    expect(cells[0].style.backgroundColor).not.toBe("");
+    expect(cells[2].style.backgroundColor).toBe("");
+  });
+
+  it("does not parse columns with mixed currency prefixes", () => {
+    delimiterInput.value = "pipe";
+    delimiterInput.dispatchEvent(new window.Event("input", { bubbles: true }));
+    setTableInput("Name|Revenue\nA|$1,000\nB|INR 2,500");
+
+    const cells = preview.querySelectorAll("tbody tr td");
+    expect(cells[0].style.textAlign).toBe("left");
+    expect(cells[0].style.backgroundColor).toBe("");
+    expect(rangeMinInput.value).toBe("");
+    expect(rangeMaxInput.value).toBe("");
+  });
+
+  it("treats consistent optional suffixes and approximation prefixes as numeric values", () => {
+    setTableInput("Name,Estimate\nA,~1.2M\nB,2.4M");
+
+    expect(rangeMinInput.value).toBe("1.2");
+    expect(rangeMaxInput.value).toBe("2.4");
+
+    const cells = preview.querySelectorAll("tbody tr td");
+    expect(cells[0].style.backgroundColor).not.toBe("");
+    expect(cells[1].style.backgroundColor).not.toBe("");
+  });
+
+  it("reverses the color scale", () => {
+    setTableInput("Name,Value\nA,0\nB,100");
+    enableCustomColors("#000000", "#ffffff");
+
+    const before = [...preview.querySelectorAll("tbody tr td")].map((cell) => cell.style.backgroundColor);
+    const reverseScale = document.getElementById("reverse-scale");
+    reverseScale.checked = true;
+    reverseScale.dispatchEvent(new window.Event("input", { bubbles: true }));
+    const after = [...preview.querySelectorAll("tbody tr td")].map((cell) => cell.style.backgroundColor);
+
+    expect(before).toEqual(["rgb(0, 0, 0)", "rgb(255, 255, 255)"]);
+    expect(after).toEqual(["rgb(255, 255, 255)", "rgb(0, 0, 0)"]);
+  });
+
   it("colors each row independently in rows mode", () => {
     setTableInput("Name,A,B\nRow1,0,100\nRow2,0,1");
     enableCustomColors("#000000", "#ffffff");

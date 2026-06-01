@@ -4,10 +4,11 @@ Paste a delimited table and get a colored HTML table.
 
 ## What it does
 
-- Accepts CSV, tab-delimited, pipe-delimited, semicolon, or custom delimiters
+- Accepts CSV, tab-delimited, pipe-delimited, Markdown, semicolon, or custom delimiters
 - Uses the first row as the header and trims whitespace
-- Treats percentages as numeric values for scaling while displaying the original text
-- Colors numeric cells using a selectable d3 gradient or custom colors
+- Treats percentages and consistent currency-style prefixes or suffixes as numeric values for scaling while displaying the original text
+- Colors numeric cells using grouped D3 continuous gradients or custom colors
+- Reverses the color scale on demand
 - Lets you override the numeric range used for scaling
 - Copies formatted HTML (2-space indentation) to the clipboard
 

@@ -1,6 +1,32 @@
 # Prompts
 
-## Initial version
+## Add options, 01 Jun 2026
+
+<!--
+cd ~/code/tools
+dev.sh
+codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
+-->
+
+Modify colortable/ as follows:
+
+- handle Markdown tables as input. It's just a variation of the pipe-delimited format where the first and last "columns" should be ignored, the second row (the one with the dashes) should be ignored, and the rest should be treated as data rows.
+- handle currencies. If a column consists only of values with the same suffix or prefix (e.g. "$", "INR ", approximation symbols like ~, etc. - which may be optional, but are consistent - i.e. there are no mixed suffixes or prefixes), treat only the numerical part of these as values.
+- add an option to reverse the color scale.
+
+Add tests first. Then implement. Run and test.
+
+---
+
+Add all built-in D3 color scales suitable for continuous data - Reds, etc. Categorize as required (sequential, diverging, etc.) with option groups.
+
+---
+
+Default to the red-yellow-green scale.
+
+<!-- codex resume 019e80de-023f-7431-af34-3e94bcb38f74 --yolo -->
+
+## Initial version, 21 Apr 2026
 
 Create a tool colortable/ that can convert pasted tables into colored HTML tables.
 Allow the user to paste a CSV or tab-delimited or pipe-delimited table.
