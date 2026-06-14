@@ -121,6 +121,11 @@ describe("chatgptscraper conversation extraction", () => {
     expect(markdown).toContain("<summary>Thought for 12s</summary>");
     expect(markdown).toContain("I checked the sidebar trace.");
     expect(markdown).toContain("Then I wrote the answer.");
+    expect(markdown).toContain("I inspected every activity.");
+    expect(markdown).toContain("<summary>Inspected the data with Python</summary>");
+    expect(markdown).toContain("Inspected and analyzed fixture data.");
+    expect(markdown).toContain('```\nimport zipfile, os\nprint("done")\n```');
+    expect(markdown).toContain("I kept the earlier reasoning after opening this section.");
   });
 
   it("does not require ChatGPT CSS classes for turn boundaries", async () => {

@@ -94,6 +94,7 @@
   function parseNode(node) {
     if (node.nodeType === nodeTypes.TEXT_NODE) return node.textContent;
     if (node.nodeType !== nodeTypes.ELEMENT_NODE || isHidden(node)) return "";
+    if (node.dataset?.aiscraperSkip) return "";
     if (node.dataset?.aiscraperMarkdown) return `\n${node.dataset.aiscraperMarkdown}\n\n`;
 
     const tag = node.tagName.toLowerCase();
@@ -146,7 +147,7 @@
     const text = cleanText(node.innerText || node.textContent || node.getAttribute("aria-label"));
     const testid = node.getAttribute("data-testid") || "";
     return (
-      /copy|more actions|sources|rate|regenerate|edit message|read aloud|open tool call list/i.test(text) ||
+      /copy|more actions|\bsources\b|rate|regenerate|edit message|read aloud|open tool call list/i.test(text) ||
       /copy-turn-action|collapsible-user-message-toggle/.test(testid)
     );
   }
@@ -224,7 +225,17 @@
     });
   }
 
-  const isThoughtButton = (node) => /^Thought for /i.test(cleanText(node.innerText || node.textContent));
+  const isReasoningToggle = (node) => /^(?:Thought|Worked) for /i.test(cleanText(node.innerText || node.textContent));
+
+  function reasoningToggleForActivity(node) {
+    if (node.tagName?.toLowerCase() !== "button" || node.getAttribute("aria-label")) return false;
+    const turn = node.closest("section[data-testid^='conversation-turn-']");
+    return Array.from(turn?.querySelectorAll("button") || []).find(
+      (button) => isReasoningToggle(button) && button.nextElementSibling?.contains(node),
+    );
+  }
+
+  const isReasoningActivity = (node) => Boolean(reasoningToggleForActivity(node));
 
   function reasoningPanel(doc = root.document) {
     return (
@@ -233,20 +244,20 @@
     );
   }
 
-  async function waitForReasoningPanel(doc, win, label) {
-    const duration = label.replace(/^Thought for\s+/i, "").trim();
+  async function waitForReasoningPanel(doc, win, previousText = "") {
     for (let i = 0; i < 16; i += 1) {
       const panel = reasoningPanel(doc);
       const text = cleanText(panel?.innerText || panel?.textContent);
-      if (panel && text && (!duration || text.includes(duration))) return panel;
+      if (panel && text && text !== previousText) return panel;
       await new Promise((resolve) => win.setTimeout(resolve, 250));
     }
-    return reasoningPanel(doc);
+    return null;
   }
 
   function formatThoughtDetails(label, panel) {
     if (!panel) return "";
     const clone = panel.cloneNode(true);
+    clone.removeAttribute("data-aiscraper-skip");
     clone
       .querySelectorAll(
         '[data-testid="bar-search-sources-header"], [data-testid="search-sources-inline-loading-row"], [data-testid="search-sources-loading-skeleton-row"]',
@@ -259,6 +270,14 @@
     });
     const markdown = parseChildren(clone).trim();
     return markdown ? `<details>\n<summary>${label}</summary>\n\n${markdown}\n\n</details>` : "";
+  }
+
+  function snapshotInlineReasoning(toggle) {
+    const container = toggle?.nextElementSibling;
+    if (!container) return;
+    const markdown = formatThoughtDetails(cleanText(toggle.innerText || toggle.textContent), container);
+    if (markdown) toggle.dataset.aiscraperMarkdown = markdown;
+    container.dataset.aiscraperSkip = "true";
   }
 
   const isConversationTurn = (node) => /^conversation-turn-\d+/.test(node.getAttribute?.("data-testid") || "");
@@ -335,7 +354,7 @@
     if (node.dataset?.aiscraperExpanded) return false;
     const target = node.getAttribute("for") ? root.document.getElementById(node.getAttribute("for")) : null;
     if (target?.checked) return false;
-    if (isThoughtButton(node)) return true;
+    if (isReasoningToggle(node) || isReasoningActivity(node)) return true;
     if (/show more/i.test(text)) return true;
     if (/copy|more actions|sources|rate|regenerate|edit|share|download|read aloud/i.test(text)) return false;
     return (
@@ -348,12 +367,25 @@
     for (let i = 0; i < limit; i += 1) {
       const node = Array.from(doc.querySelectorAll("button, label")).find(shouldClick);
       if (!node) return;
-      const thoughtLabel = isThoughtButton(node) ? cleanText(node.innerText || node.textContent) : "";
+      const reasoningLabel =
+        isReasoningToggle(node) || isReasoningActivity(node) ? cleanText(node.innerText || node.textContent) : "";
+      const previousPanelText = cleanText(reasoningPanel(doc)?.innerText || reasoningPanel(doc)?.textContent);
       node.click();
-      if (thoughtLabel) {
-        const panel = await waitForReasoningPanel(doc, win, thoughtLabel);
-        const markdown = formatThoughtDetails(thoughtLabel, panel);
+      if (reasoningLabel) {
+        const panel = isReasoningActivity(node)
+          ? await waitForReasoningPanel(doc, win, previousPanelText)
+          : await new Promise((resolve) =>
+              win.setTimeout(() => {
+                const currentPanel = reasoningPanel(doc);
+                const currentText = cleanText(currentPanel?.innerText || currentPanel?.textContent);
+                resolve(currentText && currentText !== previousPanelText ? currentPanel : null);
+              }, 250),
+            );
+        const markdown = formatThoughtDetails(reasoningLabel, panel);
         if (markdown) node.dataset.aiscraperMarkdown = markdown;
+        if (!isReasoningToggle(node) || !markdown) {
+          snapshotInlineReasoning(isReasoningToggle(node) ? node : reasoningToggleForActivity(node));
+        }
       } else {
         await new Promise((resolve) => win.setTimeout(resolve, 250));
       }

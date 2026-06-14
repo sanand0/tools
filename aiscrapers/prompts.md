@@ -1,5 +1,25 @@
 # Prompts
 
+## Improve ChatGPT scraper, 14 Jun 2026
+
+<!--
+cd ~/code/tools/
+dev.sh
+codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
+-->
+
+The ChatGPT scraper at aiscrapers/chatgptscraper.js needs improvements. It's not picking up the thinking - ensure that it picks up all the thinking. For example, on https://chatgpt.com/c/6a2d30d7-a100-83ec-b29b-3f77a37c2a58 we need to extract all the thinking. This should include:
+
+- "I’ll mine the uploaded AQI data..."
+- "Inspected and analyzed AQI data ..."
+  - The script that begins `import zipfile, os, json, textwrap, pandas as pd, numpy as np, re, glob, pathlib, math, statistics`... with proper Markdown formatting
+
+Run the ChatGPT scraper on 5 ChatGPT chats and test - especially where there are multiple conversations. Make sure the thinking in all the chats is extracted properly.
+
+Use a new tab on CDP (on localhost:9222) rather than disturbing existing tabs.
+
+<!-- codex resume 019ec6f3-5e4d-7ee2-9705-aafdbbfbed3e --yolo -->
+
 ## Improve scrapers, 28 May 2026
 
 <!--
@@ -7,6 +27,7 @@ cd ~/code/tools/
 dev.sh
 codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
 -->
+
 Modify the AI scrapers so that if the title can't be retrieved from the chat, default to the title from window.title
 
 Run the ChatGPT scraper on the last 15 ChatGPT chats and test. On a few instances, I found "```Bashls -la ..." or some version of this, i.e. "Bash" not "bash", the actual command on the same line, not next line, etc. There may be other errors too. Take a close look. Catalog the errors you find and fix them.
