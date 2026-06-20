@@ -1,5 +1,19 @@
 # Prompts
 
+## Attachments in ChatGPT scraper, 20 Jun 2026
+
+<!--
+cd ~/code/tools/
+dev.sh
+codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
+-->
+
+The ChatGPT scraper at aiscrapers/chatgptscraper.js does not capture user attachments.
+For example, browsing-history.tsv(1).xz is not captured in https://chatgpt.com/c/6a03c686-c0d0-83ec-96ed-43e03c2b01bb.
+Fix this. (Don't change / close existing tabs in CDP on localhost:9222.)
+
+<!-- codex resume 019ee30c-4e9a-74a2-a831-5f25518d6ebb --yolo -->
+
 ## Improve ChatGPT scraper, 14 Jun 2026
 
 <!--

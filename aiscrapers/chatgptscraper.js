@@ -225,6 +225,47 @@
     });
   }
 
+  const attachmentLabel = (node) => cleanText(node.getAttribute?.("aria-label") || node.getAttribute?.("title"));
+  const isAttachmentNode = (node) => {
+    const label = attachmentLabel(node);
+    if (!label || isControl(node)) return false;
+    const text = cleanText(node.innerText || node.textContent);
+    const className = String(node.getAttribute?.("class") || node.className || "");
+    return (
+      node.getAttribute?.("role") === "group" &&
+      (className.includes("file-tile") ||
+        /\bfile\b/i.test(text) ||
+        Array.from(node.querySelectorAll?.("button[aria-label]") || []).some(
+          (button) => attachmentLabel(button) === label,
+        ))
+    );
+  };
+
+  const topLevelAttachments = (node) => {
+    const candidates = Array.from(node.querySelectorAll("[role='group'][aria-label]")).filter(isAttachmentNode);
+    return candidates.filter(
+      (attachment) => !candidates.some((ancestor) => ancestor !== attachment && ancestor.contains(attachment)),
+    );
+  };
+
+  function formatAttachment(node) {
+    const filename = attachmentLabel(node);
+    const lines = (node.innerText || node.textContent || "").split(/\r?\n/).map(cleanText).filter(Boolean);
+    const type = lines.find((line) => line !== filename && /^(?:file|image|document|spreadsheet|pdf|csv)$/i.test(line));
+    return `* Attachment: ${filename}${type ? ` (${type})` : ""}`;
+  }
+
+  function transformAttachments(rootNode, sourceNode) {
+    const sourceAttachments = topLevelAttachments(sourceNode);
+    topLevelAttachments(rootNode).forEach((node, index) => {
+      const markdown = formatAttachment(sourceAttachments[index] || node);
+      if (!markdown) return;
+      const replacement = root.document.createElement("div");
+      replacement.dataset.aiscraperMarkdown = markdown;
+      node.replaceWith(replacement);
+    });
+  }
+
   const isReasoningToggle = (node) => /^(?:Thought|Worked) for /i.test(cleanText(node.innerText || node.textContent));
 
   function reasoningToggleForActivity(node) {
@@ -308,6 +349,7 @@
   function cloneForExtraction(turn) {
     const clone = turn.cloneNode(true);
     transformToolMessages(clone, turn);
+    transformAttachments(clone, turn);
     clone
       .querySelectorAll("nav, menu, form, textarea, [contenteditable='true'], .sr-only, [aria-hidden='true']")
       .forEach((node) => {

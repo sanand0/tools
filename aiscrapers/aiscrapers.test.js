@@ -98,7 +98,10 @@ describe("chatgptscraper conversation extraction", () => {
     const markdown = window.chatgptscraper.extractConversation(document);
 
     expect(markdown).toContain('title: "ChatGPT Fixture"');
-    expect(markdown).toContain("## User\n\nGive me a compact table.");
+    expect(markdown).toContain(
+      "## User\n\n* Attachment: browsing-history.tsv(1).xz (File)\n\nGive me a compact table.",
+    );
+    expect(markdown).not.toContain("\n\nFile\n\nGive me a compact table.");
     expect(markdown).toContain("## ChatGPT\n\nI will answer directly.");
     expect(markdown).toContain("| Tool | Use |");
     expect(markdown).toContain("<summary>Called tool: Local MCP - Bash</summary>");
@@ -133,7 +136,9 @@ describe("chatgptscraper conversation extraction", () => {
     document.querySelectorAll("[class]").forEach((node) => node.removeAttribute("class"));
     const markdown = window.chatgptscraper.extractConversation(document);
 
-    expect(markdown).toContain("## User\n\nGive me a compact table.");
+    expect(markdown).toContain(
+      "## User\n\n* Attachment: browsing-history.tsv(1).xz (File)\n\nGive me a compact table.",
+    );
     expect(markdown).toContain("## ChatGPT\n\nI will answer directly.");
     expect(markdown).toContain("<summary>Called tool: Local MCP - Bash</summary>");
     expect(markdown).toContain("Request\n\n```\n{commands:");
