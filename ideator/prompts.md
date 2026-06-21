@@ -1,5 +1,17 @@
 # Prompts
 
+## Dark mode, 21 Jul 2026
+
+<!--
+cd ~/code/tools/ideator
+dev.sh
+claude --dangerously-skip-permissions
+-->
+
+Make sure card colors align with dark mode. Light mode is fine. In dark mode, they have light grey text on white background. .goal-card and class="card bg-light" might need fixes.
+
+<!-- claude --resume 7d7abdb8-da5e-4e0c-881f-e9d63c31921e --dangerously-skip-permissions -->
+
 ## Initial spec
 
 Create an ideator/ tool. This should, on load:
