@@ -1,5 +1,20 @@
 # Prompts
 
+## Teams captions, 08 Jul 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
+-->
+
+Create a bookmarklet to capture Teams captions, similar to gmeetcaptions/.
+
+Rename gmeetcaptions/ to meetcaptions/ and create multiple bookmarklets on meetcaptions/index.html (similar to aiscrapers/) - one for Google Meet, one for Teams (and we may add others later).
+
+Run and test the Teams captions. I have CDP on localhost:9222 with a Teams meeting running with captions enabled. Check - WITHOUT DISTURBING IT (this is a live meeting) - if you can capture the captions and save them to a local file. If you can, then create a bookmarklet that does the same.
+
+<!-- codex resume 019f4107-555c-71b3-ac52-ef0ab58d913d -->
+
 ## Google Meet Info
 
 <!--

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Google Meet Captions</title>
+  <title>Meeting Captions</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http://www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20x2%3D%221%22%20y1%3D%220%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2334a853%22/%3E%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231a73e8%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22url(%23g)%22/%3E%3Cpath%20d%3D%22M16%2021a8%208%200%200%201%208-8h16a8%208%200%200%201%208%208v10a8%208%200%200%201-8%208H29l-9%207v-7h-4a8%208%200%200%201-8-8Z%22%20fill%3D%22white%22/%3E%3Ctext%20x%3D%2232%22%20y%3D%2235%22%20text-anchor%3D%22middle%22%20font-size%3D%2216%22%20font-family%3D%22Arial%2C%20sans-serif%22%20fill%3D%22%231a73e8%22%3ECC%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css">
@@ -15,7 +15,7 @@
     <div class="container">
       <a class="navbar-brand d-flex align-items-center" href="../">
         <i class="bi bi-badge-cc me-2"></i>
-        Google Meet Captions
+        Meeting Captions
       </a>
       <div class="bootstrap-dark-theme"></div>
     </div>
@@ -25,19 +25,23 @@
     <div class="row justify-content-center">
       <div class="col-lg-8 col-xl-7">
         <header class="mb-5 text-center">
-          <h1 class="display-5 mb-2">Google Meet Captions</h1>
-          <p class="lead text-secondary">Continuously record Google Meet captions to a local Markdown file, or copy them to your clipboard.</p>
+          <h1 class="display-5 mb-2">Meeting Captions</h1>
+          <p class="lead text-secondary">Continuously record Google Meet or Microsoft Teams captions to a local Markdown file, or copy them to your clipboard.</p>
         </header>
 
         <section class="bg-body shadow-sm border rounded-3 p-4 text-center mb-5">
-          <p class="mb-3">Drag this button to your bookmarks bar:</p>
-          <a href="" id="bookmarklet" class="btn btn-primary btn-lg mb-3 shadow-sm">
-            <i class="bi bi-badge-cc me-2"></i>
-            Google Meet Captions
-          </a>
+          <p class="mb-3">Drag these buttons to your bookmarks bar:</p>
+          <div class="d-flex flex-wrap justify-content-center gap-2 mb-3" id="bookmarklets">
+            <a href="" class="btn btn-primary btn-lg shadow-sm" data-captions-provider="google-meet">
+              <i class="bi bi-badge-cc me-1"></i> Google Meet Captions
+            </a>
+            <a href="" class="btn btn-secondary btn-lg shadow-sm" data-captions-provider="teams">
+              <i class="bi bi-microsoft-teams me-1"></i> Teams Captions
+            </a>
+          </div>
           <p class="text-secondary small mb-0" id="bookmarklet-status">
             <span id="bookmarklet-spinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            <span id="bookmarklet-status-text">Loading bookmarklet...</span>
+            <span id="bookmarklet-status-text">Loading bookmarklets...</span>
           </p>
           <p class="text-danger small mb-0" id="bookmarklet-error"></p>
         </section>
@@ -45,8 +49,8 @@
         <section class="bg-body shadow-sm border rounded-3 p-4">
           <h2 class="h5 text-secondary text-center mb-3">Usage</h2>
           <ol class="mb-0 ps-3">
-            <li>Open a Google Meet with captions enabled.</li>
-            <li>Click the <kbd>Google Meet Captions</kbd> bookmarklet — a control panel appears.</li>
+            <li>Open a Google Meet or Microsoft Teams meeting with captions enabled.</li>
+            <li>Click the matching captions bookmarklet — a control panel appears.</li>
             <li>Click <strong>Start Recording</strong> to continuously save captions to a local <code>.md</code> file.</li>
             <li>Click <strong>Stop Recording</strong> when done. The file includes speaker names, timestamps, participants, and duration.</li>
             <li>Or click <strong>Copy</strong> to copy the current visible captions to the clipboard.</li>

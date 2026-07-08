@@ -1,5 +1,32 @@
 # Prompts
 
+## Invite scraper update, 26 Jun 2026
+
+<!--
+cd /home/sanand/code/tools
+dev.sh -- codex --yolo --model gpt-5.5 --config model_reasoning_effort=medium
+-->
+
+The invite scraper in linkedinscraper/ has some issues.
+
+I have https://www.linkedin.com/mynetwork/invitation-manager/received/ open on CDP 9222 with ~200 of my latest invites. I notice that, when I run this bookmarklet:
+
+- "Hi Anand, thank you for the lovely session" appeared in a description. That should've been part of the message, and the description should have been quite different.
+- When I run the bookmarklet, the scrolling goes up and down and gets stuck - it doesn't smoothly scroll.
+- There may be other issues - check the output carefully to see if it matches.
+
+Try and preserve this window - you may open a new tab for additional tests.
+
+Fix this robustly, in a future-proof way.
+If you need to rewrite, feel free.
+If you need to test different approaches to see what's best - checking over a longer period of time, feel free.
+Learn from previous iterations on this bookmarklet - linkedinscraper/prompts.md and git history and ~/.codex/sessions/ logs might give you a hint of what was tried before and what worked and what didn't and how LinkedIn changes.
+Feel free to use sub-agents where required.
+Update tests to cover all edge cases discovered so far.
+Document your findings and learnings under linkedinscraper/notes.md for future sessions when LinkedIn changes its structure again.
+
+<!-- codex resume 019f0905-dae6-7102-8a31-86cc5bec7fe1 --yolo -->
+
 ## Invite scraper update, 01 Jun 2026
 
 <!--

@@ -27,7 +27,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[LinkedIn Scraper Bookmarklets](./linkedinscraper/)**: Collection of LinkedIn bookmarklets that copy structured page data from your browser.
 - **[AI Conversation Scrapers](./aiscrapers/)**: Copy AI conversations as Markdown with YAML frontmatter via bookmarklets.
 - **[Copy Links](./copylinks/)**: Bookmarklet to copy all page URLs and asset links as TSV.
-- **[Google Meet Captions](./gmeetcaptions/)**: Bookmarklet to copy the visible Google Meet captions as Markdown.
+- **[Meeting Captions](./meetcaptions/)**: Bookmarklets to record and save Google Meet or Microsoft Teams captions as Markdown.
 - **[Straive Intelligence](./straiveintelligence/)**: Bookmarklet to convert ChatGPT into a Straive-style user interface
 - **[GitHub Summary](./githubsummary/)**: Generates a blog-post-style summary of a GitHub user's activity within a specified date range.
 - **[Join CSV Tables](./joincsv/)**: Join multiple tables on the first column.

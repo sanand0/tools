@@ -5,9 +5,11 @@ import { fileURLToPath } from "node:url";
 import { Browser } from "happy-dom";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const scriptPath = path.join(__dirname, "gmeetcaptions.js");
+const scriptPath = path.join(__dirname, "meetcaptions.js");
 const fixturePath = path.join(__dirname, "__fixtures__/captions-anonymized.html");
+const teamsFixturePath = path.join(__dirname, "__fixtures__/teams-captions.html");
 const fixtureSource = await fs.readFile(fixturePath, "utf8");
+const teamsFixtureSource = await fs.readFile(teamsFixturePath, "utf8");
 const scriptSource = await fs.readFile(scriptPath, "utf8");
 
 const browser = new Browser({ console });
@@ -16,6 +18,15 @@ async function loadFixture(page) {
   const frame = page.mainFrame;
   frame.document.open();
   frame.document.write(fixtureSource);
+  frame.document.close();
+  await page.waitUntilComplete();
+  return frame;
+}
+
+async function loadTeamsFixture(page) {
+  const frame = page.mainFrame;
+  frame.document.open();
+  frame.document.write(teamsFixtureSource);
   frame.document.close();
   await page.waitUntilComplete();
   return frame;
@@ -62,7 +73,7 @@ function makeFilePicker(writable) {
   return vi.fn(() => Promise.resolve({ createWritable: vi.fn(() => Promise.resolve(writable)) }));
 }
 
-describe("gmeetcaptions bookmarklet", () => {
+describe("meetcaptions bookmarklet", () => {
   let page;
   let window;
   let document;
@@ -83,7 +94,7 @@ describe("gmeetcaptions bookmarklet", () => {
 
   async function load() {
     window.eval(scriptSource);
-    return window.gmeetcaptions;
+    return window.meetcaptions.googleMeet;
   }
 
   it("extracts anonymized Meet captions as Markdown", async () => {
@@ -202,21 +213,21 @@ describe("getMeta", () => {
 
   it("extracts title from document.title when no data attribute", async () => {
     window.eval(scriptSource);
-    const { getMeta } = window.gmeetcaptions;
+    const { getMeta } = window.meetcaptions.googleMeet;
     // fixture title: "Weekly Product Sync - Google Meet" — no "Meet - " prefix, kept as-is
     expect(getMeta(document, window).title).toBe("Weekly Product Sync - Google Meet");
   });
 
   it("strips Meet prefix from document.title", async () => {
     window.eval(scriptSource);
-    const { getMeta } = window.gmeetcaptions;
+    const { getMeta } = window.meetcaptions.googleMeet;
     document.title = "Meet - Weekly Sync";
     expect(getMeta(document, window).title).toBe("Weekly Sync");
   });
 
   it("prefers data-meeting-title attribute over document.title", async () => {
     window.eval(scriptSource);
-    const { getMeta } = window.gmeetcaptions;
+    const { getMeta } = window.meetcaptions.googleMeet;
     const el = document.createElement("div");
     el.setAttribute("data-meeting-title", "Q1 Planning");
     document.body.appendChild(el);
@@ -225,13 +236,13 @@ describe("getMeta", () => {
 
   it("returns empty participants when none present in DOM", async () => {
     window.eval(scriptSource);
-    const { getMeta } = window.gmeetcaptions;
+    const { getMeta } = window.meetcaptions.googleMeet;
     expect(getMeta(document, window).participants).toEqual([]);
   });
 
   it("extracts deduplicated participant names from buttons", async () => {
     window.eval(scriptSource);
-    const { getMeta } = window.gmeetcaptions;
+    const { getMeta } = window.meetcaptions.googleMeet;
     ["Alex Kim", "Alex Kim", "Jordan Rivera"].forEach((name) => {
       const btn = document.createElement("button");
       btn.setAttribute("aria-label", `More options for ${name}`);
@@ -256,29 +267,29 @@ describe("showPanel", () => {
   afterEach(() => page?.close());
 
   it("injects the panel into the document", () => {
-    window.gmeetcaptions.showPanel(document, window, window.navigator);
-    expect(document.getElementById("gmeetcaptions-panel")).not.toBeNull();
+    window.meetcaptions.googleMeet.showPanel(document, window, window.navigator);
+    expect(document.getElementById("meetcaptions-google-meet-panel")).not.toBeNull();
   });
 
   it("toggles panel visibility on repeated calls", () => {
-    const { showPanel } = window.gmeetcaptions;
+    const { showPanel } = window.meetcaptions.googleMeet;
     showPanel(document, window, window.navigator);
     showPanel(document, window, window.navigator); // hides
-    expect(document.getElementById("gmeetcaptions-panel").style.display).toBe("none");
+    expect(document.getElementById("meetcaptions-google-meet-panel").style.display).toBe("none");
     showPanel(document, window, window.navigator); // shows again
-    expect(document.getElementById("gmeetcaptions-panel").style.display).toBe("");
+    expect(document.getElementById("meetcaptions-google-meet-panel").style.display).toBe("");
   });
 
   it("panel contains Start Recording and Copy buttons", () => {
-    window.gmeetcaptions.showPanel(document, window, window.navigator);
-    expect(document.getElementById("gmeetcaptions-record")?.textContent?.trim()).toMatch(/Start Recording/);
-    expect(document.getElementById("gmeetcaptions-copy")).not.toBeNull();
+    window.meetcaptions.googleMeet.showPanel(document, window, window.navigator);
+    expect(document.getElementById("meetcaptions-google-meet-record")?.textContent?.trim()).toMatch(/Start Recording/);
+    expect(document.getElementById("meetcaptions-google-meet-copy")).not.toBeNull();
   });
 
   it("close button removes the panel", () => {
-    window.gmeetcaptions.showPanel(document, window, window.navigator);
-    document.getElementById("gmeetcaptions-close").click();
-    expect(document.getElementById("gmeetcaptions-panel")).toBeNull();
+    window.meetcaptions.googleMeet.showPanel(document, window, window.navigator);
+    document.getElementById("meetcaptions-google-meet-close").click();
+    expect(document.getElementById("meetcaptions-google-meet-panel")).toBeNull();
   });
 });
 
@@ -302,7 +313,8 @@ describe("streaming", () => {
 
   afterEach(async () => {
     // ensure streaming is stopped between tests
-    if (window.__gmeetcaptionsState?.running) await window.gmeetcaptions.stopStreaming(document, window);
+    if (window.__meetcaptionsGoogleMeetState?.running)
+      await window.meetcaptions.googleMeet.stopStreaming(document, window);
     page?.close();
   });
 
@@ -310,7 +322,7 @@ describe("streaming", () => {
     const writable = makeWritable();
     window.showSaveFilePicker = makeFilePicker(writable);
 
-    await window.gmeetcaptions.startStreaming(document, window);
+    await window.meetcaptions.googleMeet.startStreaming(document, window);
 
     expect(writable.written).toContain("# Weekly Product Sync");
     expect(writable.written).toContain("---");
@@ -320,16 +332,16 @@ describe("streaming", () => {
     window.alert = vi.fn();
     delete window.showSaveFilePicker;
 
-    await window.gmeetcaptions.startStreaming(document, window);
+    await window.meetcaptions.googleMeet.startStreaming(document, window);
 
     expect(window.alert).toHaveBeenCalledWith("File saving is not supported in this browser.");
-    expect(window.__gmeetcaptionsState).toBeFalsy();
+    expect(window.__meetcaptionsGoogleMeetState).toBeFalsy();
   });
 
   it("finalizes a turn when its DOM element is removed", async () => {
     const writable = makeWritable();
     window.showSaveFilePicker = makeFilePicker(writable);
-    await window.gmeetcaptions.startStreaming(document, window);
+    await window.meetcaptions.googleMeet.startStreaming(document, window);
 
     const item = document.querySelector(".nMcdL");
     item.remove();
@@ -343,7 +355,7 @@ describe("streaming", () => {
   it("finalizes a stable turn after STABILITY_POLLS via the interval", async () => {
     const writable = makeWritable();
     window.showSaveFilePicker = makeFilePicker(writable);
-    await window.gmeetcaptions.startStreaming(document, window);
+    await window.meetcaptions.googleMeet.startStreaming(document, window);
 
     // Advance past 4 poll cycles (STABILITY_POLLS = 4, interval = 1000ms)
     await vi.advanceTimersByTimeAsync(5000);
@@ -354,19 +366,19 @@ describe("streaming", () => {
   it("stopStreaming flushes remaining turns and closes the file", async () => {
     const writable = makeWritable();
     window.showSaveFilePicker = makeFilePicker(writable);
-    await window.gmeetcaptions.startStreaming(document, window);
-    await window.gmeetcaptions.stopStreaming(document, window);
+    await window.meetcaptions.googleMeet.startStreaming(document, window);
+    await window.meetcaptions.googleMeet.stopStreaming(document, window);
 
     expect(writable.written).toContain("## Avery Chen");
     expect(writable.written).toContain("---");
     expect(writable.close).toHaveBeenCalled();
-    expect(window.__gmeetcaptionsState).toBeNull();
+    expect(window.__meetcaptionsGoogleMeetState).toBeNull();
   });
 
   it("overwrites the last entry in-place when more text arrives after stability-write", async () => {
     const writable = makeWritable();
     window.showSaveFilePicker = makeFilePicker(writable);
-    await window.gmeetcaptions.startStreaming(document, window);
+    await window.meetcaptions.googleMeet.startStreaming(document, window);
 
     // Dynamically add a single item (mimics Google Meet adding a new speaker turn)
     const region = document.querySelector('[role="region"][aria-label="Captions"]');
@@ -398,12 +410,75 @@ describe("streaming", () => {
   it("panel record button updates to show recording state", async () => {
     const writable = makeWritable();
     window.showSaveFilePicker = makeFilePicker(writable);
-    window.gmeetcaptions.showPanel(document, window, window.navigator);
-    await window.gmeetcaptions.startStreaming(document, window);
+    window.meetcaptions.googleMeet.showPanel(document, window, window.navigator);
+    await window.meetcaptions.googleMeet.startStreaming(document, window);
 
-    expect(document.getElementById("gmeetcaptions-record")?.textContent?.trim()).toMatch(/Stop Recording/);
+    expect(document.getElementById("meetcaptions-google-meet-record")?.textContent?.trim()).toMatch(/Stop Recording/);
 
-    await window.gmeetcaptions.stopStreaming(document, window);
-    expect(document.getElementById("gmeetcaptions-record")?.textContent?.trim()).toMatch(/Start Recording/);
+    await window.meetcaptions.googleMeet.stopStreaming(document, window);
+    expect(document.getElementById("meetcaptions-google-meet-record")?.textContent?.trim()).toMatch(/Start Recording/);
+  });
+});
+
+describe("Teams captions", () => {
+  let page;
+  let window;
+  let document;
+
+  beforeAll(() => vi.useFakeTimers());
+  afterAll(() => vi.useRealTimers());
+
+  beforeEach(async () => {
+    page = browser.newPage();
+    const frame = await loadTeamsFixture(page);
+    ({ window, document } = frame);
+    window.setTimeout = setTimeout;
+    window.setInterval = setInterval;
+    window.clearInterval = clearInterval;
+    window.eval(scriptSource);
+  });
+
+  afterEach(async () => {
+    if (window.__meetcaptionsTeamsState?.running) await window.meetcaptions.teams.stopStreaming(document, window);
+    page?.close();
+  });
+
+  it("extracts Teams captions from author and closed-caption-text spans", () => {
+    expect(window.meetcaptions.teams.extractCaptions(document)).toBe(
+      [
+        "# Microsoft Teams Captions",
+        "",
+        "## Avery Chen",
+        "",
+        "Kickoff is at 10 AM.",
+        "",
+        "Please review the draft \\*today\\*.",
+        "",
+        "## Riley \\[Ops\\]",
+        "",
+        "Use \\`logs\\` and the checklist.",
+      ].join("\n"),
+    );
+  });
+
+  it("writes Teams captions to a local Markdown stream", async () => {
+    const writable = makeWritable();
+    window.showSaveFilePicker = makeFilePicker(writable);
+
+    await window.meetcaptions.teams.startStreaming(document, window);
+    await vi.advanceTimersByTimeAsync(5000);
+    await window.meetcaptions.teams.stopStreaming(document, window);
+
+    expect(writable.written).toContain("# Weekly Review");
+    expect(writable.written).toContain("## Avery Chen");
+    expect(writable.written).toContain("Kickoff is at 10 AM.");
+    expect(writable.written).toContain("## Riley \\[Ops\\]");
+    expect(writable.close).toHaveBeenCalled();
+  });
+
+  it("uses a distinct Teams panel id", () => {
+    window.meetcaptions.teams.showPanel(document, window, window.navigator);
+    expect(document.getElementById("meetcaptions-teams-panel")).not.toBeNull();
+    expect(document.getElementById("meetcaptions-teams-record")?.textContent?.trim()).toMatch(/Start Recording/);
   });
 });

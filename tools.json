@@ -58,9 +58,9 @@
     },
     {
       "icon": "bi-badge-cc",
-      "title": "Google Meet Captions",
-      "description": "Bookmarklet to record and save Google Meet captions as Markdown, with speaker names, timestamps, and meeting metadata.",
-      "url": "gmeetcaptions",
+      "title": "Meeting Captions",
+      "description": "Bookmarklets to record and save Google Meet or Microsoft Teams captions as Markdown, with speaker names, timestamps, and meeting metadata.",
+      "url": "meetcaptions",
       "created": "2026-03-24T00:00:00+00:00"
     },
     {

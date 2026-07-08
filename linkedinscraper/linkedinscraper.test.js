@@ -41,7 +41,7 @@ describe("linkedinscraper invite scraper", () => {
         <a href="/in/alex-example/"><strong>Alex Example <svg aria-label="Verified" role="img"></svg></strong></a>
         <p>Alex Example follows you and is inviting you to connect</p>
         <p>Institute Alpha | University Beta | ARN-123</p>
-        <div><svg id="company-accent-4"></svg><p>Institute Alpha</p></div>
+        <div><svg id="company-accent-4"></svg><p>Institute Alpha common organization</p></div>
         <p>Yesterday</p>
         <button aria-label="Ignore an invitation to connect from Alex Example">Ignore</button>
         <button aria-label="Accept Alex Example’s invitation">Accept</button>
@@ -72,7 +72,7 @@ describe("linkedinscraper invite scraper", () => {
         </p>
         <p>Dual Degree Student | 2nd year BS Data Science @IIT MADRAS| Student by heart</p>
         <p>| Coder | AI Enthusiast | MS Excel | SQL | Python</p>
-        <div><svg id="company-accent-4" role="img"></svg><p>Indian Institute of Technology, Madras</p></div>
+        <div><svg id="company-accent-4" role="img"></svg><p>Indian Institute of Technology, Madras common organization</p></div>
         <p>4 hours ago</p>
         <button>Ignore</button>
         <button>Accept</button>
@@ -86,6 +86,39 @@ describe("linkedinscraper invite scraper", () => {
     });
     expect(invites[0].commonOrgs).not.toContain("wants to connect");
     expect(invites[0].commonOrgs).not.toContain("| Coder | AI Enthusiast | MS Excel | SQL | Python");
+  });
+
+  it("keeps post-action invitation notes out of description, common organizations, and age parsing", () => {
+    const invites = renderInvites(`
+      <div role="listitem" componentkey="urn:li:invitation:10">
+        <a href="/in/udai-example/"><strong>Udai Example <span aria-label="Verified"></span></strong></a>
+        <p>
+          <span><a href="/in/udai-example/"><strong>Udai Example</strong></a> wants to connect</span>
+          <span aria-hidden="true"><a href="/in/udai-example/"><strong>Udai Example</strong></a> wants to connect</span>
+        </p>
+        <div><svg id="company-accent-4"></svg><p>Digital strategist - business, marketing & product. Clients include Series C funded start-ups | Past - media.net</p></div>
+        <p>Josey Sample and 12 other mutual connections</p>
+        <button>Ignore</button>
+        <button>Accept</button>
+        <div>
+          <p>Hi Anand, thank you for the lovely session today. I enjoyed the interaction.</p>
+          <button aria-hidden="true">show less</button>
+          <p><a>Reply to Udai</a></p>
+        </div>
+      </div>
+    `);
+
+    expect(invites[0]).toMatchObject({
+      name: "Udai Example",
+      description:
+        "Digital strategist - business, marketing & product. Clients include Series C funded start-ups | Past - media.net",
+      invitationMonth: "2026-05?",
+      connections: ["Josey Sample"],
+      connectionsCount: 13,
+      badges: ["verified"],
+      message: "Hi Anand, thank you for the lovely session today. I enjoyed the interaction.",
+    });
+    expect(invites[0]).not.toHaveProperty("commonOrgs");
   });
 
   it("does not use an empty profile-photo link as the invite name", () => {
@@ -158,7 +191,7 @@ describe("linkedinscraper invite scraper", () => {
         <a href="/in/priya-sample/"><strong>Priya Sample <span aria-label="Premium"></span></strong></a>
         <p>Priya Sample follows you and is inviting you to connect</p>
         <p>Sales at ExampleCo</p>
-        <p>ExampleCo</p>
+        <p>ExampleCo common organization</p>
         <p>2 weeks ago</p>
         <button>Ignore</button>
         <button>Accept</button>
@@ -184,7 +217,7 @@ describe("linkedinscraper invite scraper", () => {
         <a href="/in/no-age-sample/"><strong>No Age Sample</strong></a>
         <p>No Age Sample follows you and is inviting you to connect</p>
         <p>Engineer at Example Labs</p>
-        <p>Example Labs</p>
+        <p>Example Labs common organization</p>
         <button>Ignore</button>
         <button>Accept</button>
         <p>Hi Anand, happy to connect.</p>
@@ -268,7 +301,7 @@ describe("linkedinscraper invite scraper", () => {
     scrapeInvites({ document, navigator: { clipboard }, state });
 
     expect(document.getElementById("linkedinscraper-invites-copy-btn").textContent).toBe("Copy 1 invites");
-    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+    expect(window.scrollTo).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(1000);
     expect(window.scrollBy).toHaveBeenCalled();
