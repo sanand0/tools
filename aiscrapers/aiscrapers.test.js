@@ -93,7 +93,8 @@ describe("chatgptscraper conversation extraction", () => {
       "beforeend",
       `<div>Inspecting files</div>
       <div>Called toolCalled tool</div>
-      <pre class="overflow-visible"><div><div>Python</div><button>Run</button><pre><code><span>bash -lc ls -la</span><br><span>printf done</span></code></pre></div></pre>`,
+      <pre class="overflow-visible"><div><div>Python</div><button>Run</button><pre><code><span>bash -lc ls -la</span><br><span>printf done</span></code></pre></div></pre>
+      <div data-testid="writing-block-container"><div contenteditable="true"><p>Before answering, test the framing.</p><p>When reframing, write <code>Reframed question: …</code> in one concise sentence.</p></div></div>`,
     );
     const markdown = window.chatgptscraper.extractConversation(document);
 
@@ -110,6 +111,8 @@ describe("chatgptscraper conversation extraction", () => {
     expect(markdown).toMatch(/Inspecting files\s+```\nbash -lc ls -la\nprintf done\n```/);
     expect(markdown).not.toContain("Pythonbash -lc");
     expect(markdown).not.toContain("Called toolCalled tool");
+    expect(markdown).toContain("Before answering, test the framing.");
+    expect(markdown).toContain("When reframing, write `Reframed question: …` in one concise sentence.");
     expect(markdown).toContain("```");
     expect(markdown).not.toContain("Copy response");
     expect(markdown).not.toContain("More actions");

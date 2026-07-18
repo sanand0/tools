@@ -1,5 +1,17 @@
 # Prompts
 
+## Capture writing blocks in ChatGPT scraper, 18 Jul 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-5.6-sol --config model_reasoning_effort=medium
+-->
+
+The ChatGPT scraper at aiscrapers/chatgptscraper.js does not capture writing blocks.
+For example, https://chatgpt.com/c/6a5b09e7-71b0-83ee-8fc7-2198b0396bc2 which is on CDP in localhost:9222 has the text "Before answering, test the framing." and "When reframing, write `Reframed question: …` in one concise sentence..." - these are not captured in the output.
+Fix this. (Don't change / close existing tabs in CDP on localhost:9222.)
+Keep the edit minimal - or rather, if you find an opportunity to simplify and reduce the lines of code, great, go ahead, but avoid increasing complexity or code size much just for this feature. Ideally, this should happen because of logic that captures the intent better, not an additional fix.
+
 ## Attachments in ChatGPT scraper, 20 Jun 2026
 
 <!--

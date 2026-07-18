@@ -351,7 +351,7 @@
     transformToolMessages(clone, turn);
     transformAttachments(clone, turn);
     clone
-      .querySelectorAll("nav, menu, form, textarea, [contenteditable='true'], .sr-only, [aria-hidden='true']")
+      .querySelectorAll("nav, menu, form, textarea, .sr-only, [aria-hidden='true']")
       .forEach((node) => {
         node.remove();
       });
