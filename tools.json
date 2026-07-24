@@ -1,6 +1,13 @@
 {
   "tools": [
     {
+      "icon": "bi-google",
+      "title": "Google Bookmarklets",
+      "description": "Bookmarklets for copying useful data from GMail, Google Calendar, and other Google apps.",
+      "url": "gmail",
+      "created": "2026-07-24T00:00:00+00:00"
+    },
+    {
       "icon": "bi-person-vcard",
       "title": "Research Me",
       "description": "Launch a public-dossier research prompt in ChatGPT or Claude using your name and role.",

@@ -12,6 +12,8 @@ For example, https://chatgpt.com/c/6a5b09e7-71b0-83ee-8fc7-2198b0396bc2 which is
 Fix this. (Don't change / close existing tabs in CDP on localhost:9222.)
 Keep the edit minimal - or rather, if you find an opportunity to simplify and reduce the lines of code, great, go ahead, but avoid increasing complexity or code size much just for this feature. Ideally, this should happen because of logic that captures the intent better, not an additional fix.
 
+<!-- codex resume 019f73bd-025f-7110-baf4-ef91bbdb50a7 --yolo -->
+
 ## Attachments in ChatGPT scraper, 20 Jun 2026
 
 <!--
