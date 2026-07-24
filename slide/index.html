@@ -111,28 +111,92 @@
     #modal-content {
       background: white;
       border-radius: 12px;
-      padding: 2rem;
+      padding: 1.5rem 1.75rem;
       width: 90%;
-      max-width: 600px;
+      max-width: 620px;
       max-height: 90vh;
       overflow-y: auto;
       box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     }
 
-    #modal-content h2 {
-      margin-bottom: 1.5rem;
-      font-size: 1.5rem;
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .modal-header h2 {
+      font-size: 1.4rem;
+      margin: 0;
+    }
+
+    #theme-select {
+      width: auto;
+      max-width: 45%;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: #f8f9fa;
+      cursor: pointer;
     }
 
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.85rem;
+    }
+
+    #subtitle-input {
+      min-height: 0;
+      height: 3rem;
     }
 
     .form-group label {
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       font-weight: 600;
       color: #333;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .form-row > .form-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .slider-inline {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .slider-inline label {
+      margin-bottom: 0;
+      white-space: nowrap;
+    }
+
+    .slider-inline .value {
+      font-weight: 600;
+      color: #333;
+      font-size: 0.9rem;
+      min-width: 3.2rem;
+      text-align: right;
+    }
+
+    .slider-inline input[type="range"] {
+      flex: 1;
+    }
+
+    #title-input {
+      min-height: 0;
+      height: 2.75rem;
+      resize: vertical;
     }
 
     .form-group input[type="text"],
@@ -219,7 +283,7 @@
     .button-group {
       display: flex;
       gap: 1rem;
-      margin-top: 2rem;
+      margin-top: 1rem;
     }
 
     button {
@@ -275,69 +339,60 @@
 
   <div id="modal">
     <div id="modal-content">
-      <h2>Edit Slide</h2>
-
-      <div class="form-group">
-        <label for="title-input">Title (Markdown)</label>
-        <textarea id="title-input" placeholder="Enter slide title"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="subtitle-input">Subtitle (Markdown)</label>
-        <textarea id="subtitle-input" placeholder="Enter slide subtitle"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="font-select">Font</label>
-        <select id="font-select">
-          <option value="Montserrat">Montserrat</option>
-          <option value="Roboto">Roboto</option>
-          <option value="Open Sans">Open Sans</option>
-          <option value="Lato">Lato</option>
-          <option value="Raleway">Raleway</option>
-          <option value="Poppins">Poppins</option>
-          <option value="Playfair Display">Playfair Display</option>
-          <option value="Merriweather">Merriweather</option>
-          <option value="Oswald">Oswald</option>
-          <option value="Source Sans Pro">Source Sans Pro</option>
-          <option value="Nunito">Nunito</option>
-          <option value="Inter">Inter</option>
+      <div class="modal-header">
+        <h2>Edit Slide</h2>
+        <select id="theme-select" title="Apply a pre-designed theme">
+          <option value="">Theme…</option>
         </select>
       </div>
 
       <div class="form-group">
+        <label for="title-input">Title (Markdown)</label>
+        <textarea id="title-input" rows="1" placeholder="Enter slide title"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="subtitle-input">Subtitle (Markdown)</label>
+        <textarea id="subtitle-input" rows="2" placeholder="Enter slide subtitle"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="title-font-select">Title Font</label>
+          <select id="title-font-select"></select>
+        </div>
+        <div class="form-group">
+          <label for="subtitle-font-select">Subtitle Font</label>
+          <select id="subtitle-font-select"></select>
+        </div>
+      </div>
+
+      <div class="form-group slider-inline">
         <label for="title-scale-slider">Title Size</label>
-        <div class="slider-group">
-          <div class="slider-display">
-            <span>Scale factor: <span class="value" id="title-scale-display">100%</span></span>
-          </div>
-          <input type="range" id="title-scale-slider" min="-20" max="20" step="0.1" value="0">
-        </div>
+        <span class="value" id="title-scale-display">100%</span>
+        <input type="range" id="title-scale-slider" min="-20" max="20" step="0.1" value="0">
       </div>
 
-      <div class="form-group">
+      <div class="form-group slider-inline">
         <label for="subtitle-scale-slider">Subtitle Size</label>
-        <div class="slider-group">
-          <div class="slider-display">
-            <span>Scale factor: <span class="value" id="subtitle-scale-display">100%</span></span>
+        <span class="value" id="subtitle-scale-display">100%</span>
+        <input type="range" id="subtitle-scale-slider" min="-20" max="20" step="0.1" value="0">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fg-color">Foreground Color</label>
+          <div class="color-input-group">
+            <input type="color" id="fg-color" value="#ffffff">
+            <input type="text" id="fg-color-text" value="#ffffff">
           </div>
-          <input type="range" id="subtitle-scale-slider" min="-20" max="20" step="0.1" value="0">
         </div>
-      </div>
-
-      <div class="form-group">
-        <label for="fg-color">Foreground Color</label>
-        <div class="color-input-group">
-          <input type="color" id="fg-color" value="#ffffff">
-          <input type="text" id="fg-color-text" value="#ffffff">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="bg-color">Background Color</label>
-        <div class="color-input-group">
-          <input type="color" id="bg-color" value="#1a1a2e">
-          <input type="text" id="bg-color-text" value="#1a1a2e">
+        <div class="form-group">
+          <label for="bg-color">Background Color</label>
+          <div class="color-input-group">
+            <input type="color" id="bg-color" value="#1a1a2e">
+            <input type="text" id="bg-color-text" value="#1a1a2e">
+          </div>
         </div>
       </div>
 
@@ -355,19 +410,81 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
+    // Available fonts (shared by title & subtitle selectors)
+    const FONTS = [
+      'Montserrat', 'Roboto', 'Open Sans', 'Lato', 'Raleway', 'Poppins',
+      'Playfair Display', 'Merriweather', 'Oswald', 'Source Sans Pro', 'Nunito', 'Inter'
+    ];
+    // Pre-designed themes (fonts, sizes, colors, background images)
+    const THEMES = {
+      keynote: {
+        label: 'Keynote (Jobs)',
+        titleFont: 'Inter', subtitleFont: 'Inter',
+        titleScale: 3, subtitleScale: -1,
+        fgColor: '#ffffff', bgColor: '#000000', bgSearch: ''
+      },
+      minimal: {
+        label: 'Minimalist',
+        titleFont: 'Inter', subtitleFont: 'Inter',
+        titleScale: 1, subtitleScale: -3,
+        fgColor: '#111111', bgColor: '#ffffff', bgSearch: ''
+      },
+      editorial: {
+        label: 'Editorial',
+        titleFont: 'Playfair Display', subtitleFont: 'Merriweather',
+        titleScale: 2, subtitleScale: -2,
+        fgColor: '#2b2b2b', bgColor: '#f4efe6', bgSearch: ''
+      },
+      corporate: {
+        label: 'Corporate Blue',
+        titleFont: 'Source Sans Pro', subtitleFont: 'Source Sans Pro',
+        titleScale: 2, subtitleScale: -1,
+        fgColor: '#ffffff', bgColor: '#0f2a47', bgSearch: ''
+      },
+      poster: {
+        label: 'Flame',
+        titleFont: 'Oswald', subtitleFont: 'Montserrat',
+        titleScale: 4, subtitleScale: -1,
+        fgColor: '#ffffff', bgColor: '#d62828', bgSearch: 'https://images.pexels.com/photos/7605676/pexels-photo-7605676.jpeg'
+      },
+      cosmos: {
+        label: 'Cosmos',
+        titleFont: 'Montserrat', subtitleFont: 'Montserrat',
+        titleScale: 2, subtitleScale: -1,
+        fgColor: '#ffffff', bgColor: '#060b18',
+        bgSearch: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80'
+      },
+      summit: {
+        label: 'Summit',
+        titleFont: 'Poppins', subtitleFont: 'Poppins',
+        titleScale: 2, subtitleScale: -1,
+        fgColor: '#ffffff', bgColor: '#1a1a2e',
+        bgSearch: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1920&q=80'
+      }
+    };
     // Default values
     const defaults = {
       title: '# Welcome to Your Slide',
       subtitle: 'A beautiful presentation starts here',
-      font: 'Montserrat',
+      titleFont: 'Montserrat',
+      subtitleFont: 'Montserrat',
       titleScale: 0,
       subtitleScale: 0,
       fgColor: '#ffffff',
       bgColor: '#1a1a2e',
       bgSearch: ''
     };
-    let currentFont = null;
     let loadedFonts = new Set();
+    // Populate font selectors and theme dropdown
+    function populateSelectors() {
+      const options = FONTS.map((f) => `<option value="${f}">${f}</option>`).join('');
+      document.getElementById('title-font-select').innerHTML = options;
+      document.getElementById('subtitle-font-select').innerHTML = options;
+      const themeSelect = document.getElementById('theme-select');
+      themeSelect.innerHTML = '<option value="">Theme…</option>' +
+        Object.entries(THEMES).map(([key, t]) => `<option value="${key}">${t.label}</option>`).join('');
+    }
+    populateSelectors();
     // Parse URL hash parameters
     function parseHash() {
       const hash = window.location.hash.slice(1);
@@ -376,10 +493,12 @@
       };
       const params = new URLSearchParams(hash);
       const legacyScale = parseFloat(params.get('scale') || defaults.titleScale);
+      const legacyFont = params.get('font');
       return {
         title: params.get('title') || defaults.title,
         subtitle: params.get('subtitle') || defaults.subtitle,
-        font: params.get('font') || defaults.font,
+        titleFont: params.get('titleFont') || legacyFont || defaults.titleFont,
+        subtitleFont: params.get('subtitleFont') || legacyFont || defaults.subtitleFont,
         titleScale: parseFloat(params.get('titleScale') || legacyScale),
         subtitleScale: parseFloat(params.get('subtitleScale') || legacyScale),
         fgColor: params.get('fgColor') || defaults.fgColor,
@@ -461,22 +580,25 @@
       const {
         title,
         subtitle,
-        font,
+        titleFont,
+        subtitleFont,
         titleScale,
         subtitleScale,
         fgColor,
         bgColor,
         bgSearch
       } = config;
-      // Load font
-      loadFont(font);
-      // Apply font
-      document.getElementById('content').style.fontFamily = `'${font}', sans-serif`;
+      // Load fonts
+      loadFont(titleFont);
+      loadFont(subtitleFont);
       // Calculate and apply scale
       const baseTitleSize = 4; // rem
       const baseSubtitleSize = 2; // rem
       const titleElement = document.getElementById('title');
       const subtitleElement = document.getElementById('subtitle');
+      // Apply fonts independently
+      titleElement.style.fontFamily = `'${titleFont}', sans-serif`;
+      subtitleElement.style.fontFamily = `'${subtitleFont}', sans-serif`;
       titleElement.style.fontSize = `${baseTitleSize * calculateScale(titleScale)}rem`;
       subtitleElement.style.fontSize = `${baseSubtitleSize * calculateScale(subtitleScale)}rem`;
       // Apply colors
@@ -511,7 +633,8 @@
     function initForm(config) {
       document.getElementById('title-input').value = config.title;
       document.getElementById('subtitle-input').value = config.subtitle;
-      document.getElementById('font-select').value = config.font;
+      document.getElementById('title-font-select').value = config.titleFont;
+      document.getElementById('subtitle-font-select').value = config.subtitleFont;
       document.getElementById('title-scale-slider').value = config.titleScale;
       document.getElementById('subtitle-scale-slider').value = config.subtitleScale;
       document.getElementById('fg-color').value = config.fgColor;
@@ -533,7 +656,8 @@
       return {
         title: document.getElementById('title-input').value,
         subtitle: document.getElementById('subtitle-input').value,
-        font: document.getElementById('font-select').value,
+        titleFont: document.getElementById('title-font-select').value,
+        subtitleFont: document.getElementById('subtitle-font-select').value,
         titleScale: parseFloat(document.getElementById('title-scale-slider').value),
         subtitleScale: parseFloat(document.getElementById('subtitle-scale-slider').value),
         fgColor: document.getElementById('fg-color').value,
@@ -564,7 +688,18 @@
     // Live updates
     document.getElementById('title-input').addEventListener('input', updateLive);
     document.getElementById('subtitle-input').addEventListener('input', updateLive);
-    document.getElementById('font-select').addEventListener('change', updateLive);
+    document.getElementById('title-font-select').addEventListener('change', updateLive);
+    document.getElementById('subtitle-font-select').addEventListener('change', updateLive);
+    // Theme dropdown: apply preset styling, keep existing title/subtitle text
+    document.getElementById('theme-select').addEventListener('change', (e) => {
+      const theme = THEMES[e.target.value];
+      if (!theme) return;
+      const config = getFormValues();
+      const { label, ...styling } = theme;
+      Object.assign(config, styling);
+      initForm(config);
+      updateLive();
+    });
     document.getElementById('title-scale-slider').addEventListener('input', (e) => {
       updateScaleDisplay(e.target.value, 'title-scale-display');
       updateLive();
