@@ -343,6 +343,13 @@
       "created": "2025-02-02T21:32:15+05:30"
     },
     {
+      "icon": "bi-grid-3x3-gap-fill",
+      "title": "LiveGrid",
+      "description": "Live multi-user prioritization grid synchronized through Cloud Firestore.",
+      "url": "livegrid",
+      "created": "2026-08-04T14:45:00+08:00"
+    },
+    {
       "icon": "bi-check-circle",
       "title": "What Next?",
       "description": "Prioritization matrix helping you pick what to do next.",
