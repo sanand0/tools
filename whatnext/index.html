@@ -11,7 +11,6 @@
     html {
       font-family: Helvetica, Arial, sans-serif;
       -webkit-text-size-adjust: 100%;
-      -ms-text-size-adjust: 100%;
       /* Based on http://lea.verou.me/css3patterns/#shippo */
       background-image:
         radial-gradient(closest-side,
@@ -35,8 +34,6 @@
     *,
     *:before,
     *:after {
-      -webkit-box-sizing: border-box;
-      -moz-box-sizing: border-box;
       box-sizing: border-box;
     }
 
@@ -244,7 +241,7 @@
           <option id="_clear_view">Clear this view</option>
         </optgroup>
       </select>
-      <a href="https://github.com/sanand0/whatnext/issues/new" target="_blank" class="button">Report an issue</a>
+      <a href="https://github.com/sanand0/tools/issues/new" target="_blank" class="button">Report an issue</a>
     </div>
   </h1>
 
@@ -286,6 +283,12 @@
         The state of the page is automatically saved in the browser, and
         restored when you load the page back
       </div>
+      <div draggable="true" class="item" style="left: 650px; top: 110px; border-color: rgb(237, 125, 49)" contenteditable>
+        Ctrl-click an item to change its color
+      </div>
+      <div draggable="true" class="item" style="left: 360px; top: 300px" contenteditable>
+        Use + to add rows or columns; clear a label to remove it
+      </div>
     </div>
   </div>
 
@@ -321,19 +324,8 @@
         vanish in 5 seconds after it loses focus. (If you change your mind,
         click on the item and press <kbd>Ctrl-Z</kbd> to undo.)
       </li>
-      <li>
-        <strong>Edit labels</strong> by clicking on the labels at the left and
-        bottom. To delete a label, edit it and make it blank. It will
-        automatically be removed.
-      </li>
-      <li>
-        <strong>Add labels</strong> by clicking on the “+” button at the top
-        left or bottom right.
-      </li>
-      <li>
-        <strong>Change label colour</strong> by pressing Ctrl-click. The item
-        cycles through 5 different colours.
-      </li>
+      <li><strong>Change the grid:</strong> Use + to add rows or columns; clear a label to remove it.</li>
+      <li><strong>Change item colors:</strong> Ctrl-click an item to change its color.</li>
       <li>
         Your actions are automatically saved in your browser. Re-visit the
         page to continue from where you left off.

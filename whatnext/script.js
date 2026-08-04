@@ -3,48 +3,39 @@
 // on('click', 'item', handler) runs handler if a ".item" is clicked.
 var container = document.getElementById("container");
 function on(event, className, handler) {
-  container.addEventListener(
-    event,
-    function (e) {
-      // SVG .className is an object with .baseVal and .animVal. HTML .className is a string
-      var cls = (typeof e.target.className == "object" ? e.target.className.baseVal : e.target.className).split(/\s+/);
-      for (var i = 0, l = cls.length; i < l; i++) if (cls[i] == className) return handler(e);
-    },
-    false,
-  );
+  container.addEventListener(event, function (e) {
+    if (e.target.classList.contains(className)) handler(e);
+  });
 }
 
 // Construct an SVG element. e.g. svg('path', {d: 'M10,10h100', stroke: '#000'})
 function svg(tag, attrs, text) {
   var element = document.createElementNS("http://www.w3.org/2000/svg", tag);
-  for (var key in attrs) element.setAttributeNS(null, key, attrs[key]);
-  if (typeof text !== "undefined") element.appendChild(document.createTextNode(text));
+  for (var key in attrs) element.setAttribute(key, attrs[key]);
+  if (typeof text !== "undefined") element.textContent = text;
   return element;
 }
 
 // Remove all child nodes of a node
 function clear(node) {
-  for (var children = node.childNodes, i = children.length - 1; i >= 0; i--) node.removeChild(children[i]);
+  node.replaceChildren();
 }
 
 // Replace multiple whitespaces with a single space, and remove leading + trailing space
 function strip(s) {
-  return s.replace(/\s+/g, " ").replace(/^ /, "").replace(/ $/, "");
+  return s.replace(/\s+/g, " ").trim();
 }
 
 // Make items draggable
 var startX, startY;
 on("dragstart", "item", function (e) {
-  startX = e.screenX;
-  startY = e.screenY;
-  // Firefox won't trigger dragend without dataTransfer.setData().
-  // IE does not like 'text/plain' -- only 'text'. http://stackoverflow.com/a/26660055/100904
+  startX = e.clientX;
+  startY = e.clientY;
   e.dataTransfer.setData("text", "");
 });
 on("dragend", "item", function (e) {
-  // Firefox dragend sets clientX to 0. Using screenX instead
-  e.target.style.left = parseInt(e.target.style.left) + e.screenX - startX + "px";
-  e.target.style.top = parseInt(e.target.style.top) + e.screenY - startY + "px";
+  e.target.style.left = parseInt(e.target.style.left) + e.clientX - startX + "px";
+  e.target.style.top = parseInt(e.target.style.top) + e.clientY - startY + "px";
   save();
 });
 
@@ -110,7 +101,7 @@ on("focusout", "item", function (e) {
     e.target.timeout = setTimeout(function () {
       // Delete after a few seconds but only if it's still empty, and to be deleted
       if (!e.target.textContent && e.target.classList.contains("to-be-deleted")) {
-        e.target.parentNode.removeChild(e.target);
+        e.target.remove();
         save();
       } else e.target.classList.remove("to-be-deleted");
       delete e.target.timeout;
@@ -177,7 +168,7 @@ var labels = {
 
 // Clicking on any label lets you edit or delete it it
 on("click", "label", function (e) {
-  var key = e.target.getAttributeNS(null, "id").split(":"),
+  var key = e.target.id.split(":"),
     axis = key[0],
     index = +key[1],
     current_label = labels[axis][index],
@@ -192,7 +183,7 @@ on("click", "label", function (e) {
 
 // Clicking on the '+' icons lets you add a new row or column
 on("click", "add-label", function (e) {
-  var key = e.target.getAttributeNS(null, "id").split(":"),
+  var key = e.target.id.split(":"),
     axis = key[0],
     new_label = prompt("Add " + axis, "Name");
   if (new_label !== null) {
@@ -204,11 +195,11 @@ on("click", "add-label", function (e) {
   }
 });
 
-// Shift-click on an item to cycle through colors. Office 2013 palette in rgb() since that is what getComputedStyle returns
+// Ctrl-click on an item to cycle through colors. Office 2013 palette in rgb() since that is what getComputedStyle returns
 var colors = ["rgb(91, 155, 213)", "rgb(237, 125, 49)", "rgb(165, 165, 165)", "rgb(255, 192, 0)", "rgb(112, 173, 71)"];
 on("click", "item", function (e) {
   if (e.ctrlKey) {
-    var index = colors.indexOf(getComputedStyle(e.target)["border-top-color"]);
+    var index = colors.indexOf(getComputedStyle(e.target).borderTopColor);
     e.target.style.borderColor = colors[index < 0 ? 1 : (index + 1) % colors.length];
     save();
   }
@@ -222,7 +213,6 @@ app_name_heading.addEventListener(
     set_heading(e.target.textContent);
     save();
   },
-  false,
 );
 
 // Set the heading everywhere to name
@@ -232,7 +222,7 @@ function set_heading(name) {
 
 // Whenever notes change, save it
 var notes = document.getElementById("notes");
-notes.addEventListener("focusout", save, false);
+notes.addEventListener("focusout", save);
 
 // The state of the application is a JSON object
 function state() {
@@ -242,7 +232,7 @@ function state() {
       x: parseInt(node.style.left),
       y: parseInt(node.style.top),
       t: node.innerHTML,
-      c: getComputedStyle(node)["border-top-color"],
+      c: getComputedStyle(node).borderTopColor,
     });
   return {
     item: items,
@@ -256,7 +246,7 @@ function state() {
 
 // Save the state in localStorage
 function save() {
-  var app_id = "priority" + window.location.hash.replace(/^#/, "");
+  var app_id = "priority" + window.location.hash.slice(1);
   localStorage[app_id] = JSON.stringify(state());
 }
 
@@ -278,9 +268,9 @@ var app_list_select = document.getElementById("app-list-select");
 var app_list = document.getElementById("app-list");
 function show_states() {
   clear(app_list);
-  var current_hash = window.location.hash.replace(/^#/, "");
+  var current_hash = window.location.hash.slice(1);
   for (var app_id in localStorage)
-    if (app_id.match(/^priority/)) {
+    if (app_id.startsWith("priority")) {
       var state = JSON.parse(localStorage[app_id]),
         option = document.createElement("option"),
         hash = app_id.replace(/^priority/, "");
@@ -289,7 +279,7 @@ function show_states() {
         option.setAttribute("selected", "selected");
         option.setAttribute("class", "app-name");
       }
-      option.appendChild(document.createTextNode(state.name));
+      option.textContent = state.name;
       app_list.appendChild(option);
     }
 }
@@ -302,7 +292,7 @@ app_list_select.addEventListener("change", function () {
     publish_node.textContent = "";
   } else if (hash == "_clear_view") {
     if (confirm("Delete this view without undo?")) {
-      delete localStorage["priority" + window.location.hash.replace(/^#/, "")];
+      delete localStorage["priority" + window.location.hash.slice(1)];
       window.location.hash = "";
     }
   } else window.location.hash = hash;
@@ -310,10 +300,10 @@ app_list_select.addEventListener("change", function () {
 
 // When the URL hash changes, switch to a different view
 function hashchange() {
-  var app_id = "priority" + window.location.hash.replace(/^#/, "");
+  var app_id = "priority" + window.location.hash.slice(1);
   if (app_id in localStorage) load(JSON.parse(localStorage[app_id]));
   else draw_grid();
   show_states();
 }
-window.addEventListener("hashchange", hashchange, false);
+window.addEventListener("hashchange", hashchange);
 hashchange();
