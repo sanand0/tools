@@ -1,6 +1,6 @@
 # whatnext
 
-## TODO: Colors and drag, 04 Aug 2026
+## Colors and drag, 04 Aug 2026
 
 <!--
 cd ~/code/tools/whatnext/
@@ -16,3 +16,5 @@ When I drag a handle and drop it, the notes materialize further than where I pla
 
 Add a concise note explaining documenting Ctrl+Click for colors (in a different color than blue).
 Add a concise note explaining how to add / remove grid rows/columns.
+
+<!-- codex resume 019fcb2a-8cce-74f1-899d-0d5fa058f371 --yolo -->
