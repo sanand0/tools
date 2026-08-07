@@ -165,7 +165,7 @@
 
     #subtitle-input {
       min-height: 0;
-      height: 3rem;
+      height: 9rem;
     }
 
     .form-group label {
@@ -368,7 +368,7 @@
 
       <div class="form-group">
         <label for="subtitle-input">Subtitle (Markdown)</label>
-        <textarea id="subtitle-input" rows="2" placeholder="Enter slide subtitle"></textarea>
+        <textarea id="subtitle-input" rows="6" placeholder="Enter slide subtitle"></textarea>
       </div>
 
       <div class="form-row">
@@ -548,11 +548,9 @@
     function renderMarkdown(text) {
       return marked.parse(text);
     }
-    // Convert markdown to plain text for document title
-    function markdownToPlainText(text) {
-      const temp = document.createElement('div');
-      temp.innerHTML = renderMarkdown(text);
-      return temp.textContent?.trim() || '';
+    // Convert rendered markdown to a single line for the document title
+    function elementToPlainText(element) {
+      return element.textContent.replace(/\s+/g, ' ').trim();
     }
 
     function getFaviconLetter(text) {
@@ -623,10 +621,9 @@
       // Apply content
       titleElement.innerHTML = renderMarkdown(title);
       subtitleElement.innerHTML = renderMarkdown(subtitle);
-      const plainTitle = markdownToPlainText(title);
-      const plainSubtitle = markdownToPlainText(subtitle);
-      const tabTitle = plainTitle || plainSubtitle;
-      document.title = tabTitle ? `${tabTitle} - Slide Editor` : 'Slide Editor';
+      const plainTitle = elementToPlainText(titleElement);
+      const plainSubtitle = elementToPlainText(subtitleElement);
+      document.title = [plainTitle, plainSubtitle].filter(Boolean).join(' - ') || 'Slide Editor';
       updateFavicon(plainTitle, bgColor);
       // Apply background
       const container = document.getElementById('slide-container');
@@ -686,19 +683,23 @@
       updateHash(config);
       applyConfig(config);
     }
+    function closeModal() {
+      document.getElementById('modal').classList.remove('show');
+    }
     // Event listeners
     document.getElementById('edit-icon').addEventListener('click', () => {
       const config = parseHash();
       initForm(config);
       document.getElementById('modal').classList.add('show');
     });
-    document.getElementById('close-modal').addEventListener('click', () => {
-      document.getElementById('modal').classList.remove('show');
-    });
+    document.getElementById('close-modal').addEventListener('click', closeModal);
     document.getElementById('modal').addEventListener('click', (e) => {
       if (e.target === document.getElementById('modal')) {
-        document.getElementById('modal').classList.remove('show');
+        closeModal();
       }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
     });
     // Live updates
     document.getElementById('title-input').addEventListener('input', updateLive);

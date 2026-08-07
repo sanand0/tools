@@ -11,9 +11,9 @@ const faviconHref = html.match(/<link id="favicon" rel="icon" type="image\/svg\+
 const bodyMarkup = html.match(/<body>([\s\S]*?)<script src=/)?.[1]?.trim() || "";
 const inlineScript = html.match(/<script>\s*([\s\S]*?)\s*<\/script>\s*<\/body>/)?.[1] || "";
 
-function createWindow(hash = "") {
+function createWindow(hash = "", renderMarkdown = (text) => text) {
   const window = new Window({ url: `https://test/slide/${hash}` });
-  window.marked = { parse: (text) => text };
+  window.marked = { parse: renderMarkdown };
   window.document.head.innerHTML = `<title>Slide Editor</title><link id="favicon" rel="icon" type="image/svg+xml" href="${faviconHref}">`;
   window.document.body.innerHTML = bodyMarkup;
   window.eval(inlineScript);
@@ -51,7 +51,20 @@ describe("slide favicon", () => {
 
     const svg = getFaviconSvg(document);
     expect(svg).toContain(">Z</text>");
-    expect(document.title).toBe("!!! zebra crossing - Slide Editor");
+    expect(document.title).toBe("!!! zebra crossing - A beautiful presentation starts here");
+  });
+
+  it("includes plain, whitespace-normalized title and subtitle text in the document title", () => {
+    const title = "# [`rtk`](https://github.com/rtk-ai/rtk) compresses tokens";
+    const subtitle = '<div style="text-align:left">```bash\n\n❯ git status\nOn branch main\n\n```</div>';
+    const renderedWindow = createWindow(
+      `#?title=${encodeURIComponent(title)}&subtitle=${encodeURIComponent(subtitle)}`,
+      (text) => text === title
+        ? '<h1><a href="https://github.com/rtk-ai/rtk"><code>rtk</code></a> compresses tokens</h1>'
+        : '<div><pre><code>❯ git status\nOn branch main\n</code></pre></div>',
+    );
+
+    expect(renderedWindow.document.title).toBe("rtk compresses tokens - ❯ git status On branch main");
   });
 
   it("applies title and subtitle scales independently", () => {
@@ -66,5 +79,18 @@ describe("slide favicon", () => {
 
     expect(parseFloat(title.style.fontSize)).toBeCloseTo(4 * Math.pow(1.1, 2), 5);
     expect(parseFloat(subtitle.style.fontSize)).toBeCloseTo(2 * Math.pow(1.1, -1), 5);
+  });
+});
+
+describe("slide editor modal", () => {
+  it("closes when Escape is pressed", () => {
+    const window = createWindow();
+    const modal = window.document.getElementById("modal");
+
+    window.document.getElementById("edit-icon")?.click();
+    expect(modal?.classList.contains("show")).toBe(true);
+
+    window.document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(modal?.classList.contains("show")).toBe(false);
   });
 });

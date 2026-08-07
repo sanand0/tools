@@ -1,5 +1,45 @@
 # slide
 
+##
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-5.6-sol --config model_reasoning_effort=medium
+-->
+
+Modify slide/ so that the document.title includes the subtitle. Strip out HTML tags, Markdown links, etc. For example:
+
+````markdown
+# [`rtk`](https://github.com/rtk-ai/rtk) compresses tokens
+
+<div style="text-align:left">
+
+```bash
+
+❯ git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+
+❯ rtk git status
+* main...origin/main
+clean — nothing to commit
+```
+</div>
+````
+
+might become:
+
+```text
+rtk compresses tokens - ❯ git status On branch main Your branch is up to date with 'origin/main'. nothing to commit, working tree clean ❯ rtk git status * main...origin/main clean — nothing to commit
+```
+
+Also: clicking "Esc" should close the modal.
+
+
+## Add themes to slides, 24 Jul 2026
+
 <!--
 cd ~/code/tools/
 dev.sh -- claude --dangerously-skip-permissions --model opus --effort medium
