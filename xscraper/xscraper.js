@@ -1,3 +1,5 @@
+import { mountScraperCopyControls } from "../common/scraper-copy.js";
+
 const defaultState = createScraperState();
 
 export function createScraperState(seed) {
@@ -182,19 +184,29 @@ export function scrape({
   setIntervalFn = setInterval,
   clearIntervalFn = clearInterval,
 } = {}) {
-  const btnId = "xscraper-copy-btn";
-  const existing = rootDocument.getElementById(btnId);
-  if (existing) existing.remove();
-  rootDocument.body.insertAdjacentHTML(
-    "beforeend",
-    `<button id="${btnId}" style="position:fixed;top:10px;right:10px;padding:10px;z-index:2147483647;background-color:#fff;color:#000;border:1px solid #ccc;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.15);">Copy 0 tweets</button>`,
-  );
-  const btn = rootDocument.getElementById(btnId);
+  rootDocument.getElementById("xscraper-copy-btn")?.remove();
+  const controls = mountScraperCopyControls({
+    document: rootDocument,
+    idPrefix: "xscraper",
+    noun: "tweets",
+    onCopy: async (format) => {
+      clearIntervalFn(state.captureTimer);
+      if (state.autoScrollTimer && rootDocument.defaultView)
+        rootDocument.defaultView.clearInterval(state.autoScrollTimer);
+      state.captureTimer = null;
+      state.autoScrollTimer = null;
+      controls.remove();
+      const enriched = addBuzzKeep(Object.values(state.tweetsByLink));
+      await nav?.clipboard?.writeText?.(
+        format === "markdown" ? xTweetsMarkdown(enriched) : JSON.stringify(enriched, null, 2),
+      );
+    },
+  });
 
   const update = () => {
     mergeTweets(xTweets(rootDocument), state);
     const n = Object.values(state.tweetsByLink).length;
-    btn.textContent = `Copy ${n} tweets`;
+    controls.updateCount(n);
   };
 
   // Kick off auto-scroll capture
@@ -203,22 +215,44 @@ export function scrape({
   update();
   state.captureTimer = setIntervalFn(update, 600);
 
-  btn.addEventListener("click", async () => {
-    clearIntervalFn(state.captureTimer);
-    if (state.autoScrollTimer && rootDocument.defaultView)
-      rootDocument.defaultView.clearInterval(state.autoScrollTimer);
-    state.captureTimer = null;
-    state.autoScrollTimer = null;
-    btn.remove();
-    const list = Object.values(state.tweetsByLink);
-    const enriched = addBuzzKeep(list);
-    await nav?.clipboard?.writeText?.(JSON.stringify(enriched, null, 2));
-  });
-
   // Expose state for DevTools verification without polluting output
   try {
     rootDocument.defaultView.__xscraperState = state;
   } catch {}
+}
+
+export function xTweetsMarkdown(tweets) {
+  const blocks = tweets.map((tweet) => {
+    const name = tweet.name || tweet.handle || "Unknown author";
+    const author = tweet.handle ? `${name} (@${tweet.handle})` : name;
+    const heading = tweet.link ? `[${escapeMarkdownLabel(author)}](${tweet.link})` : escapeMarkdownLabel(author);
+    const metrics = [
+      ["Replies", tweet.replies],
+      ["Reposts", tweet.reposts],
+      ["Likes", tweet.likes],
+      ["Bookmarks", tweet.bookmarks],
+      ["Views", tweet.views],
+      ["Buzz", tweet.buzz],
+      ["Keep", tweet.keep],
+    ]
+      .filter(([, value]) => Number(value) > 0)
+      .map(([label, value]) => `${label}: ${Number(value).toLocaleString("en-US")}`)
+      .join(" · ");
+    return [
+      `## ${heading}`,
+      tweet.date ? `_${tweet.date}_` : "",
+      tweet.message || "",
+      tweet.parent_link ? `[Reply to parent](${tweet.parent_link})` : "",
+      metrics,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  });
+  return ["# X thread", ...blocks].join("\n\n").trimEnd() + "\n";
+}
+
+function escapeMarkdownLabel(value) {
+  return String(value).replace(/([\\[\]])/g, "\\$1").replace(/[\r\n]+/g, " ");
 }
 
 function normalizeMetricKey(label) {

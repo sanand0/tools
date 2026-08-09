@@ -1,6 +1,6 @@
 # slide
 
-##
+## Show subtitle in window title, 07 Aug 2026
 
 <!--
 cd ~/code/tools/
@@ -26,6 +26,7 @@ nothing to commit, working tree clean
 * main...origin/main
 clean — nothing to commit
 ```
+
 </div>
 ````
 
@@ -37,6 +38,7 @@ rtk compresses tokens - ❯ git status On branch main Your branch is up to date 
 
 Also: clicking "Esc" should close the modal.
 
+<!-- codex resume 019fd9d5-15b5-7661-b6f6-cfbdcbc92cd7 --yolo -->
 
 ## Add themes to slides, 24 Jul 2026
 

@@ -5,6 +5,7 @@ import {
   createProfileScraperState,
   invitationMonthFromAge,
   linkedinInvites,
+  linkedinInvitesMarkdown,
   linkedinProfileMarkdown,
   mergeInvites,
   scrapeInvites,
@@ -284,7 +285,7 @@ describe("linkedinscraper invite scraper", () => {
     ]);
   });
 
-  it("auto-scrolls, updates the copy button, and copies ordered JSON", async () => {
+  it("auto-scrolls, updates the copy buttons, and copies ordered JSON", async () => {
     document.body.innerHTML = `
       <main>
         <div role="listitem" componentkey="urn:li:invitation:6">
@@ -300,13 +301,18 @@ describe("linkedinscraper invite scraper", () => {
     const state = createInviteScraperState();
     scrapeInvites({ document, navigator: { clipboard }, state });
 
-    expect(document.getElementById("linkedinscraper-invites-copy-btn").textContent).toBe("Copy 1 invites");
+    expect(document.getElementById("linkedinscraper-invites-copy-markdown-btn").textContent).toBe(
+      "Copy 1 invites as Markdown",
+    );
+    expect(document.getElementById("linkedinscraper-invites-copy-json-btn").textContent).toBe(
+      "Copy 1 invites as JSON",
+    );
     expect(window.scrollTo).not.toHaveBeenCalled();
 
     vi.advanceTimersByTime(1000);
     expect(window.scrollBy).toHaveBeenCalled();
 
-    document.getElementById("linkedinscraper-invites-copy-btn").click();
+    document.getElementById("linkedinscraper-invites-copy-json-btn").click();
     await Promise.resolve();
     expect(clipboard.writeText).toHaveBeenCalledWith(
       JSON.stringify(
@@ -324,6 +330,32 @@ describe("linkedinscraper invite scraper", () => {
         2,
       ),
     );
+  });
+
+  it("copies invitations as readable Markdown", async () => {
+    document.body.innerHTML = `
+      <main>
+        <div role="listitem" componentkey="urn:li:invitation:6">
+          <a href="/in/rio-sample/"><strong>Rio Sample</strong></a>
+          <p>Rio Sample follows you and is inviting you to connect</p>
+          <p>Designer</p>
+          <p>12 hours ago</p>
+          <button aria-label="Accept Rio Sample’s invitation">Accept</button>
+        </div>
+      </main>
+    `;
+    const clipboard = { writeText: vi.fn().mockResolvedValue(undefined) };
+    scrapeInvites({ document, navigator: { clipboard }, state: createInviteScraperState() });
+
+    document.getElementById("linkedinscraper-invites-copy-markdown-btn").click();
+    await Promise.resolve();
+
+    const markdown = clipboard.writeText.mock.calls[0][0];
+    expect(markdown).toBe(linkedinInvitesMarkdown(linkedinInvites(document)));
+    expect(markdown).toContain("# LinkedIn invitations");
+    expect(markdown).toContain("## [Rio Sample](https://www.linkedin.com/in/rio-sample/)");
+    expect(markdown).toContain("- Follows you");
+    expect(document.getElementById("linkedinscraper-invites-copy-controls")).toBeNull();
   });
 });
 

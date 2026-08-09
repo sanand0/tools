@@ -1,4 +1,6 @@
 // @ts-check
+import { mountScraperCopyControls } from "../common/scraper-copy.js";
+
 const defaultState = createScraperState();
 
 const REACTION_EMOJI = {
@@ -154,7 +156,7 @@ function nodeToMarkdown(node, context) {
   const tag = node.tagName.toLowerCase();
   switch (tag) {
     case "br":
-      return "  \n";
+      return "  " + String.fromCharCode(node.ELEMENT_NODE + 9);
     case "p":
     case "div":
       return blockWrap(nodesToMarkdown(node.childNodes, context));
@@ -422,41 +424,72 @@ export function scrape({
   setIntervalFn = setInterval,
   clearIntervalFn = clearInterval,
 } = {}) {
-  const btnId = "discoursescraper-copy-btn";
-  rootDocument.getElementById(btnId)?.remove();
-  rootDocument.body.insertAdjacentHTML(
-    "beforeend",
-    `<button id="${btnId}" style="position:fixed;top:10px;right:10px;padding:10px;z-index:2147483647;background-color:#fff;color:#000;border:1px solid #ccc;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,0.15);">Copy 0 posts</button>`,
-  );
-  const btn = rootDocument.getElementById(btnId);
+  rootDocument.getElementById("discoursescraper-copy-btn")?.remove();
+  const controls = mountScraperCopyControls({
+    document: rootDocument,
+    idPrefix: "discoursescraper",
+    noun: "posts",
+    onCopy: async (format) => {
+      clearIntervalFn(state.captureTimer);
+      state.captureTimer = null;
+      if (state.autoScrollTimer && rootDocument.defaultView)
+        rootDocument.defaultView.clearInterval(state.autoScrollTimer);
+      state.autoScrollTimer = null;
+      controls.remove();
+      const posts = Object.values(state.postsById).sort((a, b) => (a.post_number || 0) - (b.post_number || 0));
+      await nav?.clipboard?.writeText?.(
+        format === "markdown" ? discoursePostsMarkdown(posts) : JSON.stringify(posts, null, 2),
+      );
+    },
+  });
   if (!state.autoScrollTimer) startAutoScroll({ rootDocument, state });
 
   const update = () => {
     mergePosts(discoursePosts(rootDocument), state);
     const count = Object.keys(state.postsById).length;
-    btn.textContent = `Copy ${count} posts`;
+    controls.updateCount(count);
   };
 
   update();
   state.captureTimer = setIntervalFn(update, 700);
-
-  btn.addEventListener("click", async () => {
-    clearIntervalFn(state.captureTimer);
-    state.captureTimer = null;
-    if (state.autoScrollTimer && rootDocument.defaultView)
-      rootDocument.defaultView.clearInterval(state.autoScrollTimer);
-    state.autoScrollTimer = null;
-    btn.remove();
-
-    const payload = Object.values(state.postsById).sort((a, b) => (a.post_number || 0) - (b.post_number || 0));
-    await nav?.clipboard?.writeText?.(JSON.stringify(payload, null, 2));
-  });
 
   try {
     rootDocument.defaultView.__discoursescraperState = state;
   } catch {
     // noop - best effort for debugging
   }
+}
+
+export function discoursePostsMarkdown(posts) {
+  const topic = posts[0];
+  const blocks = posts.map((post) => {
+    const name = post.user_name || post.user_username || "Unknown author";
+    const author = post.user_username ? `${name} (@${post.user_username})` : name;
+    const label = `${post.post_number || "?"}. ${author}`;
+    const heading = post.link ? `[${escapeMarkdownLabel(label)}](${post.link})` : escapeMarkdownLabel(label);
+    const reactions = Object.entries(post.likes || {})
+      .filter(([, count]) => Number(count) > 0)
+      .map(([emoji, count]) => `${emoji} ${count}`)
+      .join(", ");
+    const metadata = [
+      post.date ? `_${post.date}_` : "",
+      post.user_role ? `Role: ${post.user_role}` : "",
+      reactions ? `Reactions: ${reactions}` : "",
+      Number(post.views) > 0 ? `Views: ${Number(post.views).toLocaleString("en-US")}` : "",
+      Number(post.reads) > 0 ? `Reads: ${Number(post.reads).toLocaleString("en-US")}` : "",
+      Number(post.reply_count) > 0 ? `Replies: ${Number(post.reply_count).toLocaleString("en-US")}` : "",
+      post.parent_link ? `[Reply to parent](${post.parent_link})` : "",
+    ].filter(Boolean);
+    return [`## ${heading}`, ...metadata, post.message || ""].filter(Boolean).join("\n\n");
+  });
+  const topicLine = topic?.topic_url
+    ? `[${escapeMarkdownLabel(topic.topic_title || "Topic")}](${topic.topic_url})`
+    : topic?.topic_title || "";
+  return ["# Discourse thread", topicLine, ...blocks].filter(Boolean).join("\n\n").trimEnd() + "\n";
+}
+
+function escapeMarkdownLabel(value) {
+  return String(value).replace(/([\\[\]])/g, "\\$1").replace(/[\r\n]+/g, " ");
 }
 
 export { defaultState };

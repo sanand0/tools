@@ -1,6 +1,6 @@
 # WhatsApp Scraper
 
-Scrape WhatsApp chat messages into JSON.
+Scrape WhatsApp chat messages as Markdown or JSON.
 
 ![Screenshot](screenshot.webp)
 
@@ -22,7 +22,7 @@ The scraper attempts to collect the following information for each message:
 - Details of any quoted message (author, text, and an attempt to link to the original quoted message ID)
 - Reactions to the message
 
-The collected data is structured as a JSON array of message objects, which is then copied to the clipboard.
+The collected data can be copied as a readable Markdown transcript or as a JSON array of message objects.
 
 Link previews (when WhatsApp renders them) are captured in:
 
@@ -33,7 +33,7 @@ Link previews (when WhatsApp renders them) are captured in:
 
 ## Output format
 
-The bookmarklet copies a JSON array of message objects to the clipboard.
+The bookmarklet offers two live-count buttons: **Copy Markdown** for a readable transcript and **Copy JSON** for the full array of message objects.
 
 - Output is **best-effort**: fields are included only when they can be extracted from the currently-rendered DOM.
 - Output is **de-duplicated** by `messageId` while you scroll. If the same message is observed multiple times, the scraper keeps the “richer” version with field-aware merging: longer string fields win, larger numeric media metadata wins, and `true` booleans are preserved.
@@ -151,7 +151,7 @@ These are the observable invariants from the current implementation:
    - Go to [web.whatsapp.com](https://web.whatsapp.com/) and open the specific chat conversation you want to scrape.
    - Click the "💬 WhatsApp Scraper" bookmarklet from your browser's bookmarks bar. This displays a "Copy ... messages" button on the top right of WhatsApp.
    - **Crucially, scroll within the chat panel to load all the messages you intend to capture.** The scraper can only access messages that are currently rendered in the WhatsApp Web interface.
-   - Click on the "Copy ... messages" button to copy the captured messages as JSON.
+- Click **Copy ... messages as Markdown** for a readable transcript or **Copy ... messages as JSON** for structured data.
 3. **Data Extraction:**
    - The bookmarklet executes JavaScript code in the context of the WhatsApp Web page.
    - This script queries the Document Object Model (DOM) to find HTML elements corresponding to messages.

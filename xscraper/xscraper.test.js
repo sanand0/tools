@@ -2,7 +2,7 @@ import { beforeAll, afterAll, beforeEach, afterEach, describe, expect, it, vi } 
 import path from "node:path";
 import { fileURLToPath } from "url";
 import { loadFrom } from "../common/testutils.js";
-import { addBuzzKeep, createScraperState, parseCount, scrape, xTweets } from "./xscraper.js";
+import { addBuzzKeep, createScraperState, parseCount, scrape, xTweets, xTweetsMarkdown } from "./xscraper.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -74,9 +74,10 @@ describe("xscraper", () => {
       clearIntervalFn: clearInterval,
     });
 
-    const button = document.getElementById("xscraper-copy-btn");
-    expect(button).not.toBeNull();
-    expect(button.textContent).toBe("Copy 3 tweets");
+    const markdownButton = document.getElementById("xscraper-copy-markdown-btn");
+    const jsonButton = document.getElementById("xscraper-copy-json-btn");
+    expect(markdownButton.textContent).toBe("Copy 3 tweets as Markdown");
+    expect(jsonButton.textContent).toBe("Copy 3 tweets as JSON");
 
     // Add another reply dynamically
     const main = document.querySelector("main");
@@ -92,8 +93,8 @@ describe("xscraper", () => {
 
     await vi.advanceTimersByTimeAsync(1200);
 
-    const refreshed = document.getElementById("xscraper-copy-btn");
-    expect(refreshed.textContent).toBe("Copy 4 tweets");
+    const refreshed = document.getElementById("xscraper-copy-json-btn");
+    expect(refreshed.textContent).toBe("Copy 4 tweets as JSON");
 
     refreshed.click();
     expect(writeText).toHaveBeenCalledTimes(1);
@@ -111,6 +112,27 @@ describe("xscraper", () => {
     expect(typeof carol.keep).toBe("number");
     expect(carol.buzz).toBeGreaterThanOrEqual(0);
     expect(carol.keep).toBeGreaterThanOrEqual(0);
+  });
+
+  it("copies the captured thread as readable Markdown", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    scrape({
+      document,
+      navigator: { clipboard: { writeText } },
+      state: createScraperState(),
+      setIntervalFn: setInterval,
+      clearIntervalFn: clearInterval,
+    });
+
+    document.getElementById("xscraper-copy-markdown-btn").click();
+    await Promise.resolve();
+
+    const markdown = writeText.mock.calls[0][0];
+    expect(markdown).toBe(xTweetsMarkdown(addBuzzKeep(xTweets(document))));
+    expect(markdown).toContain("# X thread");
+    expect(markdown).toContain("[Ethan Mollick (@emollick)](https://test/emollick/status/123)");
+    expect(markdown).toContain("Likes: 2,300");
+    expect(document.getElementById("xscraper-copy-controls")).toBeNull();
   });
 
   it("adds buzz/keep scores with decay and weights", () => {

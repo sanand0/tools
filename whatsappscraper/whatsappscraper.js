@@ -1,3 +1,5 @@
+import { mountScraperCopyControls } from "../common/scraper-copy.js";
+
 const MESSAGE_TEXT_SELECTOR =
   '[data-testid="selectable-text"], .selectable-text';
 const QUOTE_SELECTOR = '[aria-label="Quoted message" i]';
@@ -784,30 +786,66 @@ export function scrape({
   clearIntervalFn = clearInterval,
 } = {}) {
   rootDocument.getElementById("copy-btn")?.remove();
-  rootDocument.body.insertAdjacentHTML(
-    "beforeend",
-    '<button id="copy-btn" style="position:fixed;top:10px;right:10px;padding:10px;z-index:999;background-color:#fff;color:#000;">Copy 0 messages</button>',
-  );
-  const btn = rootDocument.getElementById("copy-btn");
+  const controls = mountScraperCopyControls({
+    document: rootDocument,
+    idPrefix: "whatsappscraper",
+    noun: "messages",
+    onCopy: async (format) => {
+      clearIntervalFn(state.captureTimer);
+      state.captureTimer = null;
+      controls.remove();
+      const list = orderedMessages(state);
+      await nav?.clipboard?.writeText?.(
+        format === "markdown" ? whatsappMessagesMarkdown(list) : JSON.stringify(list, null, 2),
+      );
+    },
+  });
 
   const update = () => {
     mergeMessages(whatsappMessages(rootDocument), state);
-    btn.textContent = `Copy ${Object.keys(state.messagesById).length} messages`;
+    controls.updateCount(Object.keys(state.messagesById).length);
   };
 
   update();
   state.captureTimer = setIntervalFn(update, 500);
 
-  btn.addEventListener("click", async () => {
-    clearIntervalFn(state.captureTimer);
-    state.captureTimer = null;
-    btn.remove();
+}
 
-    const list = Object.values(state.messagesById).sort((a, b) => {
-      const ta = a.time ? new Date(a.time).getTime() : 0;
-      const tb = b.time ? new Date(b.time).getTime() : 0;
-      return ta - tb;
-    });
-    await nav?.clipboard?.writeText?.(JSON.stringify(list, null, 2));
+function orderedMessages(state) {
+  return Object.values(state.messagesById).sort((a, b) => {
+    const ta = a.time ? new Date(a.time).getTime() : 0;
+    const tb = b.time ? new Date(b.time).getTime() : 0;
+    return ta - tb;
   });
+}
+
+export function whatsappMessagesMarkdown(messages) {
+  const blocks = messages.map((message) => {
+    const author = message.author || message.authorPhone || (message.isOutgoing ? "You" : "Unknown author");
+    const quote = message.quoteText
+      ? [`> Replying to ${message.quoteAuthor || "a message"}:`, ...message.quoteText.split("\n").map((line) => `> ${line}`)].join("\n")
+      : "";
+    const link = message.linkUrl
+      ? `[${escapeMarkdownLabel(message.linkTitle || message.linkSite || message.linkUrl)}](${message.linkUrl})`
+      : "";
+    const media = message.mediaType
+      ? `Media: ${[message.mediaType, message.mediaCaption, message.mediaDuration].filter(Boolean).join(" · ")}`
+      : "";
+    return [
+      `## ${escapeMarkdownLabel(author)}${message.time ? ` — ${message.time}` : ""}`,
+      message.isRecalled ? "_This message was deleted._" : message.text || "",
+      quote,
+      link,
+      media,
+      message.reactions ? `Reactions: ${message.reactions}` : "",
+      message.isOutgoing ? "Direction: Outgoing" : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  });
+  return ["# WhatsApp chat", ...blocks].join("\n\n").trimEnd() + "\n";
+}
+
+function escapeMarkdownLabel(value) {
+  return String(value).replace(/([\\[\]])/g, "\\$1").replace(/[\r\n]+/g, " ");
 }

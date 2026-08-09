@@ -4,12 +4,12 @@ Collection of LinkedIn bookmarklets that copy structured page data from your bro
 
 ## Bookmarklets
 
-- **LinkedIn Invite Scraper**: Scrapes received invitations from `https://www.linkedin.com/mynetwork/invitation-manager/received/`.
+- **LinkedIn Invite Scraper**: Scrapes received invitations from `https://www.linkedin.com/mynetwork/invitation-manager/received/` as Markdown or JSON.
 - **LinkedIn Profile Scraper**: Scrapes a LinkedIn profile page into AI-agent friendly Markdown.
 
 ## Invite Output
 
-The invite scraper copies a JSON array. Each object may include:
+The invite scraper offers **Copy Markdown** for a readable list and **Copy JSON** for the full array. Each JSON object may include:
 
 - `name`
 - `description`

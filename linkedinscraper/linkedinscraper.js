@@ -1,4 +1,5 @@
 // @ts-check
+import { mountScraperCopyControls } from "../common/scraper-copy.js";
 
 const defaultInviteState = createInviteScraperState();
 const defaultProfileState = createProfileScraperState();
@@ -781,36 +782,63 @@ export function scrapeInvites({
   setIntervalFn = setInterval,
   clearIntervalFn = clearInterval,
 } = {}) {
-  const buttonId = "linkedinscraper-invites-copy-btn";
-  rootDocument.getElementById(buttonId)?.remove();
-  rootDocument.body.insertAdjacentHTML(
-    "beforeend",
-    `<button id="${buttonId}" style="position:fixed;top:10px;right:10px;padding:10px 12px;z-index:2147483647;background:#fff;color:#111;border:1px solid #bbb;border-radius:6px;box-shadow:0 2px 10px rgba(0,0,0,.18);font:14px system-ui,sans-serif;">Copy 0 invites</button>`,
-  );
-  const button = rootDocument.getElementById(buttonId);
+  rootDocument.getElementById("linkedinscraper-invites-copy-btn")?.remove();
+  const controls = mountScraperCopyControls({
+    document: rootDocument,
+    idPrefix: "linkedinscraper-invites",
+    noun: "invites",
+    onCopy: async (format) => {
+      clearIntervalFn(state.captureTimer);
+      if (state.autoScrollTimer && rootDocument.defaultView)
+        rootDocument.defaultView.clearInterval(state.autoScrollTimer);
+      state.captureTimer = null;
+      state.autoScrollTimer = null;
+      controls.remove();
+      const invites = orderedInvites(state);
+      await nav?.clipboard?.writeText?.(
+        format === "markdown" ? linkedinInvitesMarkdown(invites) : JSON.stringify(invites, null, 2),
+      );
+    },
+  });
 
   const update = () => {
     mergeInvites(linkedinInvites(rootDocument), state);
-    button.textContent = `Copy ${Object.keys(state.invitesByKey).length} invites`;
+    controls.updateCount(Object.keys(state.invitesByKey).length);
   };
 
   if (!state.autoScrollTimer) startInviteAutoScroll({ rootDocument, state });
   update();
   state.captureTimer = setIntervalFn(update, 600);
 
-  button.addEventListener("click", async () => {
-    clearIntervalFn(state.captureTimer);
-    if (state.autoScrollTimer && rootDocument.defaultView)
-      rootDocument.defaultView.clearInterval(state.autoScrollTimer);
-    state.captureTimer = null;
-    state.autoScrollTimer = null;
-    button.remove();
-    await nav?.clipboard?.writeText?.(JSON.stringify(orderedInvites(state), null, 2));
-  });
-
   try {
     rootDocument.defaultView.__linkedinscraperInviteState = state;
   } catch {}
+}
+
+export function linkedinInvitesMarkdown(invites) {
+  const blocks = invites.map((invite) => {
+    const name = invite.name || "Unknown person";
+    const heading = invite.profileUrl
+      ? `[${escapeMarkdownHeading(name)}](${invite.profileUrl})`
+      : escapeMarkdownHeading(name);
+    const metadata = [
+      invite.invitationMonth ? `- Invited: ${invite.invitationMonth}` : "",
+      invite.followsYou ? "- Follows you" : "",
+      Number(invite.connectionsCount) > 0 ? `- Mutual connections: ${invite.connectionsCount}` : "",
+      invite.connections?.length ? `- Connections: ${invite.connections.join(", ")}` : "",
+      invite.commonOrgs?.length ? `- Common organizations: ${invite.commonOrgs.join(", ")}` : "",
+      invite.badges?.length ? `- Badges: ${invite.badges.join(", ")}` : "",
+    ].filter(Boolean);
+    return [
+      `## ${heading}`,
+      invite.description || "",
+      metadata.join("\n"),
+      invite.message ? `### Invitation message\n\n${invite.message}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  });
+  return ["# LinkedIn invitations", ...blocks].join("\n\n").trimEnd() + "\n";
 }
 
 export function scrapeProfile({

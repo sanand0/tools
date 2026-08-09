@@ -17,6 +17,7 @@ import {
   mergeMessages,
   scrape,
   whatsappMessages,
+  whatsappMessagesMarkdown,
 } from "./whatsappscraper.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -786,9 +787,10 @@ describe("whatsappscraper", () => {
       });
 
       const main = document.getElementById("main");
-      const button = document.getElementById("copy-btn");
-      expect(button).not.toBeNull();
-      expect(button.textContent).toBe("Copy 5 messages");
+      const markdownButton = document.getElementById("whatsappscraper-copy-markdown-btn");
+      const jsonButton = document.getElementById("whatsappscraper-copy-json-btn");
+      expect(markdownButton.textContent).toBe("Copy 5 messages as Markdown");
+      expect(jsonButton.textContent).toBe("Copy 5 messages as JSON");
 
       const newRow = document.createElement("div");
       newRow.setAttribute("role", "row");
@@ -810,8 +812,8 @@ describe("whatsappscraper", () => {
         authorPhone: "+00 00000 00000",
       });
 
-      const refreshedButton = document.getElementById("copy-btn");
-      expect(refreshedButton.textContent).toBe("Copy 6 messages");
+      const refreshedButton = document.getElementById("whatsappscraper-copy-json-btn");
+      expect(refreshedButton.textContent).toBe("Copy 6 messages as JSON");
 
       refreshedButton.click();
       expect(writeText).toHaveBeenCalledTimes(1);
@@ -829,8 +831,33 @@ describe("whatsappscraper", () => {
         authorPhone: "+00 00000 00000",
       });
 
-      expect(document.getElementById("copy-btn")).toBeNull();
+      expect(document.getElementById("whatsappscraper-copy-controls")).toBeNull();
       expect(state.captureTimer).toBeNull();
     },
   );
+
+  it("copies the captured chat as readable Markdown", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    scrape({
+      document,
+      navigator: { clipboard: { writeText } },
+      state: createScraperState(),
+      setIntervalFn: setInterval,
+      clearIntervalFn: clearInterval,
+    });
+
+    document.getElementById("whatsappscraper-copy-markdown-btn").click();
+    await Promise.resolve();
+
+    const messages = whatsappMessages(document).sort((a, b) => {
+      const ta = a.time ? new Date(a.time).getTime() : 0;
+      const tb = b.time ? new Date(b.time).getTime() : 0;
+      return ta - tb;
+    });
+    const markdown = writeText.mock.calls[0][0];
+    expect(markdown).toBe(whatsappMessagesMarkdown(messages));
+    expect(markdown).toContain("# WhatsApp chat");
+    expect(markdown).toContain("## Member Alpha");
+    expect(document.getElementById("whatsappscraper-copy-controls")).toBeNull();
+  });
 });

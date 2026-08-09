@@ -2,7 +2,13 @@ import { beforeAll, afterAll, beforeEach, afterEach, describe, expect, it, vi } 
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadFrom } from "../common/testutils.js";
-import { createScraperState, discoursePosts, mergePosts, scrape } from "./discoursescraper.js";
+import {
+  createScraperState,
+  discoursePosts,
+  discoursePostsMarkdown,
+  mergePosts,
+  scrape,
+} from "./discoursescraper.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -170,9 +176,10 @@ describe("discoursescraper", () => {
       clearIntervalFn: clearInterval,
     });
 
-    const btn = document.getElementById("discoursescraper-copy-btn");
-    expect(btn).not.toBeNull();
-    expect(btn.textContent).toBe("Copy 2 posts");
+    const markdownButton = document.getElementById("discoursescraper-copy-markdown-btn");
+    const jsonButton = document.getElementById("discoursescraper-copy-json-btn");
+    expect(markdownButton.textContent).toBe("Copy 2 posts as Markdown");
+    expect(jsonButton.textContent).toBe("Copy 2 posts as JSON");
 
     postsData.push({
       id: 104,
@@ -188,9 +195,9 @@ describe("discoursescraper", () => {
     });
 
     await vi.advanceTimersByTimeAsync(1800);
-    expect(btn.textContent).toBe("Copy 3 posts");
+    expect(jsonButton.textContent).toBe("Copy 3 posts as JSON");
 
-    btn.click();
+    jsonButton.click();
     expect(writeText).toHaveBeenCalledTimes(1);
     resolveClipboard();
     await Promise.resolve();
@@ -200,5 +207,26 @@ describe("discoursescraper", () => {
     const latest = payload.at(-1);
     expect(latest.message).toContain("Later update");
     expect(latest.parent_link).toBe(payload[0].link);
+  });
+
+  it("copies the captured topic as readable Markdown", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    scrape({
+      document,
+      navigator: { clipboard: { writeText } },
+      state: createScraperState(),
+      setIntervalFn: setInterval,
+      clearIntervalFn: clearInterval,
+    });
+
+    document.getElementById("discoursescraper-copy-markdown-btn").click();
+    await Promise.resolve();
+
+    const markdown = writeText.mock.calls[0][0];
+    expect(markdown).toBe(discoursePostsMarkdown(discoursePosts(document)));
+    expect(markdown).toContain("# Discourse thread");
+    expect(markdown).toContain("## [1. Alice (@alice)]");
+    expect(markdown).toContain("Reactions: ♥️ 5, 👍 2");
+    expect(document.getElementById("discoursescraper-copy-controls")).toBeNull();
   });
 });

@@ -31,7 +31,7 @@
     {
       "icon": "bi-twitter-x",
       "title": "X Thread Scraper",
-      "description": "Bookmarklet to copy a tweet and all its replies as JSON (with buzz/keep).",
+      "description": "Bookmarklet to copy a tweet and all its replies as Markdown or JSON (with buzz/keep).",
       "url": "xscraper",
       "created": "2025-10-26T00:00:00+00:00"
     },
@@ -45,7 +45,7 @@
     {
       "icon": "bi-chat-dots",
       "title": "Discourse Thread Scraper",
-      "description": "Bookmarklet to copy a Discourse topic and replies as JSON.",
+      "description": "Bookmarklet to copy a Discourse topic and replies as Markdown or JSON.",
       "url": "discoursescraper",
       "created": "2025-10-29T00:00:00+00:00"
     },
@@ -205,7 +205,7 @@
     {
       "icon": "bi-whatsapp",
       "title": "WhatsApp Scraper",
-      "description": "Scrape WhatsApp chat messages into JSON.",
+      "description": "Scrape WhatsApp chat messages as Markdown or JSON.",
       "url": "whatsappscraper",
       "created": "2025-05-11T15:46:35+05:30"
     },
