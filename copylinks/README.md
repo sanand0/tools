@@ -1,3 +1,3 @@
 # Copy Links
 
-Bookmarklet to copy all page URLs and asset links as TSV.
+Bookmarklets to copy all page URLs as TSV or copy the current URL with a selected text fragment.

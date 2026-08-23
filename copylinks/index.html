@@ -26,17 +26,22 @@
       <div class="col-lg-8 col-xl-7">
         <header class="mb-5 text-center">
           <h1 class="display-5 mb-2">Copy Links</h1>
-          <p class="lead text-secondary">Grab every URL on a page and copy it as a tidy TSV list</p>
+          <p class="lead text-secondary">Copy every link on a page, or share the exact passage you selected</p>
         </header>
 
         <section class="bg-body shadow-sm border rounded-3 p-4 text-center mb-5">
-          <p class="mb-3">Drag this button to your bookmarks bar:</p>
-          <a href="" id="bookmarklet" class="btn btn-primary btn-lg mb-3 shadow-sm">
-            Copy Links
-          </a>
+          <p class="mb-3">Drag these buttons to your bookmarks bar:</p>
+          <div class="d-flex flex-wrap justify-content-center gap-2 mb-3" id="bookmarklets">
+            <a href="" class="btn btn-primary btn-lg shadow-sm" data-bookmarklet="links">
+              <i class="bi bi-link-45deg me-1"></i> Copy Links
+            </a>
+            <a href="" class="btn btn-success btn-lg shadow-sm" data-bookmarklet="text-fragment">
+              <i class="bi bi-highlighter me-1"></i> Copy URL + Text Fragment
+            </a>
+          </div>
           <p class="text-secondary small mb-0" id="bookmarklet-status">
             <span id="bookmarklet-spinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            <span id="bookmarklet-status-text">Loading bookmarklet...</span>
+            <span id="bookmarklet-status-text">Loading bookmarklets...</span>
           </p>
           <p class="text-danger small mb-0" id="bookmarklet-error"></p>
         </section>
@@ -44,9 +49,9 @@
         <section class="bg-body shadow-sm border rounded-3 p-4">
           <h2 class="h5 text-secondary text-center mb-3">Usage</h2>
           <ol class="mb-0 ps-3">
-            <li>Open any page with links or embedded assets.</li>
-            <li>Click the <kbd>Copy Links</kbd> bookmarklet.</li>
-            <li>All unique URLs are copied as tab-separated values (URL + description).</li>
+            <li>Use <kbd>Copy Links</kbd> to copy every unique page and asset URL as tab-separated values.</li>
+            <li>Or select a passage and use <kbd>Copy URL + Text Fragment</kbd> to copy a link that highlights it.</li>
+            <li>With no selection, <kbd>Copy URL + Text Fragment</kbd> copies the current page URL.</li>
             <li>Paste into a spreadsheet, text editor, or your notes.</li>
           </ol>
         </section>
