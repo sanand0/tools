@@ -39,6 +39,18 @@ jobs:
             git archive HEAD | tar -x -C public/wip
           fi
 
+      - name: Add GoatCounter analytics
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          snippet = '<script>window.goatcounter = {path: p => \'/@tools\' + p}</script>\n<script data-goatcounter="https://sanand0.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>'
+          for path in Path('public').rglob("*.html"):
+              html = path.read_text()
+              if "data-goatcounter" not in html and "</head>" in html:
+                  path.write_text(html.replace("</head>", snippet + "\n</head>", 1))
+          PY
+
       # Deploy public/
       - uses: actions/upload-pages-artifact@v3
         with:
