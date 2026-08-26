@@ -1,5 +1,32 @@
 # Prompts
 
+## Update and simplify ChatGPT scraper, 27 Aug 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-5.6-sol --config model_reasoning_effort=medium
+-->
+
+Let's update the ChatGPT scraper at aiscrapers/chatgptscraper.js.
+We want this to be the equivalent of clicking on the "Copy message" button below each user's message and then the "Copy response" below each ChatGPT response and stringing them together one after another under level one sections labeled `# User` and `# ChatGPT`, respectively.
+It doesn't have to actually trigger the copy buttons. You can just extract the Markdown from the text - that's fine. Just keep in mind that we want to preserve the formatting. The current code does that OK for the ChatGPT responses (but there may be opportunities to improve) but certainly not for user messages - which are copied as a single line.
+We do NOT need to capture the thinking traces by clicking on the sidebar, etc. That slows things down and makes it brittle.
+We want to do this by capturing ALL of the messages and responses. Start with what's available in the DOM, but scrolling can reveal more in long conversations. So, like whatsappscraper/ show a button at the top right allowing the user to copy as Markdown or JSON and as the user scrolls, update the number of chat messages. They can copy whichever messages they way.
+
+Test on these ChatGPT conversations (as well as any others) via CDP on localhost:9222 by loading them in new tabs (don't touch existing tabs):
+https://chatgpt.com/c/6a8bf567-3b60-83e9-a820-2c2ef190cfe8 (6 messages)
+https://chatgpt.com/c/6a8cfe2c-9108-83ee-be70-4572aae9e63e (10+ messages)
+https://chatgpt.com/c/6a8e203d-8190-83ec-8607-520741448180 (10+ messages)
+
+Feel free to do this as a complete rewrite if that's what makes it better.
+Prefer robust selection strategies, e.g. aria-labels, semantic structure, text content, etc. rather than brittle classes or IDs that look non-semantic and could change.
+
+---
+
+It's worth preserving the frontmatter in the Markdown. Include the timestamps in both if you can retrieve those. Explore opportunities for efficiency an simplification.
+
+<!-- codex resume 01a0403a-ba08-7cc0-9abf-05ac9d3c8c3d --yolo -->
+
 ## Capture writing blocks in ChatGPT scraper, 18 Jul 2026
 
 <!--

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { loadFrom } from "../common/testutils.js";
 
 describe("geminiscraper table handling", () => {
@@ -83,68 +83,288 @@ describe("claudescraper conversation extraction", () => {
 });
 
 describe("chatgptscraper conversation extraction", () => {
-  it("extracts semantic ChatGPT turns without action controls", async () => {
-    const { window, document } = await loadFrom(import.meta.dirname, "__fixtures__/chatgpt-basic.html");
+  it("extracts semantic ChatGPT turns as copy-button-equivalent Markdown", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-basic.html",
+    );
     const ogTitle = document.createElement("meta");
     ogTitle.setAttribute("property", "og:title");
     ogTitle.content = "ChatGPT";
     document.head.appendChild(ogTitle);
-    document.querySelector('[data-message-author-role="assistant"] .markdown').insertAdjacentHTML(
-      "beforeend",
-      `<div>Inspecting files</div>
+    document
+      .querySelector("[data-testid='conversation-turn-1']")
+      .insertAdjacentHTML(
+        "beforeend",
+        '<time datetime="2026-08-27T09:10:11.000Z"></time>',
+      );
+    document
+      .querySelector("[data-testid='conversation-turn-2']")
+      .insertAdjacentHTML(
+        "beforeend",
+        '<time datetime="2026-08-27T09:11:12.000Z"></time>',
+      );
+    document
+      .querySelector('[data-message-author-role="assistant"] .markdown')
+      .insertAdjacentHTML(
+        "beforeend",
+        `<div>Inspecting files</div>
       <div>Called toolCalled tool</div>
       <pre class="overflow-visible"><div><div>Python</div><button>Run</button><pre><code><span>bash -lc ls -la</span><br><span>printf done</span></code></pre></div></pre>
       <div data-testid="writing-block-container"><div contenteditable="true"><p>Before answering, test the framing.</p><p>When reframing, write <code>Reframed question: …</code> in one concise sentence.</p></div></div>`,
-    );
+      );
     const markdown = window.chatgptscraper.extractConversation(document);
 
-    expect(markdown).toContain('title: "ChatGPT Fixture"');
+    expect(markdown).toMatch(
+      /^---\ntitle: "ChatGPT Fixture"\ndate: .+\nsource: "https:\/\/test\/aiscrapers\/__fixtures__\/chatgpt-basic.html"\n---\n\n# User\n\n_2026-08-27T09:10:11.000Z_\n\n/,
+    );
     expect(markdown).toContain(
-      "## User\n\n* Attachment: browsing-history.tsv(1).xz (File)\n\nGive me a compact table.",
+      "# User\n\n_2026-08-27T09:10:11.000Z_\n\n* Attachment: browsing-history.tsv(1).xz (File)\n\nGive me a compact table.\n\nKeep **this emphasis** and `this code`.\n\n* First item\n* Second item\n\nInclude code too.",
     );
     expect(markdown).not.toContain("\n\nFile\n\nGive me a compact table.");
-    expect(markdown).toContain("## ChatGPT\n\nI will answer directly.");
+    expect(markdown).toContain(
+      "# ChatGPT\n\n_2026-08-27T09:11:12.000Z_\n\nI will answer directly.",
+    );
     expect(markdown).toContain("| Tool | Use |");
-    expect(markdown).toContain("<summary>Called tool: Local MCP - Bash</summary>");
+    expect(markdown).toContain(
+      "<summary>Called tool: Local MCP - Bash</summary>",
+    );
     expect(markdown).toContain("Request\n\n```\n{commands:");
     expect(markdown).toContain("Response\n\n```\n{result:");
-    expect(markdown).toMatch(/Inspecting files\s+```\nbash -lc ls -la\nprintf done\n```/);
+    expect(markdown).toMatch(
+      /Inspecting files\s+```\nbash -lc ls -la\nprintf done\n```/,
+    );
     expect(markdown).not.toContain("Pythonbash -lc");
     expect(markdown).not.toContain("Called toolCalled tool");
     expect(markdown).toContain("Before answering, test the framing.");
-    expect(markdown).toContain("When reframing, write `Reframed question: …` in one concise sentence.");
+    expect(markdown).toContain(
+      "When reframing, write `Reframed question: …` in one concise sentence.",
+    );
     expect(markdown).toContain("```");
     expect(markdown).not.toContain("Copy response");
     expect(markdown).not.toContain("More actions");
+    expect(markdown).not.toContain("Thought for 12s");
+    expect(markdown).not.toContain("Worked for 1m");
+    expect(markdown.match(/^title:/gm)).toHaveLength(1);
   });
 
-  it("expands ChatGPT show-more and reasoning controls before extracting", async () => {
-    const { window, document } = await loadFrom(import.meta.dirname, "__fixtures__/chatgpt-basic.html");
-    await window.chatgptscraper.expandChatGPTContent(document, window);
-    const markdown = window.chatgptscraper.extractConversation(document);
+  it("does not click or capture reasoning controls", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-basic.html",
+    );
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const state = window.chatgptscraper.createScraperState();
+    window.chatgptscraper.scrape(
+      document,
+      window,
+      { clipboard: { writeText } },
+      state,
+      () => 1,
+      vi.fn(),
+    );
 
-    expect(markdown).toContain("Include code too.");
-    expect(markdown).toContain("<summary>Thought for 12s</summary>");
-    expect(markdown).toContain("I checked the sidebar trace.");
-    expect(markdown).toContain("Then I wrote the answer.");
-    expect(markdown).toContain("I inspected every activity.");
-    expect(markdown).toContain("<summary>Inspected the data with Python</summary>");
-    expect(markdown).toContain("Inspected and analyzed fixture data.");
-    expect(markdown).toContain('```\nimport zipfile, os\nprint("done")\n```');
-    expect(markdown).toContain("I kept the earlier reasoning after opening this section.");
+    expect(
+      document.querySelector(".reasoning-toggle").getAttribute("aria-expanded"),
+    ).toBe("false");
+    expect(
+      document.querySelector("[aria-label='Reasoning details']"),
+    ).toBeNull();
+    expect(state.messages).toHaveLength(2);
+    expect(state.messages[1].content).not.toContain("Thought for 12s");
+    expect(state.messages[1].content).not.toContain(
+      "I checked the shape first.",
+    );
   });
 
   it("does not require ChatGPT CSS classes for turn boundaries", async () => {
-    const { window, document } = await loadFrom(import.meta.dirname, "__fixtures__/chatgpt-basic.html");
-    document.querySelectorAll("[class]").forEach((node) => node.removeAttribute("class"));
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-basic.html",
+    );
+    document
+      .querySelectorAll("[class]")
+      .forEach((node) => node.removeAttribute("class"));
     const markdown = window.chatgptscraper.extractConversation(document);
 
     expect(markdown).toContain(
-      "## User\n\n* Attachment: browsing-history.tsv(1).xz (File)\n\nGive me a compact table.",
+      "# User\n\n* Attachment: browsing-history.tsv(1).xz (File)\n\nGive me a compact table.",
     );
-    expect(markdown).toContain("## ChatGPT\n\nI will answer directly.");
-    expect(markdown).toContain("<summary>Called tool: Local MCP - Bash</summary>");
+    expect(markdown).toContain("# ChatGPT\n\nI will answer directly.");
+    expect(markdown).toContain(
+      "<summary>Called tool: Local MCP - Bash</summary>",
+    );
     expect(markdown).toContain("Request\n\n```\n{commands:");
+  });
+
+  it("accumulates newly revealed turns and copies Markdown or JSON", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-basic.html",
+    );
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    let capture;
+    const clearIntervalFn = vi.fn();
+    const state = window.chatgptscraper.createScraperState();
+    window.chatgptscraper.scrape(
+      document,
+      window,
+      { clipboard: { writeText } },
+      state,
+      (callback) => {
+        capture = callback;
+        return 42;
+      },
+      clearIntervalFn,
+    );
+
+    expect(
+      document.getElementById("chatgptscraper-copy-markdown-btn").textContent,
+    ).toBe("Copy 2 messages as Markdown");
+    expect(
+      document.getElementById("chatgptscraper-copy-json-btn").textContent,
+    ).toBe("Copy 2 messages as JSON");
+
+    document.querySelector("main").insertAdjacentHTML(
+      "beforeend",
+      `<section data-testid="conversation-turn-3">
+        <div data-message-id="message-3" data-message-author-role="user"><p>Newly revealed question.</p></div>
+        <button aria-label="Copy message"></button>
+      </section>`,
+    );
+    capture();
+    capture();
+
+    expect(state.messages).toHaveLength(3);
+    expect(
+      document.getElementById("chatgptscraper-copy-json-btn").textContent,
+    ).toBe("Copy 3 messages as JSON");
+    document.querySelector("[data-testid='conversation-turn-1']").remove();
+    capture();
+    expect(state.messages).toHaveLength(3);
+    await state.timestampsPromise;
+    document.getElementById("chatgptscraper-copy-json-btn").click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(JSON.parse(writeText.mock.calls[0][0])).toEqual([
+      expect.objectContaining({ id: "conversation-turn-1", role: "user" }),
+      expect.objectContaining({ id: "conversation-turn-2", role: "assistant" }),
+      {
+        id: "message-3",
+        role: "user",
+        content: "Newly revealed question.",
+      },
+    ]);
+    expect(clearIntervalFn).toHaveBeenCalledWith(42);
+    expect(document.getElementById("chatgptscraper-copy-controls")).toBeNull();
+  });
+
+  it("orders immutable message IDs when pagination reindexes turn containers", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-basic.html",
+    );
+    const [user, assistant] = document.querySelectorAll(
+      "[data-message-author-role]",
+    );
+    user.setAttribute("data-message-id", "latest-user");
+    assistant.setAttribute("data-message-id", "latest-assistant");
+    const state = window.chatgptscraper.createScraperState();
+    window.chatgptscraper.captureMessages(document, state);
+
+    user.closest("section").setAttribute("data-testid", "conversation-turn-11");
+    assistant
+      .closest("section")
+      .setAttribute("data-testid", "conversation-turn-12");
+    user
+      .closest("section")
+      .insertAdjacentHTML(
+        "beforebegin",
+        `<section data-testid="conversation-turn-2"><div data-message-id="earlier-assistant" data-message-author-role="assistant"><div class="markdown"><p>Earlier answer.</p></div></div></section>`,
+      );
+    document
+      .querySelector("[data-message-id='earlier-assistant']")
+      .closest("section")
+      .insertAdjacentHTML(
+        "beforebegin",
+        `<section data-testid="conversation-turn-1"><div data-message-id="earlier-user" data-message-author-role="user"><p>Earlier question.</p></div></section>`,
+      );
+    window.chatgptscraper.captureMessages(document, state);
+
+    expect(state.messages.map(({ id }) => id)).toEqual([
+      "earlier-user",
+      "earlier-assistant",
+      "latest-user",
+      "latest-assistant",
+    ]);
+  });
+
+  it("enriches Markdown and JSON with API timestamps when available", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-basic.html",
+    );
+    const [user, assistant] = document.querySelectorAll(
+      "[data-message-author-role]",
+    );
+    window.history.replaceState({}, "", "/c/conversation-id");
+    user.setAttribute("data-message-id", "user-message");
+    assistant.setAttribute("data-message-id", "assistant-message");
+    window.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        mapping: {
+          user: { message: { id: "user-message", create_time: 1787821811 } },
+          assistant: {
+            message: { id: "assistant-message", create_time: 1787821872 },
+          },
+        },
+      }),
+    });
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const state = window.chatgptscraper.createScraperState(document);
+    window.chatgptscraper.scrape(
+      document,
+      window,
+      { clipboard: { writeText } },
+      state,
+      () => 7,
+      vi.fn(),
+    );
+    await state.timestampsPromise;
+
+    expect(state.messages.map(({ timestamp }) => timestamp)).toEqual([
+      "2026-08-27T09:10:11.000Z",
+      "2026-08-27T09:11:12.000Z",
+    ]);
+    expect(
+      window.chatgptscraper.messagesToMarkdown(state.messages, state.metadata),
+    ).toContain("# User\n\n_2026-08-27T09:10:11.000Z_\n\n");
+    document.getElementById("chatgptscraper-copy-json-btn").click();
+    await Promise.resolve();
+    expect(JSON.parse(writeText.mock.calls[0][0])[1]).toMatchObject({
+      id: "assistant-message",
+      timestamp: "2026-08-27T09:11:12.000Z",
+    });
+  });
+
+  it("keeps DOM extraction usable when timestamp APIs fail", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-basic.html",
+    );
+    window.history.replaceState({}, "", "/c/conversation-id");
+    window.fetch = vi.fn().mockResolvedValue({ ok: false });
+
+    const timestamps =
+      await window.chatgptscraper.fetchMessageTimestamps(document);
+
+    expect(timestamps.size).toBe(0);
+    expect(window.fetch).toHaveBeenCalledTimes(2);
+    expect(window.chatgptscraper.extractConversation(document)).toContain(
+      "# User\n\n* Attachment: browsing-history.tsv(1).xz (File)",
+    );
   });
 });
 

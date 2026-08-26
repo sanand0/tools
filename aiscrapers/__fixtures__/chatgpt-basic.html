@@ -20,7 +20,7 @@
         <div data-testid="collapsible-user-message-root">
           <input id="chatgpt-more" data-testid="collapsible-user-message-toggle-checkbox" type="checkbox" />
           <div data-testid="collapsible-user-message-content">
-            <p>Give me a compact table.</p>
+            <div id="user-message-text"></div>
             <p class="hidden-user" hidden>Include code too.</p>
           </div>
           <label for="chatgpt-more" data-testid="collapsible-user-message-toggle">Show more</label>
@@ -87,6 +87,8 @@
   </main>
   <div id="thought-flyout"></div>
   <script>
+    document.querySelector("#user-message-text").textContent =
+      "Give me a compact table.\n\nKeep **this emphasis** and `this code`.\n\n* First item\n* Second item";
     document.querySelector("[data-testid='collapsible-user-message-toggle']").addEventListener("click", () => {
       document.querySelector("#chatgpt-more").checked = true;
       document.querySelector(".hidden-user").hidden = false;
