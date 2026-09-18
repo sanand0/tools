@@ -8,6 +8,9 @@
     },
     "chatgpt": {
       "scriptPath": "chatgptscraper.js"
+    },
+    "chatgpt-sidebar": {
+      "scriptPath": "chatgpt-sidebar-scraper.js"
     }
   }
 }

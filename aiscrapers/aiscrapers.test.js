@@ -368,6 +368,100 @@ describe("chatgptscraper conversation extraction", () => {
   });
 });
 
+describe("ChatGPT sidebar scraper", () => {
+  it("extracts chat titles and absolute URLs only from chat history", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-sidebar.html",
+    );
+
+    expect(window.chatgptSidebarScraper.extractChats(document)).toEqual([
+      { title: "First chat", url: "https://test/c/chat-1" },
+      {
+        title: "Research [notes]",
+        url: "https://test/g/project/c/chat-2?messageId=latest",
+      },
+    ]);
+  });
+
+  it("retains chats revealed after scrolling when earlier rows are virtualized", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-sidebar.html",
+    );
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const clearIntervalFn = vi.fn();
+    let capture;
+    const state = window.chatgptSidebarScraper.createScraperState();
+    window.chatgptSidebarScraper.scrape(
+      document,
+      window,
+      { clipboard: { writeText } },
+      state,
+      (callback) => {
+        capture = callback;
+        return 23;
+      },
+      clearIntervalFn,
+    );
+
+    expect(
+      document.getElementById("chatgpt-sidebar-scraper-copy-json-btn")
+        .textContent,
+    ).toBe("Copy 2 chats as JSON");
+    document.querySelector("nav").insertAdjacentHTML(
+      "beforeend",
+      '<a href="/c/chat-3" data-sidebar-item="true"><span data-marquee-text="true">Newly revealed chat</span></a>',
+    );
+    document.querySelector('a[href="/c/chat-1"]').remove();
+    capture();
+
+    expect(state.chats).toEqual([
+      { title: "First chat", url: "https://test/c/chat-1" },
+      {
+        title: "Research [notes]",
+        url: "https://test/g/project/c/chat-2?messageId=latest",
+      },
+      { title: "Newly revealed chat", url: "https://test/c/chat-3" },
+    ]);
+    document.getElementById("chatgpt-sidebar-scraper-copy-json-btn").click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(JSON.parse(writeText.mock.calls[0][0])).toEqual(state.chats);
+    expect(clearIntervalFn).toHaveBeenCalledWith(23);
+    expect(
+      document.getElementById("chatgpt-sidebar-scraper-copy-controls"),
+    ).toBeNull();
+  });
+
+  it("copies a Markdown list with escaped titles", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-sidebar.html",
+    );
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    window.chatgptSidebarScraper.scrape(
+      document,
+      window,
+      { clipboard: { writeText } },
+      window.chatgptSidebarScraper.createScraperState(),
+      () => 9,
+      vi.fn(),
+    );
+    document
+      .getElementById("chatgpt-sidebar-scraper-copy-markdown-btn")
+      .click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(writeText).toHaveBeenCalledWith(
+      "- [First chat](https://test/c/chat-1)\n" +
+        "- [Research \\[notes\\]](https://test/g/project/c/chat-2?messageId=latest)",
+    );
+  });
+});
+
 describe("geminiscraper user formatting", () => {
   it("treats user paragraphs as single line breaks", async () => {
     const { window, document } = await loadFrom(import.meta.dirname, "__fixtures__/user-paragraphs.html");

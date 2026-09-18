@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ChatGPT Sidebar Fixture</title>
+  </head>
+
+  <body>
+    <nav aria-label="Chat history">
+      <a
+        href="/c/chat-1"
+        data-sidebar-item="true"
+        aria-label="First chat, pinned conversation"
+      >
+        <span data-marquee-text="true">First chat</span>
+        <button aria-label="Unpin First chat"></button>
+      </a>
+      <a
+        href="/g/project/c/chat-2?messageId=latest"
+        data-sidebar-item="true"
+        aria-label="Research [notes], unread"
+      >
+        <span data-marquee-text="true">Research [notes]</span>
+        <button
+          aria-label="Open conversation options for Research [notes]"
+        ></button>
+      </a>
+      <a href="/" data-sidebar-item="true">New chat</a>
+    </nav>
+    <main>
+      <a href="/c/not-in-sidebar">Conversation content link</a>
+    </main>
+    <script src="../chatgpt-sidebar-scraper.js"></script>
+  </body>
+</html>

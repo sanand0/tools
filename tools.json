@@ -52,7 +52,7 @@
     {
       "icon": "bi-stars",
       "title": "AI Conversation Scrapers",
-      "description": "Copy AI conversations as Markdown with YAML frontmatter.",
+      "description": "Copy AI conversations or ChatGPT sidebar chat links with bookmarklets.",
       "url": "aiscrapers",
       "created": "2026-01-11T12:22:42+08:00"
     },

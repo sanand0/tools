@@ -22,6 +22,11 @@ const scrapers = {
     scriptPath: "chatgptscraper.js",
     call: "chatgptscraper.scrape();",
   },
+  "chatgpt-sidebar": {
+    label: "ChatGPT Chats",
+    scriptPath: "chatgpt-sidebar-scraper.js",
+    call: "chatgptSidebarScraper.scrape();",
+  },
 };
 
 const setLoading = (isLoading) => {
@@ -71,7 +76,7 @@ const loadBookmarklet = async () => {
         button.href = await loadScraper(scraper);
       }),
     );
-    updateStatus("Drag a button to your bookmarks bar, then click it on the matching AI conversation.");
+    updateStatus("Drag a button to your bookmarks bar, then click it on the matching AI page.");
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     updateStatus("Unable to load bookmarklets.");

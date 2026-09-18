@@ -1,5 +1,26 @@
 # Prompts
 
+## Add ChatGPT Chats scraper, 18 Sep 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-5.6-sol --config model_reasoning_effort=medium
+-->
+
+Add a new scraper in aiscrapers/chatgpt-sidebar-scraper.js that scrapes the ChatGPT sidebar for all the chats and their titles.
+
+The scraper should be able to extract the title of each chat and the corresponding URL from the currently visible set of chats.
+If the user scrolls and that reveals more chats, the scraper should be able to extract those as well.
+
+The copy options should be similar to the other bookmarklets: Markdown - which copies a list of `- [Title](link)` lines, and JSON.
+
+Run and test on CDP at localhost:9222 - don't disturb existing ChatGPT windows, feel free to open a new tab and test.
+Add test cases. Run and verify.
+
+Update the aiscrapers/ landing page, docs, and any other relevant files.
+
+<!-- codex resume 01a0b37e-1aab-7e32-87d2-cc61765558d3 --yolo -->
+
 ## Update and simplify ChatGPT scraper, 27 Aug 2026
 
 <!--
