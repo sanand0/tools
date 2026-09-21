@@ -51,6 +51,10 @@ describe("claudescraper conversation extraction", () => {
 
   it("expands thinking traces and nested show-more content before extracting", async () => {
     const { window, document } = await loadFrom(import.meta.dirname, "__fixtures__/claude-basic.html");
+    document.querySelector(".font-claude-response").insertAdjacentHTML(
+      "beforeend",
+      '<button aria-expanded="false" aria-label="More ways to open">Open artifact</button>',
+    );
     await window.claudescraper.expandClaudeContent(document, window);
     const markdown = window.claudescraper.extractConversation(document);
 
@@ -69,6 +73,7 @@ describe("claudescraper conversation extraction", () => {
     expect(markdown).toContain('Request\n\n```\n{\n  "commands": "printf \'Now: \'; date"\n}');
     expect(markdown).toContain("Response\n\n```\nNow: Sat May 16 12:28:03 PM +08 2026");
     expect(markdown).toContain("The preserved answer is inside the same grid as the thinking trace.");
+    expect(document.querySelector('[aria-label="More ways to open"]').getAttribute("aria-expanded")).toBe("false");
   });
 
   it("does not require Claude CSS classes for turn boundaries", async () => {
@@ -79,6 +84,134 @@ describe("claudescraper conversation extraction", () => {
     expect(markdown).toContain("## User\n\nGive me a short plan.");
     expect(markdown).toContain("## Claude\n\n<details>");
     expect(markdown).toContain("Start with the narrowest useful version.");
+  });
+
+  it("keeps transcript rows revealed by user scrolling", async () => {
+    const { window, document } = await loadFrom(import.meta.dirname, "__fixtures__/claude-basic.html");
+    const row = (index, role, text) => `
+      <div data-testid="transcript-row" data-index="${index}" data-perf-row="${role}">
+        <div data-testid="${role === "human" ? "user-message" : "assistant-message"}" data-is-streaming="false">
+          <div class="font-claude-response"><p>${text}</p></div>
+        </div>
+      </div>`;
+    document.body.innerHTML = `
+      <header><button data-testid="chat-title-button">Virtualized Claude</button></header>
+      <main>${row(0, "human", "First question.")}${row(1, "assistant", "First answer.")}</main>`;
+    window.alert = vi.fn();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const clearIntervalFn = vi.fn();
+    const state = window.claudescraper.createScraperState(document);
+    let refresh;
+    window.claudescraper.scrape(
+      document,
+      window,
+      { clipboard: { writeText } },
+      state,
+      (callback) => {
+        refresh = callback;
+        return 42;
+      },
+      clearIntervalFn,
+    );
+    await Promise.resolve();
+    expect(document.getElementById("claudescraper-copy-markdown-btn").textContent).toBe(
+      "Copy 2 messages as Markdown",
+    );
+    expect(document.getElementById("claudescraper-copy-json-btn").textContent).toBe(
+      "Copy 2 messages as JSON",
+    );
+    expect(document.getElementById("claudescraper-copy-prompts-btn").textContent).toBe(
+      "Copy 1 prompts",
+    );
+    expect(document.getElementById("claudescraper-copy-controls").getAttribute("style")).toContain("font:12px");
+    expect(document.getElementById("claudescraper-copy-json-btn").getAttribute("style")).toContain("background:#0d6efd");
+    expect(document.getElementById("claudescraper-copy-close-btn").getAttribute("style")).toContain("background:#dc3545");
+    expect(document.getElementById("claudescraper-copy-close-btn").getAttribute("style")).toContain("padding:2px 10px");
+
+    document.querySelector('[data-index="0"]').remove();
+    document.querySelector("main").insertAdjacentHTML("beforeend", row(2, "human", "Second question."));
+    refresh();
+    await Promise.resolve();
+    expect(state.rows).toHaveLength(3);
+    expect(state.rows.map((item) => item.dataset.index)).toEqual(["0", "1", "2"]);
+
+    document.getElementById("claudescraper-copy-markdown-btn").click();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining("First question."));
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining("Second question."));
+    expect(writeText.mock.calls[0][0].indexOf("First question.")).toBeLessThan(
+      writeText.mock.calls[0][0].indexOf("First answer."),
+    );
+    expect(writeText.mock.calls[0][0].indexOf("First answer.")).toBeLessThan(
+      writeText.mock.calls[0][0].indexOf("Second question."),
+    );
+    expect(window.alert).not.toHaveBeenCalled();
+    expect(document.getElementById("claudescraper-copy-controls")).not.toBeNull();
+    document.getElementById("claudescraper-copy-close-btn").click();
+    expect(clearIntervalFn).toHaveBeenCalledWith(42);
+    expect(state.active).toBe(false);
+    expect(document.getElementById("claudescraper-copy-controls")).toBeNull();
+  });
+
+  it("copies Claude JSON and prompts in the ChatGPT scraper format", async () => {
+    const createPage = async () => {
+      const loaded = await loadFrom(import.meta.dirname, "__fixtures__/claude-basic.html");
+      loaded.document.body.innerHTML = `
+        <header><button data-testid="chat-title-button">Virtualized Claude</button></header>
+        <main>
+          <div data-testid="transcript-row" data-index="0" data-perf-row="human">
+            <div data-testid="user-message"><p>First question.</p></div>
+          </div>
+          <div data-testid="transcript-row" data-index="1" data-perf-row="assistant">
+            <div data-testid="assistant-message" data-is-streaming="false"><div class="font-claude-response"><p>First answer.</p></div></div>
+          </div>
+          <div data-testid="transcript-row" data-index="2" data-perf-row="human">
+            <div data-testid="user-message"><p>Second question.</p></div>
+          </div>
+        </main>`;
+      loaded.window.alert = vi.fn();
+      return loaded;
+    };
+
+    const jsonPage = await createPage();
+    const jsonWriteText = vi.fn().mockResolvedValue(undefined);
+    jsonPage.window.claudescraper.scrape(
+      jsonPage.document,
+      jsonPage.window,
+      { clipboard: { writeText: jsonWriteText } },
+      jsonPage.window.claudescraper.createScraperState(jsonPage.document),
+      () => 1,
+      vi.fn(),
+    );
+    jsonPage.document.getElementById("claudescraper-copy-json-btn").click();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(JSON.parse(jsonWriteText.mock.calls[0][0])).toEqual([
+      { id: "0", role: "user", content: "First question." },
+      { id: "1", role: "assistant", content: "First answer." },
+      { id: "2", role: "user", content: "Second question." },
+    ]);
+    expect(jsonPage.document.getElementById("claudescraper-copy-controls")).not.toBeNull();
+    jsonPage.document.getElementById("claudescraper-copy-close-btn").click();
+    expect(jsonPage.document.getElementById("claudescraper-copy-controls")).toBeNull();
+
+    const promptsPage = await createPage();
+    const promptWriteText = vi.fn().mockResolvedValue(undefined);
+    promptsPage.window.claudescraper.scrape(
+      promptsPage.document,
+      promptsPage.window,
+      { clipboard: { writeText: promptWriteText } },
+      promptsPage.window.claudescraper.createScraperState(promptsPage.document),
+      () => 1,
+      vi.fn(),
+    );
+    promptsPage.document.getElementById("claudescraper-copy-prompts-btn").click();
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(promptWriteText.mock.calls[0][0]).toContain("<!-- Virtualized Claude: ");
+    expect(promptWriteText.mock.calls[0][0]).toContain("First question.\n\n---\n\nSecond question.");
+    expect(promptWriteText.mock.calls[0][0]).not.toContain("First answer.");
   });
 });
 
@@ -224,6 +357,10 @@ describe("chatgptscraper conversation extraction", () => {
     expect(
       document.getElementById("chatgptscraper-copy-json-btn").textContent,
     ).toBe("Copy 2 messages as JSON");
+    expect(document.getElementById("chatgptscraper-copy-controls").getAttribute("style")).toContain("font:12px");
+    expect(document.getElementById("chatgptscraper-copy-markdown-btn").getAttribute("style")).toContain("background:#0d6efd");
+    expect(document.getElementById("chatgptscraper-copy-close-btn").getAttribute("style")).toContain("background:#dc3545");
+    expect(document.getElementById("chatgptscraper-copy-close-btn").getAttribute("style")).toContain("padding:2px 10px");
 
     document.querySelector("main").insertAdjacentHTML(
       "beforeend",
@@ -256,8 +393,48 @@ describe("chatgptscraper conversation extraction", () => {
         content: "Newly revealed question.",
       },
     ]);
+    expect(clearIntervalFn).not.toHaveBeenCalledWith(42);
+    expect(document.getElementById("chatgptscraper-copy-controls")).not.toBeNull();
+    document.getElementById("chatgptscraper-copy-close-btn").click();
     expect(clearIntervalFn).toHaveBeenCalledWith(42);
     expect(document.getElementById("chatgptscraper-copy-controls")).toBeNull();
+  });
+
+  it("copies only user prompts with a metadata comment and separators", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-basic.html",
+    );
+    document.querySelector("main").insertAdjacentHTML(
+      "beforeend",
+      `<section data-testid="conversation-turn-3">
+        <div data-message-id="message-3" data-message-author-role="user"><p>Follow-up question.</p></div>
+      </section>`,
+    );
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const state = window.chatgptscraper.createScraperState(document);
+    window.chatgptscraper.scrape(
+      document,
+      window,
+      { clipboard: { writeText } },
+      state,
+      () => 11,
+      vi.fn(),
+    );
+
+    const button = document.getElementById("chatgptscraper-copy-prompts-btn");
+    expect(button.textContent).toBe("Copy 2 prompts");
+    button.click();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(writeText).toHaveBeenCalledWith(
+      `<!-- ChatGPT Fixture: ${window.location.href} (${state.metadata.date}) -->\n\n` +
+        `${state.messages[0].content}\n\n---\n\nFollow-up question.\n`,
+    );
+    expect(writeText.mock.calls[0][0]).not.toContain("I will answer directly.");
+    expect(writeText.mock.calls[0][0]).not.toContain("# User");
+    expect(writeText.mock.calls[0][0]).not.toContain("# ChatGPT");
   });
 
   it("orders immutable message IDs when pagination reindexes turn containers", async () => {
@@ -347,6 +524,9 @@ describe("chatgptscraper conversation extraction", () => {
       id: "assistant-message",
       timestamp: "2026-08-27T09:11:12.000Z",
     });
+    expect(document.getElementById("chatgptscraper-copy-controls")).not.toBeNull();
+    document.getElementById("chatgptscraper-copy-close-btn").click();
+    expect(document.getElementById("chatgptscraper-copy-controls")).toBeNull();
   });
 
   it("keeps DOM extraction usable when timestamp APIs fail", async () => {

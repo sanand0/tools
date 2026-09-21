@@ -427,6 +427,16 @@
     return `${frontmatter}\n\n${transcript}\n`;
   }
 
+  function messagesToPrompts(
+    messages,
+    metadata = conversationMetadata(root.document),
+  ) {
+    const prompts = messages
+      .filter(({ role }) => role === "user")
+      .map(({ content }) => content);
+    return `<!-- ${metadata.title}: ${metadata.source} (${metadata.date}) -->\n\n${prompts.join("\n\n---\n\n")}\n`;
+  }
+
   const extractConversation = (doc = root.document) =>
     messagesToMarkdown(extractMessages(doc), conversationMetadata(doc));
 
@@ -562,19 +572,27 @@
     doc.getElementById("chatgptscraper-copy-controls")?.remove();
     doc.body.insertAdjacentHTML(
       "beforeend",
-      '<div id="chatgptscraper-copy-controls" role="group" aria-label="Copy captured messages" style="position:fixed;top:10px;right:10px;display:flex;gap:6px;padding:6px;z-index:2147483647;background:#fff;border:1px solid #bbb;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);font:14px system-ui,sans-serif;color-scheme:light"><button id="chatgptscraper-copy-markdown-btn" data-format="markdown" style="padding:8px 10px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-json-btn" data-format="json" style="padding:8px 10px;background:#fff;color:#111;border:1px solid #777;border-radius:5px;cursor:pointer"></button></div>',
+      '<div id="chatgptscraper-copy-controls" role="group" aria-label="Copy captured messages" style="position:fixed;top:10px;right:10px;display:flex;gap:6px;padding:6px;z-index:2147483647;background:#fff;border:1px solid #bbb;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);font:12px system-ui,sans-serif;color-scheme:light"><button id="chatgptscraper-copy-markdown-btn" data-format="markdown" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-json-btn" data-format="json" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-prompts-btn" data-format="prompts" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-close-btn" type="button" aria-label="Close scraper controls" title="Close" data-action="close" style="padding:2px 10px;background:#dc3545;color:#fff;border:1px solid #dc3545;border-radius:5px;cursor:pointer">×</button></div>',
     );
     const controls = doc.getElementById("chatgptscraper-copy-controls");
     controls.addEventListener("click", (event) => {
       const button = event.target.closest?.("button[data-format]");
       if (button) onCopy(button.dataset.format, button);
+      if (event.target.closest?.("button[data-action='close']")) controls.remove();
     });
     return {
       remove: () => controls.remove(),
-      updateCount(count) {
-        for (const format of ["markdown", "json"]) {
+      updateCount(count, promptCount = count) {
+        for (const format of ["markdown", "json", "prompts"]) {
+          const amount = format === "prompts" ? promptCount : count;
+          const label =
+            format === "json"
+              ? "JSON"
+              : format === "markdown"
+                ? "Markdown"
+                : "prompts";
           doc.getElementById(`chatgptscraper-copy-${format}-btn`).textContent =
-            `Copy ${count} messages as ${format === "json" ? "JSON" : "Markdown"}`;
+            `Copy ${amount} ${label === "prompts" ? label : `messages as ${label}`}`;
         }
       },
     };
@@ -619,24 +637,39 @@
       clearIntervalFn(previousState.captureTimer);
     if (previousState) previousState.active = false;
     state.active = true;
-    const controls = mountCopyControls(doc, async (format, button) => {
+    const stop = () => {
       clearIntervalFn(state.captureTimer);
       state.captureTimer = null;
+      state.active = false;
+    };
+    const controls = mountCopyControls(doc, async (format, button) => {
       button.disabled = true;
       button.textContent = "Preparing…";
       await state.timestampsPromise;
       captureMessages(doc, state);
-      state.active = false;
-      controls.remove();
       const payload =
         format === "markdown"
           ? messagesToMarkdown(state.messages, state.metadata)
-          : JSON.stringify(state.messages, null, 2);
+          : format === "prompts"
+            ? messagesToPrompts(state.messages, state.metadata)
+            : JSON.stringify(state.messages, null, 2);
       if (!(await copyText(payload, doc, nav)))
         (win?.alert ?? console.warn)("Failed to copy ChatGPT conversation.");
+      button.disabled = false;
+      if (state.active) controls.updateCount(state.messages.length, state.messages.filter(({ role }) => role === "user").length);
     });
-    const update = () =>
-      controls.updateCount(captureMessages(doc, state).length);
+    const closeButton = doc.getElementById("chatgptscraper-copy-close-btn");
+    closeButton.addEventListener("click", () => {
+      stop();
+      controls.remove();
+    });
+    const update = () => {
+      const messages = captureMessages(doc, state);
+      controls.updateCount(
+        messages.length,
+        messages.filter(({ role }) => role === "user").length,
+      );
+    };
     update();
     state.timestampsPromise = fetchMessageTimestamps(doc).then((timestamps) => {
       if (!state.active) return timestamps;
@@ -657,6 +690,7 @@
     extractMessages,
     fetchMessageTimestamps,
     messagesToMarkdown,
+    messagesToPrompts,
     scrape,
   };
 })(typeof window === "undefined" ? globalThis : window);

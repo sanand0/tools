@@ -1,5 +1,56 @@
 # Prompts
 
+## Update Claude scraper, 21 Sep 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-5.6-luna --config model_reasoning_effort=high
+-->
+
+aiscrapers/claudescraper.js isn't scraping properly on claude.ai. Fix it. Make sure it works with long Claude Chat / Cowork chats like:
+
+https://claude.ai/cowork/cse_019nJiuf6RDW5Ho8WyG1uSZS
+https://claude.ai/cowork/cse_01N2nykRnv9cceipJ9ori6i6
+https://claude.ai/chat/6b66230c-0a0c-403b-a957-806e198a2709
+https://claude.ai/chat/e269717c-42c4-4f2b-af80-e67520794430
+
+--- <!-- steering -->
+
+Take a look at how the ChatGPT scraper works. Let the USER do the scrolling and monitor the page - don't automate the scrolling.
+
+--- <!-- steering -->
+
+You may have noticed - it seems to be opening a number of other popups as well, which we don't want. Screenshots might help you see this.
+
+---
+
+Include buttons to copy as JSON or just the prompts - exactly like how the ChatGPT scraper does.
+
+---
+
+In both the ChatGPT and Claude scrapers, add a small close button that closes the dialog. Don't auto-close on clicking any button.
+
+---
+
+Make the close button red. Make all the other buttons blue. Reduce the font size a bit (and padding proportionally). Make the close button a bit more square in shape (maybe increase horizontal padding.)
+
+<!-- codex resume 01a0c471-108b-70d1-9b42-5ed9bd502dbc --yolo -->
+
+## Add ChatGPT Prompts scraper, 21 Sep 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-5.6-luna --config model_reasoning_effort=high
+-->
+
+Minimally modify aiscripers/chatgptscraper.js to include a new button that copies just the user prompts and skips the ChatGPT responses.
+The prompts should be separated by `\n\n---\n\n` and there should be no headings.
+Instead of the YAML frontmatter, begin with a `<!-- $title: $url ($date) -->\n\n` line, followed by the user prompts separated by `\n\n---\n\n`.
+Write tests first, then implement, then run and verify.
+Also verify live on chatgpt.com via CDP on localhost:9222, but don't disturb existing tabs. Open a new tab and test.
+
+<!-- codex resume 01a0c465-1f90-7b13-bfbb-1fecfe6ae0e9 --yolo -->
+
 ## Add ChatGPT Chats scraper, 18 Sep 2026
 
 <!--

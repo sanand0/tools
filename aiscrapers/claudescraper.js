@@ -130,9 +130,9 @@
   const isClaudeResponseRoot = (node) =>
     node.matches?.("[data-is-streaming]") ||
     cleanText(node.querySelector?.("h2")?.textContent).toLowerCase().startsWith("claude responded");
-  const responseRootFor = (node) =>
+  const responseRootFor = (node, doc = root.document) =>
     node.closest("[data-is-streaming]") ||
-    Array.from(root.document.querySelectorAll("section, article, div")).find(
+    Array.from(doc.querySelectorAll("section, article, div")).find(
       (candidate) => candidate.contains(node) && isClaudeResponseRoot(candidate),
     ) ||
     node.closest(".group");
@@ -162,7 +162,28 @@
     return button.closest(".grid")?.querySelector(".overflow-hidden") || null;
   }
 
-  function getTurns(doc = root.document) {
+  function transcriptRowsFor(doc, rows = null) {
+    if (rows?.length) return rows;
+    return Array.from(doc.querySelectorAll('[data-testid="transcript-row"]'));
+  }
+
+  function turnForTranscriptRow(row) {
+    const isUser = row.dataset?.perfRow === "human" || row.querySelector('[data-testid="user-message"]');
+    return {
+      role: isUser ? "User" : "Claude",
+      node:
+        row.querySelector(
+          isUser
+            ? '[data-testid="user-message"], [data-message-author-role="user"]'
+            : '[data-testid="assistant-message"], [data-is-streaming], .font-claude-response',
+        ) || row,
+    };
+  }
+
+  function getTurns(doc = root.document, rows = null) {
+    const transcriptRows = transcriptRowsFor(doc, rows);
+    if (transcriptRows.length) return transcriptRows.map(turnForTranscriptRow);
+
     const turnNodes = [
       ...doc.querySelectorAll(
         '[data-testid="user-message"], [data-message-author-role="user"], [data-is-streaming], .font-claude-response',
@@ -176,7 +197,7 @@
       .map((node) => {
         const responseRoot = node.matches?.('[data-testid="user-message"], [data-message-author-role="user"]')
           ? null
-          : responseRootFor(node);
+          : responseRootFor(node, doc);
         const key = responseRoot || node;
         if (seen.has(key)) return null;
         seen.add(key);
@@ -278,7 +299,7 @@
     return output.trim();
   }
 
-  function extractConversation(doc = root.document) {
+  function extractConversation(doc = root.document, rows = null) {
     const title =
       cleanTitle($('[data-testid="chat-title-button"]', doc)?.textContent) ||
       cleanTitle($('[data-testid="page-header"]', doc)?.textContent) ||
@@ -288,7 +309,7 @@
     const source = doc.location?.href || "";
     let mdOutput = `---\ntitle: "${yamlEscape(title)}"\ndate: ${date}\nsource: "${yamlEscape(source)}"\n---\n\n`;
 
-    getTurns(doc).forEach((turn) => {
+    getTurns(doc, rows).forEach((turn) => {
       const content = turn.role === "Claude" ? extractResponse(turn.node) : parseChildren(turn.node).trim();
       if (content) mdOutput += `## ${turn.role}\n\n${content}\n\n---\n\n`;
     });
@@ -301,9 +322,12 @@
     if (button.hidden || button.closest("[hidden]")) return false;
     if (button.dataset?.aiscraperExpanded) return false;
     if (button.closest("nav, header, fieldset, [data-testid='user-message']")) return false;
-    if (!responseRootFor(button)) return false;
+    const response = button.closest('[data-testid="assistant-message"], [data-is-streaming], .font-claude-response');
+    if (!response) return false;
     if (/^(copy|retry|edit|share|more actions|save|download|view)/i.test(text)) return false;
+    if (button.getAttribute("aria-label") && !/^show more$/i.test(text)) return false;
     if (/^(Loading tools|Bash|Result)$/i.test(text)) return true;
+    if (button.matches('[data-testid="tool-status-pill"]')) return true;
     if (button.getAttribute("aria-expanded") === "false") return true;
     return /^show more$/i.test(text);
   };
@@ -316,6 +340,87 @@
       button.click();
       await new Promise((resolve) => win.setTimeout(resolve, 250));
     }
+  }
+
+  function transcriptRowId(row, index) {
+    return row.dataset.index ?? row.querySelector('[role="article"]')?.getAttribute("aria-posinset") ?? `row-${index}`;
+  }
+
+  function extractMessages(doc = root.document, rows = null) {
+    return getTurns(doc, rows).flatMap((turn, index) => {
+      const content = turn.role === "Claude" ? extractResponse(turn.node) : parseChildren(turn.node).trim();
+      if (!content) return [];
+      const row = turn.node.closest('[data-testid="transcript-row"]');
+      return [
+        {
+          id: String(transcriptRowId(row || turn.node, index)),
+          role: turn.role === "User" ? "user" : "assistant",
+          content,
+        },
+      ];
+    });
+  }
+
+  function messagesToPrompts(messages, metadata) {
+    const prompts = messages.filter(({ role }) => role === "user").map(({ content }) => content);
+    return `<!-- ${metadata.title}: ${metadata.source} (${metadata.date}) -->\n\n${prompts.join("\n\n---\n\n")}\n`;
+  }
+
+  function createScraperState(doc = root.document) {
+    return {
+      metadata: {
+        title: cleanTitle($("[data-testid='chat-title-button']", doc)?.textContent) || cleanTitle(doc.title) || "Claude Conversation",
+        date: formatLocalIso(new Date()),
+        source: doc.location?.href || "",
+      },
+      rowsById: new Map(),
+      rowOrder: new Map(),
+      rows: [],
+      messages: [],
+      captureTimer: null,
+      observer: null,
+      expanding: false,
+      active: true,
+    };
+  }
+
+  function captureRows(doc, state) {
+    const visibleRows = transcriptRowsFor(doc);
+    visibleRows.forEach((row, index) => {
+      const id = String(transcriptRowId(row, index));
+      state.rowsById.set(id, row.cloneNode(true));
+      const order = Number(row.dataset.index ?? row.querySelector('[role="article"]')?.getAttribute("aria-posinset"));
+      state.rowOrder.set(id, Number.isFinite(order) ? order : index);
+    });
+    state.rows = [...state.rowsById.keys()]
+      .sort((left, right) => state.rowOrder.get(left) - state.rowOrder.get(right))
+      .map((id) => state.rowsById.get(id));
+    return state.rows;
+  }
+
+  function mountCopyControls(doc, onCopy) {
+    doc.getElementById("claudescraper-copy-controls")?.remove();
+    doc.body.insertAdjacentHTML(
+      "beforeend",
+      '<div id="claudescraper-copy-controls" role="group" aria-label="Copy captured Claude messages" style="position:fixed;top:10px;right:10px;display:flex;gap:6px;padding:6px;z-index:2147483647;background:#fff;border:1px solid #bbb;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);font:12px system-ui,sans-serif;color-scheme:light"><button id="claudescraper-copy-markdown-btn" data-format="markdown" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="claudescraper-copy-json-btn" data-format="json" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="claudescraper-copy-prompts-btn" data-format="prompts" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="claudescraper-copy-close-btn" type="button" aria-label="Close scraper controls" title="Close" data-action="close" style="padding:2px 10px;background:#dc3545;color:#fff;border:1px solid #dc3545;border-radius:5px;cursor:pointer">×</button></div>',
+    );
+    const controls = doc.getElementById("claudescraper-copy-controls");
+    controls.addEventListener("click", (event) => {
+      const button = event.target.closest?.("button[data-format]");
+      if (button) onCopy(button.dataset.format, button);
+      if (event.target.closest?.("button[data-action='close']")) controls.remove();
+    });
+    return {
+      remove: () => controls.remove(),
+      updateCount(count, promptCount = count) {
+        for (const format of ["markdown", "json", "prompts"]) {
+          const amount = format === "prompts" ? promptCount : count;
+          const label = format === "json" ? "JSON" : format === "markdown" ? "Markdown" : "prompts";
+          doc.getElementById(`claudescraper-copy-${format}-btn`).textContent =
+            `Copy ${amount} ${label === "prompts" ? label : `messages as ${label}`}`;
+        }
+      },
+    };
   }
 
   async function copyText(text, doc = root.document, nav = root.navigator) {
@@ -333,24 +438,87 @@
     }
   }
 
-  async function copyConversation(doc = root.document, win = root, nav = root.navigator) {
-    const markdown = extractConversation(doc);
+  async function copyConversation(doc = root.document, win = root, nav = root.navigator, rows = null) {
+    const markdown = extractConversation(doc, rows);
     const ok = await copyText(markdown, doc, nav);
-    const notify = win?.alert ?? console.warn;
-    notify(ok ? "Claude conversation copied to clipboard." : "Failed to copy Claude conversation.");
+    if (!ok) (win?.alert ?? console.warn)("Failed to copy Claude conversation.");
     return markdown;
   }
 
-  async function scrape(doc = root.document, win = root, nav = root.navigator) {
-    await expandClaudeContent(doc, win);
-    await new Promise((resolve) => win.setTimeout(resolve, 500));
-    return copyConversation(doc, win, nav);
+  function scrape(
+    doc = root.document,
+    win = root,
+    nav = root.navigator,
+    state = createScraperState(doc),
+    setIntervalFn = win.setInterval.bind(win),
+    clearIntervalFn = win.clearInterval.bind(win),
+  ) {
+    const previousState = root.__claudescraperState;
+    if (previousState?.captureTimer) clearIntervalFn(previousState.captureTimer);
+    previousState?.observer?.disconnect();
+    if (previousState) previousState.active = false;
+    state.active = true;
+    const stop = () => {
+      clearIntervalFn(state.captureTimer);
+      state.observer?.disconnect();
+      state.captureTimer = null;
+      state.active = false;
+    };
+    const controls = mountCopyControls(doc, async (format, button) => {
+      button.disabled = true;
+      button.textContent = "Preparing…";
+      captureRows(doc, state);
+      state.messages = extractMessages(doc, state.rows.length ? state.rows : null);
+      const payload =
+        format === "markdown"
+          ? extractConversation(doc, state.rows.length ? state.rows : null)
+          : format === "prompts"
+            ? messagesToPrompts(state.messages, state.metadata)
+            : JSON.stringify(state.messages, null, 2);
+      if (!(await copyText(payload, doc, nav))) (win?.alert ?? console.warn)("Failed to copy Claude conversation.");
+      button.disabled = false;
+      if (state.active) controls.updateCount(state.messages.length, state.messages.filter(({ role }) => role === "user").length);
+    });
+    const closeButton = doc.getElementById("claudescraper-copy-close-btn");
+    closeButton.addEventListener("click", () => {
+      stop();
+      controls.remove();
+    });
+    const refresh = () => {
+      if (!state.active) return;
+      const rows = captureRows(doc, state);
+      state.messages = extractMessages(doc, rows.length ? rows : null);
+      controls.updateCount(state.messages.length, state.messages.filter(({ role }) => role === "user").length);
+      if (state.expanding) return;
+      state.expanding = true;
+      void expandClaudeContent(doc, win).finally(() => {
+        state.expanding = false;
+        if (!state.active) return;
+        const expandedRows = captureRows(doc, state);
+        state.messages = extractMessages(doc, expandedRows.length ? expandedRows : null);
+        controls.updateCount(state.messages.length, state.messages.filter(({ role }) => role === "user").length);
+      });
+    };
+    refresh();
+    const Observer = win.MutationObserver || root.MutationObserver;
+    const transcript = doc.querySelector('[data-testid="transcript-list"]');
+    if (Observer && transcript) {
+      state.observer = new Observer(refresh);
+      state.observer.observe(transcript, { childList: true, subtree: true });
+    }
+    state.captureTimer = setIntervalFn(refresh, 500);
+    root.__claudescraperState = state;
+    return state;
   }
 
   root.claudescraper = {
     extractConversation,
     copyConversation,
+    captureRows,
+    createScraperState,
+    extractMessages,
     expandClaudeContent,
+    messagesToPrompts,
     scrape,
   };
 })(typeof window === "undefined" ? globalThis : window);
