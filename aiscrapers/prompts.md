@@ -1,5 +1,22 @@
 # Prompts
 
+## Update ChatGPT scraper, 26 Sep 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-6-luna --config model_reasoning_effort=high
+-->
+
+aiscripers/chatgptscraper.js is no longer working. I think it's because ChatGPT has changed its DOM structure.
+Check aiscripers/prompts.md and any other related context. Use agent-browser with CDP localhost:9222 to test on ChatGPT chats. Don't disturb existing windows.
+Fix, update tests, verify. Document what happened in aiscrapers/notes.md for future reference.
+
+---
+
+The close icon might have a unicode error - check and fix.
+
+<!-- codex resume 01a0dc20-530f-7bb3-b30a-addb02982c1c --yolo -->
+
 ## Update Claude scraper, 21 Sep 2026
 
 <!--

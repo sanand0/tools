@@ -370,25 +370,53 @@
   }
 
   function getMessageRecords(doc = root.document) {
-    const nodes = Array.from(
-      doc.querySelectorAll(
+    const scope = doc.querySelector("main") || doc;
+    const legacyNodes = Array.from(
+      scope.querySelectorAll(
         '[data-message-author-role="user"], [data-message-author-role="assistant"]',
       ),
     ).filter(
       (node) => !node.parentElement?.closest?.("[data-message-author-role]"),
     );
+    const nodes = legacyNodes.length
+      ? legacyNodes
+      : Array.from(
+          scope.querySelectorAll(
+            '[data-user-message-bubble="true"], [data-markdown-text-style="assistant-message"]',
+          ),
+        ).filter((node) => !node.closest("[hidden], [aria-hidden='true']"));
     return nodes.flatMap((node, index) => {
-      const role = node.getAttribute("data-message-author-role");
+      const role =
+        node.getAttribute("data-message-author-role") ||
+        (node.matches('[data-user-message-bubble="true"]')
+          ? "user"
+          : "assistant");
       const content = parseChildren(cloneForExtraction(node, role)).trim();
       if (!roleLabels[role] || !content) return [];
-      const turn = node.closest("section[data-testid^='conversation-turn-']");
+      const turn = node.closest(
+        "[data-content-search-turn-key], section[data-testid^='conversation-turn-']",
+      );
       const turnId = turn?.getAttribute("data-testid") || "";
+      const messageIds = node
+        .closest("[data-chatgpt-search-message-ids]")
+        ?.getAttribute("data-chatgpt-search-message-ids")
+        ?.trim()
+        .split(/\s+/);
       const id =
         node.getAttribute("data-message-id") ||
+        node
+          .closest("[data-chatgpt-selection-message-id]")
+          ?.getAttribute("data-chatgpt-selection-message-id") ||
+        messageIds?.[0] ||
+        node
+          .closest("[data-content-search-unit-key]")
+          ?.getAttribute("data-content-search-unit-key") ||
         turnId ||
         node.id ||
         `${role}-${index + 1}`;
-      const order = Number(turnId.match(/conversation-turn-(\d+)/)?.[1]);
+      const order = Number(
+        turnId.match(/conversation-turn-(\d+)/)?.[1] ?? index,
+      );
       const timestamp = normalizeTimestamp(
         turn?.querySelector("time[datetime]")?.getAttribute("datetime"),
       );
@@ -572,9 +600,10 @@
     doc.getElementById("chatgptscraper-copy-controls")?.remove();
     doc.body.insertAdjacentHTML(
       "beforeend",
-      '<div id="chatgptscraper-copy-controls" role="group" aria-label="Copy captured messages" style="position:fixed;top:10px;right:10px;display:flex;gap:6px;padding:6px;z-index:2147483647;background:#fff;border:1px solid #bbb;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);font:12px system-ui,sans-serif;color-scheme:light"><button id="chatgptscraper-copy-markdown-btn" data-format="markdown" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-json-btn" data-format="json" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-prompts-btn" data-format="prompts" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-close-btn" type="button" aria-label="Close scraper controls" title="Close" data-action="close" style="padding:2px 10px;background:#dc3545;color:#fff;border:1px solid #dc3545;border-radius:5px;cursor:pointer">×</button></div>',
+      '<div id="chatgptscraper-copy-controls" role="group" aria-label="Copy captured messages" style="position:fixed;top:10px;right:10px;display:flex;gap:6px;padding:6px;z-index:2147483647;background:#fff;border:1px solid #bbb;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);font:12px system-ui,sans-serif;color-scheme:light"><button id="chatgptscraper-copy-markdown-btn" data-format="markdown" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-json-btn" data-format="json" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-prompts-btn" data-format="prompts" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-close-btn" type="button" aria-label="Close scraper controls" title="Close" data-action="close" style="padding:2px 10px;background:#dc3545;color:#fff;border:1px solid #dc3545;border-radius:5px;cursor:pointer"></button></div>',
     );
     const controls = doc.getElementById("chatgptscraper-copy-controls");
+    doc.getElementById("chatgptscraper-copy-close-btn").textContent = "\u00d7";
     controls.addEventListener("click", (event) => {
       const button = event.target.closest?.("button[data-format]");
       if (button) onCopy(button.dataset.format, button);

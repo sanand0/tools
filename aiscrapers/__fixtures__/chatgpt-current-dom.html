@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Current DOM fixture - ChatGPT</title>
+  </head>
+
+  <body>
+    <main>
+      <div data-content-search-turn-key="turn-a">
+        <time datetime="2026-09-26T08:00:00.000Z"></time>
+        <div
+          data-content-search-unit-key="turn-a:0:user"
+          data-chatgpt-search-message-ids="user-a"
+        >
+          <h4>You said:</h4>
+          <div data-user-message-bubble="true">
+            <div data-markdown-text-tone="user-message">
+              <p>First question with <strong>emphasis</strong>.</p>
+            </div>
+          </div>
+        </div>
+        <div
+          data-content-search-unit-key="turn-a:2:assistant"
+          data-chatgpt-selection-message-id="assistant-a"
+        >
+          <h4 data-conversation-role="assistant">ChatGPT said:</h4>
+          <div data-markdown-text-style="assistant-message">
+            <p>First answer.</p>
+            <pre><code>const answer = true;</code></pre>
+            <button>Copy</button>
+          </div>
+        </div>
+      </div>
+      <div data-content-search-turn-key="turn-b">
+        <time datetime="2026-09-26T08:01:00.000Z"></time>
+        <div
+          data-content-search-unit-key="turn-b:0:user"
+          data-chatgpt-search-message-ids="user-b"
+        >
+          <h4>You said:</h4>
+          <div data-user-message-bubble="true">
+            <p>Second question.</p>
+          </div>
+        </div>
+        <div
+          data-content-search-unit-key="turn-b:2:assistant"
+          data-chatgpt-selection-message-id="assistant-b"
+        >
+          <h4 data-conversation-role="assistant">ChatGPT said:</h4>
+          <div data-markdown-text-style="assistant-message">
+            <p>Second answer.</p>
+          </div>
+        </div>
+      </div>
+      <div contenteditable="true">Ask ChatGPT</div>
+    </main>
+    <script src="../chatgptscraper.js"></script>
+  </body>
+</html>

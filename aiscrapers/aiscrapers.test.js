@@ -216,6 +216,44 @@ describe("claudescraper conversation extraction", () => {
 });
 
 describe("chatgptscraper conversation extraction", () => {
+  it("extracts ChatGPT's current semantic message DOM", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-current-dom.html",
+    );
+    const messages = window.chatgptscraper.extractMessages(document);
+
+    expect(
+      document.querySelectorAll("[data-message-author-role]"),
+    ).toHaveLength(0);
+    expect(messages).toEqual([
+      {
+        id: "user-a",
+        role: "user",
+        content: "First question with **emphasis**.",
+        timestamp: "2026-09-26T08:00:00.000Z",
+      },
+      {
+        id: "assistant-a",
+        role: "assistant",
+        content: "First answer.\n\n\n```\nconst answer = true;\n```",
+        timestamp: "2026-09-26T08:00:00.000Z",
+      },
+      {
+        id: "user-b",
+        role: "user",
+        content: "Second question.",
+        timestamp: "2026-09-26T08:01:00.000Z",
+      },
+      {
+        id: "assistant-b",
+        role: "assistant",
+        content: "Second answer.",
+        timestamp: "2026-09-26T08:01:00.000Z",
+      },
+    ]);
+  });
+
   it("extracts semantic ChatGPT turns as copy-button-equivalent Markdown", async () => {
     const { window, document } = await loadFrom(
       import.meta.dirname,
@@ -361,6 +399,9 @@ describe("chatgptscraper conversation extraction", () => {
     expect(document.getElementById("chatgptscraper-copy-markdown-btn").getAttribute("style")).toContain("background:#0d6efd");
     expect(document.getElementById("chatgptscraper-copy-close-btn").getAttribute("style")).toContain("background:#dc3545");
     expect(document.getElementById("chatgptscraper-copy-close-btn").getAttribute("style")).toContain("padding:2px 10px");
+    expect(
+      document.getElementById("chatgptscraper-copy-close-btn").textContent,
+    ).toBe("×");
 
     document.querySelector("main").insertAdjacentHTML(
       "beforeend",
