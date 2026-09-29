@@ -286,6 +286,19 @@ describe("showPanel", () => {
     expect(document.getElementById("meetcaptions-google-meet-copy")).not.toBeNull();
   });
 
+  it("moves the panel when its header is dragged", () => {
+    window.meetcaptions.googleMeet.showPanel(document, window, window.navigator);
+    const panel = document.getElementById("meetcaptions-google-meet-panel");
+    const header = panel.firstElementChild;
+    header.dispatchEvent(new window.MouseEvent("pointerdown", { bubbles: true, clientX: 100, clientY: 100 }));
+    document.dispatchEvent(new window.MouseEvent("pointermove", { bubbles: true, clientX: 140, clientY: 125 }));
+    document.dispatchEvent(new window.MouseEvent("pointerup", { bubbles: true }));
+
+    expect(panel.style.left).toBe("40px");
+    expect(panel.style.top).toBe("25px");
+    expect(panel.style.right).toBe("auto");
+  });
+
   it("close button removes the panel", () => {
     window.meetcaptions.googleMeet.showPanel(document, window, window.navigator);
     document.getElementById("meetcaptions-google-meet-close").click();
@@ -321,11 +334,17 @@ describe("streaming", () => {
   it("writes a Markdown header when recording starts", async () => {
     const writable = makeWritable();
     window.showSaveFilePicker = makeFilePicker(writable);
+    Object.defineProperty(window, "location", { configurable: true, value: { pathname: "/abc-defg-hij" } });
+    vi.setSystemTime(new Date("2026-09-29T12:34:56.000Z"));
+    window.Date = Date;
 
     await window.meetcaptions.googleMeet.startStreaming(document, window);
 
     expect(writable.written).toContain("# Weekly Product Sync");
     expect(writable.written).toContain("---");
+    expect(window.showSaveFilePicker).toHaveBeenCalledWith(expect.objectContaining({
+      suggestedName: "gmeet-abc-defg-hij-2026-09-29-12-34-56.md",
+    }));
   });
 
   it("does not start when showSaveFilePicker is unavailable", async () => {
@@ -464,6 +483,12 @@ describe("Teams captions", () => {
   it("writes Teams captions to a local Markdown stream", async () => {
     const writable = makeWritable();
     window.showSaveFilePicker = makeFilePicker(writable);
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { pathname: "/l/meetup-join/19%3ameeting_ID", search: "" },
+    });
+    vi.setSystemTime(new Date("2026-09-29T12:34:56.000Z"));
+    window.Date = Date;
 
     await window.meetcaptions.teams.startStreaming(document, window);
     await vi.advanceTimersByTimeAsync(5000);
@@ -474,6 +499,26 @@ describe("Teams captions", () => {
     expect(writable.written).toContain("Kickoff is at 10 AM.");
     expect(writable.written).toContain("## Riley \\[Ops\\]");
     expect(writable.close).toHaveBeenCalled();
+    expect(window.showSaveFilePicker).toHaveBeenCalledWith(expect.objectContaining({
+      suggestedName: "teams-19_meeting_ID-2026-09-29-12-34-56.md",
+    }));
+  });
+
+  it("uses a captions fallback when the Teams URL has no recognizable meeting ID", async () => {
+    const writable = makeWritable();
+    window.showSaveFilePicker = makeFilePicker(writable);
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: { pathname: "/v2/", search: "" },
+    });
+    vi.setSystemTime(new Date("2026-09-29T12:34:56.000Z"));
+    window.Date = Date;
+
+    await window.meetcaptions.teams.startStreaming(document, window);
+
+    expect(window.showSaveFilePicker).toHaveBeenCalledWith(expect.objectContaining({
+      suggestedName: "teams-captions-2026-09-29-12-34-56.md",
+    }));
   });
 
   it("uses a distinct Teams panel id", () => {

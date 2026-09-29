@@ -1,5 +1,25 @@
 # Prompts
 
+## Captions filename and position, 29 Sep 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-6-luna --config model_reasoning_effort=high
+-->
+
+In meetcaptions/ make the following changes:
+
+1. Allow dragging the captions box - to avoid it overlapping useful controls on screen
+2. Change the filename used by Teams AND Google Meet to reflect the time. For example, `gmeet-ID-yyyy-mm-dd-hh-mm-ss.md` and `teams-ID-yyyy-mm-dd-hh-mm-ss.md`
+
+Update failing tests first, implement, then test.
+
+---
+
+I'm not too fussed about the Teams ID (or even the Meet ID), in case you're not sure how to get it or if it fails.
+
+<!-- codex resume 01a0eba9-5999-7781-93e6-81c974195511 --yolo -->
+
 ## Teams captions, 08 Jul 2026
 
 <!--

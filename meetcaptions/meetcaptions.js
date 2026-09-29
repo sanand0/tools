@@ -91,6 +91,25 @@
     );
   }
 
+  function getMeetingId(win) {
+    const location = win.location || {};
+    const url = new URL(
+      location.href || `${location.pathname || "/"}${location.search || ""}`,
+      "https://invalid.local/",
+    );
+    const queryId = url.searchParams.get("meetingId") || url.searchParams.get("threadId");
+    const segments = url.pathname.split("/").filter(Boolean).map((part) => {
+      try {
+        return decodeURIComponent(part);
+      } catch {
+        return part;
+      }
+    });
+    const joinIndex = segments.findIndex((part) => part.toLowerCase() === "meetup-join");
+    const id = queryId || (joinIndex >= 0 ? segments[joinIndex + 1] : "") || "";
+    return id.replace(/[^a-zA-Z0-9_-]+/g, "_").replace(/^_+|_+$/g, "");
+  }
+
   function isTeamsItem(node) {
     return node.nodeType === 1 && node.matches?.('[role="log"]');
   }
@@ -102,10 +121,10 @@
     return { speaker: escapeMarkdown(speaker), text: escapeMarkdown(text) };
   }
 
-  function getTeamsMeta(doc = root.document) {
+  function getTeamsMeta(doc = root.document, win = root) {
     return {
       title: normalize(doc.title.replace(/\s*\|\s*Microsoft Teams$/, "")),
-      code: "",
+      code: getMeetingId(win),
       duration: "",
       participants: [
         ...new Set(getTeamsItems(doc).map((item) => normalize(item.querySelector('[data-tid="author"]')?.textContent))),
@@ -119,7 +138,7 @@
       globalName: "gmeetcaptions",
       stateKey: "__meetcaptionsGoogleMeetState",
       title: "Google Meet Captions",
-      filePrefix: "meet",
+      filePrefix: "gmeet",
       emptyMessage: "No Google Meet captions found.",
       copiedMessage: "Google Meet captions copied to clipboard as Markdown.",
       getItems: getMeetItems,
@@ -271,7 +290,11 @@
     let writable;
     try {
       const fileHandle = await win.showSaveFilePicker({
-        suggestedName: `${provider.filePrefix}-${meta.code || "captions"}-${new Date().toISOString().slice(0, 10)}.md`,
+        suggestedName: `${provider.filePrefix}-${meta.code || "captions"}-${new Date()
+          .toISOString()
+          .slice(0, 19)
+          .replace("T", "-")
+          .replace(/:/g, "-")}.md`,
         types: [{ description: "Markdown", accept: { "text/markdown": [".md"] } }],
       });
       writable = await fileHandle.createWritable();
@@ -432,6 +455,8 @@
       alignItems: "center",
       justifyContent: "space-between",
       marginBottom: "8px",
+      cursor: "grab",
+      touchAction: "none",
     });
     const title = makeEl("strong", { fontSize: "14px" }, provider.title);
     const closeBtn = makeEl(
@@ -488,7 +513,36 @@
 
     panel.append(header, status, btnRow);
     doc.body.appendChild(panel);
-    closeBtn.onclick = () => panel.remove();
+    let drag = null;
+    header.addEventListener("pointerdown", (event) => {
+      if (event.target.closest("button")) return;
+      const rect = panel.getBoundingClientRect();
+      drag = { x: event.clientX, y: event.clientY, left: rect.left, top: rect.top };
+      header.style.cursor = "grabbing";
+      event.preventDefault();
+    });
+    const movePanel = (event) => {
+      if (!drag) return;
+      const maxLeft = Math.max(0, win.innerWidth - panel.offsetWidth);
+      const maxTop = Math.max(0, win.innerHeight - panel.offsetHeight);
+      panel.style.left = `${Math.max(0, Math.min(maxLeft, drag.left + event.clientX - drag.x))}px`;
+      panel.style.top = `${Math.max(0, Math.min(maxTop, drag.top + event.clientY - drag.y))}px`;
+      panel.style.right = "auto";
+    };
+    const endDrag = () => {
+      drag = null;
+      header.style.cursor = "grab";
+    };
+    doc.addEventListener("pointermove", movePanel);
+    doc.addEventListener("pointerup", endDrag);
+    doc.addEventListener("pointercancel", endDrag);
+    closeBtn.onclick = () => {
+      endDrag();
+      doc.removeEventListener("pointermove", movePanel);
+      doc.removeEventListener("pointerup", endDrag);
+      doc.removeEventListener("pointercancel", endDrag);
+      panel.remove();
+    };
     copyBtn.onclick = () => copyCaptions(doc, win, nav, provider);
     recordBtn.onclick = async () => {
       if (getStreamState(provider)?.running) await stopStreaming(doc, win, provider);
