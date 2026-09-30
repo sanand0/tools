@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Record</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2212%22%20fill%3D%22%23dc3545%22%2F%3E%3Ccircle%20cx%3D%2232%22%20cy%3D%2232%22%20r%3D%2215%22%20fill%3D%22white%22%2F%3E%3C%2Fsvg%3E" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet" crossorigin="anonymous" />
+  <style>
+    #waveform {
+      width: 100%;
+      height: 7rem;
+      display: block;
+      background:
+        linear-gradient(to bottom, transparent 49.5%, color-mix(in srgb, var(--bs-secondary-color) 24%, transparent) 49.5% 50.5%, transparent 50.5%),
+        var(--bs-tertiary-bg);
+      border-radius: var(--bs-border-radius);
+    }
+
+    .record-button {
+      width: 4.25rem;
+      height: 4.25rem;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      box-shadow: 0 0.4rem 1rem color-mix(in srgb, var(--bs-danger) 20%, transparent);
+      transition: transform 120ms ease;
+    }
+
+    .record-button:hover {
+      transform: translateY(-2px);
+    }
+
+    #timer {
+      min-width: 4.5ch;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.03em;
+    }
+
+    .folder-name,
+    .saved-name {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .level-badge {
+      min-width: 5rem;
+    }
+
+    .saved-recording audio {
+      min-width: 13rem;
+      height: 2.4rem;
+    }
+
+    @media (max-width: 575.98px) {
+      #waveform {
+        height: 6rem;
+      }
+
+      .saved-recording audio {
+        width: 100%;
+        min-width: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .record-button {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar bg-body-tertiary py-2 mb-2" data-bs-theme="dark">
+    <div class="container-fluid px-3">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="../">
+        <i class="bi bi-record-circle"></i>
+        Record
+      </a>
+      <div class="bootstrap-dark-theme"></div>
+    </div>
+  </nav>
+
+  <main class="container-fluid px-3 pb-4">
+    <section aria-labelledby="audio-heading">
+      <div class="d-flex flex-wrap align-items-center gap-2 gap-md-3 py-2 mb-2 border-bottom">
+        <h1 id="audio-heading" class="h4 mb-0 me-auto">Record a voice note</h1>
+
+        <div class="d-flex flex-wrap align-items-center gap-2 folder-name">
+          <span class="small text-secondary">Save recordings to</span>
+          <i class="bi bi-folder2-open text-primary"></i>
+          <strong id="folder-name">No folder selected</strong>
+          <span id="folder-status" class="badge text-bg-secondary">Choose a folder</span>
+        </div>
+
+        <button id="folder-button" type="button" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-folder-symlink me-1"></i>
+          <span>Choose folder</span>
+        </button>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-3">
+          <div class="row g-3 align-items-center">
+            <div class="col-12 col-md">
+              <div class="position-relative">
+                <canvas id="waveform" role="img" aria-label="Rolling five-second microphone level history"></canvas>
+                <div id="paused-overlay" class="position-absolute top-50 start-50 translate-middle badge text-bg-secondary d-none">
+                  Paused
+                </div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center gap-2 small mt-1">
+                <span class="text-secondary">−5s</span>
+                <div class="d-flex align-items-center gap-2">
+                  <strong id="peak-db">— dBFS</strong>
+                  <span id="level-badge" class="badge text-bg-secondary level-badge">Ready</span>
+                  <span class="text-secondary d-none d-lg-inline">Target −18 to −6 dBFS</span>
+                </div>
+                <span class="text-secondary">Now</span>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-auto">
+              <div class="d-flex flex-md-column align-items-center justify-content-center gap-2">
+                <div id="timer" class="h2 fw-semibold mb-0">00:00</div>
+                <button id="record-button" type="button" class="btn btn-danger record-button" aria-label="Start recording">
+                  <i class="bi bi-mic-fill"></i>
+                </button>
+
+                <div id="active-controls" class="d-none flex-wrap justify-content-center gap-2">
+                  <button id="pause-button" type="button" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-pause-fill me-1"></i>
+                    <span>Pause</span>
+                  </button>
+                  <button id="stop-button" type="button" class="btn btn-sm btn-danger">
+                    <i class="bi bi-stop-fill me-1"></i>
+                    Stop & save
+                  </button>
+                </div>
+              </div>
+              <div id="recording-status" class="text-secondary small text-center mt-2" role="status" aria-live="polite">
+                Choose a folder, then press record.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section id="saved-section" class="mt-3 d-none" aria-labelledby="saved-heading">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h2 id="saved-heading" class="h6 mb-0">Saved this session</h2>
+          <span id="saved-count" class="badge text-bg-secondary">0</span>
+        </div>
+        <div id="saved-list" class="list-group"></div>
+      </section>
+
+      <section id="save-fallback" class="alert alert-warning mt-3 d-none mb-0">
+        The recording could not be written to the selected folder.
+        <a id="download-fallback" class="alert-link" download>Download this recording instead</a>.
+      </section>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>
