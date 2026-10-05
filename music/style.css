@@ -438,6 +438,10 @@ ol {
   color: var(--muted);
   margin-top: 3px;
 }
+.queue-row .track-label strong {
+  color: var(--accent);
+  font-weight: 700;
+}
 .empty {
   padding: 40px 18px;
   text-align: center;

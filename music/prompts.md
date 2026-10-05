@@ -1,5 +1,22 @@
 # Prompts
 
+## #TODO
+
+- Enable offline mode
+- Add extensive test cases
+
+## Tweaks, 05 Oct 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-6-luna --config model_reasoning_effort=medium
+-->
+
+Modify music/ minimally so that the queue on the right shows the album and year below the title and above the artist.
+The font size can be similar to that of the artist, but make the title prominent (bold, maybe a more prominent color in light & dark modes).
+
+<!-- codex resume 01a10b7e-8e0c-7ee2-812d-32fa26bbdfa6 -->
+
 ## Global shortcuts, 05 Oct 2026
 
 <!--
@@ -112,8 +129,8 @@ music.control({
   action: "play-m3u",
   path: "New.m3u",
   shuffle: true,
-  repeat: "all"
-})
+  repeat: "all",
+});
 ```
 
 Support `repeat: "off" | "all" | "one"`; default shuffle=false, repeat=off. Expose the same through `music-control` custom events and a convenient `music.playM3U(...)` API. `Appa*.m3u` is still playable normally; just don't infer anything special about my preferences from playlists because this player doesn't need recommendation logic.
@@ -192,9 +209,11 @@ All normal controls should converge on one dispatcher shared by UI, keyboard and
 Support:
 
 ```js id="mh8ese"
-window.dispatchEvent(new CustomEvent("music-control", {
-  detail: { action: "forward", seconds: 5 }
-}))
+window.dispatchEvent(
+  new CustomEvent("music-control", {
+    detail: { action: "forward", seconds: 5 },
+  }),
+);
 ```
 
 Keep a small coherent vocabulary covering play, pause, toggle, forward/backward, next/previous, speed, volume, repeat, play-track, queue-track, play-next, remove/clear/shuffle queue, shuffle-visible, filter/select/show-info, and `play-m3u`.
@@ -202,13 +221,13 @@ Keep a small coherent vocabulary covering play, pause, toggle, forward/backward,
 Also expose:
 
 ```js id="xojjcd"
-music.control({ action: "forward", seconds: 5 })
-music.playM3U("New.m3u", { shuffle: true, repeat: "all" })
-music.getState()
-music.getTrack(id)
-music.find("rahman 199 spb")
-music.getQueue()
-music.getHistory({ limit: 20 })
+music.control({ action: "forward", seconds: 5 });
+music.playM3U("New.m3u", { shuffle: true, repeat: "all" });
+music.getState();
+music.getTrack(id);
+music.find("rahman 199 spb");
+music.getQueue();
+music.getHistory({ limit: 20 });
 ```
 
 Emit a compact `music-state` custom event after meaningful state changes.

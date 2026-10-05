@@ -433,6 +433,7 @@ function renderLists() {
       label.disabled = !getTrack(track.id);
       label.append(
         make("strong", track.title),
+        make("span", [track.album, track.year].filter(Boolean).join(" · ")),
         make(
           "span",
           timestamp
