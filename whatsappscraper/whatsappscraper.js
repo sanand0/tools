@@ -791,13 +791,16 @@ export function scrape({
     idPrefix: "whatsappscraper",
     noun: "messages",
     onCopy: async (format) => {
-      clearIntervalFn(state.captureTimer);
-      state.captureTimer = null;
-      controls.remove();
       const list = orderedMessages(state);
-      await nav?.clipboard?.writeText?.(
+      if (!nav?.clipboard?.writeText) return false;
+      await nav.clipboard.writeText(
         format === "markdown" ? whatsappMessagesMarkdown(list) : JSON.stringify(list, null, 2),
       );
+      return true;
+    },
+    onClose: () => {
+      clearIntervalFn(state.captureTimer);
+      state.captureTimer = null;
     },
   });
 

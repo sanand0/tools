@@ -1,5 +1,17 @@
 # Prompts
 
+## Consistent toolbars, 05 Oct 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-6-luna --config model_reasoning_effort=high
+-->
+
+Modify aiscrapers/ so that when a button is clicked, there's a visible indication that the action was performed, e.g. change in color + "Copied" text. Revert these in 3 seconds.
+Go through other directories that have scrapers, and wherever we copy in multiple formats like Markdown + JSON (e.g. whatsappscraper/) - make sure that the button bar persists until closed, add a close button, and add a visible indication that the action was performed.
+
+<!-- codex resume 01a10b9f-c220-72e0-b19f-1feb305687bd --yolo -->
+
 ## Update ChatGPT scraper, 26 Sep 2026
 
 <!--

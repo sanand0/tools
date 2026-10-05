@@ -430,16 +430,19 @@ export function scrape({
     idPrefix: "discoursescraper",
     noun: "posts",
     onCopy: async (format) => {
-      clearIntervalFn(state.captureTimer);
-      state.captureTimer = null;
-      if (state.autoScrollTimer && rootDocument.defaultView)
-        rootDocument.defaultView.clearInterval(state.autoScrollTimer);
-      state.autoScrollTimer = null;
-      controls.remove();
       const posts = Object.values(state.postsById).sort((a, b) => (a.post_number || 0) - (b.post_number || 0));
-      await nav?.clipboard?.writeText?.(
+      if (!nav?.clipboard?.writeText) return false;
+      await nav.clipboard.writeText(
         format === "markdown" ? discoursePostsMarkdown(posts) : JSON.stringify(posts, null, 2),
       );
+      return true;
+    },
+    onClose: () => {
+      clearIntervalFn(state.captureTimer);
+      if (state.autoScrollTimer && rootDocument.defaultView)
+        rootDocument.defaultView.clearInterval(state.autoScrollTimer);
+      state.captureTimer = null;
+      state.autoScrollTimer = null;
     },
   });
   if (!state.autoScrollTimer) startAutoScroll({ rootDocument, state });

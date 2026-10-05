@@ -820,6 +820,7 @@ describe("whatsappscraper", () => {
       expect(resolveClipboard).toBeTypeOf("function");
       resolveClipboard();
       await Promise.resolve();
+      await Promise.resolve();
 
       const payload = writeText.mock.calls[0][0];
       const parsed = JSON.parse(payload);
@@ -831,7 +832,12 @@ describe("whatsappscraper", () => {
         authorPhone: "+00 00000 00000",
       });
 
-      expect(document.getElementById("whatsappscraper-copy-controls")).toBeNull();
+      expect(document.getElementById("whatsappscraper-copy-controls")).not.toBeNull();
+      expect(refreshedButton.textContent).toBe("Copied");
+      await vi.advanceTimersByTimeAsync(3000);
+      expect(refreshedButton.textContent).toBe("Copy 6 messages as JSON");
+      expect(state.captureTimer).not.toBeNull();
+      document.getElementById("whatsappscraper-copy-close-btn").click();
       expect(state.captureTimer).toBeNull();
     },
   );
@@ -848,6 +854,7 @@ describe("whatsappscraper", () => {
 
     document.getElementById("whatsappscraper-copy-markdown-btn").click();
     await Promise.resolve();
+    await Promise.resolve();
 
     const messages = whatsappMessages(document).sort((a, b) => {
       const ta = a.time ? new Date(a.time).getTime() : 0;
@@ -858,6 +865,7 @@ describe("whatsappscraper", () => {
     expect(markdown).toBe(whatsappMessagesMarkdown(messages));
     expect(markdown).toContain("# WhatsApp chat");
     expect(markdown).toContain("## Member Alpha");
-    expect(document.getElementById("whatsappscraper-copy-controls")).toBeNull();
+    expect(document.getElementById("whatsappscraper-copy-controls")).not.toBeNull();
+    expect(document.getElementById("whatsappscraper-copy-markdown-btn").textContent).toBe("Copied");
   });
 });

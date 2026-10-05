@@ -221,12 +221,14 @@ describe("discoursescraper", () => {
 
     document.getElementById("discoursescraper-copy-markdown-btn").click();
     await Promise.resolve();
+    await Promise.resolve();
 
     const markdown = writeText.mock.calls[0][0];
     expect(markdown).toBe(discoursePostsMarkdown(discoursePosts(document)));
     expect(markdown).toContain("# Discourse thread");
     expect(markdown).toContain("## [1. Alice (@alice)]");
     expect(markdown).toContain("Reactions: ♥️ 5, 👍 2");
-    expect(document.getElementById("discoursescraper-copy-controls")).toBeNull();
+    expect(document.getElementById("discoursescraper-copy-controls")).not.toBeNull();
+    expect(document.getElementById("discoursescraper-copy-markdown-btn").textContent).toBe("Copied");
   });
 });

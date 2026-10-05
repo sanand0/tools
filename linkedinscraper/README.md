@@ -9,7 +9,7 @@ Collection of LinkedIn bookmarklets that copy structured page data from your bro
 
 ## Invite Output
 
-The invite scraper offers **Copy Markdown** for a readable list and **Copy JSON** for the full array. Each JSON object may include:
+The invite scraper offers **Copy Markdown** for a readable list and **Copy JSON** for the full array. The selected button shows **Copied** for three seconds; the toolbar stays open until you close it with **×**. Each JSON object may include:
 
 - `name`
 - `description`
@@ -22,7 +22,7 @@ The invite scraper offers **Copy Markdown** for a readable list and **Copy JSON*
 - `badges`
 - `message`
 
-The bookmarklet auto-scrolls from the top of the invitation page and keeps merging newly loaded invitations until you click the floating copy button.
+The bookmarklet auto-scrolls from the top of the invitation page and keeps merging newly loaded invitations until you close the floating copy toolbar.
 
 `invitationMonth` is a best-guess `YYYY-MM` value based on LinkedIn's relative text, for example `Yesterday`,
 `2 weeks ago`, or `3 months ago`, evaluated at scrape time. If LinkedIn does not expose a date, the scraper uses

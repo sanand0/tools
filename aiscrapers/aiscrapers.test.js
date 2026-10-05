@@ -434,6 +434,7 @@ describe("chatgptscraper conversation extraction", () => {
         content: "Newly revealed question.",
       },
     ]);
+    await vi.waitFor(() => expect(document.getElementById("chatgptscraper-copy-json-btn").textContent).toBe("Copied"));
     expect(clearIntervalFn).not.toHaveBeenCalledWith(42);
     expect(document.getElementById("chatgptscraper-copy-controls")).not.toBeNull();
     document.getElementById("chatgptscraper-copy-close-btn").click();
@@ -650,10 +651,14 @@ describe("ChatGPT sidebar scraper", () => {
     await Promise.resolve();
 
     expect(JSON.parse(writeText.mock.calls[0][0])).toEqual(state.chats);
-    expect(clearIntervalFn).toHaveBeenCalledWith(23);
+    await vi.waitFor(() => expect(document.getElementById("chatgpt-sidebar-scraper-copy-json-btn").textContent).toBe("Copied"));
+    expect(clearIntervalFn).not.toHaveBeenCalledWith(23);
     expect(
       document.getElementById("chatgpt-sidebar-scraper-copy-controls"),
-    ).toBeNull();
+    ).not.toBeNull();
+    document.getElementById("chatgpt-sidebar-scraper-copy-close-btn").click();
+    expect(clearIntervalFn).toHaveBeenCalledWith(23);
+    expect(document.getElementById("chatgpt-sidebar-scraper-copy-controls")).toBeNull();
   });
 
   it("copies a Markdown list with escaped titles", async () => {

@@ -67,27 +67,56 @@
     return Boolean(copied);
   }
 
-  function mountCopyControls(doc, onCopy) {
+  function mountCopyControls(doc, onCopy, onClose) {
     doc.getElementById("chatgpt-sidebar-scraper-copy-controls")?.remove();
     doc.body.insertAdjacentHTML(
       "beforeend",
-      '<div id="chatgpt-sidebar-scraper-copy-controls" role="group" aria-label="Copy captured chats" style="position:fixed;top:10px;right:10px;display:flex;gap:6px;padding:6px;z-index:2147483647;background:#fff;border:1px solid #bbb;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);font:14px system-ui,sans-serif;color-scheme:light"><button id="chatgpt-sidebar-scraper-copy-markdown-btn" data-format="markdown" style="padding:8px 10px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgpt-sidebar-scraper-copy-json-btn" data-format="json" style="padding:8px 10px;background:#fff;color:#111;border:1px solid #777;border-radius:5px;cursor:pointer"></button></div>',
+      '<div id="chatgpt-sidebar-scraper-copy-controls" role="group" aria-label="Copy captured chats" style="position:fixed;top:10px;right:10px;display:flex;gap:6px;padding:6px;z-index:2147483647;background:#fff;border:1px solid #bbb;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);font:14px system-ui,sans-serif;color-scheme:light"><button id="chatgpt-sidebar-scraper-copy-markdown-btn" data-format="markdown" style="padding:8px 10px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgpt-sidebar-scraper-copy-json-btn" data-format="json" style="padding:8px 10px;background:#fff;color:#111;border:1px solid #777;border-radius:5px;cursor:pointer"></button><button id="chatgpt-sidebar-scraper-copy-close-btn" type="button" data-action="close" aria-label="Close scraper controls" title="Close" style="padding:2px 10px;background:#dc3545;color:#fff;border:1px solid #dc3545;border-radius:5px;cursor:pointer">×</button></div>',
     );
     const controls = doc.getElementById(
       "chatgpt-sidebar-scraper-copy-controls",
     );
-    controls.addEventListener("click", (event) => {
+    const feedbackTimers = new Map();
+    controls.addEventListener("click", async (event) => {
       const button = event.target.closest?.("button[data-format]");
-      if (button) onCopy(button.dataset.format, button);
+      if (button) {
+        doc.defaultView.clearTimeout(feedbackTimers.get(button));
+        button.disabled = true;
+        let copied = false;
+        try {
+          copied = await onCopy(button.dataset.format, button);
+        } catch {
+          copied = false;
+        }
+        button.disabled = false;
+        button.textContent = copied ? "Copied" : "Copy failed";
+        button.style.background = copied ? "#198754" : "#dc3545";
+        button.style.borderColor = button.style.background;
+        button.dataset.feedback = "true";
+        feedbackTimers.set(button, doc.defaultView.setTimeout(() => {
+          button.textContent = button.dataset.copyLabel;
+          button.style.background = button.dataset.copyBackground;
+          button.style.borderColor = button.dataset.copyBorder;
+          delete button.dataset.feedback;
+        }, 3000));
+      }
+      if (event.target.closest?.("button[data-action='close']")) {
+        for (const timer of feedbackTimers.values()) doc.defaultView.clearTimeout(timer);
+        onClose();
+        controls.remove();
+      }
     });
     return {
       remove: () => controls.remove(),
       updateCount(count) {
         for (const format of ["markdown", "json"]) {
-          doc.getElementById(
+          const button = doc.getElementById(
             `chatgpt-sidebar-scraper-copy-${format}-btn`,
-          ).textContent =
-            `Copy ${count} chats as ${format === "json" ? "JSON" : "Markdown"}`;
+          );
+          button.dataset.copyLabel = `Copy ${count} chats as ${format === "json" ? "JSON" : "Markdown"}`;
+          button.dataset.copyBackground = button.dataset.copyBackground || button.style.background;
+          button.dataset.copyBorder = button.dataset.copyBorder || button.style.borderColor;
+          if (!button.dataset.feedback) button.textContent = button.dataset.copyLabel;
         }
       },
     };
@@ -104,19 +133,19 @@
     const previousState = root.__chatgptSidebarScraperState;
     if (previousState?.captureTimer)
       clearIntervalFn(previousState.captureTimer);
-    const controls = mountCopyControls(doc, async (format, button) => {
-      clearIntervalFn(state.captureTimer);
-      state.captureTimer = null;
-      button.disabled = true;
-      button.textContent = "Copying…";
+    const controls = mountCopyControls(doc, async (format) => {
       captureChats(doc, state);
       const payload =
         format === "markdown"
           ? chatsToMarkdown(state.chats)
           : JSON.stringify(state.chats, null, 2);
-      controls.remove();
-      if (!(await copyText(payload, doc, nav)))
+      const copied = await copyText(payload, doc, nav);
+      if (!copied)
         (win?.alert ?? console.warn)("Failed to copy ChatGPT chats.");
+      return copied;
+    }, () => {
+      clearIntervalFn(state.captureTimer);
+      state.captureTimer = null;
     });
     const update = () => controls.updateCount(captureChats(doc, state).length);
     update();

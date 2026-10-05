@@ -190,16 +190,19 @@ export function scrape({
     idPrefix: "xscraper",
     noun: "tweets",
     onCopy: async (format) => {
+      const enriched = addBuzzKeep(Object.values(state.tweetsByLink));
+      if (!nav?.clipboard?.writeText) return false;
+      await nav.clipboard.writeText(
+        format === "markdown" ? xTweetsMarkdown(enriched) : JSON.stringify(enriched, null, 2),
+      );
+      return true;
+    },
+    onClose: () => {
       clearIntervalFn(state.captureTimer);
       if (state.autoScrollTimer && rootDocument.defaultView)
         rootDocument.defaultView.clearInterval(state.autoScrollTimer);
       state.captureTimer = null;
       state.autoScrollTimer = null;
-      controls.remove();
-      const enriched = addBuzzKeep(Object.values(state.tweetsByLink));
-      await nav?.clipboard?.writeText?.(
-        format === "markdown" ? xTweetsMarkdown(enriched) : JSON.stringify(enriched, null, 2),
-      );
     },
   });
 

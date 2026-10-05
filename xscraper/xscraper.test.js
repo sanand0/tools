@@ -126,13 +126,15 @@ describe("xscraper", () => {
 
     document.getElementById("xscraper-copy-markdown-btn").click();
     await Promise.resolve();
+    await Promise.resolve();
 
     const markdown = writeText.mock.calls[0][0];
     expect(markdown).toBe(xTweetsMarkdown(addBuzzKeep(xTweets(document))));
     expect(markdown).toContain("# X thread");
     expect(markdown).toContain("[Ethan Mollick (@emollick)](https://test/emollick/status/123)");
     expect(markdown).toContain("Likes: 2,300");
-    expect(document.getElementById("xscraper-copy-controls")).toBeNull();
+    expect(document.getElementById("xscraper-copy-controls")).not.toBeNull();
+    expect(document.getElementById("xscraper-copy-markdown-btn").textContent).toBe("Copied");
   });
 
   it("adds buzz/keep scores with decay and weights", () => {

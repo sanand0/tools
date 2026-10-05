@@ -603,11 +603,31 @@
       '<div id="chatgptscraper-copy-controls" role="group" aria-label="Copy captured messages" style="position:fixed;top:10px;right:10px;display:flex;gap:6px;padding:6px;z-index:2147483647;background:#fff;border:1px solid #bbb;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);font:12px system-ui,sans-serif;color-scheme:light"><button id="chatgptscraper-copy-markdown-btn" data-format="markdown" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-json-btn" data-format="json" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-prompts-btn" data-format="prompts" style="padding:6px 8px;background:#0d6efd;color:#fff;border:1px solid #0d6efd;border-radius:5px;cursor:pointer"></button><button id="chatgptscraper-copy-close-btn" type="button" aria-label="Close scraper controls" title="Close" data-action="close" style="padding:2px 10px;background:#dc3545;color:#fff;border:1px solid #dc3545;border-radius:5px;cursor:pointer"></button></div>',
     );
     const controls = doc.getElementById("chatgptscraper-copy-controls");
-    doc.getElementById("chatgptscraper-copy-close-btn").textContent = "\u00d7";
-    controls.addEventListener("click", (event) => {
+    doc.getElementById("chatgptscraper-copy-close-btn").textContent = "×";
+    const feedbackTimers = new Map();
+    controls.addEventListener("click", async (event) => {
       const button = event.target.closest?.("button[data-format]");
-      if (button) onCopy(button.dataset.format, button);
-      if (event.target.closest?.("button[data-action='close']")) controls.remove();
+      if (button) {
+        doc.defaultView.clearTimeout(feedbackTimers.get(button));
+        button.disabled = true;
+        let copied = false;
+        try { copied = await onCopy(button.dataset.format, button); } catch {}
+        button.disabled = false;
+        button.textContent = copied ? "Copied" : "Copy failed";
+        button.style.background = copied ? "#198754" : "#dc3545";
+        button.style.borderColor = button.style.background;
+        button.dataset.feedback = "true";
+        feedbackTimers.set(button, doc.defaultView.setTimeout(() => {
+          button.textContent = button.dataset.copyLabel;
+          button.style.background = button.dataset.copyBackground;
+          button.style.borderColor = button.dataset.copyBorder;
+          delete button.dataset.feedback;
+        }, 3000));
+      }
+      if (event.target.closest?.("button[data-action='close']")) {
+        for (const timer of feedbackTimers.values()) doc.defaultView.clearTimeout(timer);
+        controls.remove();
+      }
     });
     return {
       remove: () => controls.remove(),
@@ -620,8 +640,11 @@
               : format === "markdown"
                 ? "Markdown"
                 : "prompts";
-          doc.getElementById(`chatgptscraper-copy-${format}-btn`).textContent =
-            `Copy ${amount} ${label === "prompts" ? label : `messages as ${label}`}`;
+          const button = doc.getElementById(`chatgptscraper-copy-${format}-btn`);
+          button.dataset.copyLabel = `Copy ${amount} ${label === "prompts" ? label : `messages as ${label}`}`;
+          button.dataset.copyBackground ||= button.style.background;
+          button.dataset.copyBorder ||= button.style.borderColor;
+          if (!button.dataset.feedback) button.textContent = button.dataset.copyLabel;
         }
       },
     };
@@ -672,8 +695,6 @@
       state.active = false;
     };
     const controls = mountCopyControls(doc, async (format, button) => {
-      button.disabled = true;
-      button.textContent = "Preparing…";
       await state.timestampsPromise;
       captureMessages(doc, state);
       const payload =
@@ -682,10 +703,11 @@
           : format === "prompts"
             ? messagesToPrompts(state.messages, state.metadata)
             : JSON.stringify(state.messages, null, 2);
-      if (!(await copyText(payload, doc, nav)))
+      const copied = await copyText(payload, doc, nav);
+      if (!copied)
         (win?.alert ?? console.warn)("Failed to copy ChatGPT conversation.");
-      button.disabled = false;
       if (state.active) controls.updateCount(state.messages.length, state.messages.filter(({ role }) => role === "user").length);
+      return copied;
     });
     const closeButton = doc.getElementById("chatgptscraper-copy-close-btn");
     closeButton.addEventListener("click", () => {

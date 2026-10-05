@@ -349,13 +349,15 @@ describe("linkedinscraper invite scraper", () => {
 
     document.getElementById("linkedinscraper-invites-copy-markdown-btn").click();
     await Promise.resolve();
+    await Promise.resolve();
 
     const markdown = clipboard.writeText.mock.calls[0][0];
     expect(markdown).toBe(linkedinInvitesMarkdown(linkedinInvites(document)));
     expect(markdown).toContain("# LinkedIn invitations");
     expect(markdown).toContain("## [Rio Sample](https://www.linkedin.com/in/rio-sample/)");
     expect(markdown).toContain("- Follows you");
-    expect(document.getElementById("linkedinscraper-invites-copy-controls")).toBeNull();
+    expect(document.getElementById("linkedinscraper-invites-copy-controls")).not.toBeNull();
+    expect(document.getElementById("linkedinscraper-invites-copy-markdown-btn").textContent).toBe("Copied");
   });
 });
 

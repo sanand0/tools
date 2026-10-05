@@ -788,16 +788,19 @@ export function scrapeInvites({
     idPrefix: "linkedinscraper-invites",
     noun: "invites",
     onCopy: async (format) => {
+      const invites = orderedInvites(state);
+      if (!nav?.clipboard?.writeText) return false;
+      await nav.clipboard.writeText(
+        format === "markdown" ? linkedinInvitesMarkdown(invites) : JSON.stringify(invites, null, 2),
+      );
+      return true;
+    },
+    onClose: () => {
       clearIntervalFn(state.captureTimer);
       if (state.autoScrollTimer && rootDocument.defaultView)
         rootDocument.defaultView.clearInterval(state.autoScrollTimer);
       state.captureTimer = null;
       state.autoScrollTimer = null;
-      controls.remove();
-      const invites = orderedInvites(state);
-      await nav?.clipboard?.writeText?.(
-        format === "markdown" ? linkedinInvitesMarkdown(invites) : JSON.stringify(invites, null, 2),
-      );
     },
   });
 

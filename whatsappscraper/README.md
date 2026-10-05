@@ -33,7 +33,7 @@ Link previews (when WhatsApp renders them) are captured in:
 
 ## Output format
 
-The bookmarklet offers two live-count buttons: **Copy Markdown** for a readable transcript and **Copy JSON** for the full array of message objects.
+The bookmarklet offers two live-count buttons: **Copy Markdown** for a readable transcript and **Copy JSON** for the full array of message objects. The selected button shows **Copied** for three seconds; close the toolbar with **×** when finished.
 
 - Output is **best-effort**: fields are included only when they can be extracted from the currently-rendered DOM.
 - Output is **de-duplicated** by `messageId` while you scroll. If the same message is observed multiple times, the scraper keeps the “richer” version with field-aware merging: longer string fields win, larger numeric media metadata wins, and `true` booleans are preserved.
