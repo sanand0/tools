@@ -1,6 +1,13 @@
 {
   "tools": [
     {
+      "icon": "bi-disc",
+      "title": "Music",
+      "description": "Play your local music files and M3U playlists with ranked search, global media controls, continuous queue and listening history.",
+      "url": "music",
+      "created": "2026-10-05T00:00:00+00:00"
+    },
+    {
       "icon": "bi-google",
       "title": "Google Bookmarklets",
       "description": "Bookmarklets for copying useful data from GMail, Google Calendar, and other Google apps.",

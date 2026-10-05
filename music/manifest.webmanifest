@@ -1,0 +1,29 @@
+{
+  "id": "/music/",
+  "name": "Music",
+  "short_name": "Music",
+  "start_url": "/music/",
+  "scope": "/music/",
+  "display": "standalone",
+  "background_color": "#141b20",
+  "theme_color": "#141b20",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "launch_handler": { "client_mode": "focus-existing" },
+  "file_handlers": [
+    {
+      "action": "/music/",
+      "accept": {
+        "audio/mpeg": [".mp3"],
+        "audio/x-mpegurl": [".m3u"],
+        "application/vnd.apple.mpegurl": [".m3u", ".m3u8"]
+      }
+    }
+  ]
+}

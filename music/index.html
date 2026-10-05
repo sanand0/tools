@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <!-- Agent API: window.music.control({action:'forward',seconds:5}); also dispatch
+ new CustomEvent('music-control',{detail:{action:'pause'}}) on window.
+ music.playM3U('New.m3u',{shuffle:true,repeat:'all'}) == control({action:'play-m3u',path:'New.m3u',shuffle:true,repeat:'all'}).
+ music.getState(), getTrack(id), find('rahman 199 spb'), getQueue(), getHistory({limit:20}).
+ music-state events carry compact state. Track commands use {track:id}; select uses {id}; filter uses {query}.
+ Queue persisted as path/status in queue.tsv; getQueue includes played/current/next and getState.queueIndex.
+ findSimilar(id), similarity(a,b); play-similar {track:id} adds up to ten immediately after current.
+ locate-track {track:id} clears search, selects and reveals the library song; clear-search; focus-playlists.
+ mute; volume-up/volume-down; play-any appends ten random visible tracks.
+ Queue: music.control({action:'move-queue',index:2,to:'top'}); play-queue/remove-queue use {index}.
+ Folder picking / permission requests require a genuine user click; automation cannot grant folder access. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#141b20" />
+    <title>Music · Your files, your listening</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23141b20'/%3E%3Cpath d='M26 42V18l24-5v24M26 22l24-5' stroke='%2388dec2' stroke-width='5' fill='none'/%3E%3Cellipse cx='19' cy='43' rx='9' ry='6' fill='%2388dec2'/%3E%3Cellipse cx='43' cy='38' rx='9' ry='6' fill='%2388dec2'/%3E%3C/svg%3E"
+    />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <nav class="navbar bg-body-tertiary" aria-label="Main">
+      <div class="container">
+        <a class="navbar-brand" href="../"
+          ><i class="bi bi-disc" aria-hidden="true"></i> Music<span
+            class="brand-note"
+            >YOUR FILES. YOUR LISTENING.</span
+          ></a
+        >
+        <search>
+          <label class="visually-hidden" for="search">Search library</label
+          ><i class="bi bi-search" aria-hidden="true"></i
+          ><input
+            id="search"
+            type="search"
+            placeholder="Search songs, artists, years…"
+            autocomplete="off"
+            spellcheck="false"
+          /><button
+            id="clear-search"
+            data-action="clear-search"
+            class="btn btn-sm"
+            aria-label="Clear search"
+            title="Clear search (Escape)"
+          >
+            <i class="bi bi-x-lg" aria-hidden="true"></i></button
+          ><kbd>/</kbd>
+        </search>
+        <button id="install" class="btn btn-sm" hidden>
+          <i class="bi bi-download" aria-hidden="true"></i> Install app
+        </button>
+        <div class="bootstrap-dark-theme">
+          <button
+            id="theme"
+            class="btn"
+            aria-label="Toggle light / dark mode"
+            title="Toggle light / dark mode"
+          >
+            <i class="bi bi-circle-half" aria-hidden="true"></i>
+          </button>
+        </div>
+        <details id="menu">
+          <summary class="btn" aria-label="Menu">
+            <i class="bi bi-three-dots" aria-hidden="true"></i>
+          </summary>
+          <div class="menu-panel">
+            <button data-action="refresh">Refresh Library</button
+            ><button data-action="reconnect">Reconnect Music Folder</button
+            ><button data-action="change-folder">Change Music Folder</button
+            ><button data-action="help">Help</button>
+          </div>
+        </details>
+      </div>
+    </nav>
+    <div id="alerts" aria-live="polite"></div>
+    <main>
+      <section class="library" aria-labelledby="library-title">
+        <header class="section-header">
+          <div>
+            <p class="eyebrow" id="folder-label">LOCAL MUSIC</p>
+            <h1 id="library-title">Library</h1>
+          </div>
+          <div class="playlist-bar">
+            <i class="bi bi-music-note-list" aria-hidden="true"></i
+            ><label for="playlist">Playlists</label
+            ><select id="playlist" aria-label="Playlist">
+              <option value="">All tracks</option></select
+            ><button class="btn btn-sm" data-action="play-playlist">
+              <i class="bi bi-play-fill" aria-hidden="true"></i> Play</button
+            ><button class="btn btn-sm" data-action="queue-playlist">
+              <i class="bi bi-plus" aria-hidden="true"></i> Queue
+            </button>
+          </div>
+          <div class="library-tools">
+            <span
+              id="busy"
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-label="Reading library"
+              hidden
+            ></span
+            ><span id="count" class="muted">0 tracks</span
+            ><button
+              class="btn btn-sm"
+              data-action="play-any"
+              title="Append 10 random visible songs and start that batch"
+            >
+              <i class="bi bi-shuffle" aria-hidden="true"></i> Play Any</button
+            ><button
+              id="connect"
+              class="btn btn-accent"
+              data-action="reconnect"
+            >
+              <i class="bi bi-folder2-open" aria-hidden="true"></i> Choose
+              folder
+            </button>
+          </div>
+        </header>
+        <div id="welcome" class="welcome">
+          <div class="record-art">
+            <i class="bi bi-music-note-beamed" aria-hidden="true"></i>
+          </div>
+          <p class="eyebrow">A HOME FOR YOUR MUSIC</p>
+          <h2>All the songs.<br />None of the noise.</h2>
+          <p>
+            Open your Music folder to start listening.<br />Your files stay on
+            this device.
+          </p>
+          <button class="btn btn-accent" data-action="reconnect">
+            Choose Music folder
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+          </button>
+          <p class="small muted mt-3">
+            Reads audio, musicdump.csv and playlists.<br />Queue saves to
+            queue.tsv; track starts append to music-history.tsv.
+          </p>
+        </div>
+        <div
+          id="library-scroll"
+          tabindex="0"
+          aria-label="Library tracks. Arrow keys select, Enter plays now, Ctrl Enter queues, Shift Enter plays next."
+          hidden
+        >
+          <table>
+            <thead id="library-head"></thead>
+            <tbody id="library-body"></tbody>
+          </table>
+          <p id="empty" class="empty" hidden>
+            No matching tracks. Try fewer search terms.
+          </p>
+          <button id="more" class="btn btn-sm" hidden>Show more tracks</button>
+        </div>
+      </section>
+      <aside class="side-panel" aria-label="Queue and history">
+        <div class="panel-tabs" role="tablist">
+          <button
+            id="queue-tab"
+            role="tab"
+            aria-selected="true"
+            aria-controls="queue-panel"
+            data-action="tab"
+            data-value="queue"
+          >
+            QUEUE <span id="queue-count">0</span></button
+          ><button
+            id="history-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="history-panel"
+            data-action="tab"
+            data-value="history"
+          >
+            HISTORY
+          </button>
+        </div>
+        <section id="queue-panel" role="tabpanel" aria-labelledby="queue-tab">
+          <div class="panel-tools">
+            <span class="muted">Played &amp; coming next</span
+            ><button
+              class="btn btn-sm"
+              data-action="shuffle-queue"
+              aria-label="Shuffle queue"
+              title="Shuffle songs after the current song"
+            >
+              <i class="bi bi-shuffle" aria-hidden="true"></i></button
+            ><button class="btn btn-sm" data-action="clear-queue">Clear</button>
+          </div>
+          <ol
+            id="queue-list"
+            tabindex="0"
+            aria-label="Queue. Drag songs to reorder; right-click for queue actions."
+          ></ol>
+          <p id="queue-empty" class="empty">
+            A little quiet here.<br /><span class="muted"
+              >Queue a song with Ctrl+Enter or the + button. Drag songs to
+              reorder.</span
+            >
+          </p>
+        </section>
+        <section
+          id="history-panel"
+          role="tabpanel"
+          aria-labelledby="history-tab"
+          hidden
+        >
+          <p class="panel-caption muted">
+            From your history file &amp; this session
+          </p>
+          <ol id="history-list"></ol>
+          <p id="history-empty" class="empty">Your listening starts here.</p>
+        </section>
+        <footer class="side-footer">
+          <i class="bi bi-hdd" aria-hidden="true"></i> Local files. No
+          uploads.<button
+            class="btn btn-sm"
+            data-action="help"
+            aria-label="Help"
+          >
+            <i class="bi bi-question-circle" aria-hidden="true"></i>
+          </button>
+        </footer>
+      </aside>
+    </main>
+    <footer class="player" aria-label="Now playing">
+      <div class="now-playing">
+        <div id="artwork" class="track-art">
+          <i class="bi bi-music-note" aria-hidden="true"></i>
+        </div>
+        <div>
+          <span class="eyebrow">NOW PLAYING</span
+          ><button id="now-title" data-action="current-info">
+            Choose something good
+          </button>
+          <p id="now-album"></p>
+          <p id="now-detail" class="muted">
+            Your next favorite is in your library.
+          </p>
+        </div>
+      </div>
+      <div class="transport">
+        <div class="transport-buttons">
+          <button
+            class="btn"
+            data-action="previous"
+            aria-label="Previous track"
+            title="Previous track"
+          >
+            <i class="bi bi-skip-start-fill" aria-hidden="true"></i></button
+          ><button
+            class="btn seek"
+            data-action="backward"
+            aria-label="−5s: Back 5 seconds"
+          >
+            −5s</button
+          ><button
+            id="toggle"
+            class="btn play-button"
+            data-action="toggle"
+            aria-label="Play"
+            title="Play / pause"
+          >
+            <i class="bi bi-play-fill" aria-hidden="true"></i></button
+          ><button
+            class="btn seek"
+            data-action="forward"
+            aria-label="+5s: Forward 5 seconds"
+          >
+            +5s</button
+          ><button
+            class="btn"
+            data-action="next"
+            aria-label="Next track"
+            title="Next track"
+          >
+            <i class="bi bi-skip-end-fill" aria-hidden="true"></i></button
+          ><button
+            id="repeat"
+            class="btn"
+            data-action="repeat"
+            aria-label="Repeat: off"
+            title="Repeat: off"
+          >
+            <i class="bi bi-repeat" aria-hidden="true"></i
+            ><span id="repeat-label">off</span>
+          </button>
+        </div>
+      </div>
+      <div class="sound">
+        <label for="speed">Speed</label
+        ><select id="speed" aria-label="Playback speed"></select
+        ><button
+          id="mute"
+          class="btn btn-sm"
+          data-action="mute"
+          aria-label="Mute"
+          aria-pressed="false"
+          title="Mute (M)"
+        >
+          <i class="bi bi-volume-up" aria-hidden="true"></i></button
+        ><input
+          id="volume"
+          aria-label="Volume"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value="1"
+        /><output id="volume-label" for="volume">100%</output>
+      </div>
+      <audio
+        id="audio"
+        controls
+        preload="metadata"
+        aria-label="Audio playback"
+      ></audio>
+    </footer>
+    <dialog id="info">
+      <header>
+        <h2>Track info</h2>
+        <button class="btn" data-close="info" aria-label="Close track info">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </header>
+      <dl id="info-content"></dl>
+    </dialog>
+    <dialog id="help">
+      <header>
+        <h2>Your music, simply.</h2>
+        <button class="btn" data-close="help" aria-label="Close help">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </header>
+      <h3>Global shortcuts</h3>
+      <ul id="global-shortcuts" class="shortcut-list"></ul>
+      <p class="small muted">
+        These shortcuts work while Music is unfocused or backgrounded. They
+        are supplied by your Ubuntu setup at
+        <code>~/code/scripts/setup/media-keys.dconf</code> via app-specific CDP
+        calls; this page does not register them. Standard OS/browser media
+        controls use Media Session.
+      </p>
+      <h3>Keyboard shortcuts</h3>
+      <p class="small muted">
+        Library shortcuts apply while the library is focused. Player shortcuts
+        apply outside editable fields and focused buttons. Standard input and
+        button keys keep their usual behavior.
+      </p>
+      <ul id="keyboard-shortcuts" class="shortcut-list"></ul>
+      <h3>Library &amp; playback</h3>
+      <p>
+        Choose your Music folder. Audio files are the library; optional
+        <code>musicdump.csv</code> adds metadata, and M3Us add playlists.
+        Refresh rereads your files. Nothing is uploaded. Only actual track
+        starts append three fields to <code>music-history.tsv</code>: local
+        timestamp, filename, <code>music-tool</code>.
+      </p>
+      <h3>Find &amp; listen</h3>
+      <p>
+        Try <code>rahman 199 spb</code>. Every word matches metadata or a file
+        path; initials and small typos work too. Searching selects the first
+        result. Press Enter in search to focus it, then use Up/Down to select
+        a song and Enter to play. Click column headings to sort.
+        Double-click anywhere on a song row or press Enter to play it now. It is
+        inserted directly after the current Queue item, preserving later songs.
+        Right-click a library value to filter it, Play now, Play next, Play at
+        end, Play 10 similar next or Info. Queue’s Locate in playlist clears
+        search and reveals the song, switching to All tracks if needed. Drag
+        Queue songs to reorder, or right-click for moves and removals, including
+        all above/below. Played songs remain visible, and the current item is
+        highlighted. Removing the current item or clearing the Queue stops
+        playback. Shuffle queue rearranges songs after the current item. Repeat
+        all cycles the entire Queue. Natural completion at the end stops
+        playback without adding songs. Pressing Play or Next at the end
+        appends up to ten available songs similar
+        to the latest Queue song and starts the first. If none qualify, playback
+        pauses with a message. Play Any appends ten random songs from the
+        current playlist/search and starts that batch; small results repeat
+        songs to reach ten.
+      </p>
+      <p>
+        The Queue is synced to <code>queue.tsv</code> in your Music folder: two
+        columns, <code>path</code> and
+        <code>status</code> (played/current/next). It restores paused, without a
+        new history entry. Refresh also rereads this file. Songs opened outside
+        the folder remain in this session only. A gentler volume curve gives
+        balanced control throughout the range; new users start at 100%. Mute
+        keeps the selected level. Resume points stay in memory for up to 24
+        hours; replaying continues where you stopped, unless fewer than 15
+        seconds remained. Previous’s restart and repeat-one start at zero.
+        Play after a song finishes continues the Queue, adding similar songs
+        at its end, instead of replaying the finished song.
+      </p>
+      <p>
+        Play 10 similar next uses CSV genre, composer, singer, year and album
+        scores from
+        <a href="https://github.com/sanand0/scripts/blob/main/play-music"
+          >play-music</a
+        >, choosing from the top 30 with slight randomness and penalties for
+        repeated albums and people. It adds up to ten after the current song
+        without interrupting playback. No playlist preference bonuses are
+        inferred; songs without matching metadata may have no similar results.
+      </p>
+      <h3>Open files from Ubuntu</h3>
+      <p>
+        After deployment at
+        <a href="https://tools.s-anand.net/music/">tools.s-anand.net/music/</a>,
+        install Music with the browser’s Install app command (or the Install
+        button here). Visiting alone does not register file handlers. Allow file
+        handling if prompted, then select Music in Ubuntu’s Open With / default
+        application for <code>.mp3</code>, <code>.m3u</code>, and
+        <code>.m3u8</code>. An MP3 opens directly; a playlist needs access to
+        its tracks via your selected Music folder. Reconnect if permission
+        expires. No service worker or offline cache is used.
+      </p>
+      <h3>Script &amp; agent control</h3>
+      <p>
+        Use <code>window.music</code>, or dispatch <code>music-control</code> on
+        window with the command in <code>detail</code>.
+        <code>music-state</code> emits compact state after changes. Folder
+        picking and permission requests require a genuine user click; scripts
+        cannot grant folder access.
+      </p>
+      <pre>
+music.control({action: 'forward', seconds: 5})
+window.dispatchEvent(new CustomEvent('music-control',
+  {detail: {action: 'pause'}}))
+music.playM3U('New.m3u', {shuffle: true, repeat: 'all'})
+// Also: {action:'play-m3u', path:'New.m3u', shuffle:true, repeat:'all'}
+music.find('rahman 199 spb'); music.getTrack(id)
+music.findSimilar(id); music.similarity(id, otherId)
+music.control({action: 'play-similar', track: id})
+music.control({action: 'locate-track', track: id})
+music.getState(); music.getQueue(); music.getHistory({limit:20})</pre>
+      <p class="small">
+        Actions: play, pause, toggle, forward/backward (seconds), seek
+        (seconds), next/previous, speed/volume/repeat (value),
+        play-track/queue-track/play-next/show-info (track: id),
+        remove-queue/play-queue/remove-above/remove-below (index), move-queue
+        (index, to: index or up/down/top/bottom), clear-queue, shuffle-queue,
+        shuffle-visible, play-any, mute, volume-up/volume-down, filter (query),
+        select (id), clear-search, focus-search, focus-results, focus-playlists,
+        play-similar/locate-track (track: id or queue index), play-m3u (path,
+        shuffle=false, repeat='off'). Volume 0–1 is perceptual; speed uses
+        browser playbackRate. Unsupported speeds or codecs show an error.
+      </p>
+    </dialog>
+    <div
+      id="context-menu"
+      class="context-menu"
+      role="menu"
+      aria-label="Track actions"
+      hidden
+    ></div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script type="module" src="script.js"></script>
+  </body>
+</html>

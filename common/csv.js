@@ -1,4 +1,4 @@
-import { csvFormat, csvParse, tsvFormat } from "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm";
+import { csvFormat, csvParse, tsvParse, tsvFormat } from "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm";
 import { downloadBlob } from "./download.js";
 
 function flattenObject(obj, prefix = "") {
@@ -46,4 +46,4 @@ function downloadCsv(csv, filename = "data.csv") {
   downloadBlob(blob, filename);
 }
 
-export { flattenObject, objectsToCsv, objectsToTsv, csvToTable, downloadCsv };
+export { csvParse, tsvParse, flattenObject, objectsToCsv, objectsToTsv, csvToTable, downloadCsv };
