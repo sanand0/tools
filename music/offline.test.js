@@ -87,6 +87,7 @@ function serviceWorkerHarness({ fetchResponse, oldCache, sharedStores, failPut }
   const context = vm.createContext({
     Request,
     Response,
+    Headers,
     URL,
     fetch: fetcher,
     caches,
@@ -196,6 +197,14 @@ describe("Music offline shell", () => {
     expect(harness.fetcher).not.toHaveBeenCalledWith(
       expect.stringContaining("song.mp3"),
     );
+    const upload = await harness.dispatch("fetch", {
+      request: request("https://music.test/music/Album/song.mp3", { method: "POST" }),
+    });
+    expect(upload.response).toBeUndefined();
+    const blob = await harness.dispatch("fetch", {
+      request: { url: "blob:https://music.test/audio", method: "GET" },
+    });
+    expect(blob.response).toBeUndefined();
   });
 
   it("serves the app shell from cache after the network disappears", async () => {
@@ -251,6 +260,53 @@ describe("Music offline shell", () => {
     );
     await harness.dispatch("message", { data: { type: "CHECK_UPDATE" } });
     await vi.waitFor(() => expect(harness.messages).toEqual([{ type: "UPDATE_READY" }]));
+  });
+
+  it("serializes concurrent update checks so only one shell download runs at a time", async () => {
+    let active = 0;
+    let peak = 0;
+    const harness = serviceWorkerHarness();
+    await harness.dispatch("install");
+    await harness.dispatch("activate");
+    harness.fetcher.mockImplementation(async (input) => {
+      active += 1;
+      peak = Math.max(peak, active);
+      await Promise.resolve();
+      active -= 1;
+      return new Response(`changed:${input.url}`);
+    });
+    await Promise.all([
+      harness.dispatch("message", { data: { type: "CHECK_UPDATE" } }),
+      harness.dispatch("message", { data: { type: "CHECK_UPDATE" } }),
+    ]);
+    // The worker uses a bounded pool for fast shell downloads; concurrent
+    // checks must not create an unbounded connection storm.
+    expect(peak).toBeGreaterThan(1);
+    expect(peak).toBeLessThanOrEqual(4);
+    expect(harness.messages.filter(({ type }) => type === "UPDATE_READY")).toHaveLength(2);
+  });
+
+  it("updates a changed player script while retaining the rest of the offline shell", async () => {
+    const harness = serviceWorkerHarness();
+    await harness.dispatch("install");
+    await harness.dispatch("activate");
+    harness.fetcher.mockImplementation(async (input) => {
+      const url = String(input.url);
+      return new Response(url.endsWith("/script.js") ? "new-player-script" : `asset:${url}`);
+    });
+    await harness.dispatch("message", { data: { type: "CHECK_UPDATE" } });
+    expect(harness.messages).toContainEqual({ type: "UPDATE_READY" });
+    await harness.dispatch("message", { data: { type: "APPLY_UPDATE" } });
+    expect(harness.messages).toContainEqual({ type: "UPDATE_APPLIED" });
+    harness.fetcher.mockRejectedValue(new Error("offline"));
+    const script = await harness.dispatch("fetch", {
+      request: request("https://music.test/music/script.js"),
+    });
+    expect(await script.response.text()).toBe("new-player-script");
+    const style = await harness.dispatch("fetch", {
+      request: request("https://music.test/music/style.css"),
+    });
+    expect(await style.response.text()).toBe("asset:https://music.test/music/style.css");
   });
 
   it("answers readiness and serves queried app navigation from the active shell offline", async () => {
@@ -312,13 +368,14 @@ describe("Music offline shell", () => {
   });
 });
 
-function statusHarness({ online = true, failRegister = false } = {}) {
+function statusHarness({ online = true, failRegister = false, controller = true, firstInstall = false } = {}) {
   const page = browser.newPage();
   const document = page.mainFrame.window.document;
   document.body.innerHTML = '<div id="offline-status" hidden></div>';
   const listeners = new Map();
+  const activeWorker = { postMessage: vi.fn() };
   const registration = {
-    active: { postMessage: vi.fn() },
+    active: firstInstall ? null : activeWorker,
     waiting: null,
     installing: null,
     addEventListener(type, handler) {
@@ -339,8 +396,15 @@ function statusHarness({ online = true, failRegister = false } = {}) {
       removeEventListener(type) {
         listeners.delete(type);
       },
-      controller: registration.active,
-      ready: Promise.resolve(registration),
+      controller: controller ? registration.active : null,
+      ready: firstInstall
+        ? new Promise((resolve) => {
+            registration.resolveReady = () => {
+              registration.active = activeWorker;
+              resolve(registration);
+            };
+          })
+        : Promise.resolve(registration),
     },
   };
   const window = {
@@ -358,6 +422,36 @@ function statusHarness({ online = true, failRegister = false } = {}) {
 }
 
 describe("offline status journey", () => {
+  it("uses concise status copy while preparing and after the shell is ready", async () => {
+    const harness = statusHarness({ online: false });
+    expect(harness.document.getElementById("offline-status").textContent).toContain("Offlining");
+    await vi.waitFor(() => expect(harness.listeners.get("message")).toEqual(expect.any(Function)));
+    harness.navigator.onLine = true;
+    harness.listeners.get("message")({ data: { type: "OFFLINE_READY" } });
+    expect(harness.document.getElementById("offline-status").textContent).toContain("Offline ready");
+  });
+
+  it("uses an active registration before controller takeover and asks its worker for status first", async () => {
+    const harness = statusHarness({ controller: false });
+    await vi.waitFor(() => expect(harness.listeners.get("message")).toEqual(expect.any(Function)));
+    await vi.waitFor(() =>
+      expect(harness.registration.active.postMessage).toHaveBeenCalledWith({ type: "GET_STATUS" }),
+    );
+    expect(harness.registration.active.postMessage.mock.calls[0][0]).toEqual({ type: "GET_STATUS" });
+    expect(harness.registration.active.postMessage).toHaveBeenCalledWith({ type: "CHECK_UPDATE" });
+    harness.listeners.get("message")({ data: { type: "OFFLINE_READY" } });
+    expect(harness.document.getElementById("offline-status").textContent).toBe("Offline ready");
+  });
+
+  it("does not repeat the full online shell check after a first installation", async () => {
+    const harness = statusHarness({ firstInstall: true });
+    await vi.waitFor(() => expect(harness.listeners.get("registration:updatefound")).toEqual(expect.any(Function)));
+    harness.registration.resolveReady();
+    await vi.waitFor(() => expect(harness.registration.active?.postMessage).toHaveBeenCalledWith({ type: "GET_STATUS" }));
+    expect(harness.registration.update).not.toHaveBeenCalled();
+    expect(harness.registration.active.postMessage).not.toHaveBeenCalledWith({ type: "CHECK_UPDATE" });
+  });
+
   it("treats the first completed installation as ready, without an update prompt", async () => {
     const harness = statusHarness();
     await vi.waitFor(() => expect(harness.listeners.get("registration:updatefound")).toEqual(expect.any(Function)));
@@ -373,7 +467,7 @@ describe("offline status journey", () => {
     expect(harness.document.getElementById("offline-status").textContent).not.toContain("An update");
     harness.registration.waiting = null;
     harness.listeners.get("message")({ data: { type: "OFFLINE_READY" } });
-    expect(harness.document.getElementById("offline-status").textContent).toBe("Ready for offline listening");
+    expect(harness.document.getElementById("offline-status").textContent).toBe("Offline ready");
   });
 
   it("removes a stale update offer when the deployment is reverted", async () => {
@@ -383,7 +477,7 @@ describe("offline status journey", () => {
     harness.listeners.get("message")({ data: { type: "UPDATE_READY" } });
     expect(status.textContent).toContain("Refresh");
     harness.listeners.get("message")({ data: { type: "OFFLINE_READY" } });
-    expect(status.textContent).toBe("Ready for offline listening");
+    expect(status.textContent).toBe("Offline ready");
     expect(status.querySelector("button")).toBeNull();
   });
   it("shows readiness, offline and online states through normal browser events", async () => {
@@ -403,9 +497,9 @@ describe("offline status journey", () => {
     expect(status.textContent).toBe("Offline mode");
     harness.navigator.onLine = true;
     harness.listeners.get("message")({ data: { type: "OFFLINE_READY" } });
-    expect(status.textContent).toContain("Ready for offline listening");
+    expect(status.textContent).toContain("Offline ready");
     harness.listeners.get("window:online")();
-    expect(status.textContent).toContain("Ready for offline listening");
+    expect(status.textContent).toContain("Offline ready");
     expect(harness.registration.update).toHaveBeenCalled();
     expect(harness.registration.active.postMessage).toHaveBeenCalledWith({ type: "CHECK_UPDATE" });
   });
@@ -438,7 +532,7 @@ describe("offline status journey", () => {
     const status = harness.document.getElementById("offline-status");
     harness.listeners.get("message")({ data: { type: "UPDATE_READY" } });
     status.querySelector("button:last-child")?.click();
-    expect(status.textContent).toContain("Ready for offline listening");
+    expect(status.textContent).toContain("Offline ready");
     harness.listeners.get("message")({ data: { type: "UPDATE_READY" } });
     expect(status.querySelector("button")).toBeNull();
   });

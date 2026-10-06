@@ -6,8 +6,14 @@ let updateAvailable = false;
 let offlineReady = false;
 let dismissed = false;
 let lastCheck = 0;
+let checking = false;
+
+function postToWorker(message) {
+  (registration?.active || registration?.waiting || navigator.serviceWorker.controller)?.postMessage(message);
+}
 
 function showStatus(message, action, label) {
+  status.title = message === "Offline ready" ? "The player shell is cached for flight mode." : "";
   status.replaceChildren();
   if (message.endsWith("…")) {
     const spinner = document.createElement("span");
@@ -35,7 +41,7 @@ function showUpdate() {
     updating = true;
     showStatus("Updating player…");
     if (registration.waiting) registration.waiting.postMessage({ type: "SKIP_WAITING" });
-    else navigator.serviceWorker.controller?.postMessage({ type: "APPLY_UPDATE" });
+    else postToWorker({ type: "APPLY_UPDATE" });
   }, "Refresh");
   const later = document.createElement("button");
   later.type = "button";
@@ -43,24 +49,26 @@ function showUpdate() {
   later.textContent = "Later";
   later.addEventListener("click", () => {
     dismissed = true;
-    showStatus(navigator.onLine ? "Ready for offline listening" : "Offline mode");
+    showStatus(navigator.onLine ? "Offline ready" : "Offline mode");
   });
   status.append(" ", later);
 }
 function checkUpdate() {
-  if (!navigator.onLine || !registration) return;
+  if (!navigator.onLine || !registration || checking) return;
+  checking = true;
   lastCheck = Date.now();
   registration.update().catch(() => {});
-  navigator.serviceWorker.controller?.postMessage({ type: "CHECK_UPDATE" });
+  postToWorker({ type: "CHECK_UPDATE" });
 }
 async function registerOffline() {
-  showStatus("Preparing offline listening…");
+  showStatus("Offlining…");
   if (!("serviceWorker" in navigator) || !window.isSecureContext) {
     showStatus("Offline setup needs HTTPS or localhost and a supported browser.");
     return;
   }
   try {
     registration = await navigator.serviceWorker.register("./sw.js", { scope: "./", updateViaCache: "none" });
+    const hadActiveWorker = Boolean(registration.active);
     const watchInstall = () => {
       const worker = registration.installing;
       worker?.addEventListener("statechange", () => {
@@ -72,20 +80,22 @@ async function registerOffline() {
     watchInstall();
     if (registration.waiting) showUpdate();
     await navigator.serviceWorker.ready;
-    navigator.serviceWorker.controller?.postMessage({ type: "GET_STATUS" });
-    checkUpdate();
+    postToWorker({ type: "GET_STATUS" });
+    // Installation has just fetched the shell; only returning visits need another check.
+    if (hadActiveWorker) checkUpdate();
   } catch {
     showStatus("Offline setup failed. Reconnect and retry.", registerOffline, "Retry");
   }
 }
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener("message", ({ data }) => {
+    if (["OFFLINE_READY", "UPDATE_READY", "UPDATE_CHECK_FAILED", "OFFLINE_UNAVAILABLE"].includes(data?.type)) checking = false;
     if (data?.type === "UPDATE_READY") showUpdate();
     if (data?.type === "OFFLINE_READY") {
       offlineReady = true;
       if (!registration?.waiting) {
         updateAvailable = false;
-        showStatus(navigator.onLine ? "Ready for offline listening" : "Offline mode");
+        showStatus(navigator.onLine ? "Offline ready" : "Offline mode");
       }
     }
     if (["UPDATE_CHECK_FAILED", "OFFLINE_UNAVAILABLE"].includes(data?.type)) {
@@ -101,7 +111,7 @@ if ("serviceWorker" in navigator) {
   });
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     if (updating) window.location.reload();
-    else navigator.serviceWorker.controller?.postMessage({ type: "GET_STATUS" });
+    else postToWorker({ type: "GET_STATUS" });
   });
 }
 window.addEventListener("online", () => {

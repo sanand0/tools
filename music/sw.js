@@ -17,8 +17,11 @@ const ASSETS = [
   "https://cdn.jsdelivr.net/npm/d3-dsv@3/+esm",
 ].map((asset) => new URL(asset, self.registration.scope).href);
 const shellURL = new URL("index.html", self.registration.scope).href;
+const CDN_PREFIX = "https://cdn.jsdelivr.net/npm/";
+const DOWNLOAD_CONCURRENCY = 4;
 // Old and installing workers share storage, so coordinate across worker versions.
 const serialize = (task) => self.navigator.locks.request("music-offline-shell", task);
+let checkInFlight;
 
 async function readState() {
   const cache = await caches.open(META_CACHE);
@@ -30,13 +33,24 @@ async function writeState(state) {
 }
 async function downloadShell() {
   const assets = [];
-  for (const url of ASSETS) {
-    const response = await fetch(new Request(url, { cache: "no-store", signal: AbortSignal.timeout(30_000) }));
-    if (!response.ok) throw new Error(`Cannot save ${url}: ${response.status}`);
-    // Drain each body before the next fetch, freeing the browser's connections.
-    await response.clone().arrayBuffer();
-    assets.push([url, response]);
-  }
+  let next = 0;
+  const worker = async () => {
+    while (next < ASSETS.length) {
+      const url = ASSETS[next++];
+      const response = await fetch(new Request(url, {
+        cache: url.startsWith(CDN_PREFIX) ? "default" : "no-store",
+        signal: AbortSignal.timeout(30_000),
+      }));
+      if (!response.ok) throw new Error(`Cannot save ${url}: ${response.status}`);
+      const body = await response.arrayBuffer();
+      // The body is decoded by fetch; do not retain encoding/length headers on
+      // the reconstructed response or the browser may decode it twice.
+      const contentType = response.headers?.get?.("content-type");
+      const headers = contentType ? { "content-type": contentType } : undefined;
+      assets.push([url, new Response(body, { status: response.status, statusText: response.statusText, headers })]);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(DOWNLOAD_CONCURRENCY, ASSETS.length) }, worker));
   return assets;
 }
 async function saveShell(assets) {
@@ -130,12 +144,17 @@ self.addEventListener("message", (event) => {
     event.waitUntil(self.skipWaiting());
     return;
   }
-  if (!["GET_STATUS", "CHECK_UPDATE", "APPLY_UPDATE"].includes(type)) return;
+  if (type === "CHECK_UPDATE") {
+    checkInFlight ||= serialize(checkUpdate).finally(() => { checkInFlight = undefined; });
+    event.waitUntil(checkInFlight.then((result) => event.source?.postMessage({ type: result }))
+      .catch(() => event.source?.postMessage({ type: "UPDATE_CHECK_FAILED" })));
+    return;
+  }
+  if (!["GET_STATUS", "APPLY_UPDATE"].includes(type)) return;
   const operation = serialize(async () => {
     const state = await readState();
     let result;
     if (type === "GET_STATUS") result = await hasCompleteShell(state.active) ? state.pending ? "UPDATE_READY" : "OFFLINE_READY" : "OFFLINE_UNAVAILABLE";
-    if (type === "CHECK_UPDATE") result = await checkUpdate();
     if (type === "APPLY_UPDATE") {
       if (!await hasCompleteShell(state.pending)) throw new Error("Update is no longer available");
       const next = { active: state.pending, pending: null };
