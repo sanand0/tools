@@ -1,8 +1,10 @@
 # Music
 
-Play your local music files and M3U playlists with ranked search, global media controls, continuous queue and listening history.
+Play your local music files and M3U playlists offline with ranked search, global media controls, continuous queue and listening history.
 
-Static desktop music player for current Edge/Chrome. Choose your Music folder using a real click. The only IndexedDB entry is its directory handle; preferences use localStorage. Audio is never uploaded. No tag parser, metadata database, framework, build step or service worker.
+Static desktop music player for current Edge/Chrome. Choose your Music folder using a real click. The only IndexedDB entry is its directory handle; preferences use localStorage. Audio is never uploaded. No tag parser, metadata database, framework or build step.
+
+The app includes an offline shell on HTTPS or localhost. Visit it online before travel, choose your Music folder, and wait for “Ready for offline listening”; the page, player code, shared parsing modules, manifest, icon and CDN dependencies are then available after switching to flight mode. Keep the music files downloaded on the device and open the same URL in the same browser profile; the saved folder handle may need Reconnect permission after a browser restart, which works offline. Clearing browser site data removes the cached player. Installation is optional. Changes to player code or assets are checked on opening, reconnecting and returning to the page after five minutes. A quiet update notice offers Refresh or Later; playback continues until you choose Refresh. Failed setup or checks offer Retry and preserve the existing cached player.
 
 - Recursively reads audio files, joins optional root `musicdump.csv` by filename/path, and reads M3Us anywhere in the folder. Duplicate basenames are never guessed. Info includes all CSV fields and browser File facts.
 - Search ANDs forgiving words across all metadata and paths, with initials and one-edit typo tolerance. Complete field matches rank first (case-sensitive before case-insensitive), then whole words, substrings and typos; `Ko` prefers the album `Ko`. Try `rahman 199 spb`. Click headings to sort. M3Us are listed newest-modified first. A selected M3U keeps file order until you sort or shuffle. Duration appears before Track.
@@ -70,9 +72,13 @@ music.control({ action: "queue-track", track: music.find("rahman")[0].id });
 2. Allow file handling if prompted. In Ubuntu Open With / default application, choose Music for `.mp3`, `.m3u`, `.m3u8` if needed.
 3. Choose/reconnect Music Folder for metadata, history and playlist track access. An OS-launched MP3 can play outside that folder. A launched playlist grants access only to itself; unavailable entries show a reconnect message. Playlist launches use shuffle=false and repeat=off.
 
-The manifest uses an SVG icon, `/music/` scope/action, standard `file_handlers` and `focus-existing` launch handling. No offline support is promised. After deployment check DevTools Application → Manifest, app icon/install affordance, and actual Ubuntu file association behavior; OS install/association prompts require manual verification.
+The manifest uses an SVG icon, `/music/` scope/action, standard `file_handlers` and `focus-existing` launch handling. After deployment check DevTools Application → Manifest, app icon/install affordance, and actual Ubuntu file association behavior; OS install/association prompts require manual verification.
 
 ## Validation
+
+Offline and keyboard changes (6 October 2026): `npm test -- music` passes 91 tests, including Escape/Space recovery, keyboard queue building, folder cancellation and permission reconnect, decode recovery, offline navigation, interrupted downloads/writes, worker restart, unchanged and reverted deployments, and accepting or deferring updates. A separate Edge 154 browser check cached actual dependencies, reloaded with network disabled, played an in-memory WAV, and used Escape then Space to pause/resume. A change to only `script.js` offered an update without reloading; accepting it survived another offline reload. A service-worker code change waited for explicit Refresh. Narrow and desktop layouts had no horizontal overflow, and the browser reported no JavaScript errors. Lighthouse accessibility and best-practices scores were both 100. The full repository run had three unrelated failures in HN Links and Research Me; the repository has no lint script. Browser fixtures used memory-only music handles; no real music files were read or written and no binary artifacts were generated.
+
+Earlier validation before offline support:
 
 `npm test -- music` covers helpers and full-page integration with fake file handles, including Media Session handlers, native audio state changes, unsupported actions, background toggle and exact search ranking; it never writes your real history or queue. No generated binary assets or screenshots are committed.
 

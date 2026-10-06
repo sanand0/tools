@@ -186,6 +186,21 @@ summary::-webkit-details-marker {
   padding: 10px 38px 10px 12px;
   font-size: 13px;
 }
+.offline-status {
+  margin-left: auto;
+  max-width: 100%;
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: var(--panel);
+  white-space: normal;
+  font-size: 12px;
+}
+.offline-status .btn {
+  padding: 1px 7px;
+  color: var(--accent);
+}
 main {
   flex: 1;
   min-height: 0;

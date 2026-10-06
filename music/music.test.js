@@ -759,6 +759,53 @@ describe("music player integration", () => {
     expect(document.querySelector("#help").open).toBe(true);
   });
 
+  it("returns focus from native controls so Space resumes the player shortcut", async () => {
+    await connect();
+    const audio = nativeAudio();
+    await window.music.control({
+      action: "play-track",
+      track: "Tamil/Chandramukhi.mp3",
+    });
+    await waitFor(() => !audio.paused);
+
+    const controls = [
+      document.querySelector("#theme"),
+      document.querySelector("#playlist"),
+      audio,
+      document.querySelector(".navbar-brand"),
+    ];
+    for (const control of controls) {
+      control.focus();
+      expect(document.activeElement).toBe(control);
+      control.dispatchEvent(
+        new window.KeyboardEvent("keydown", {
+          key: "Escape",
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      await flush();
+      expect(document.activeElement).toBe(document.querySelector("#library-scroll"));
+
+      document.querySelector("#library-scroll").dispatchEvent(
+        new window.KeyboardEvent("keydown", {
+          key: " ",
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      await waitFor(() => audio.paused);
+      document.querySelector("#library-scroll").dispatchEvent(
+        new window.KeyboardEvent("keydown", {
+          key: " ",
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
+      await waitFor(() => !audio.paused);
+    }
+  });
+
   it("selects the first search result and uses Enter to focus results before playing", async () => {
     await connect();
     await window.music.control({ action: "select", id: "Tamil/Second.ogg" });
@@ -2059,6 +2106,116 @@ describe("music player integration", () => {
     );
   });
 
+  it("closes the menu with Escape and returns Space to playback", async () => {
+    await connect();
+    const audio = nativeAudio();
+    await window.music.control({ action: "play-track", track: "Tamil/Chandramukhi.mp3" });
+    await waitFor(() => !audio.paused);
+    document.querySelector("#menu summary").click();
+    expect(document.querySelector("#menu").open).toBe(true);
+    document.querySelector("#menu summary").dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await flush();
+    expect(document.querySelector("#menu").open).toBe(false);
+    expect(document.activeElement).toBe(document.querySelector("#library-scroll"));
+    document.activeElement.dispatchEvent(new window.KeyboardEvent("keydown", { key: " ", bubbles: true, cancelable: true }));
+    await waitFor(() => audio.paused);
+  });
+
+  it("clears a search with Escape without changing a playing queue", async () => {
+    await connect();
+    const audio = nativeAudio();
+    await window.music.control({ action: "play-m3u", path: "New.m3u" });
+    await waitFor(() => !audio.paused);
+    const before = window.music.getQueue().map(({ name }) => name);
+    const search = document.querySelector("#search");
+    search.focus();
+    search.value = "rahman";
+    search.dispatchEvent(new window.Event("input", { bubbles: true }));
+    await waitFor(() => window.music.getState().filter === "rahman");
+    search.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    await waitFor(() => window.music.getState().filter === "");
+    expect(window.music.getQueue().map(({ name }) => name)).toEqual(before);
+    expect(window.music.getState().current).toBe("Tamil/Chandramukhi.mp3");
+  });
+
+  it("treats a cancelled folder picker as a harmless user action", async () => {
+    window.showDirectoryPicker.mockRejectedValue(new DOMException("Cancelled", "AbortError"));
+    document.querySelector("#connect").click();
+    await flush();
+    expect(window.music.getState().current).toBeNull();
+    expect(document.querySelector("#alerts").textContent).not.toContain("Cancelled");
+  });
+
+  it("reports revoked folder permission and lets the user retry reconnect", async () => {
+    await connect();
+    root.requestPermission = vi.fn(async () => "denied");
+    document.querySelector("#connect").click();
+    await waitFor(() => document.querySelector("#alerts").textContent.includes("permission"));
+    expect(window.music.getState().folder).toBe("Music");
+    root.requestPermission.mockResolvedValue("granted");
+    document.querySelector("#connect").click();
+    await waitFor(() => document.querySelector("#count").textContent === "2 tracks");
+  });
+
+  it("recovers from a decode error by moving to the next queued song", async () => {
+    await connect();
+    const audio = nativeAudio();
+    await window.music.control({ action: "queue-track", track: "Tamil/Chandramukhi.mp3" });
+    await window.music.control({ action: "queue-track", track: "Tamil/Second.ogg" });
+    await window.music.control({ action: "play-queue", index: 0 });
+    audio.dispatchEvent(new window.Event("error"));
+    expect(document.querySelector("#alerts").textContent).toContain("Cannot decode");
+    await window.music.control({ action: "next" });
+    expect(window.music.getState().current).toBe("Tamil/Second.ogg");
+  });
+
+  it("builds a queue from keyboard intent before playing the selected result", async () => {
+    await connect();
+    const library = document.querySelector("#library-scroll");
+    library.focus();
+    library.dispatchEvent(new window.KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    await waitFor(() => window.music.getState().selected === "Tamil/Chandramukhi.mp3");
+    library.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", ctrlKey: true, bubbles: true }));
+    await waitFor(() => window.music.getQueue().length === 1);
+    library.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", shiftKey: true, bubbles: true }));
+    await waitFor(() => window.music.getQueue().length === 2);
+    library.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    await waitFor(() => window.music.getState().current === "Tamil/Chandramukhi.mp3");
+    expect(window.music.getQueue().map(({ name }) => name)).toEqual([
+      "Chandramukhi.mp3",
+      "Chandramukhi.mp3",
+      "Chandramukhi.mp3",
+    ]);
+  });
+
+  it("reveals more search results, sorts them, and keeps selection on a real row", async () => {
+    const tamil = await root.getDirectoryHandle("Tamil");
+    for (let index = 0; index < 205; index += 1) tamil.children.push(fileHandle(`Extra-${index}.mp3`, "audio"));
+    document.querySelector("#connect").click();
+    await waitFor(() => document.querySelector("#count").textContent === "207 tracks");
+    expect(document.querySelectorAll("#library-body tr[data-id]")).toHaveLength(200);
+    document.querySelector("#more").click();
+    await waitFor(() => document.querySelectorAll("#library-body tr[data-id]").length === 207);
+    document.querySelector('#library-head [data-value="title"]').click();
+    await waitFor(() => document.querySelector('[aria-sort="ascending"]'));
+    const row = document.querySelector('#library-body tr[data-id="Tamil/Extra-204.mp3"]');
+    row.click();
+    await waitFor(() => window.music.getState().selected === "Tamil/Extra-204.mp3");
+    expect(row.getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("closes the track info dialog with Escape and restores the library focus", async () => {
+    await connect();
+    await window.music.control({ action: "show-info", track: "Tamil/Chandramukhi.mp3" });
+    const dialog = document.querySelector("#info");
+    expect(dialog.open).toBe(true);
+    dialog.querySelector("button").focus();
+    dialog.querySelector("button").dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await flush();
+    expect(dialog.open).toBe(false);
+    expect(document.activeElement).toBe(document.querySelector("#library-scroll"));
+  });
+
   it("declares the required Chromium file handlers in the manifest", async () => {
     const manifest = JSON.parse(
       await fs.readFile(
@@ -2081,4 +2238,5 @@ describe("music player integration", () => {
       ]),
     );
   });
+
 });

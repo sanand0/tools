@@ -1,9 +1,21 @@
 # Prompts
 
-## #TODO
+## Offline and tests, 06 Oct 2026
 
-- Enable offline mode
-- Add extensive test cases
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-6.1-sol --config model_reasoning_effort=medium
+-->
+
+When I focus on an element, say a button (e.g. using tab), I can no longer press the spacebar to play. That makes sense - space should activate the button. But I'd like to be able to press Esc when on any such focused element and that should defocus (or focus on something else if required) so that I can use the shortcuts like space normally.
+
+Also enable offline mode. My main objective is to be able to use the music player on flights in flight mode. Think about what's required for that, minimally. But ensure that when I change the player code, it should update the player when online - or at least inform the user about an update and have them refresh. Don't make the update notice too intrusive - follow best practices.
+
+Thirdly, add extensive test cases. Focus more on the FUNCTIONALITY and usage rather than the technology and cover realistic tasks / paths.
+
+Implement these using sub-agents with the relevant intelligence, context, and prompts to manage context. You may decide sequential / parallel.
+
+<!-- codex resume 01a10ed7-3a6d-7b02-9232-e36b02c33e42 --yolo -->
 
 ## Tweaks, 05 Oct 2026
 

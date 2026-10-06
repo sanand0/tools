@@ -65,6 +65,7 @@
         <button id="install" class="btn btn-sm" hidden>
           <i class="bi bi-download" aria-hidden="true"></i> Install app
         </button>
+        <div id="offline-status" class="offline-status" role="status" hidden></div>
         <div class="bootstrap-dark-theme">
           <button
             id="theme"
@@ -426,7 +427,17 @@
         application for <code>.mp3</code>, <code>.m3u</code>, and
         <code>.m3u8</code>. An MP3 opens directly; a playlist needs access to
         its tracks via your selected Music folder. Reconnect if permission
-        expires. No service worker or offline cache is used.
+        expires.
+      </p>
+      <h3>Offline listening</h3>
+      <p>
+        Before your flight, open Music online, choose your Music folder, and
+        wait for “Ready for offline listening”. Keep the music files downloaded
+        on your device. You can then reopen the same URL in the same browser
+        profile in flight mode; Reconnect can renew folder permission offline.
+        Installing the app is optional. Clearing site data removes the cached
+        player. Updates offer Refresh or Later and leave playback running until
+        you choose Refresh.
       </p>
       <h3>Script &amp; agent control</h3>
       <p>
@@ -471,6 +482,7 @@ music.getState(); music.getQueue(); music.getHistory({limit:20})</pre>
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
       crossorigin="anonymous"
     ></script>
+    <script type="module" src="offline.js"></script>
     <script type="module" src="script.js"></script>
   </body>
 </html>

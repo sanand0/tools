@@ -102,7 +102,7 @@ const KEYBOARD_SHORTCUTS = [
   {
     keys: "Escape",
     description:
-      "Close a menu or dialog; otherwise clear search, then return to the library",
+      "Close a menu or dialog; otherwise clear search and focus the library",
     action: "clear-search",
   },
 ];
@@ -1790,11 +1790,27 @@ $("more").addEventListener("click", () => {
   state.limit += 200;
   renderLibrary();
 });
+function focusShortcutSurface() {
+  const library = $("library-scroll");
+  if (!library.hidden) {
+    library.focus({ preventScroll: true });
+    return;
+  }
+  document.activeElement?.blur?.();
+}
 document.addEventListener("keydown", (event) => {
   const editable = event.target.matches?.(
     "input,textarea,select,[contenteditable]",
   );
-  if (document.querySelector("dialog[open]")) return;
+  const dialog = document.querySelector("dialog[open]");
+  if (dialog) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      dialog.close();
+      focusShortcutSurface();
+    }
+    return;
+  }
   if (event.target === $("search") && event.key === "Enter") {
     event.preventDefault();
     control({ action: "focus-results" });
@@ -1803,13 +1819,14 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     if ($("menu").open) {
       $("menu").open = false;
+      event.preventDefault();
+      focusShortcutSurface();
       return;
     }
-    if (state.query || $("search").value) control({ action: "clear-search" });
-    else if (event.target === $("search")) {
-      $("search").blur();
-      $("library-scroll").focus();
-    }
+    event.preventDefault();
+    if (state.query || $("search").value)
+      control({ action: "clear-search" }).then(() => focusShortcutSurface());
+    else focusShortcutSurface();
     return;
   }
   if (event.key === "/" && (!editable || event.target === $("search"))) {
@@ -1830,7 +1847,7 @@ document.addEventListener("keydown", (event) => {
   }
   if (
     !editable &&
-    !event.target.closest?.("#menu") &&
+    !event.target.closest?.("#menu, .player, a[href]") &&
     !event.target.matches?.("button") &&
     !event.ctrlKey &&
     !event.metaKey
