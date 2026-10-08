@@ -8,7 +8,7 @@
  music.getState(), getTrack(id), find('rahman 199 spb'), getQueue(), getHistory({limit:20}).
  music-state events carry compact state. Track commands use {track:id}; select uses {id}; filter uses {query}.
  Queue persisted as path/status in queue.tsv; getQueue includes played/current/next and getState.queueIndex.
- findSimilar(id), similarity(a,b); play-similar {track:id} adds up to ten immediately after current.
+ findSimilar(id), similarity(a,b); play-similar {track:id} adds up to ten immediately after current; {index} adds after that Queue occurrence.
  locate-track {track:id} clears search, selects and reveals the library song; clear-search; focus-playlists.
  mute; volume-up/volume-down; play-any appends ten random visible tracks.
  Queue: music.control({action:'move-queue',index:2,to:'top'}); play-queue/remove-queue use {index}.
@@ -382,7 +382,8 @@
         Right-click a library value to filter it, Play now, Play next, Play at
         end, Play 10 similar next or Info. Queue’s Locate in playlist clears
         search and reveals the song, switching to All tracks if needed. Drag
-        Queue songs to reorder, or right-click for moves and removals, including
+        Queue songs to reorder, or right-click for Add 10 similar here to insert
+        after the selected song, and moves and removals, including
         all above/below. Played songs remain visible, and the current item is
         highlighted. Removing the current item or clearing the Queue stops
         playback. Shuffle queue rearranges songs after the current item. Repeat
@@ -414,7 +415,11 @@
           >play-music</a
         >, choosing from the top 30 with slight randomness and penalties for
         repeated albums and people. It adds up to ten after the current song
-        without interrupting playback. No playlist preference bonuses are
+        without interrupting playback; Queue’s Add 10 similar here adds after
+        the selected song instead. All similar-song selections exclude songs
+        played in the last seven days or 200 listening entries, whichever is
+        less: only entries within both limits are excluded, using your history
+        file and this session. No playlist preference bonuses are
         inferred; songs without matching metadata may have no similar results.
       </p>
       <h3>Open files from Ubuntu</h3>

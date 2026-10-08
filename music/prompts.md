@@ -1,5 +1,19 @@
 # Prompts
 
+## Similar songs improvements, 08 Oct 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-6.1-sol --config model_reasoning_effort=medium
+-->
+
+Update music/ minimally as follows:
+
+- When I right-click on a song in the queue and select "Play 10 similar next", it should add 10 similar songs to the queue after the SELECTED song, not the current song. Rename it to "Add 10 similar here".
+- The selection of similar songs (wherever it is used) should exclude songs played in the last 7 days or 200 songs (whichever is less). Document this in Help.
+
+<!-- codex resume 01a119b6-57ab-7dc1-abae-bca7a1e55ca5 --yolo -->
+
 ## Offline and tests, 06 Oct 2026
 
 <!--

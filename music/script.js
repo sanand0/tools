@@ -929,6 +929,20 @@ async function startTrack(
     );
   }
 }
+function findSimilarTracks(seed, options) {
+  const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const recent = new Set(
+    state.history
+      .slice(-200)
+      .filter((entry) => Date.parse(entry.timestamp) >= cutoff)
+      .map((entry) => entry.id),
+  );
+  return pickSimilarTracks(
+    seed,
+    state.tracks.filter((track) => !recent.has(track.id)),
+    options,
+  );
+}
 async function next(ended = false) {
   if (ended && state.repeat === "one" && state.current)
     return startTrack(state.current, {
@@ -944,7 +958,7 @@ async function next(ended = false) {
     state.queue.length
   ) {
     const seed = state.queue.at(-1).track;
-    const tracks = pickSimilarTracks(seed, state.tracks);
+    const tracks = findSimilarTracks(seed);
     if (tracks.length) {
       state.queue.push(...tracks.map(queueEntry));
       queueDirty = true;
@@ -1271,12 +1285,16 @@ async function dispatch(command) {
     case "play-similar": {
       const seed = index == null ? track : state.queue[Number(index)]?.track;
       if (!seed) throw new Error("Track not found. Refresh your library.");
-      const tracks = pickSimilarTracks(seed, state.tracks);
+      const tracks = findSimilarTracks(seed);
       if (!tracks.length)
         throw new Error(
           "No similar songs found in the available CSV metadata.",
         );
-      state.queue.splice(queueIndex() + 1, 0, ...tracks.map(queueEntry));
+      state.queue.splice(
+        (index == null ? queueIndex() : Number(index)) + 1,
+        0,
+        ...tracks.map(queueEntry),
+      );
       queueDirty = true;
       break;
     }
@@ -1456,7 +1474,7 @@ window.music = {
   findSimilar: (id, options = {}) => {
     const track = getTrack(id);
     return track
-      ? pickSimilarTracks(track, state.tracks, options).map(publicTrack)
+      ? findSimilarTracks(track, options).map(publicTrack)
       : [];
   },
   getTrack: (id) => publicTrack(getTrack(id)),
@@ -1536,7 +1554,7 @@ function openContextMenu(event, target) {
           (track) => track.id === state.queue[index].track.id,
         ),
       },
-      { label: "Play 10 similar next", command: command("play-similar") },
+      { label: "Add 10 similar here", command: command("play-similar") },
       {
         label: "Move up",
         command: command("move-queue", { to: "up" }),

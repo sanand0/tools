@@ -1043,10 +1043,86 @@ describe("music player integration", () => {
       }),
     );
     [...document.querySelectorAll("#context-menu button")]
-      .find((button) => button.textContent === "Play 10 similar next")
+      .find((button) => button.textContent === "Add 10 similar here")
       .click();
     await waitFor(() => window.music.getQueue().length === 5);
     expect(window.music.getState().current).toBe(current);
+  });
+
+  it.each([0, 2])("adds ten similar songs after selected queue occurrence %s, preserving playback", async (index) => {
+    const catalog = await root.getFileHandle("musicdump.csv");
+    const writer = await catalog.createWritable();
+    const rows = [
+      "filename,TIT2,TCON",
+      "Chandramukhi.mp3,Seed,Tamil",
+      "Second.ogg,Current,Jazz",
+    ];
+    for (let i = 0; i < 12; i++) {
+      root.children.push(fileHandle(`Similar-${i}.mp3`, "audio"));
+      rows.push(`Similar-${i}.mp3,Similar ${i},Tamil`);
+    }
+    await writer.write(rows.join("\n"));
+    await writer.close();
+    document.querySelector("#connect").click();
+    await waitFor(() => document.querySelector("#count").textContent === "14 tracks");
+    for (const track of ["Tamil/Chandramukhi.mp3", "Tamil/Second.ogg", "Tamil/Chandramukhi.mp3", "Tamil/Second.ogg"])
+      await window.music.control({ action: "queue-track", track });
+    await window.music.control({ action: "play-queue", index: 1 });
+    const prefix = window.music.getQueue();
+    document.querySelector(`#queue-list .queue-row[data-index="${index}"]`).dispatchEvent(
+      new window.MouseEvent("contextmenu", { bubbles: true, cancelable: true }),
+    );
+    [...document.querySelectorAll("#context-menu button")]
+      .find((button) => button.textContent === "Add 10 similar here")
+      .click();
+    await waitFor(() => window.music.getQueue().length === 14);
+    const queue = window.music.getQueue();
+    expect(queue.slice(0, index + 1)).toEqual(prefix.slice(0, index + 1));
+    expect(queue.slice(index + 1, index + 11).every(({ id }) => id.startsWith("Similar-"))).toBe(true);
+    expect(queue.slice(index + 11)).toEqual(prefix.slice(index + 1));
+    expect(window.music.getState()).toMatchObject({ current: "Tamil/Second.ogg", queueIndex: index === 0 ? 11 : 1 });
+    expect((await root.getFileHandle("queue.tsv")).text.split("\n").filter(Boolean)).toHaveLength(15);
+  });
+
+  it.each([
+    { days: 1, newer: 0, excluded: true },
+    { days: 7, newer: 0, excluded: true },
+    { days: 8, newer: 0, excluded: false },
+    { days: 1, newer: 199, excluded: true },
+    { days: 1, newer: 200, excluded: false },
+  ])("filters similar songs using both history limits: %j", async ({ days, newer, excluded }) => {
+    const now = Date.parse("2026-10-08T12:00:00Z");
+    vi.spyOn(window.Date, "now").mockReturnValue(now);
+    const writer = await history.createWritable();
+    await writer.write([
+      `${new Date(now - days * 86400000).toISOString()}\tTamil/Second.ogg\texternal`,
+      ...Array.from({ length: newer }, () => `${new Date(now).toISOString()}\tMissing.mp3\texternal`),
+    ].join("\n"));
+    await writer.close();
+    await connect();
+    const seed = "Tamil/Chandramukhi.mp3";
+    expect(window.music.findSimilar(seed).map(({ id }) => id)).toEqual(excluded ? [] : ["Tamil/Second.ogg"]);
+    await window.music.control({ action: "queue-track", track: seed });
+    const result = await window.music.control({ action: "play-similar", index: 0 });
+    expect(!!result.error).toBe(excluded);
+    expect(window.music.getQueue()).toHaveLength(excluded ? 1 : 2);
+    await window.music.control({ action: "clear-queue" });
+    await window.music.control({ action: "queue-track", track: seed });
+    await window.music.control({ action: "play-queue", index: 0 });
+    const next = await window.music.control({ action: "next" });
+    expect(next.error).toBeUndefined();
+    expect(window.music.getState().current).toBe(excluded ? seed : "Tamil/Second.ogg");
+  });
+
+  it("excludes session starts from similarity even when history cannot be written", async () => {
+    await connect();
+    nativeAudio();
+    vi.spyOn(history, "createWritable").mockRejectedValue(new Error("Write denied"));
+    await window.music.control({ action: "play-track", track: "Tamil/Second.ogg" });
+    await waitFor(() => document.querySelector("#alerts").textContent.includes("Write denied"));
+    expect(history.text).toBe("");
+    expect(window.music.getHistory()).toHaveLength(1);
+    expect(window.music.findSimilar("Tamil/Chandramukhi.mp3")).toEqual([]);
   });
 
   it.each(["next", "play", "toggle", "media-play"])("extends an exhausted queue with ten similar songs via %s and starts the batch", async (action) => {
