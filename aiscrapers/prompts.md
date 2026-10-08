@@ -1,5 +1,32 @@
 # Prompts
 
+## ChatGPT UI features, 08 Oct 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-6.1-sol --config model_reasoning_effort=medium
+-->
+
+Modify aiscrapers/chatgptscraper.js to handle the recent UI updates in ChatGPT.
+See recent chats (you may use agent-browser, etc. prefering background work - see devtools skill)
+https://chatgpt.com/c/6ac71c21-518c-83e8-8316-e0584d6c8a1b
+https://chatgpt.com/c/6ac6f41a-dfdc-83ec-98dd-3fc03b73a839
+https://chatgpt.com/c/6ac582b4-7d44-83ec-b04c-c53620d2cc90
+
+These expose several UI elements. Carefully catalog all of these. Research online for other UI elements that might have been introduced. You may create a new chat that'll surface as many of these elements as you can. Avoid closing / editing tabs you didn't open.
+
+Modify the scraper to handle the new elements. Think about how best to represent them in Markdown and JSON. The focus in on getting the information out sematically, i.e. a human and an agent reading the information should be able to make sense of it instantly. The formatting matters less.
+
+---
+
+Clean up and document as required, commit and push.
+
+--- <!-- steering -->
+
+Include prompts.md in the commit.
+
+<!-- codex resume 01a11a40-4f03-7921-b369-5035c363fc51 --yolo -->
+
 ## Consistent toolbars, 05 Oct 2026
 
 <!--

@@ -71,16 +71,22 @@
     const text = node.textContent || "";
     if (!text.trim()) return text.includes("\n") ? "" : text;
     if (!text.includes("\n")) return text.replace(/\s+/g, " ");
-    return text
+    const content = text
       .replace(/\r/g, "")
       .split("\n")
       .map((line) => line.replace(/[ \t]+/g, " ").trim())
       .join("\n")
       .replace(/^\n+|\n+$/g, "");
+    return `${/^\s/.test(text) && node.previousSibling ? " " : ""}${content}${/\s$/.test(text) && node.nextSibling ? " " : ""}`;
   }
 
   function fenceCode(code, language = "") {
-    const fence = code.includes("```") ? "````" : "```";
+    const fence = "`".repeat(
+      Math.max(
+        3,
+        ...Array.from(code.matchAll(/`+/g), (match) => match[0].length + 1),
+      ),
+    );
     return `\n${fence}${language.toLowerCase()}\n${code.replace(/\n+$/g, "")}\n${fence}\n\n`;
   }
 
@@ -128,6 +134,75 @@
       return `\n${node.dataset.aiscraperMarkdown}\n\n`;
 
     const tag = node.tagName.toLowerCase();
+    const component = node.dataset?.dComponent;
+    if (
+      node.dataset?.markdownCopy === "exclude" ||
+      component === "favicon" ||
+      component === "icon"
+    )
+      return "";
+    if (node.dataset?.markdownCopy === "code-block") {
+      const { code, language } = codeBlock(node);
+      return fenceCode(code, language);
+    }
+    if (component === "divider") return "\n---\n\n";
+    if (component === "button")
+      return `\nAction: ${cleanText(node.textContent) || attachmentLabel(node)}\n\n`;
+    if (
+      component === "popover-trigger" ||
+      (component === "pressable" && node.getAttribute("role") === "link")
+    ) {
+      const label = richLabel(node);
+      const url = node.dataset.aiscraperUrl || node.getAttribute("href");
+      const citation = node.querySelector('[data-d-component="badge"]');
+      const additional = citation && label.match(/\+(\d+)$/)?.[1];
+      const text = additional
+        ? `${label.replace(/\+\d+$/, "").trim()} (+${additional} more sources)`
+        : label;
+      const sources = JSON.parse(node.dataset.aiscraperSources || "[]");
+      const details = sources.length
+        ? ` [Sources: ${sources.map(({ label, url }) => (url ? `[${label}](${url})` : label)).join("; ")}]`
+        : "";
+      if (url) return `[${text}](${url})${details}`;
+      return `${text} (${citation ? "source" : "link"}: target not exposed)${details}`;
+    }
+    if (tag === "img" || node.getAttribute("role") === "img") {
+      const label =
+        node.getAttribute("alt") || attachmentLabel(node) || "Image";
+      const url = node.getAttribute("src");
+      return url ? `![${label}](${url})` : `[${label}]`;
+    }
+    const formula = node.querySelector(
+      'annotation[encoding="application/x-tex"]',
+    );
+    if (
+      formula &&
+      (component === "math" ||
+        node.matches(".katex, .katex-display") ||
+        tag === "math")
+    ) {
+      const display =
+        node.hasAttribute("data-d-block") ||
+        node.matches(".katex-display") ||
+        node.getAttribute("display") === "block";
+      return display
+        ? `\n$$\n${formula.textContent}\n$$\n\n`
+        : `$${formula.textContent}$`;
+    }
+    if (tag === "iframe" || tag === "canvas")
+      return `\nEmbedded ${tag === "canvas" ? "chart/visual" : "content"}: ${attachmentLabel(node) || node.getAttribute("src") || "content not exposed in the DOM"}\n\n`;
+    if (metricNode(node)) {
+      const [label, value] = Array.from(node.children).map((child) =>
+        cleanText(child.textContent),
+      );
+      return `* ${label}: **${value}**\n\n`;
+    }
+    if (component === "row" && !node.hasAttribute("data-d-inline")) {
+      return `${Array.from(node.children)
+        .map((child) => parseNode(child).trim())
+        .filter(Boolean)
+        .join(" — ")}\n\n`;
+    }
     if (
       [
         "script",
@@ -161,24 +236,250 @@
       return `\`${(node.textContent || "").replace(/\s+/g, " ").trim()}\``;
     }
     if (tag === "table") return parseTable(node);
+    if (node.hasAttribute("data-d-default-strong"))
+      return `**${parseChildren(node)}**`;
+    if (node.dataset?.dFontStyle === "italic")
+      return `*${parseChildren(node)}*`;
     if (tag === "strong" || tag === "b") return `**${parseChildren(node)}**`;
     if (tag === "em" || tag === "i") return `*${parseChildren(node)}*`;
     if (tag === "a") return parseLink(node);
+    if (
+      /^h[1-6]$/.test(tag) &&
+      component === "title" &&
+      node.closest('[data-d-component="card"]') &&
+      node.previousElementSibling?.tagName === "P"
+    )
+      return `**${parseChildren(node).trim()}**\n\n`;
     if (/^h[1-6]$/.test(tag))
       return `${"#".repeat(Number(tag[1]))} ${parseChildren(node).trim()}\n\n`;
     if (tag === "li") {
       const parent = node.parentElement;
       const marker =
         parent?.tagName?.toLowerCase() === "ol"
-          ? `${Array.from(parent.children).indexOf(node) + 1}. `
+          ? `${Number(parent.getAttribute("start") || 1) + Array.from(parent.children).indexOf(node)}. `
           : "* ";
-      return `${marker}${parseChildren(node).trim()}\n`;
+      const content = parseChildren(node).trim().replace(/\n/g, "\n  ");
+      return `${marker}${content}\n`;
     }
     if (tag === "ul" || tag === "ol") return `${parseChildren(node)}\n`;
     if (tag === "blockquote")
       return `> ${parseChildren(node).trim().replace(/\n/g, "\n> ")}\n\n`;
     const content = parseChildren(node);
-    return tag === "p" ? `${content.trim()}\n\n` : content;
+    return tag === "p" ||
+      (component &&
+        !node.hasAttribute("data-d-inline") &&
+        !["text", "code", "title"].includes(component))
+      ? `${content.trim()}\n\n`
+      : content;
+  }
+
+  // These large headings are values in cards, not document section headings.
+  const metricNode = (node) =>
+    ["box", "grid-item", "row"].includes(node.dataset?.dComponent) &&
+    node.children.length === 2 &&
+    node.children[0].tagName === "P" &&
+    /^H[1-6]$/.test(node.children[1].tagName);
+
+  const isChart = (node) =>
+    node.tagName === "SECTION" &&
+    Boolean(node.querySelector('[data-w-component="chart"]'));
+  const richLabel = (node) =>
+    cleanText(node.textContent) ||
+    attachmentLabel(node) ||
+    attachmentLabel(node.querySelector("[aria-label]")) ||
+    "Source";
+
+  function codeBlock(node) {
+    const editor = node.querySelector('[role="textbox"][data-language]');
+    const code = editor
+      ? Array.from(editor.children, (line) =>
+          textWithBreaks(line).replace(/\n$/, ""),
+        ).join("\n")
+      : textWithBreaks(node.querySelector("pre code, code") || node);
+    const language =
+      editor?.getAttribute("data-language") ||
+      cleanText(
+        node.querySelector('[data-markdown-copy="exclude"]')?.textContent,
+      );
+    return { code, language: language.toLowerCase() };
+  }
+
+  function messageParts(node) {
+    if (node.nodeType === nodeTypes.TEXT_NODE) {
+      const content = textNodeMarkdown(node);
+      return content.trim() ? [{ type: "text", content }] : [];
+    }
+    if (node.nodeType !== nodeTypes.ELEMENT_NODE || isHidden(node)) return [];
+    const content = parseNode(node).trim();
+    if (!content) return [];
+    const component = node.dataset?.dComponent;
+    const tag = node.tagName.toLowerCase();
+    const children = () => Array.from(node.childNodes).flatMap(messageParts);
+    if (node.dataset?.aiscraperPart)
+      return [JSON.parse(node.dataset.aiscraperPart)];
+    if (node.dataset?.aiscraperMarkdown) return [{ type: "text", content }];
+    if (metricNode(node))
+      return [
+        {
+          type: "metric",
+          label: cleanText(node.children[0].textContent),
+          value: cleanText(node.children[1].textContent),
+        },
+      ];
+    if (
+      component === "popover-trigger" ||
+      (component === "pressable" && node.getAttribute("role") === "link")
+    ) {
+      const citation = Boolean(
+        node.querySelector('[data-d-component="badge"]'),
+      );
+      const visibleLabel = richLabel(node);
+      const url = node.dataset.aiscraperUrl || node.getAttribute("href");
+      const additionalSources = citation
+        ? Number(visibleLabel.match(/\+(\d+)$/)?.[1] || 0)
+        : 0;
+      const label = additionalSources
+        ? visibleLabel.replace(/\+\d+$/, "").trim()
+        : visibleLabel;
+      const file = component === "pressable" && /^Download\b/i.test(label);
+      const name = file && label.match(/^Download\s+(.+\.[\w-]+)$/i)?.[1];
+      const sources =
+        node.dataset.aiscraperSources &&
+        JSON.parse(node.dataset.aiscraperSources);
+      return [
+        {
+          type: citation ? "citation" : file ? "file" : "link",
+          label,
+          ...(name && { name }),
+          ...(additionalSources && { additionalSources }),
+          ...(sources && { sources }),
+          ...(url ? { url } : { unresolved: true }),
+        },
+      ];
+    }
+    if (component === "button")
+      return [
+        {
+          type: "action",
+          label: cleanText(node.textContent) || attachmentLabel(node),
+          ...(node.disabled && { disabled: true }),
+        },
+      ];
+    if (tag === "img" || node.getAttribute("role") === "img")
+      return [
+        {
+          type: "image",
+          label: node.getAttribute("alt") || attachmentLabel(node) || "Image",
+          ...(node.getAttribute("src")
+            ? { url: node.getAttribute("src") }
+            : { unavailable: true }),
+        },
+      ];
+    if (tag === "table")
+      return [
+        {
+          type: "table",
+          rows: Array.from(node.querySelectorAll("tr"), (row) =>
+            Array.from(row.children, (cell) => parseChildren(cell).trim()),
+          ),
+          content,
+        },
+      ];
+    if (node.dataset?.markdownCopy === "code-block")
+      return [{ type: "code", ...codeBlock(node) }];
+    if (tag === "pre")
+      return [
+        {
+          type: "code",
+          language: content.match(/^`+([^\n]*)/)?.[1] || "",
+          code: textWithBreaks(node.querySelector("code") || node),
+        },
+      ];
+    if (tag === "iframe" || tag === "canvas")
+      return [
+        {
+          type: "embed",
+          kind: tag,
+          label: attachmentLabel(node),
+          ...(node.getAttribute("src") && { url: node.getAttribute("src") }),
+          unavailable: true,
+        },
+      ];
+    if (
+      (component === "math" || node.matches(".katex-display, .katex, math")) &&
+      node.querySelector('annotation[encoding="application/x-tex"]')
+    )
+      return [
+        {
+          type: "math",
+          latex: node.querySelector('annotation[encoding="application/x-tex"]')
+            .textContent,
+          display: content.startsWith("$$"),
+          content,
+        },
+      ];
+    if (tag === "code")
+      return [{ type: "inline_code", code: node.textContent }];
+    if (/^h[1-6]$/.test(tag)) {
+      if (
+        component === "title" &&
+        node.closest('[data-d-component="card"]') &&
+        node.previousElementSibling?.tagName === "P"
+      )
+        return [
+          {
+            type: "metric",
+            label: cleanText(node.previousElementSibling.textContent),
+            value: cleanText(node.textContent),
+          },
+        ];
+      return [
+        {
+          type: "heading",
+          level: Number(tag[1]),
+          content: parseChildren(node).trim(),
+        },
+      ];
+    }
+    if (tag === "p" || component === "caption")
+      return [
+        {
+          type: component === "caption" ? "caption" : "paragraph",
+          content,
+          children: children(),
+        },
+      ];
+    if (tag === "a")
+      return [
+        {
+          type: "link",
+          label: cleanText(node.textContent),
+          url: node.getAttribute("href") || "#",
+        },
+      ];
+    if (["ul", "ol", "li", "blockquote", "details", "summary"].includes(tag))
+      return [
+        {
+          type: {
+            ul: "list",
+            ol: "list",
+            li: "list-item",
+            blockquote: "quote",
+            details: "details",
+            summary: "summary",
+          }[tag],
+          ...(tag === "ol" && {
+            ordered: true,
+            start: Number(node.getAttribute("start") || 1),
+          }),
+          content,
+          children: children(),
+        },
+      ];
+    if (component === "divider" || tag === "hr") return [{ type: "divider" }];
+    if (component && !["text", "code", "title"].includes(component))
+      return [{ type: "group", component, children: children() }];
+    return children();
   }
 
   function parseChildren(node) {
@@ -273,7 +574,7 @@
 
   const attachmentLabel = (node) =>
     cleanText(
-      node.getAttribute?.("aria-label") || node.getAttribute?.("title"),
+      node?.getAttribute?.("aria-label") || node?.getAttribute?.("title"),
     );
   const isAttachment = (node) => {
     const label = attachmentLabel(node);
@@ -294,12 +595,128 @@
         !nodes.some((parent) => parent !== node && parent.contains(node)),
     );
 
+  const referencesByNode = new WeakMap();
+  const referencesByDocument = new WeakMap();
+  function exposedReference(node, index) {
+    const direct = node.getAttribute("href");
+    const preview = node.ownerDocument.getElementById(
+      node.getAttribute("aria-controls"),
+    );
+    const url =
+      direct ||
+      (preview?.getAttribute("role") === "dialog" &&
+        Array.from(preview.querySelectorAll("[href], [aria-label]"))
+          .map(
+            (element) =>
+              element.getAttribute("href") ||
+              element.getAttribute("aria-label"),
+          )
+          .find((value) => /^(?:https?:\/\/|sandbox:|\/)/.test(value || "")));
+    const sources =
+      preview?.getAttribute("role") === "dialog" &&
+      node.querySelector('[data-d-component="badge"]')
+        ? Array.from(
+            preview.querySelectorAll('[data-d-component="pressable"]'),
+            (card) => {
+              const texts = topLevelMatches(
+                Array.from(card.querySelectorAll('[data-d-component="text"]')),
+              ).map((node) => cleanText(node.textContent));
+              const label = texts.join(" — ") || richLabel(card);
+              const url = card.getAttribute("href");
+              return { label, ...(url ? { url } : { unresolved: true }) };
+            },
+          )
+        : [];
+    const label = richLabel(node);
+    const message = node.closest(
+      "[data-chatgpt-selection-message-id], [data-message-id], [data-chatgpt-search-message-ids]",
+    );
+    const id =
+      message?.getAttribute("data-chatgpt-selection-message-id") ||
+      message?.getAttribute("data-message-id") ||
+      message
+        ?.getAttribute("data-chatgpt-search-message-ids")
+        ?.trim()
+        .split(/\s+/)[0];
+    if (!referencesByDocument.has(node.ownerDocument))
+      referencesByDocument.set(node.ownerDocument, new Map());
+    const cache = id
+      ? referencesByDocument.get(node.ownerDocument)
+      : referencesByNode;
+    const key = id ? `${id}:${index}` : node;
+    if (url || sources.length) cache.set(key, { url, sources, label });
+    const cached = cache.get(key);
+    return cached?.label === label ? cached : {};
+  }
+
   function cloneForExtraction(message, role) {
     const content =
       role === "assistant"
         ? message.querySelector(".markdown") || message
         : message;
     const clone = content.cloneNode(true);
+    // Resolve only this trigger's associated preview; never click links/actions or
+    // infer a source URL from its favicon domain. Immutable IDs retain references
+    // across virtualized remounts; labels guard against recycled controls.
+    const linkSelector =
+      '[data-d-component="popover-trigger"], [data-d-component="pressable"][role="link"]';
+    const sourceLinks = Array.from(content.querySelectorAll(linkSelector));
+    clone.querySelectorAll(linkSelector).forEach((node, index) => {
+      const reference = exposedReference(sourceLinks[index], index);
+      if (reference.url) node.dataset.aiscraperUrl = reference.url;
+      if (reference.sources?.length)
+        node.dataset.aiscraperSources = JSON.stringify(reference.sources);
+    });
+    // Chart values are deliberately duplicated in a screen-reader summary.
+    // Capture that semantic data before removing UI-only accessibility labels.
+    Array.from(clone.querySelectorAll("section"))
+      .filter(isChart)
+      .forEach((chart) => {
+        const summary = Array.from(chart.querySelectorAll("li"), (item) =>
+          cleanText(item.textContent),
+        );
+        const label = attachmentLabel(chart);
+        const caption = Array.from(chart.querySelectorAll("p"), (node) =>
+          cleanText(node.textContent),
+        )
+          .filter(Boolean)
+          .join("\n");
+        const markdown = `Chart: ${label}\n${summary.length ? summary.map((line) => `* ${line}`).join("\n") : "Chart data not exposed in the DOM."}${caption ? `\n${caption}` : ""}`;
+        const replacement = clone.ownerDocument.createElement("div");
+        replacement.dataset.aiscraperMarkdown = markdown;
+        replacement.dataset.aiscraperPart = JSON.stringify({
+          type: "chart",
+          label,
+          summary,
+          ...(caption && { caption }),
+          ...(summary.length === 0 && { unavailable: true }),
+        });
+        chart.replaceWith(replacement);
+      });
+    clone
+      .querySelectorAll(
+        '[data-d-component="checkbox"], li input[type="checkbox"]',
+      )
+      .forEach((checkbox) => {
+        const label =
+          Array.from(clone.querySelectorAll("label")).find(
+            (label) => label.htmlFor === checkbox.id,
+          ) ||
+          checkbox.closest("label") ||
+          checkbox.parentElement.querySelector("label");
+        const text = cleanText(label?.textContent) || attachmentLabel(checkbox);
+        const checked =
+          checkbox.getAttribute("aria-checked") ?? String(checkbox.checked);
+        const replacement = clone.ownerDocument.createElement("div");
+        replacement.dataset.aiscraperMarkdown = `* [${checked === "true" ? "x" : checked === "mixed" ? "-" : " "}] ${text}`;
+        replacement.dataset.aiscraperPart = JSON.stringify({
+          type: "checkbox",
+          label: text,
+          checked: checked === "mixed" ? "mixed" : checked === "true",
+        });
+        checkbox.replaceWith(replacement);
+        label?.remove();
+      });
     const isTool = (node) => {
       const text = cleanText(node.innerText || node.textContent);
       return (
@@ -346,6 +763,11 @@
       .forEach((node) => node.removeAttribute("hidden"));
     clone.querySelectorAll("button").forEach((button) => {
       if (
+        button.dataset.dComponent === "button" &&
+        !button.closest('[data-markdown-copy="exclude"]')
+      )
+        return;
+      if (
         /^(?:Thought|Worked) for /i.test(
           cleanText(button.innerText || button.textContent),
         )
@@ -391,7 +813,14 @@
         (node.matches('[data-user-message-bubble="true"]')
           ? "user"
           : "assistant");
-      const content = parseChildren(cloneForExtraction(node, role)).trim();
+      const clone = cloneForExtraction(node, role);
+      const content = parseChildren(clone).trim();
+      const rich = clone.querySelector(
+        '[data-d-component], [data-aiscraper-part], img, [role="img"], .katex, math, iframe, canvas',
+      );
+      const parts = rich
+        ? Array.from(clone.childNodes).flatMap(messageParts)
+        : [];
       if (!roleLabels[role] || !content) return [];
       const turn = node.closest(
         "[data-content-search-turn-key], section[data-testid^='conversation-turn-']",
@@ -425,6 +854,7 @@
           id,
           role,
           content,
+          ...(parts.length && { parts }),
           order: Number.isFinite(order) ? order : index,
           ...(timestamp && { timestamp }),
         },
@@ -432,10 +862,11 @@
     });
   }
 
-  const publicMessage = ({ id, role, content, timestamp }) => ({
+  const publicMessage = ({ id, role, content, timestamp, parts }) => ({
     id,
     role,
     content,
+    ...(parts && { parts }),
     ...(timestamp && { timestamp }),
   });
   const extractMessages = (doc = root.document) =>
@@ -694,7 +1125,7 @@
       state.captureTimer = null;
       state.active = false;
     };
-    const controls = mountCopyControls(doc, async (format, button) => {
+    const controls = mountCopyControls(doc, async (format) => {
       await state.timestampsPromise;
       captureMessages(doc, state);
       const payload =

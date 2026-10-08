@@ -59,7 +59,7 @@
     {
       "icon": "bi-stars",
       "title": "AI Conversation Scrapers",
-      "description": "Copy AI conversations or ChatGPT sidebar chat links with bookmarklets.",
+      "description": "Copy AI conversations, rich ChatGPT responses, or sidebar chat links as Markdown and JSON with bookmarklets.",
       "url": "aiscrapers",
       "created": "2026-01-11T12:22:42+08:00"
     },
