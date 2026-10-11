@@ -8,25 +8,32 @@
       "created": "2026-10-05T00:00:00+00:00"
     },
     {
+      "icon": "bi-badge-cc",
+      "title": "Meeting Captions",
+      "description": "Bookmarklets to record and save Google Meet or Microsoft Teams captions as Markdown, with speaker names, timestamps, and meeting metadata.",
+      "url": "meetcaptions",
+      "created": "2026-03-24T00:00:00+00:00"
+    },
+    {
+      "icon": "bi-stars",
+      "title": "AI Conversation Scrapers",
+      "description": "Copy AI conversations, rich ChatGPT responses, or sidebar chat links as Markdown and JSON with bookmarklets.",
+      "url": "aiscrapers",
+      "created": "2026-01-11T12:22:42+08:00"
+    },
+    {
+      "icon": "bi-whatsapp",
+      "title": "WhatsApp Scraper",
+      "description": "Scrape WhatsApp chat messages as Markdown or JSON.",
+      "url": "whatsappscraper",
+      "created": "2025-05-11T15:46:35+05:30"
+    },
+    {
       "icon": "bi-google",
       "title": "Google Bookmarklets",
       "description": "Bookmarklets for copying useful data from GMail, Google Calendar, and other Google apps.",
       "url": "gmail",
       "created": "2026-07-24T00:00:00+00:00"
-    },
-    {
-      "icon": "bi-record-circle",
-      "title": "Record",
-      "description": "Record audio and save it locally.",
-      "url": "record",
-      "created": "2026-09-30T00:00:00+08:00"
-    },
-    {
-      "icon": "bi-bullseye",
-      "title": "Technology Radar",
-      "description": "Track technology adoption across four quadrants (Techniques, Tools, Platforms, Frameworks) and four rings (Adopt, Trial, Assess, Hold).",
-      "url": "radar",
-      "created": "2025-07-01T00:00:00+00:00"
     },
     {
       "icon": "bi-code",
@@ -43,11 +50,45 @@
       "created": "2025-10-26T00:00:00+00:00"
     },
     {
+      "icon": "bi-newspaper",
+      "title": "Hacker News Thread Markdown",
+      "description": "Bookmarklet to copy a Hacker News thread as nested Markdown bullets.",
+      "url": "hnmd",
+      "created": "2025-12-03T00:00:00+00:00"
+    },
+    {
       "icon": "bi-linkedin",
       "title": "LinkedIn Scraper Bookmarklets",
       "description": "Collection of LinkedIn bookmarklets that copy structured page data from your browser.",
       "url": "linkedinscraper",
       "created": "2026-05-11T00:00:00+00:00"
+    },
+    {
+      "icon": "bi-markdown",
+      "title": "Page to Markdown",
+      "description": "Bookmarklet to copy a web page or selection as Markdown.",
+      "url": "page2md",
+      "created": "2024-12-21T17:15:17+08:00"
+    },
+    {
+      "icon": "bi-unlock",
+      "title": "Wallhop",
+      "description": "Bookmarklet to open the current page through Wallhop for one-off paywall-free reads.",
+      "url": "readability",
+      "created": "2026-10-11T00:00:00+00:00"
+    },
+    {
+      "icon": "bi-graph-up-arrow",
+      "title": "Trending Repositories",
+      "description": "Scan weekly trending GitHub repos with status and language filters.",
+      "url": "trending-repos",
+      "created": "2025-10-06T00:00:00+00:00"
+    },
+    {
+      "icon": "bi-check2-square",
+      "title": "Google Tasks",
+      "description": "Download all your Google Tasks as CSV or Markdown and delete completed tasks.",
+      "url": "googletasks"
     },
     {
       "icon": "bi-chat-dots",
@@ -57,11 +98,39 @@
       "created": "2025-10-29T00:00:00+00:00"
     },
     {
-      "icon": "bi-stars",
-      "title": "AI Conversation Scrapers",
-      "description": "Copy AI conversations, rich ChatGPT responses, or sidebar chat links as Markdown and JSON with bookmarklets.",
-      "url": "aiscrapers",
-      "created": "2026-01-11T12:22:42+08:00"
+      "icon": "bi-braces",
+      "title": "JSON to CSV",
+      "description": "Convert arrays of JSON objects to CSV format.",
+      "url": "json2csv",
+      "created": "2024-11-01T20:02:17+08:00"
+    },
+    {
+      "icon": "bi-code",
+      "title": "GitHub Stars",
+      "description": "Replaces GitHub links in Markdown with the repo name, stars, and last pushed date.",
+      "url": "githubstars",
+      "created": "2025-04-28T11:32:38+08:00"
+    },
+    {
+      "icon": "bi-github",
+      "title": "GitHub Summary",
+      "description": "Summarize all activity by a user over a time period.",
+      "url": "githubsummary",
+      "created": "2025-05-22T15:28:43+08:00"
+    },
+    {
+      "icon": "bi-github",
+      "title": "GitHub Users",
+      "description": "Get information about GitHub users.",
+      "url": "githubusers",
+      "created": "2024-11-07T23:22:11+08:00"
+    },
+    {
+      "icon": "bi-bullseye",
+      "title": "Technology Radar",
+      "description": "Track technology adoption across four quadrants (Techniques, Tools, Platforms, Frameworks) and four rings (Adopt, Trial, Assess, Hold).",
+      "url": "radar",
+      "created": "2025-07-01T00:00:00+00:00"
     },
     {
       "icon": "bi-link-45deg",
@@ -71,11 +140,11 @@
       "created": "2026-01-12T09:00:00+08:00"
     },
     {
-      "icon": "bi-badge-cc",
-      "title": "Meeting Captions",
-      "description": "Bookmarklets to record and save Google Meet or Microsoft Teams captions as Markdown, with speaker names, timestamps, and meeting metadata.",
-      "url": "meetcaptions",
-      "created": "2026-03-24T00:00:00+00:00"
+      "icon": "bi-record-circle",
+      "title": "Record",
+      "description": "Record audio and save it locally.",
+      "url": "record",
+      "created": "2026-09-30T00:00:00+08:00"
     },
     {
       "icon": "bi-clock-history",
@@ -148,13 +217,6 @@
       "created": "2025-10-19T00:00:00+00:00"
     },
     {
-      "icon": "bi-braces",
-      "title": "JSON to CSV",
-      "description": "Convert arrays of JSON objects to CSV format.",
-      "url": "json2csv",
-      "created": "2024-11-01T20:02:17+08:00"
-    },
-    {
       "icon": "bi-book",
       "title": "PicBook",
       "description": "Create a sequence of images from captions.",
@@ -167,13 +229,6 @@
       "description": "Bookmarklet to preview and swap Bootstrap color palettes live on any page.",
       "url": "bootstrappicker",
       "created": "2025-09-21T00:00:00+00:00"
-    },
-    {
-      "icon": "bi-markdown",
-      "title": "Page to Markdown",
-      "description": "Bookmarklet to copy a web page or selection as Markdown.",
-      "url": "page2md",
-      "created": "2024-12-21T17:15:17+08:00"
     },
     {
       "icon": "bi-arrow-down-up",
@@ -190,33 +245,6 @@
       "created": "2026-03-24T00:00:00+00:00"
     },
     {
-      "icon": "bi-code",
-      "title": "GitHub Stars",
-      "description": "Replaces GitHub links in Markdown with the repo name, stars, and last pushed date.",
-      "url": "githubstars",
-      "created": "2025-04-28T11:32:38+08:00"
-    },
-    {
-      "icon": "bi-graph-up-arrow",
-      "title": "Trending Repositories",
-      "description": "Scan weekly trending GitHub repos with status and language filters.",
-      "url": "trending-repos",
-      "created": "2025-10-06T00:00:00+00:00"
-    },
-    {
-      "icon": "bi-check2-square",
-      "title": "Google Tasks",
-      "description": "Download all your Google Tasks as CSV or Markdown and delete completed tasks.",
-      "url": "googletasks"
-    },
-    {
-      "icon": "bi-whatsapp",
-      "title": "WhatsApp Scraper",
-      "description": "Scrape WhatsApp chat messages as Markdown or JSON.",
-      "url": "whatsappscraper",
-      "created": "2025-05-11T15:46:35+05:30"
-    },
-    {
       "icon": "bi-openai",
       "title": "Straive Intelligence",
       "description": "Bookmarklet to convert ChatGPT into a Straive-style user interface.",
@@ -229,13 +257,6 @@
       "description": "Bookmarklet to convert Codex into a Straive-style user interface.",
       "url": "straivecodex",
       "created": "2025-10-15T15:15:43+08:00"
-    },
-    {
-      "icon": "bi-github",
-      "title": "GitHub Summary",
-      "description": "Summarize all activity by a user over a time period.",
-      "url": "githubsummary",
-      "created": "2025-05-22T15:28:43+08:00"
     },
     {
       "icon": "bi-table",
@@ -252,25 +273,11 @@
       "created": "2025-06-03T22:05:52+08:00"
     },
     {
-      "icon": "bi-github",
-      "title": "GitHub Users",
-      "description": "Get information about GitHub users.",
-      "url": "githubusers",
-      "created": "2024-11-07T23:22:11+08:00"
-    },
-    {
       "icon": "bi-bounding-box",
       "title": "Unicode Characters",
       "description": "Find non-ASCII Unicode characters in the clipboard.",
       "url": "unicode",
       "created": "2024-12-07T08:55:00+05:30"
-    },
-    {
-      "icon": "bi-newspaper",
-      "title": "Hacker News Thread Markdown",
-      "description": "Bookmarklet to copy a Hacker News thread as nested Markdown bullets.",
-      "url": "hnmd",
-      "created": "2025-12-03T00:00:00+00:00"
     },
     {
       "icon": "bi-newspaper",

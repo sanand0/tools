@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Wallhop</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%232457f5'/%3E%3Cpath%20d='M18%2034h28v20H18zM24%2034V22a10%2010%200%200%201%2020%200'%20fill='none'%20stroke='white'%20stroke-width='5'%20stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" />
+  </head>
+  <body class="bg-body-tertiary">
+    <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4" data-bs-theme="dark">
+      <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="../">
+          <i class="bi bi-unlock me-2" aria-hidden="true"></i>
+          Wallhop
+        </a>
+        <div class="bootstrap-dark-theme"></div>
+      </div>
+    </nav>
+    <main class="container py-5">
+      <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-7">
+          <header class="mb-5 text-center">
+            <h1 class="display-5 mb-2">Wallhop</h1>
+            <p class="lead text-secondary">Skip the paywall for a one-off read</p>
+          </header>
+          <section class="bg-body shadow-sm border rounded-3 p-4 text-center mb-5">
+            <h2 class="h5 mb-3">Install the bookmarklet</h2>
+            <p class="mb-3">Drag this button to your bookmarks bar:</p>
+            <a id="bookmarklet" href="javascript:void(location.href='https://wallhop.io/'+location.href)" class="btn btn-primary btn-lg shadow-sm" draggable="true">Wallhop</a>
+          </section>
+          <section class="bg-body shadow-sm border rounded-3 p-4">
+            <h2 class="h5 text-secondary text-center mb-3">Usage</h2>
+            <ol class="mb-4 ps-3">
+              <li>Open the article you want to read.</li>
+              <li>Click the saved <kbd>Wallhop</kbd> bookmark.</li>
+              <li>The current tab opens the article through Wallhop.</li>
+            </ol>
+            <p class="text-break">The bookmark prefixes the full page URL with <code>https://wallhop.io/</code>. For example, <code>https://example.com/article</code> becomes <code>https://wallhop.io/https://example.com/article</code>.</p>
+            <p class="text-secondary mb-0">As <a href="https://wallhop.io/">Wallhop's docs</a> explain, this is for one-off reads. Subscribe to publications you read regularly.</p>
+          </section>
+        </div>
+      </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-dark-theme@1" type="module"></script>
+    <script type="module" src="wallhop.js"></script>
+  </body>
+</html>

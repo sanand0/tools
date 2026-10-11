@@ -1,5 +1,12 @@
 # Prompts
 
+## #TODO
+
+Update music/ minimally as follows:
+
+- Remove the "Reconnect" button. The "Reconnect music folder" menu item is enough.
+- After I move the audio control position slider, pressing Esc does not restore focus to the playlist - it stays on the slider. Fix this.
+
 ## Similar songs improvements, 08 Oct 2026
 
 <!--
