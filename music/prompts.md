@@ -4,8 +4,9 @@
 
 Update music/ minimally as follows:
 
-- Remove the "Reconnect" button. The "Reconnect music folder" menu item is enough.
+- Remove the "Reconnect" button. The "Reconnect music folder" menu item is enough - and this feels too big / prominent compared with its low importance / frequency of usage.
 - After I move the audio control position slider, pressing Esc does not restore focus to the playlist - it stays on the slider. Fix this.
+- When adding 10 similar songs (from queue or playlist) to the queue, remove items already in the queue - and it's OK if that leads to less than 10 songs.
 
 ## Similar songs improvements, 08 Oct 2026
 

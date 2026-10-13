@@ -71,6 +71,12 @@
       "created": "2024-12-21T17:15:17+08:00"
     },
     {
+      "icon": "bi-moon-stars",
+      "title": "Dark Mode",
+      "description": "Toggle a readable dark theme on supported sites with a bookmarklet.",
+      "url": "darkmode"
+    },
+    {
       "icon": "bi-unlock",
       "title": "Wallhop",
       "description": "Bookmarklet to open the current page through Wallhop for one-off paywall-free reads.",
