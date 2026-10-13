@@ -73,7 +73,7 @@
     {
       "icon": "bi-moon-stars",
       "title": "Dark Mode",
-      "description": "Toggle a readable dark theme on supported sites with a bookmarklet.",
+      "description": "Toggle readable dark mode for Gmail messages and Hacker News with a bookmarklet.",
       "url": "darkmode"
     },
     {

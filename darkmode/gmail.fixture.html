@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gmail message fixtures</title>
+  <style>
+    body { background: #101010; color: #eeeeee; }
+    .ii.gt { background: white; color: black; }
+    .iY, .btDi4d { background-color: white; color: black; }
+    .newsletter { background: #fff; color: #111; }
+    .newsletter td { background: #fafafa; color: #333; }
+    .noshow { display: none; }
+  </style>
+</head>
+<body>
+  <nav>Inbox navigation <a href="#inbox">Inbox</a></nav>
+  <table id="inbox"><tbody><tr><td>Message list and snippet</td></tr></tbody></table>
+  <section class="iY" id="message-pane">
+  <header id="message-header">Subject, sender, reply and archive controls</header>
+  <main id="messages">
+    <div class="ii gt"><div class="a3s aiL" id="plain">Plain text message.<br />Second line.<a href="#link">A link</a></div></div>
+    <div class="ii gt"><div class="a3s aiL newsletter" id="newsletter" style="background-color: white; color: black">
+      <table bgcolor="#ffffff"><tbody><tr><td bgcolor="#ffff00" style="background-color: white; color: #222; border: 1px solid #eee">
+        <h1>Newsletter heading</h1><font color="#000000">Legacy HTML</font>
+        <a href="#offer" style="background: #e00; color: white"><span style="color: white">Offer button</span></a>
+        <div id="gradient" style="background-image: linear-gradient(white, #eee)">Gradient banner</div>
+        <img id="email-image" width="120" height="40" alt="Logo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40'%3E%3Crect width='120' height='40' fill='white'/%3E%3C/svg%3E" />
+      </td></tr></tbody></table>
+      <span id="preheader" style="display: none; color: transparent; height: 0">Hidden preheader</span>
+    </div></div>
+    <div class="ii gt"><div class="a3s aiL" id="thread" dir="rtl">
+      Reply in another language: مرحبا
+      <blockquote class="gmail_quote" style="color: #777; border-left: 1px solid #ccc"><p>Quoted reply</p></blockquote>
+      <details><summary>Earlier messages</summary><div style="background: white">Earlier reply</div></details>
+      <pre style="background-color: #fafafa; color: #111"><code>const answer = 42;</code></pre>
+    </div></div>
+    <div class="ii gt noshow"><div class="a3s aiL" id="collapsed" style="background-color: #121212; color: white">Already dark, collapsed message</div></div>
+  </main>
+  <section class="btDi4d" id="attachments">Attachment preview</section>
+  <button id="reply" type="button" role="button">Reply</button>
+  </section>
+  <div class="a3s" id="draft" contenteditable="true" role="textbox" style="background: white; color: black">Unsaved draft</div>
+  <div class="editable" contenteditable="true"><div class="gmail_quote">Quoted draft</div></div>
+</body>
+</html>

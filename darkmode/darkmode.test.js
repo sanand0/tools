@@ -22,6 +22,86 @@ const openSite = (url = "https://news.ycombinator.com/item?id=1") => {
   return { page, window, document };
 };
 
+const openGmail = (url = "https://mail.google.com/mail/u/1/#inbox/thread") => {
+  const page = browser.newPage();
+  page.mainFrame.url = url;
+  const { window, document } = page.mainFrame;
+  document.write(readFileSync(new URL("gmail.fixture.html", import.meta.url), "utf8"));
+  return { page, window, document };
+};
+
+describe("Gmail message bodies", () => {
+  it("themes plain text, newsletters, tables, quotes, code, RTL and already dark mail", () => {
+    const { window, document } = openGmail();
+    window.eval(source);
+    for (const id of ["plain", "newsletter", "thread", "collapsed"]) {
+      const body = document.getElementById(id);
+      expect(window.getComputedStyle(body).backgroundColor).toBe("#202124");
+      expect(window.getComputedStyle(body).color).toBe("#e8eaed");
+    }
+    for (const selector of ["td[bgcolor]", "font", "blockquote", "code"]) {
+      expect(window.getComputedStyle(document.querySelector(selector)).color).toBe("#e8eaed");
+    }
+    expect(window.getComputedStyle(document.querySelector("#newsletter a span")).color).toBe("#8ab4f8");
+    expect(window.getComputedStyle(document.getElementById("gradient")).backgroundImage).toBe("none");
+    expect(window.getComputedStyle(document.querySelector("td[bgcolor]")).backgroundColor).toBe("transparent");
+    expect(window.getComputedStyle(document.getElementById("preheader")).display).toBe("none");
+    expect(document.getElementById("thread").dir).toBe("rtl");
+    const image = window.getComputedStyle(document.getElementById("email-image"));
+    expect(image.filter).not.toContain("invert");
+    expect(document.getElementById("email-image").getAttribute("width")).toBe("120");
+  });
+
+  it("darkens the surrounding conversation, preserves inbox and pop-out drafts, and restores exact markup", () => {
+    const { window, document } = openGmail();
+    const original = document.documentElement.outerHTML;
+    const selectors = ["body", "nav", "#inbox", "#draft", ".editable"];
+    const colors = () => selectors.map((selector) => {
+      const style = window.getComputedStyle(document.querySelector(selector));
+      return [style.color, style.backgroundColor];
+    });
+    const before = colors();
+    for (let i = 0; i < 3; i++) {
+      window.eval(source);
+      expect(colors()).toEqual(before);
+      expect(window.getComputedStyle(document.getElementById("message-pane")).backgroundColor).toBe("#202124");
+      for (const selector of ["#message-header", "#attachments", "#reply"]) {
+        expect(window.getComputedStyle(document.querySelector(selector)).color).toBe("#e8eaed");
+        expect(window.getComputedStyle(document.querySelector(selector)).backgroundColor).toBe("transparent");
+      }
+      expect(document.querySelectorAll("#tools-darkmode-style")).toHaveLength(1);
+      window.eval(source);
+      expect(document.documentElement.outerHTML).toBe(original);
+    }
+    window.eval(source);
+    document.getElementById("draft").textContent = "Updated draft";
+    document.querySelector("details").open = true;
+    document.querySelector(".noshow").classList.remove("noshow");
+    window.eval(source);
+    expect(document.getElementById("draft").textContent).toBe("Updated draft");
+    expect(document.querySelector("details").open).toBe(true);
+    expect(document.getElementById("collapsed").parentElement.classList.contains("noshow")).toBe(false);
+  });
+
+  it("can start in the inbox, then follow navigation, expanded threads and preview panes", () => {
+    const { window, document } = openGmail("https://mail.google.com/mail/u/0/#inbox");
+    document.getElementById("messages").replaceChildren();
+    window.eval(source);
+    const style = document.getElementById("tools-darkmode-style");
+    for (const route of ["#inbox/one", "#search/receipt/two", "#all/three", "#sent/four"]) {
+      window.location.hash = route;
+      document.getElementById("messages").replaceChildren();
+      document.getElementById("messages").insertAdjacentHTML("beforeend", '<div class="ii gt"><div class="a3s aiL" style="background-color: white; color: black">New message</div></div>');
+      expect(window.getComputedStyle(document.querySelector(".ii .a3s")).backgroundColor).toBe("#202124");
+      document.querySelector(".a3s").insertAdjacentHTML("beforeend", '<blockquote style="color: black">Expanded quote</blockquote>');
+      expect(window.getComputedStyle(document.querySelector("blockquote")).color).toBe("#e8eaed");
+      expect(document.getElementById("tools-darkmode-style")).toBe(style);
+    }
+    window.eval(source);
+    expect(window.getComputedStyle(document.querySelector(".a3s")).backgroundColor).toBe("white");
+  });
+});
+
 describe("darkmode bookmarklet", () => {
   it("toggles repeatedly, restores original markup, and preserves interactive state", () => {
     const { window, document } = openSite();
@@ -84,7 +164,7 @@ describe("darkmode bookmarklet", () => {
     expect(contrast("#141414", "#ff6600")).toBeGreaterThanOrEqual(4.5);
   });
 
-  it.each(["https://example.com/", "https://news.ycombinator.com.evil.test/", "https://ycombinator.com/"])(
+  it.each(["https://example.com/", "https://news.ycombinator.com.evil.test/", "https://ycombinator.com/", "https://mail.google.com.evil.test/", "https://google.com/"])(
     "leaves unsupported host %s unchanged", (url) => {
       const { window, document } = openSite(url);
       window.alert = vi.fn();
@@ -95,13 +175,13 @@ describe("darkmode bookmarklet", () => {
     },
   );
 
-  it("loads the installation page and executes the actual encoded bookmark URL", async () => {
+  it.each(["https://news.ycombinator.com/login", "https://mail.google.com/mail/u/0/#inbox"])("loads the installation page and executes the actual encoded bookmark URL on %s", async (url) => {
     const { document, page } = await loadFrom(new URL(".", import.meta.url).pathname);
     const link = document.getElementById("bookmarklet");
     expect(link.classList.contains("disabled")).toBe(false);
     expect(document.getElementById("bookmarklet-spinner").classList.contains("d-none")).toBe(true);
     expect(link.href.startsWith("javascript:")).toBe(true);
-    const { window, document: site } = openSite("https://news.ycombinator.com/login");
+    const { window, document: site } = url.startsWith("https://mail.google.com/") ? openGmail(url) : openSite(url);
     const code = decodeURIComponent(link.href.slice("javascript:".length));
     expect(window.eval(code)).toBeUndefined();
     expect(site.getElementById("tools-darkmode-style")).not.toBeNull();

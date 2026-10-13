@@ -1,8 +1,13 @@
 // @ts-check
 (() => {
+  // Gmail uses these containers for received messages, including reading panes
+  // and expanded conversations. Scope every rule here, away from lists/drafts.
+  const gmailBody = '.ii.gt .a3s:not([contenteditable="true"])';
   // Exact hosts keep future site themes isolated; no requests run on the target site.
   const themes = {
-    "news.ycombinator.com": `
+    "news.ycombinator.com": {
+      name: "Hacker News (news.ycombinator.com)",
+      css: `
       html { color-scheme: dark !important; background: #141414 !important; }
       body { background: #141414 !important; color: #c8c8c8 !important; }
       #hnmain, [bgcolor] { background-color: #202020 !important; }
@@ -50,11 +55,63 @@
       .votearrow { filter: brightness(1.8); }
       a:hover .votearrow { filter: brightness(2.4); }
       ::selection { background: #ffbd80 !important; color: #141414 !important; }
-    `,
+      `,
+    },
+    "mail.google.com": {
+      name: "Gmail (mail.google.com)",
+      css: `
+        /* The conversation surface surrounds the body with subject, sender,
+           attachment and reply areas. Gmail's inbox uses a separate container. */
+        .iY {
+          color-scheme: dark !important;
+          background-color: #202124 !important;
+          color: #e8eaed !important;
+        }
+        .iY * {
+          background-color: transparent !important;
+          color: #e8eaed !important;
+          border-color: #5f6368 !important;
+        }
+        .iY [role="button"]:hover, .iY [role="button"]:focus-visible {
+          background-color: #303134 !important;
+        }
+        /* Gmail's monochrome sprite controls need light pixels; mail images
+           and sender avatars keep their original colors. */
+        .iY .ajz, .iY .iV { filter: brightness(0) invert(1) !important; }
+        ${gmailBody} {
+          color-scheme: dark !important;
+          background-color: #202124 !important;
+          color: #e8eaed !important;
+        }
+        /* Neutralize sender colors and legacy bgcolor/font attributes without
+           changing layout, hidden preheaders, quoted text or image pixels. */
+        ${gmailBody} * {
+          background-color: transparent !important;
+          color: #e8eaed !important;
+          border-color: #5f6368 !important;
+          text-shadow: none !important;
+          -webkit-text-fill-color: currentColor !important;
+        }
+        ${gmailBody}[style*="gradient" i], ${gmailBody} [style*="gradient" i] {
+          background-image: none !important;
+        }
+        ${gmailBody} a[href], ${gmailBody} a[href] * {
+          color: #8ab4f8 !important;
+        }
+        ${gmailBody} a[href]:hover { text-decoration: underline !important; }
+        ${gmailBody} :focus-visible {
+          outline: 2px solid #8ab4f8 !important; outline-offset: 2px !important;
+        }
+        ${gmailBody} ::selection, ${gmailBody}::selection {
+          background-color: #8ab4f8 !important; color: #202124 !important;
+          -webkit-text-fill-color: currentColor !important;
+        }
+      `,
+    },
   };
-  const css = themes[location.hostname];
-  if (!css) {
-    alert("Dark Mode currently supports Hacker News (news.ycombinator.com). Other sites are unchanged.");
+  const theme = themes[location.hostname];
+  if (!theme) {
+    alert(`Dark Mode currently supports ${Object.values(themes).map(({ name }) => name).join(" and ")}. Other sites are unchanged.`);
     return;
   }
   const id = "tools-darkmode-style";
@@ -65,6 +122,8 @@
   }
   const style = document.createElement("style");
   style.id = id;
-  style.textContent = css;
+  // Keep the stylesheet in the document head: Gmail replaces message bodies
+  // during navigation, but newly inserted bodies match these rules immediately.
+  style.textContent = theme.css;
   document.head.append(style);
 })();
