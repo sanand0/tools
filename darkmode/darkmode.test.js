@@ -31,6 +31,28 @@ const openGmail = (url = "https://mail.google.com/mail/u/1/#inbox/thread") => {
 };
 
 describe("Gmail message bodies", () => {
+  it("themes the floating compose backdrop without changing its sticky state or controls", () => {
+    const { window, document } = openGmail();
+    const bar = document.querySelector(".aDj");
+    const original = bar.outerHTML;
+    window.eval(source);
+    // Happy DOM does not render pseudo-elements; check the parsed rule here
+    // and verify the actual backdrop and scrolling in Chromium.
+    const rule = [...document.getElementById("tools-darkmode-style").sheet.cssRules]
+      .find(({ selectorText }) => selectorText === ".iY .aDj::after");
+    expect(bar.matches(rule.selectorText.replace("::after", ""))).toBe(true);
+    expect(document.getElementById("draft").matches(rule.selectorText.replace("::after", ""))).toBe(false);
+    expect(rule.style.backgroundColor).toBe("#202124");
+    expect(rule.style.getPropertyPriority("background-color")).toBe("important");
+    bar.classList.remove("ahe");
+    expect(bar.matches(rule.selectorText.replace("::after", ""))).toBe(true);
+    bar.classList.add("ahe");
+    expect(bar.outerHTML).toBe(original);
+    window.eval(source);
+    expect(document.getElementById("tools-darkmode-style")).toBeNull();
+    expect(bar.outerHTML).toBe(original);
+  });
+
   it("themes plain text, newsletters, tables, quotes, code, RTL and already dark mail", () => {
     const { window, document } = openGmail();
     window.eval(source);

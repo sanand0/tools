@@ -1,5 +1,19 @@
 # darkmode
 
+## GMail dark mode fix, 14 Oct 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-6.1-sol --config model_reasoning_effort=medium
+-->
+
+Update darkmode/ for Gmail.
+There's a niche case on Gmail where the toolbar for email formatting etc. when composing an email has a white background.
+I have that on my screen right now (agent-browser, CDP localhost:9222, see devtools skill, prefer background operations without disturbing tab focus).
+This vanishes when I scroll. See if you can fix it. Minimally, elegantly.
+
+<!-- codex resume 01a138d3-1d6d-7be3-8c84-a032c2327c6e --yolo -->
+
 ## GMail, 13 Oct 2026
 
 <!--
@@ -22,7 +36,6 @@ We will add more sites in the future. Extend the bookmarklet in a modular way.
 Keep in mind that I want the entire screen to be dark - not a white box that contains a dark email.
 
 <!-- codex resume 01a135c9-5138-7003-8398-257ad993853c --yolo -->
-
 
 ## Hacker News, 13 Oct 2026
 

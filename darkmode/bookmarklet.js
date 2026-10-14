@@ -72,6 +72,8 @@
           color: #e8eaed !important;
           border-color: #5f6368 !important;
         }
+        /* Gmail paints the floating compose action bar on a pseudo-element. */
+        .iY .aDj::after { background-color: #202124 !important; }
         .iY [role="button"]:hover, .iY [role="button"]:focus-visible {
           background-color: #303134 !important;
         }
