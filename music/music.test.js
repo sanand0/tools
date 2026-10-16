@@ -476,7 +476,7 @@ describe("music player integration", () => {
   });
 
   const connect = async () => {
-    document.querySelector("#connect").click();
+    document.querySelector('#menu [data-action="reconnect"]').click();
     await waitFor(
       () => document.querySelector("#count")?.textContent === "2 tracks",
     );
@@ -771,7 +771,7 @@ describe("music player integration", () => {
     const controls = [
       document.querySelector("#theme"),
       document.querySelector("#playlist"),
-      audio,
+      document.querySelector("#position"),
       document.querySelector(".navbar-brand"),
     ];
     for (const control of controls) {
@@ -865,7 +865,7 @@ describe("music player integration", () => {
       for (const child of [tamil, old, current, catalog, history])
         yield [child.name, child];
     };
-    document.querySelector("#connect").click();
+    document.querySelector('#menu [data-action="reconnect"]').click();
     await waitFor(
       () => document.querySelector("#count")?.textContent === "3 tracks",
     );
@@ -893,7 +893,7 @@ describe("music player integration", () => {
     const tamil = await root.getDirectoryHandle("Tamil");
     for (let index = 0; index < 205; index += 1)
       tamil.children.push(fileHandle(`Song-${index}.mp3`, "audio"));
-    document.querySelector("#connect").click();
+    document.querySelector('#menu [data-action="reconnect"]').click();
     await waitFor(
       () => document.querySelector("#count")?.textContent === "207 tracks",
     );
@@ -940,6 +940,7 @@ describe("music player integration", () => {
     });
     audio.currentTime = 90;
     audio.dispatchEvent(new window.Event("pause"));
+    await window.music.control({ action: "play-track", track: "Tamil/Second.ogg" });
     await window.music.control({
       action: "play-track",
       track: "Tamil/Chandramukhi.mp3",
@@ -976,6 +977,7 @@ describe("music player integration", () => {
     audio.dispatchEvent(new window.Event("playing"));
     audio.currentTime = 42;
     audio.dispatchEvent(new window.Event("pause"));
+    await window.music.control({ action: "play-track", track: "Tamil/Second.ogg" });
     const clock = vi
       .spyOn(window.Date, "now")
       .mockReturnValue(window.Date.now() + 25 * 60 * 60 * 1000);
@@ -988,6 +990,7 @@ describe("music player integration", () => {
     audio.dispatchEvent(new window.Event("playing"));
     audio.currentTime = 42;
     audio.dispatchEvent(new window.Event("pause"));
+    await window.music.control({ action: "play-track", track: "Tamil/Second.ogg" });
     await window.music.control({
       action: "play-track",
       track: "Tamil/Chandramukhi.mp3",
@@ -998,55 +1001,34 @@ describe("music player integration", () => {
     expect(audio.currentTime).toBe(0);
   });
 
-  it("inserts up to ten similar tracks after the current track without interrupting it", async () => {
+  it.each(["library", "queue"])("excludes songs already queued when adding similar songs from %s", async (source) => {
     await connect();
-    await window.music.control({
-      action: "play-track",
-      track: "Tamil/Chandramukhi.mp3",
-    });
-    const current = window.music.getState().current;
-    const future = await window.music.findSimilar(current);
-    expect(future.map(({ id }) => id)).toContain("Tamil/Second.ogg");
-    await window.music.control({
-      action: "queue-track",
-      track: "Tamil/Second.ogg",
-    });
-    await window.music.control({ action: "play-similar", track: current });
-    expect(window.music.getState().current).toBe(current);
+    const audio = nativeAudio();
+    await window.music.control({ action: "play-track", track: "Tamil/Chandramukhi.mp3" });
+    await window.music.control({ action: "queue-track", track: "Tamil/Second.ogg" });
+    const before = window.music.getQueue();
+    const row = document.querySelector(source === "library" ? '#library-body tr[data-id="Tamil/Chandramukhi.mp3"]' : "#queue-list .queue-row");
+    row.dispatchEvent(new window.MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+    [...document.querySelectorAll("#context-menu button")].find((button) => button.textContent.includes("similar")).click();
+    await waitFor(() => document.querySelector("#alerts").textContent.includes("No similar"));
+    expect(window.music.getQueue()).toEqual(before);
+    expect(audio.paused).toBe(false);
+    expect(document.querySelector("#connect")).toBeNull();
+  });
+
+  it("adds fewer similar songs after removing existing queue items", async () => {
+    root.children.push(fileHandle("Third.mp3", "audio"));
+    const catalog = await root.getFileHandle("musicdump.csv");
+    const writer = await catalog.createWritable();
+    await writer.write(catalog.text + "Third.mp3,Third,Another Artist,Soundtrack,Another Composer,1996,03,240\n");
+    await writer.close();
+    await window.music.control({ action: "reconnect" });
+    await window.music.control({ action: "play-track", track: "Tamil/Chandramukhi.mp3" });
+    await window.music.control({ action: "queue-track", track: "Tamil/Second.ogg" });
+    await window.music.control({ action: "play-similar", index: 0 });
     expect(window.music.getQueue().map(({ id }) => id)).toEqual([
-      current,
-      "Tamil/Second.ogg",
-      "Tamil/Second.ogg",
+      "Tamil/Chandramukhi.mp3", "Third.mp3", "Tamil/Second.ogg",
     ]);
-    expect((await root.getFileHandle("queue.tsv")).text).toBe(
-      "path\tstatus\nTamil/Chandramukhi.mp3\tcurrent\nTamil/Second.ogg\tnext\nTamil/Second.ogg\tnext\n",
-    );
-    expect(typeof window.music.findSimilar).toBe("function");
-    document
-      .querySelector('#library-body tr[data-id="Tamil/Chandramukhi.mp3"]')
-      .dispatchEvent(
-        new window.MouseEvent("contextmenu", {
-          bubbles: true,
-          cancelable: true,
-        }),
-      );
-    const similarButton = [
-      ...document.querySelectorAll("#context-menu button"),
-    ].find((button) => button.textContent.includes("similar"));
-    expect(similarButton).toBeTruthy();
-    similarButton.click();
-    await waitFor(() => window.music.getQueue().length === 4);
-    document.querySelector("#queue-list .queue-row").dispatchEvent(
-      new window.MouseEvent("contextmenu", {
-        bubbles: true,
-        cancelable: true,
-      }),
-    );
-    [...document.querySelectorAll("#context-menu button")]
-      .find((button) => button.textContent === "Add 10 similar here")
-      .click();
-    await waitFor(() => window.music.getQueue().length === 5);
-    expect(window.music.getState().current).toBe(current);
   });
 
   it.each([0, 2])("adds ten similar songs after selected queue occurrence %s, preserving playback", async (index) => {
@@ -1063,7 +1045,7 @@ describe("music player integration", () => {
     }
     await writer.write(rows.join("\n"));
     await writer.close();
-    document.querySelector("#connect").click();
+    document.querySelector('#menu [data-action="reconnect"]').click();
     await waitFor(() => document.querySelector("#count").textContent === "14 tracks");
     for (const track of ["Tamil/Chandramukhi.mp3", "Tamil/Second.ogg", "Tamil/Chandramukhi.mp3", "Tamil/Second.ogg"])
       await window.music.control({ action: "queue-track", track });
@@ -1139,7 +1121,7 @@ describe("music player integration", () => {
     }
     await writer.write(rows.join("\n"));
     await writer.close();
-    document.querySelector("#connect").click();
+    document.querySelector('#menu [data-action="reconnect"]').click();
     await waitFor(() => document.querySelector("#count").textContent === "14 tracks");
     const audio = nativeAudio();
     await window.music.playM3U("New.m3u");
@@ -2216,7 +2198,7 @@ describe("music player integration", () => {
 
   it("treats a cancelled folder picker as a harmless user action", async () => {
     window.showDirectoryPicker.mockRejectedValue(new DOMException("Cancelled", "AbortError"));
-    document.querySelector("#connect").click();
+    document.querySelector('#menu [data-action="reconnect"]').click();
     await flush();
     expect(window.music.getState().current).toBeNull();
     expect(document.querySelector("#alerts").textContent).not.toContain("Cancelled");
@@ -2225,24 +2207,114 @@ describe("music player integration", () => {
   it("reports revoked folder permission and lets the user retry reconnect", async () => {
     await connect();
     root.requestPermission = vi.fn(async () => "denied");
-    document.querySelector("#connect").click();
+    document.querySelector('#menu [data-action="reconnect"]').click();
     await waitFor(() => document.querySelector("#alerts").textContent.includes("permission"));
     expect(window.music.getState().folder).toBe("Music");
     root.requestPermission.mockResolvedValue("granted");
-    document.querySelector("#connect").click();
+    document.querySelector('#menu [data-action="reconnect"]').click();
     await waitFor(() => document.querySelector("#count").textContent === "2 tracks");
   });
 
-  it("recovers from a decode error by moving to the next queued song", async () => {
+  it.each([false, true])("waits one second, appends decode errors and skips even with repeat-one=%s", async (repeatOne) => {
     await connect();
     const audio = nativeAudio();
-    await window.music.control({ action: "queue-track", track: "Tamil/Chandramukhi.mp3" });
-    await window.music.control({ action: "queue-track", track: "Tamil/Second.ogg" });
-    await window.music.control({ action: "play-queue", index: 0 });
-    audio.dispatchEvent(new window.Event("error"));
-    expect(document.querySelector("#alerts").textContent).toContain("Cannot decode");
-    await window.music.control({ action: "next" });
-    expect(window.music.getState().current).toBe("Tamil/Second.ogg");
+    await window.music.playM3U("New.m3u");
+    if (repeatOne) await window.music.control({ action: "repeat", value: "one" });
+    const errors = await root.getFileHandle("errors.tsv", { create: true });
+    const writer = await errors.createWritable();
+    await writer.write("old entry");
+    await writer.close();
+    Object.defineProperty(audio, "error", { value: { code: 3, message: "Truncated\tfile\nend" } });
+    vi.useFakeTimers();
+    const originalTimeout = window.setTimeout;
+    window.setTimeout = setTimeout;
+    try {
+      audio.dispatchEvent(new window.Event("error"));
+      audio.dispatchEvent(new window.Event("error"));
+      expect(audio.paused).toBe(true);
+      await vi.advanceTimersByTimeAsync(999);
+      expect(window.music.getState().current).toBe("Tamil/Chandramukhi.mp3");
+      expect(errors.text).toMatch(/^old entry\n[^\t\n]+\tTamil\/Chandramukhi.mp3\tTruncated file end\n$/);
+      await vi.advanceTimersByTimeAsync(1);
+      await window.music.control({ action: "pause" });
+      expect(window.music.getState().current).toBe("Tamil/Second.ogg");
+    } finally {
+      window.setTimeout = originalTimeout;
+      vi.useRealTimers();
+    }
+  });
+
+  it("cancels a pending decode skip when the user changes tracks", async () => {
+    await connect();
+    const audio = nativeAudio();
+    await window.music.playM3U("New.m3u");
+    vi.useFakeTimers();
+    const originalTimeout = window.setTimeout;
+    window.setTimeout = setTimeout;
+    try {
+      audio.dispatchEvent(new window.Event("error"));
+      await window.music.control({ action: "next" });
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(window.music.getState().current).toBe("Tamil/Second.ogg");
+      expect(audio.paused).toBe(false);
+    } finally {
+      window.setTimeout = originalTimeout;
+      vi.useRealTimers();
+    }
+  });
+
+  it("opens queue actions by tapping the three-dot button", async () => {
+    await connect();
+    await window.music.playM3U("New.m3u");
+    document.querySelector('[data-action="queue-menu"]').click();
+    expect(document.querySelector("#context-menu").hidden).toBe(false);
+    [...document.querySelectorAll("#context-menu button")].find((button) => button.textContent === "Remove from queue").click();
+    await waitFor(() => window.music.getQueue().length === 1);
+    expect(window.music.getQueue()[0].id).toBe("Tamil/Second.ogg");
+  });
+
+  it.each(["queue", "library"])("keeps playing or resumes the current song from %s without reloading", async (source) => {
+    await connect();
+    const audio = nativeAudio();
+    await window.music.playM3U("New.m3u");
+    const src = audio.src;
+    audio.currentTime = 42;
+    const play = window.HTMLMediaElement.prototype.play;
+    const pause = window.HTMLMediaElement.prototype.pause;
+    const click = () => document.querySelector(source === "queue" ? '#queue-list [data-action="play-queue"]' : '#library-body [data-action="play-track"]').click();
+    play.mockClear();
+    pause.mockClear();
+    click();
+    await window.music.control({ action: "volume", value: 1 });
+    expect(play).not.toHaveBeenCalled();
+    expect(pause).not.toHaveBeenCalled();
+    await window.music.control({ action: "pause" });
+    click();
+    await window.music.control({ action: "volume", value: 1 });
+    expect(audio.paused).toBe(false);
+    expect(audio.currentTime).toBe(42);
+    expect(audio.src).toBe(src);
+    expect(window.music.getQueue()).toHaveLength(2);
+    expect(window.music.getHistory()).toHaveLength(1);
+  });
+
+  it("seeks with the position slider and returns focus to the library on Escape", async () => {
+    await connect();
+    const audio = nativeAudio();
+    await window.music.playM3U("New.m3u");
+    audio.dispatchEvent(new window.Event("durationchange"));
+    const slider = document.querySelector("#position");
+    expect(slider.disabled).toBe(false);
+    expect(slider.max).toBe("240");
+    slider.focus();
+    slider.value = "42";
+    slider.dispatchEvent(new window.Event("input", { bubbles: true }));
+    await window.music.control({ action: "volume", value: 1 });
+    expect(audio.currentTime).toBe(42);
+    audio.dispatchEvent(new window.Event("timeupdate"));
+    expect(document.querySelector("#position-label").textContent).toBe("0:42");
+    slider.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    expect(document.activeElement).toBe(document.querySelector("#library-scroll"));
   });
 
   it("builds a queue from keyboard intent before playing the selected result", async () => {
@@ -2267,7 +2339,7 @@ describe("music player integration", () => {
   it("reveals more search results, sorts them, and keeps selection on a real row", async () => {
     const tamil = await root.getDirectoryHandle("Tamil");
     for (let index = 0; index < 205; index += 1) tamil.children.push(fileHandle(`Extra-${index}.mp3`, "audio"));
-    document.querySelector("#connect").click();
+    document.querySelector('#menu [data-action="reconnect"]').click();
     await waitFor(() => document.querySelector("#count").textContent === "207 tracks");
     expect(document.querySelectorAll("#library-body tr[data-id]")).toHaveLength(200);
     document.querySelector("#more").click();

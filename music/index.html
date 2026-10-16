@@ -123,14 +123,7 @@
               title="Append 10 random visible songs and start that batch"
             >
               <i class="bi bi-shuffle" aria-hidden="true"></i> Play Any</button
-            ><button
-              id="connect"
-              class="btn btn-accent"
-              data-action="reconnect"
             >
-              <i class="bi bi-folder2-open" aria-hidden="true"></i> Choose
-              folder
-            </button>
           </div>
         </header>
         <div id="welcome" class="welcome">
@@ -324,9 +317,22 @@
           value="1"
         /><output id="volume-label" for="volume">100%</output>
       </div>
+      <div class="position-control">
+        <output id="position-label" for="position">0:00</output>
+        <input
+          id="position"
+          type="range"
+          min="0"
+          max="0"
+          step="1"
+          value="0"
+          aria-label="Playback position"
+          disabled
+        />
+        <span id="duration-label">0:00</span>
+      </div>
       <audio
         id="audio"
-        controls
         preload="metadata"
         aria-label="Audio playback"
       ></audio>

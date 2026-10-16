@@ -1,6 +1,11 @@
 # Prompts
 
-## #TODO
+## Improve music, 16 Oct 2026
+
+<!--
+cd ~/code/tools/
+dev.sh -- codex --yolo --model gpt-6.1-sol --config model_reasoning_effort=medium
+-->
 
 Update music/ minimally as follows:
 
@@ -11,6 +16,8 @@ Update music/ minimally as follows:
 - On touch devices, I am not able to "right-click" on the queue. In the library I can long-press and that acts like a double-click. In the queue it acts like a drag action. Resolve this in a popular UX friendly way that requires little code change.
 - When I click on the currently playing song in the queue, it pauses for a bit and continues - as if trying to change songs, and then re-playing the same song from the same place. Instead, if the currently playing song is clicked in the queue (or library), ignore it. Let the song continue (or play, if it's been paused).
 - On mobile, "Local files. No uploads" takes up an entire row. I think that's a waste of space. Drop it on mobile.
+
+<!-- codex resume 01a1452e-c887-7531-b116-537c3acd3665 --yolo -->
 
 ## Similar songs improvements, 08 Oct 2026
 

@@ -453,7 +453,13 @@ function renderLists() {
           "x",
         );
         remove.dataset.index = index;
-        row.append(remove);
+        const menu = actionButton(
+          "queue-menu",
+          `Actions for ${track.title}`,
+          "three-dots-vertical",
+        );
+        menu.setAttribute("aria-haspopup", "menu");
+        row.append(menu, remove);
       }
       return row;
     });
@@ -693,7 +699,6 @@ async function refresh() {
     );
     $("playlist").value = state.playlist;
     $("folder-label").textContent = `${folder.name} / LOCAL MUSIC`;
-    $("connect").textContent = "Reconnect";
     if (skipped.length)
       report(
         `Skipped ${skipped.length} unreadable items: ${skipped.slice(0, 6).join("; ")}${skipped.length > 6 ? "; see files and refresh after reconnecting" : ""}`,
@@ -924,9 +929,11 @@ async function startTrack(
   try {
     await audio.play();
   } catch (error) {
-    report(
-      `Cannot play ${track.name}: ${error.name === "NotAllowedError" ? "autoplay was blocked. Click Play to start." : error.message + ". This file may be missing or use an unsupported format."}`,
-    );
+    if (error.name === "NotSupportedError") recoverDecodeError(error.message);
+    else
+      report(
+        `Cannot play ${track.name}: ${error.name === "NotAllowedError" ? "autoplay was blocked. Click Play to start." : error.message + ". This file may be missing or use an unsupported format."}`,
+      );
   }
 }
 function findSimilarTracks(seed, options) {
@@ -943,8 +950,8 @@ function findSimilarTracks(seed, options) {
     options,
   );
 }
-async function next(ended = false) {
-  if (ended && state.repeat === "one" && state.current)
+async function next(ended = false, failed = false) {
+  if (!failed && ended && state.repeat === "one" && state.current)
     return startTrack(state.current, {
       remember: false,
       entry: state.queueCurrent,
@@ -1072,7 +1079,7 @@ async function dispatch(command) {
         if (audio.ended) await next();
         else if (!activeStart)
           await startTrack(state.current, { entry: state.queueCurrent });
-        else await audio.play();
+        else if (audio.paused) await audio.play();
       } else await next();
       break;
     case "pause":
@@ -1101,7 +1108,8 @@ async function dispatch(command) {
       break;
     }
     case "next":
-      await next(command.ended);
+      if (command.failedStart && activeStart !== command.failedStart) break;
+      await next(command.ended, !!command.failedStart);
       break;
     case "previous": {
       if (state.current && audio.currentTime > 3) {
@@ -1178,6 +1186,8 @@ async function dispatch(command) {
       break;
     }
     case "play-track":
+      if (track && track.id === state.current?.id)
+        return dispatch({ action: "play" });
       await startTrack(track);
       break;
     case "queue-track":
@@ -1217,6 +1227,7 @@ async function dispatch(command) {
       )
         break;
       const queued = state.queue[position];
+      if (queued === state.queueCurrent) return dispatch({ action: "play" });
       await startTrack(queued.track, { entry: queued });
       break;
     }
@@ -1285,7 +1296,10 @@ async function dispatch(command) {
     case "play-similar": {
       const seed = index == null ? track : state.queue[Number(index)]?.track;
       if (!seed) throw new Error("Track not found. Refresh your library.");
-      const tracks = findSimilarTracks(seed);
+      const queued = new Set(state.queue.map(({ track }) => track.id));
+      const tracks = findSimilarTracks(seed).filter(
+        (track) => !queued.has(track.id),
+      );
       if (!tracks.length)
         throw new Error(
           "No similar songs found in the available CSV metadata.",
@@ -1499,6 +1513,10 @@ document.addEventListener("click", (event) => {
   }
   const button = event.target.closest("[data-action]");
   if (button) {
+    if (button.dataset.action === "queue-menu") {
+      openContextMenu(event, button);
+      return;
+    }
     control({
       action: button.dataset.action,
       value: button.dataset.value,
@@ -1729,7 +1747,7 @@ document.addEventListener(
 );
 $("queue-list").addEventListener("dragstart", (event) => {
   const row = event.target.closest(".queue-row");
-  if (!row || event.target.closest('[data-action="remove-queue"]')) {
+  if (!row || event.target.closest('button:not(.track-label)')) {
     event.preventDefault();
     return;
   }
@@ -1799,6 +1817,9 @@ $("playlist").addEventListener("change", () =>
 );
 $("speed").addEventListener("change", () =>
   control({ action: "speed", value: Number($("speed").value) }),
+);
+$("position").addEventListener("input", () =>
+  control({ action: "seek", seconds: Number($("position").value) }),
 );
 $("volume").addEventListener("input", () =>
   control({ action: "volume", value: Number($("volume").value) }),
@@ -1969,12 +1990,45 @@ audio.addEventListener("ended", () => {
   mediaPosition();
   control({ action: "next", ended: true });
 });
-audio.addEventListener("error", () => {
-  if (state.current)
-    report(
-      `Cannot decode ${state.current.name}. Try another track or format; Next skips this file.`,
-    );
-});
+function recoverDecodeError(
+  message = audio.error?.message || `Media error ${audio.error?.code || "unknown"}`,
+) {
+  const start = activeStart;
+  if (!start || start.failed) return;
+  start.failed = true;
+  audio.pause();
+  report(`Cannot decode ${start.track.name}: ${message}. Skipping in one second.`);
+  const timestamp = localTimestamp();
+  logWrites = logWrites
+    .then(async () => {
+      if (!start.folder)
+        throw new Error("Choose/reconnect Music Folder to write errors.tsv.");
+      const handle = await start.folder.getFileHandle("errors.tsv", { create: true });
+      const file = await handle.getFile();
+      const writer = await handle.createWritable({ keepExistingData: true });
+      try {
+        const tail = file.size ? await file.slice(-1).text() : "\n";
+        const line = [timestamp, start.track.path, message]
+          .map((value) => value.replace(/[\t\r\n]/g, " "))
+          .join("\t");
+        await writer.write({
+          type: "write",
+          position: file.size,
+          data: `${tail === "\n" ? "" : "\n"}${line}\n`,
+        });
+        await writer.close();
+      } catch (error) {
+        await writer.abort?.();
+        throw error;
+      }
+    })
+    .catch((error) => report(`Error not saved: ${error.message}`));
+  setTimeout(() => {
+    if (activeStart === start)
+      control({ action: "next", ended: true, failedStart: start });
+  }, 1000);
+}
+audio.addEventListener("error", () => recoverDecodeError());
 audio.addEventListener("timeupdate", mediaPosition);
 audio.addEventListener("durationchange", mediaPosition);
 audio.addEventListener("emptied", mediaPosition);
@@ -2021,6 +2075,16 @@ audio.addEventListener("volumechange", () => {
 });
 
 function mediaPosition() {
+  const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+  $("position").max = duration;
+  $("position").disabled = !duration || !state.current;
+  $("position").value = audio.currentTime || 0;
+  $("position-label").textContent = durationLabel(audio.currentTime) || "0:00";
+  $("duration-label").textContent = durationLabel(duration) || "0:00";
+  $("position").setAttribute(
+    "aria-valuetext",
+    `${$("position-label").textContent} of ${$("duration-label").textContent}`,
+  );
   if (!navigator.mediaSession) return;
   const session = navigator.mediaSession;
   if (!state.current) session.metadata = null;
@@ -2136,12 +2200,11 @@ const ready = (async () => {
     const folder = await savedFolder();
     if (folder) {
       state.folder = folder;
-      $("connect").textContent = "Reconnect";
       if ((await folder.queryPermission({ mode: "read" })) === "granted")
         await refresh();
       else
         report(
-          "Your saved Music folder needs permission. Click Reconnect to load it.",
+          "Your saved Music folder needs permission. Use Reconnect Music Folder in the menu to load it.",
         );
     }
   } catch {

@@ -571,10 +571,14 @@ ol {
 #repeat.active {
   color: var(--accent);
 }
-audio {
+.position-control {
   width: 100%;
-  height: 30px;
-  display: block;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
   margin-top: 0;
   grid-column: 1 / -1;
 }
@@ -677,6 +681,9 @@ a {
   }
 }
 @media (max-width: 720px) {
+  .side-footer {
+    display: none;
+  }
   body {
     height: 100dvh;
   }
@@ -898,7 +905,7 @@ th:last-child {
   color: var(--accent);
 }
 @media (max-width: 720px) {
-  .player audio {
+  .player .position-control {
     grid-row: 3;
   }
   .library-tools #count {
@@ -938,4 +945,10 @@ th:last-child {
   opacity: 0.75;
   margin: 0 !important;
   flex-shrink: 0;
+}
+
+#position {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
 }
