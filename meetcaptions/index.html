@@ -26,17 +26,20 @@
       <div class="col-lg-8 col-xl-7">
         <header class="mb-5 text-center">
           <h1 class="display-5 mb-2">Meeting Captions</h1>
-          <p class="lead text-secondary">Continuously record Google Meet or Microsoft Teams captions to a local Markdown file, or copy them to your clipboard.</p>
+          <p class="lead text-secondary">Record Google Meet or Microsoft Teams captions, or upload MP4 video backgrounds to Google Meet.</p>
         </header>
 
         <section class="bg-body shadow-sm border rounded-3 p-4 text-center mb-5">
           <p class="mb-3">Drag these buttons to your bookmarks bar:</p>
           <div class="d-flex flex-wrap justify-content-center gap-2 mb-3" id="bookmarklets">
-            <a href="" class="btn btn-primary btn-lg shadow-sm" data-captions-provider="google-meet">
+            <a href="" class="btn btn-primary btn-lg shadow-sm" data-bookmarklet="google-meet">
               <i class="bi bi-badge-cc me-1"></i> Google Meet Captions
             </a>
-            <a href="" class="btn btn-secondary btn-lg shadow-sm" data-captions-provider="teams">
+            <a href="" class="btn btn-secondary btn-lg shadow-sm" data-bookmarklet="teams">
               <i class="bi bi-microsoft-teams me-1"></i> Teams Captions
+            </a>
+            <a href="" class="btn btn-outline-primary btn-lg" data-bookmarklet="meet-mp4">
+              <i class="bi bi-camera-video me-1"></i> Meet MP4 Background
             </a>
           </div>
           <p class="text-secondary small mb-0" id="bookmarklet-status">
@@ -54,6 +57,7 @@
             <li>Click <strong>Start Recording</strong> to continuously save captions to a local <code>.md</code> file.</li>
             <li>Click <strong>Stop Recording</strong> when done. The file includes speaker names, timestamps, participants, and duration.</li>
             <li>Or click <strong>Copy</strong> to copy the current visible captions to the clipboard.</li>
+            <li>For MP4 backgrounds: open Google Meet's <strong>Backgrounds and effects → Backgrounds</strong> panel, click <strong>Meet MP4 Background</strong>, and choose an <code>.mp4</code> file. The video may take a moment to appear.</li>
           </ol>
         </section>
       </div>

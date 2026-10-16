@@ -1,7 +1,7 @@
 // @ts-check
 import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 
-const bookmarkletButtons = Array.from(document.querySelectorAll("[data-captions-provider]"));
+const bookmarkletButtons = Array.from(document.querySelectorAll("[data-bookmarklet]"));
 const statusText = document.getElementById("bookmarklet-status-text");
 const spinner = document.getElementById("bookmarklet-spinner");
 const errorText = document.getElementById("bookmarklet-error");
@@ -9,11 +9,17 @@ const errorText = document.getElementById("bookmarklet-error");
 const providers = {
   "google-meet": {
     label: "Google Meet",
+    file: "meetcaptions.js",
     call: "meetcaptions.googleMeet.scrape();",
   },
   teams: {
     label: "Teams",
+    file: "meetcaptions.js",
     call: "meetcaptions.teams.scrape();",
+  },
+  "meet-mp4": {
+    label: "Google Meet MP4 background",
+    file: "meetbackground.js",
   },
 };
 
@@ -30,10 +36,10 @@ const showError = (message) => {
 };
 
 const loadBookmarklet = async (provider) => {
-  const response = await fetch("meetcaptions.js", { cache: "no-store" });
+  const response = await fetch(provider.file, { cache: "no-store" });
   if (!response.ok) throw new Error(`Unable to load ${provider.label} bookmarklet (${response.status})`);
   const code = await response.text();
-  return `javascript:${encodeURIComponent(`${code};${provider.call}`)}`;
+  return `javascript:${encodeURIComponent(`${code}${provider.call ? `;${provider.call}` : ""}`)}`;
 };
 
 async function loadBookmarklets() {
@@ -43,7 +49,7 @@ async function loadBookmarklets() {
   try {
     await Promise.all(
       bookmarkletButtons.map(async (button) => {
-        const provider = providers[button.dataset.captionsProvider];
+        const provider = providers[button.dataset.bookmarklet];
         if (!provider) return;
         button.href = await loadBookmarklet(provider);
       }),

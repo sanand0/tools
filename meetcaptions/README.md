@@ -1,6 +1,6 @@
 # Meeting Captions
 
-Bookmarklets to record and save Google Meet or Microsoft Teams captions as Markdown, with speaker names, timestamps, and meeting metadata.
+Bookmarklets to record Google Meet or Teams captions as Markdown and upload MP4 video backgrounds to Google Meet.
 
 ## Usage
 
@@ -10,6 +10,15 @@ Bookmarklets to record and save Google Meet or Microsoft Teams captions as Markd
 4. **Copy** copies a snapshot of the currently visible captions to the clipboard as Markdown.
 5. **Start Recording** opens a save-file dialog, then continuously writes captions to a local `.md` file as speakers talk.
 6. **Stop Recording** flushes any pending text and closes the file. The `.md` file is only finalized on Stop; Chrome writes to a `.crswap` swap file during recording.
+
+## MP4 backgrounds
+
+1. Drag the **Meet MP4 Background** button from the tool page to your bookmarks bar.
+2. Join or preview a Google Meet meeting. Open **Backgrounds and effects → Backgrounds** (so the personal-background uploader is available).
+3. Click the bookmarklet. It adds `video/mp4` to Meet's existing background file picker and opens the file chooser.
+4. Select an MP4 file. Processing may take a few seconds; once uploaded, it appears among your personal backgrounds.
+
+This uses an **unofficial** Meet file-picker workaround tested in October 2026. It changes the upload filter in the current page only; it does not convert the video or guarantee compatibility after future Meet updates. Run it again if Meet replaces the picker.
 
 ## Output format
 
@@ -36,7 +45,7 @@ Timestamps show minutes and seconds elapsed since recording started.
 
 ## How it works
 
-The bookmarklet injects a self-contained IIFE into the meeting page. No external requests are made after injection - everything runs locally in the browser.
+Each bookmarklet injects JavaScript into the meeting page. No external requests are made after injection - everything runs locally in the browser. The MP4 bookmarklet changes the existing background input's `accept` attribute and clicks that input within the bookmarklet's user gesture.
 
 Google Meet captions are read from the captions region with structural fallbacks for Meet's obfuscated class names. Microsoft Teams captions are read from visible `role="log"` entries, using `data-tid="author"` for the speaker and `data-tid="closed-caption-text"` for the caption text.
 

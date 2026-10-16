@@ -7,6 +7,10 @@ Update music/ minimally as follows:
 - Remove the "Reconnect" button. The "Reconnect music folder" menu item is enough - and this feels too big / prominent compared with its low importance / frequency of usage.
 - After I move the audio control position slider, pressing Esc does not restore focus to the playlist - it stays on the slider. Fix this.
 - When adding 10 similar songs (from queue or playlist) to the queue, remove items already in the queue - and it's OK if that leads to less than 10 songs.
+- In case a song cannot be decoded (e.g. the file was truncated), pause for 1 second and continue with the next song. It should append the error (timestamp, file, error) in errors.tsv in the same directory as the history, queue, etc.
+- On touch devices, I am not able to "right-click" on the queue. In the library I can long-press and that acts like a double-click. In the queue it acts like a drag action. Resolve this in a popular UX friendly way that requires little code change.
+- When I click on the currently playing song in the queue, it pauses for a bit and continues - as if trying to change songs, and then re-playing the same song from the same place. Instead, if the currently playing song is clicked in the queue (or library), ignore it. Let the song continue (or play, if it's been paused).
+- On mobile, "Local files. No uploads" takes up an entire row. I think that's a waste of space. Drop it on mobile.
 
 ## Similar songs improvements, 08 Oct 2026
 

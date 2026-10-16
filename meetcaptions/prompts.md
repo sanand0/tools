@@ -1,5 +1,11 @@
 # Prompts
 
+## Meet MP4 Backgrounds, 16 Oct 2026
+
+<!-- https://chatgpt.com/c/6ad0d37c-9db8-83ec-abe9-d8b5180b0403 -->
+
+Update ~/code/tools/meetcaptions/ to add another bookmarklet that lets me upload MP4 files as backgrounds in Google Meet.
+
 ## Captions filename and position, 29 Sep 2026
 
 <!--
