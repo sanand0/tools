@@ -2210,8 +2210,12 @@ describe("music player integration", () => {
     document.querySelector('#menu [data-action="reconnect"]').click();
     await waitFor(() => document.querySelector("#alerts").textContent.includes("permission"));
     expect(window.music.getState().folder).toBe("Music");
+    const reconnect = document.querySelector('#alerts [data-action="reconnect"]');
+    expect(reconnect?.textContent).toBe("Reconnect");
     root.requestPermission.mockResolvedValue("granted");
-    document.querySelector('#menu [data-action="reconnect"]').click();
+    reconnect.click();
+    await waitFor(() => root.requestPermission.mock.calls.length === 2);
+    await waitFor(() => !document.querySelector("#alerts [data-action='reconnect']"));
     await waitFor(() => document.querySelector("#count").textContent === "2 tracks");
   });
 

@@ -236,6 +236,16 @@ function report(message) {
       const body = toast.querySelector(".toast-body");
       if (body) {
         body.replaceChildren(content.cloneNode(true));
+        if (/\breconnect\b/i.test(message)) {
+          const button = make(
+            "button",
+            "Reconnect",
+            "btn btn-sm toast-reconnect",
+          );
+          button.type = "button";
+          button.dataset.action = "reconnect";
+          body.append(button);
+        }
         if (close) body.append(close);
       }
       toast.querySelector(".toast-header")?.remove();
@@ -1517,6 +1527,8 @@ document.addEventListener("click", (event) => {
       openContextMenu(event, button);
       return;
     }
+    if (button.matches("#alerts [data-action='reconnect']"))
+      button.closest(".toast")?.querySelector(".btn-close")?.click();
     control({
       action: button.dataset.action,
       value: button.dataset.value,
@@ -2204,7 +2216,7 @@ const ready = (async () => {
         await refresh();
       else
         report(
-          "Your saved Music folder needs permission. Use Reconnect Music Folder in the menu to load it.",
+          "Your saved Music folder needs permission. Reconnect to load it.",
         );
     }
   } catch {
