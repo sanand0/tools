@@ -762,6 +762,10 @@
       )
       .forEach((node) => node.removeAttribute("hidden"));
     clone.querySelectorAll("button").forEach((button) => {
+      if (button.matches('[data-testid="generated-image-preview"]')) {
+        button.replaceWith(...button.childNodes); // Keep the image, never activate its preview.
+        return;
+      }
       if (
         button.dataset.dComponent === "button" &&
         !button.closest('[data-markdown-copy="exclude"]')
@@ -804,9 +808,14 @@
       ? legacyNodes
       : Array.from(
           scope.querySelectorAll(
-            '[data-user-message-bubble="true"], [data-markdown-text-style="assistant-message"]',
+            '[data-user-message-bubble="true"], [data-markdown-text-style="assistant-message"], [data-chatgpt-search-message-ids]:has([data-testid="generated-image-gallery"]):not(:has([data-markdown-text-style="assistant-message"]))',
           ),
-        ).filter((node) => !node.closest("[hidden], [aria-hidden='true']"));
+        ).filter((node) =>
+          !node.closest("[hidden], [aria-hidden='true']") &&
+          // Agent activity headings share the reply's Markdown style, but are UI
+          // summaries rather than independently identified conversation messages.
+          !node.matches('[data-markdown-text-style="assistant-message"][data-markdown-text-tone="tertiary"]'),
+        );
     return nodes.flatMap((node, index) => {
       const role =
         node.getAttribute("data-message-author-role") ||

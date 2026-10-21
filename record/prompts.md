@@ -1,5 +1,23 @@
 # Prompts
 
+## Improve, add video, 21 Oct 2026
+
+<!--
+cd ~/code/tools/
+claude --model opus --effort medium
+-->
+
+Improve record/ so that:
+
+- It can record video as well as audio. Make sure it's compressed as much as possible - video quality can be very low, audio quality same as the audio recording.
+- It has a better, more useful UI (think about how I might use it in real life)
+
+---
+
+Improve the UI. No need to stick to the current design at all - just retain the functionality.
+
+<!-- claude --resume 484b87ce-21cd-4104-9d25-38f6674b5998 -->
+
 ## Initial draft, 30 Sep 2026
 
 <!-- Record Voice and Screen Tools: https://chatgpt.com/c/6abcb43c-05a4-83ec-88a4-30442ef8e799?src=history_search -->

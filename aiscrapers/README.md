@@ -14,6 +14,9 @@ Drag a bookmarklet from the landing page to the bookmarks bar, open the matching
 
 The ChatGPT scraper preserves cards, label/value metrics, tables, chart summaries,
 checkbox states, math, code editors, citations, files, images, and action labels.
+Generated-image-only replies retain their message IDs and image references; preview
+buttons are unwrapped in the extraction clone without being activated. Image URLs
+may expire; this does not download or archive the image binaries.
 Markdown is the readable transcript. JSON keeps `{ id, role, content, timestamp? }`
 and adds ordered `parts` for rich messages. Nested `children` retain card/grid
 boundaries; `content` remains the full Markdown message for existing consumers.
@@ -41,6 +44,9 @@ For example, a rich message's `parts` can contain:
   }
 ]
 ```
+
+Agent activity summaries marked as tertiary Markdown are excluded as standalone
+messages; they do not have independent conversation message identities.
 
 Extraction is passive. It does not activate buttons, checkboxes, downloads,
 reasoning panels, or widgets. A link without an exposed target gets

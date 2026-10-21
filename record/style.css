@@ -1,0 +1,959 @@
+/* Hardware look after Teenage Engineering's TP-7 field recorder: an aluminium body, a black display, keycaps, one orange key. */
+:root {
+  --body: #e3e1dc;
+  --panel: #f3f2ee;
+  --panel-edge: #d2cfc7;
+  --ink: #1c1c1a;
+  --muted: #5d5a53;
+  --accent: #ff4f00;
+  --accent-ink: #fff;
+  --key: #fcfbf8;
+  --key-edge: #c9c5bb;
+  --key-shadow: #a9a497;
+  --lcd: #0d0e0c;
+  --lcd-ink: #eeede6;
+  --lcd-dim: #8f8e87;
+  --ui-font: "Familjen Grotesk", system-ui, sans-serif;
+  --mono-font: "Martian Mono", ui-monospace, monospace;
+}
+
+[data-bs-theme="dark"] {
+  --body: #111110;
+  --panel: #1c1c1b;
+  --panel-edge: #2d2c2a;
+  --ink: #ecebe5;
+  --muted: #8f8c84;
+  --key: #2a2a28;
+  --key-edge: #3a3936;
+  --key-shadow: #050505;
+  --lcd: #050505;
+}
+
+input,
+select,
+button {
+  font-family: inherit;
+}
+
+body {
+  background: var(--body);
+  color: var(--ink);
+  font-family: var(--ui-font);
+}
+
+.legend,
+kbd {
+  font-family: var(--mono-font);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+kbd {
+  padding: 0.05rem 0.3rem;
+  border-radius: 0.2rem;
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  color: var(--muted);
+}
+
+/* ---------- Layout ---------- */
+
+.studio {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 1200px) {
+  .studio {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+
+  .device {
+    position: sticky;
+    top: 1rem;
+  }
+}
+
+.device,
+.library {
+  animation: rise 500ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.library {
+  animation-delay: 120ms;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}
+
+/* ---------- Device body ---------- */
+
+.device {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: 1.5rem;
+  padding: clamp(0.85rem, 2.5vw, 1.5rem);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 60%, transparent),
+    0 1.5rem 3rem -1.5rem rgb(0 0 0 / 0.35);
+}
+
+[data-bs-theme="dark"] .device {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 1.5rem 3rem -1.5rem rgb(0 0 0 / 0.8);
+}
+
+.device-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.plate {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.plate-model {
+  font-family: var(--mono-font);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+}
+
+.plate-sub {
+  font-family: var(--mono-font);
+  font-size: 0.62rem;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.dest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+  min-width: 0;
+}
+
+.dest .legend {
+  color: var(--muted);
+}
+
+.dest-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* Status lamp: a coloured LED plus a short label */
+.lamp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--mono-font);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.lamp::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--lamp, #8a877f);
+  box-shadow: 0 0 0.4rem var(--lamp, transparent);
+}
+
+.lamp[data-tone="ready"] {
+  --lamp: #2fbf4a;
+}
+
+.lamp[data-tone="warn"] {
+  --lamp: #ffb300;
+}
+
+.chip-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--key-edge);
+  border-radius: 999px;
+  background: var(--key);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: 0 1px 0 var(--key-shadow);
+}
+
+.chip-button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.chip-button:disabled {
+  opacity: 0.45;
+}
+
+/* ---------- Display ---------- */
+
+.lcd {
+  /* Waveform/level colours, read by script.js from the canvas. Tuned to glow on black in both themes. */
+  --bs-secondary-color: #55544e;
+  --bs-info: #49c6ff;
+  --bs-success: #8dff5a;
+  --bs-warning: #ffc533;
+  --bs-danger: #ff3d1f;
+  background: var(--lcd);
+  color: var(--lcd-ink);
+  border-radius: 0.9rem;
+  padding: 0.7rem 0.85rem 0.8rem;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 0.04),
+    inset 0 0.6rem 1.2rem rgb(0 0 0 / 0.6),
+    0 0 0 0.35rem color-mix(in srgb, var(--panel-edge) 70%, transparent);
+  font-family: var(--mono-font);
+}
+
+.lcd-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  min-height: 1.4rem;
+}
+
+.lcd-gap {
+  flex: 1;
+}
+
+.lcd-mode {
+  color: var(--lcd-dim);
+}
+
+.lcd-db {
+  font-variant-numeric: tabular-nums;
+  text-transform: none;
+}
+
+.rec-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  color: var(--lcd-dim);
+}
+
+.rec-flag::after {
+  content: "Standby";
+}
+
+.rec-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+[data-state="starting"] .rec-flag::after {
+  content: "Arming";
+}
+
+[data-state="countdown"] .rec-flag::after {
+  content: "Get ready";
+}
+
+[data-state="countdown"] .rec-flag,
+[data-state="recording"] .rec-flag {
+  color: var(--bs-danger);
+}
+
+[data-state="recording"] .rec-flag::after {
+  content: "Rec";
+}
+
+[data-state="recording"] .rec-dot {
+  animation: blink 1s steps(2, start) infinite;
+  box-shadow: 0 0 0.5rem var(--bs-danger);
+}
+
+[data-state="paused"] .rec-flag {
+  color: var(--bs-warning);
+}
+
+[data-state="paused"] .rec-flag::after {
+  content: "Paused";
+}
+
+[data-state="saving"] .rec-flag::after {
+  content: "Saving";
+}
+
+@keyframes blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+.level-badge {
+  min-width: 5.5rem;
+  padding: 0.1rem 0.45rem;
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--level, var(--lcd-dim));
+}
+
+.level-badge[data-level="info"] {
+  --level: var(--bs-info);
+}
+
+.level-badge[data-level="success"] {
+  --level: var(--bs-success);
+}
+
+.level-badge[data-level="warning"] {
+  --level: var(--bs-warning);
+}
+
+.level-badge[data-level="danger"] {
+  --level: var(--bs-danger);
+  background: color-mix(in srgb, var(--bs-danger) 25%, transparent);
+}
+
+.lcd-stage {
+  position: relative;
+  margin: 0.5rem 0;
+  height: clamp(8rem, 24vh, 13rem);
+  border-radius: 0.4rem;
+  overflow: hidden;
+  /* faint dot-matrix grid */
+  background:
+    radial-gradient(circle, rgb(255 255 255 / 0.05) 1px, transparent 1.2px) 0 0 / 0.5rem 0.5rem;
+}
+
+[data-mode="camera"] .lcd-stage,
+[data-mode="screen"] .lcd-stage {
+  height: auto;
+  aspect-ratio: 16 / 9;
+  max-height: 26rem;
+  margin-inline: auto;
+}
+
+#waveform {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: linear-gradient(to bottom, transparent 49.6%, rgb(255 255 255 / 0.12) 49.6% 50.4%, transparent 50.4%);
+}
+
+/* In video modes the meter becomes a strip over the bottom of the preview */
+[data-mode="camera"] #waveform,
+[data-mode="screen"] #waveform {
+  inset: auto 0 0 0;
+  height: 3rem;
+  background:
+    linear-gradient(to bottom, transparent 49%, rgb(255 255 255 / 0.12) 49% 51%, transparent 51%),
+    linear-gradient(to top, rgb(0 0 0 / 0.75), transparent);
+}
+
+#preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.stage-placeholder {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 1rem 3.5rem;
+  text-align: center;
+  color: var(--lcd-dim);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.stage-placeholder i {
+  font-size: 2.2rem;
+}
+
+[data-mode="camera"] .stage-placeholder:not(.d-none),
+[data-mode="screen"] .stage-placeholder:not(.d-none) {
+  display: flex;
+}
+
+.scale {
+  position: absolute;
+  inset: auto 0.4rem 0.15rem;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.55rem;
+  color: var(--lcd-dim);
+  pointer-events: none;
+}
+
+.countdown {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: clamp(4rem, 14vw, 8rem);
+  font-weight: 700;
+  color: var(--lcd-ink);
+  background: rgb(0 0 0 / 0.45);
+  text-shadow: 0 0 1.5rem rgb(0 0 0 / 0.8);
+}
+
+.countdown:not(.d-none) {
+  animation: pop 1s ease-out infinite;
+}
+
+@keyframes pop {
+  from {
+    transform: scale(1.15);
+  }
+}
+
+.paused-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--bs-warning);
+  border-radius: 0.25rem;
+  background: rgb(0 0 0 / 0.7);
+  color: var(--bs-warning);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.lcd-foot {
+  align-items: baseline;
+  gap: 1rem;
+  text-transform: none;
+}
+
+.lcd-timer {
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+[data-state="idle"] .lcd-timer,
+[data-state="starting"] .lcd-timer {
+  color: var(--lcd-dim);
+}
+
+.lcd-status {
+  min-width: 0;
+  color: var(--lcd-dim);
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+
+[data-state="recording"] .lcd-status {
+  color: var(--lcd-ink);
+}
+
+.lcd-status.warn {
+  color: var(--bs-warning);
+  font-weight: 700;
+}
+
+/* ---------- Controls ---------- */
+
+.deck {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.1rem;
+}
+
+.mode-keys {
+  display: inline-flex;
+  padding: 0.25rem;
+  gap: 0.25rem;
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.mode-key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  min-width: 4.5rem;
+  padding: 0.45rem 0.6rem 0.35rem;
+  border-radius: 0.6rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition:
+    background-color 120ms,
+    color 120ms;
+}
+
+.mode-key i {
+  font-size: 1.15rem;
+}
+
+.mode-key:hover {
+  color: var(--ink);
+}
+
+.btn-check:checked + .mode-key {
+  background: var(--key);
+  color: var(--ink);
+  box-shadow: 0 1px 0 var(--key-shadow), 0 0 0 1px var(--key-edge);
+}
+
+.btn-check:checked + .mode-key i {
+  color: var(--accent);
+}
+
+.btn-check:focus-visible + .mode-key {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn-check:disabled + .mode-key {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.transport {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(0.6rem, 2vw, 1.1rem);
+}
+
+.key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+}
+
+.key .cap {
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--key-edge);
+  background: var(--key);
+  font-size: 1.35rem;
+  box-shadow: 0 0.2rem 0 var(--key-shadow);
+  transition:
+    transform 80ms,
+    box-shadow 80ms,
+    opacity 120ms;
+}
+
+.key .legend {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.key:not(:disabled):hover .cap {
+  border-color: var(--accent);
+}
+
+.key:not(:disabled):active .cap {
+  transform: translateY(0.18rem);
+  box-shadow: 0 0.02rem 0 var(--key-shadow);
+}
+
+.key:focus-visible {
+  outline: none;
+}
+
+.key:focus-visible .cap {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.key:disabled .cap {
+  opacity: 0.35;
+}
+
+.key:disabled .legend {
+  opacity: 0.5;
+}
+
+/* The one orange key */
+.key-rec .cap {
+  width: 4.4rem;
+  height: 4.4rem;
+  border-radius: 50%;
+  border-color: color-mix(in srgb, var(--accent) 70%, #000);
+  background: var(--accent);
+  box-shadow:
+    0 0.25rem 0 color-mix(in srgb, var(--accent) 55%, #000),
+    0 0.6rem 1.4rem -0.4rem var(--accent);
+}
+
+.key-rec .cap::after {
+  content: "";
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: var(--accent-ink);
+}
+
+.key-rec:not(:disabled):hover .cap {
+  border-color: #000;
+}
+
+/* While recording the key stays lit (disabled, but not dimmed) */
+[data-state="recording"] .key-rec .cap,
+[data-state="paused"] .key-rec .cap,
+[data-state="countdown"] .key-rec .cap {
+  opacity: 1;
+  transform: translateY(0.18rem);
+  box-shadow: 0 0 1.6rem 0.1rem var(--accent);
+}
+
+[data-state="recording"] .key-rec .cap {
+  animation: glow 1.6s ease-in-out infinite;
+}
+
+@keyframes glow {
+  50% {
+    box-shadow: 0 0 0.4rem 0 var(--accent);
+  }
+}
+
+[data-state="paused"] .key-pause .cap {
+  background: #ffc533;
+  border-color: #c99400;
+  color: #1c1c1a;
+}
+
+.label-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px dashed var(--panel-edge);
+}
+
+/* A tape label you write the take's name on */
+.tape-label {
+  flex: 2 1 16rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  border: 1px solid transparent;
+}
+
+.tape-label:focus-within {
+  border-color: var(--accent);
+}
+
+.tape-label .legend {
+  color: var(--muted);
+}
+
+.tape-label input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-weight: 500;
+  outline: none;
+}
+
+.tape-label input::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.device-select {
+  flex: 1 1 11rem;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.6rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  color: var(--muted);
+}
+
+.device-select[hidden] {
+  display: none;
+}
+
+.device-select select {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-size: 0.85rem;
+  outline: none;
+  text-overflow: ellipsis;
+}
+
+.device-select:focus-within {
+  outline: 1px solid var(--accent);
+}
+
+.device-select select option {
+  background: var(--panel);
+}
+
+/* ---------- Library ---------- */
+
+.library-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.library-head h2 {
+  margin: 0 auto 0 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.library-summary {
+  font-family: var(--mono-font);
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.takes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 13.5rem), 1fr));
+  align-items: start;
+  gap: 0.75rem;
+}
+
+.day {
+  grid-column: 1 / -1;
+  margin: 0.6rem 0 -0.2rem;
+  font-family: var(--mono-font);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.day:first-child {
+  margin-top: 0;
+}
+
+.take {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.6rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--panel-edge);
+  background: var(--panel);
+  min-width: 0;
+}
+
+.take video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.5rem;
+  background: #000;
+}
+
+.take audio {
+  width: 100%;
+  height: 2.4rem;
+}
+
+.take-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.take-kind {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+}
+
+.take-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.take-name {
+  display: block;
+  font-family: var(--mono-font);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.take-name-input {
+  width: 100%;
+  padding: 0.15rem 0.35rem;
+  border: 1px solid var(--accent);
+  border-radius: 0.3rem;
+  background: var(--body);
+  color: var(--ink);
+  font-family: var(--mono-font);
+  font-size: 0.72rem;
+  outline: none;
+}
+
+.take-meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.take-actions {
+  display: flex;
+  gap: 0.15rem;
+  flex: none;
+}
+
+.take-actions button {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.45rem;
+  background: none;
+  color: var(--muted);
+}
+
+.take-actions button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  color: var(--ink);
+}
+
+.take-actions .danger:hover:not(:disabled) {
+  color: var(--bs-danger);
+}
+
+.take.just-saved {
+  animation: saved 2.4s ease-out;
+}
+
+@keyframes saved {
+  from {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 2.5rem 1rem;
+  border: 1.5px dashed var(--panel-edge);
+  border-radius: 0.9rem;
+  background: none;
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty-button:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.show-all {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 575.98px) {
+  .deck {
+    justify-content: center;
+  }
+
+  .mode-keys {
+    width: 100%;
+  }
+
+  .mode-key {
+    flex: 1;
+  }
+
+  .key .cap {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .key-rec .cap {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .device-select {
+    flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

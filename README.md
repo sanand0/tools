@@ -26,7 +26,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[GitHub Users](./githubusers/)**: Get information about GitHub users.
 - **[Technology Radar](./radar/)**: Track technology adoption across four quadrants (Techniques, Tools, Platforms, Frameworks) and four rings (Adopt, Trial, Assess, Hold).
 - **[Copy Links](./copylinks/)**: Bookmarklets to copy all page URLs as TSV or copy the current URL with a selected text fragment.
-- **[Record](./record/)**: Record audio and save it locally.
+- **[Record](./record/)**: Record audio, camera, or screen and save it locally.
 - **[Recall](./recall/)**: Randomly recall list items from Markdown.
 - **[Ideator](./ideator/)**: Fuse notes into a ChatGPT ideation prompt.
 - **[Ask AI](./askai/)**: Send a question to your preferred AI chat engine in one click.

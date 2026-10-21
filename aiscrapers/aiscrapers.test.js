@@ -556,6 +556,65 @@ describe("chatgptscraper conversation extraction", () => {
     expect(markdown.match(/^title:/gm)).toHaveLength(1);
   });
 
+  it("captures generated-image-only replies without activating their preview", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname, "__fixtures__/chatgpt-rich.html",
+    );
+    const userId = "9992bc25-3ffa-4054-bc1e-55570cbe4173";
+    const imageId = "db96d4af-29a3-4940-b4b7-5fae558ff21e";
+    document.querySelector("main").innerHTML = `
+      <div data-chatgpt-search-message-ids="${userId}">
+        <div data-user-message-bubble="true">Draw a comic.</div>
+      </div>
+      <div data-chatgpt-search-message-ids="${imageId}">
+        <span class="sr-only">ChatGPT said:</span>
+        <div data-testid="generated-image-gallery">
+          <button data-testid="generated-image-preview" aria-label="Generated image 1">
+            <img alt="Generated image 1" src="https://example.com/comic.png">
+          </button>
+          <button aria-label="Edit image">Edit</button>
+        </div>
+      </div>`;
+    const preview = document.querySelector('[data-testid="generated-image-preview"]');
+    const click = vi.spyOn(preview, "click");
+    const state = window.chatgptscraper.createScraperState(document);
+    const messages = window.chatgptscraper.captureMessages(document, state);
+    expect(messages.map(m => [m.id, m.role])).toEqual([[userId,"user"],[imageId,"assistant"]]);
+    expect(messages[1].content).toBe("![Generated image 1](https://example.com/comic.png)");
+    expect(flattenParts(messages[1].parts)).toContainEqual({type:"image",label:"Generated image 1",url:"https://example.com/comic.png"});
+    expect(window.chatgptscraper.messagesToMarkdown(messages, state.metadata)).toContain(messages[1].content);
+    // Multiple images in one response retain one message identity and both parts.
+    preview.insertAdjacentHTML("afterend", preview.outerHTML.replaceAll("image 1","image 2").replace("comic.png","second.png"));
+    const again = window.chatgptscraper.extractMessages(document);
+    expect(again).toHaveLength(2);
+    expect(flattenParts(again[1].parts).filter(p => p.type === "image")).toHaveLength(2);
+    expect(click).not.toHaveBeenCalled();
+    click.mockRestore();
+  });
+
+  it("does not mistake agent activity summaries for standalone messages", async () => {
+    const { window, document } = await loadFrom(
+      import.meta.dirname,
+      "__fixtures__/chatgpt-rich.html",
+    );
+    const before = window.chatgptscraper.extractMessages(document);
+    document.querySelector("main").insertAdjacentHTML("beforeend", `
+      <div><span><span><div data-markdown-text-style="assistant-message"
+        data-markdown-text-tone="tertiary"><p>Planning the migration</p></div></span></span></div>
+      <button aria-label="Stop">Stop</button>`);
+    const stop = vi.spyOn(document.querySelector('button[aria-label="Stop"]'), "click");
+    const state = window.chatgptscraper.createScraperState(document);
+    expect(window.chatgptscraper.captureMessages(document, state)).toEqual(before);
+    expect(stop).not.toHaveBeenCalled();
+    // Unknown primary messages must remain visible to the backup's ID validator.
+    document.querySelector("main").insertAdjacentHTML("beforeend", `
+      <div data-markdown-text-style="assistant-message"><p>Unidentified reply</p></div>`);
+    expect(window.chatgptscraper.extractMessages(document).at(-1)).toMatchObject({
+      role: "assistant", content: "Unidentified reply",
+    });
+    stop.mockRestore();
+  });
+
   it("does not click or capture reasoning controls", async () => {
     const { window, document } = await loadFrom(
       import.meta.dirname,

@@ -148,7 +148,7 @@
     {
       "icon": "bi-record-circle",
       "title": "Record",
-      "description": "Record audio and save it locally.",
+      "description": "Record audio, camera, or screen and save it locally.",
       "url": "record",
       "created": "2026-09-30T00:00:00+08:00"
     },
