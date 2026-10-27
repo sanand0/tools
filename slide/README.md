@@ -7,9 +7,9 @@ A beautiful, interactive slide editor for creating professional title slides.
 - **Markdown Support**: Title and subtitle support full Markdown formatting
 - **Live Editing**: Changes reflect instantly in both the slide and URL
 - **Bookmarkable**: Share or save slides via URL - all settings are preserved
-- **Pre-designed Themes**: Pick a professional theme (Keynote, Minimalist, Editorial, Corporate Blue, Bold Poster, Cosmos, Summit) from the dropdown next to the "Edit Slide" header — each sets fonts, sizes, colors, and a background image
+- **Pre-designed Themes**: Pick a professional theme (Keynote, Minimalist, Editorial, Corporate Blue, Flame, Cosmos, Summit, Straive) from the dropdown next to the "Edit Slide" header — each sets fonts, sizes, colors, and a background image. **Straive** also switches to an editorial layout (`layout=straive`): warm paper, hairline frame, left-aligned Fraunces title (use `*italics*` for the vermilion accent), Instrument Sans body, and the Straive logo at the bottom-right
 - **Custom Styling**:
-  - 12 professional fonts (Montserrat, Roboto, Open Sans, Lato, Raleway, Poppins, Playfair Display, Merriweather, Oswald, Source Sans Pro, Nunito, Inter)
+  - 14 professional fonts (Montserrat, Roboto, Open Sans, Lato, Raleway, Poppins, Playfair Display, Merriweather, Oswald, Source Sans Pro, Nunito, Inter, Fraunces, Instrument Sans)
   - Independent title and subtitle fonts
   - Foreground and background color pickers
   - Independent log-scale title and subtitle sizing (+1 = 110%, +2 = 121%, etc., range: -20 to +20)

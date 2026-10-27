@@ -79,6 +79,113 @@
       transition: all 0.3s ease;
     }
 
+    #slide-foot {
+      display: none;
+    }
+
+    /* Straive layout: editorial paper, hairline frame, left-aligned title + body, logo bottom-right */
+    #slide-container.layout-straive {
+      --accent: #c2410c;
+      --faint: color-mix(in srgb, var(--fg) 14%, transparent);
+      align-items: stretch;
+      justify-content: flex-start;
+      padding: 3.6vw 5vw 2.4vw;
+      &::after {
+        content: '';
+        position: absolute;
+        inset: 1.2vw;
+        border: 1px solid var(--faint);
+        pointer-events: none;
+        z-index: 1;
+      }
+      #content {
+        text-align: left;
+        padding: 0;
+        max-width: 88vw;
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      #title {
+        font-weight: 400;
+        line-height: 1.04;
+        letter-spacing: -0.02em;
+        margin-bottom: 0;
+        font-optical-sizing: auto;
+        h1, h2, h3 {
+          font-weight: inherit;
+        }
+        em {
+          font-style: italic;
+          color: var(--accent);
+        }
+      }
+      #subtitle {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding-top: 1.8vw;
+        max-width: 70vw;
+        p + p, ul, ol {
+          margin-top: 0.8em;
+        }
+        ul, ol {
+          padding-left: 1.2em;
+        }
+        li + li {
+          margin-top: 0.3em;
+        }
+        em {
+          color: var(--accent);
+        }
+        strong {
+          font-weight: 600;
+        }
+      }
+      #title, #subtitle {
+        opacity: 0;
+        transform: translateY(0.8vw);
+        animation: straive-rise 0.6s cubic-bezier(.2, .7, .2, 1) forwards;
+        animation-delay: 170ms;
+      }
+      #subtitle {
+        --rest: 0.78;
+        animation-delay: 260ms;
+      }
+      #slide-foot {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        border-top: 1px solid var(--faint);
+        padding-top: 1vw;
+        height: calc(2.9vw + 4px);
+      }
+      #brand-logo {
+        display: block;
+        height: 1.5vw;
+        width: auto;
+      }
+    }
+
+    @keyframes straive-rise {
+      to {
+        opacity: var(--rest, 1);
+        transform: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #slide-container.layout-straive :is(#title, #subtitle) {
+        animation: none;
+        opacity: var(--rest, 1);
+        transform: none;
+      }
+    }
+
     #edit-icon {
       position: absolute;
       top: 20px;
@@ -350,6 +457,9 @@
       <h1 id="title"></h1>
       <h2 id="subtitle"></h2>
     </div>
+    <footer id="slide-foot">
+      <img id="brand-logo" src="straive-logo-black.svg" alt="Straive">
+    </footer>
   </div>
 
   <div id="modal">
@@ -413,6 +523,7 @@
 
       <div class="form-group">
         <label for="bg-search">Background Image URL</label>
+        <input type="hidden" id="layout-input" value="">
         <input type="text" id="bg-search" placeholder="Paste image URL (e.g., https://images.unsplash.com/...)">
         <div class="hint">Leave empty for solid background color. Try <a href="https://unsplash.com" target="_blank">Unsplash</a>, <a href="https://www.pexels.com" target="_blank">Pexels</a>, or any image URL</div>
       </div>
@@ -428,8 +539,14 @@
     // Available fonts (shared by title & subtitle selectors)
     const FONTS = [
       'Montserrat', 'Roboto', 'Open Sans', 'Lato', 'Raleway', 'Poppins',
-      'Playfair Display', 'Merriweather', 'Oswald', 'Source Sans Pro', 'Nunito', 'Inter'
+      'Playfair Display', 'Merriweather', 'Oswald', 'Source Sans Pro', 'Nunito', 'Inter',
+      'Fraunces', 'Instrument Sans'
     ];
+    // Google Fonts axes for fonts that need more than regular + bold (e.g. italics for accents)
+    const FONT_AXES = {
+      'Fraunces': 'ital,opsz,wght@0,9..144,300..700;1,9..144,300..600',
+      'Instrument Sans': 'wght@400;500;600'
+    };
     // Pre-designed themes (fonts, sizes, colors, background images)
     const THEMES = {
       keynote: {
@@ -475,6 +592,13 @@
         titleScale: 2, subtitleScale: -1,
         fgColor: '#ffffff', bgColor: '#1a1a2e',
         bgSearch: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=1920&q=80'
+      },
+      straive: {
+        label: 'Straive',
+        titleFont: 'Fraunces', subtitleFont: 'Instrument Sans',
+        titleScale: -7, subtitleScale: -3,
+        fgColor: '#1a1c22', bgColor: '#fbf9f4', bgSearch: '',
+        layout: 'straive'
       }
     };
     // Default values
@@ -487,7 +611,8 @@
       subtitleScale: 0,
       fgColor: '#ffffff',
       bgColor: '#1a1a2e',
-      bgSearch: ''
+      bgSearch: '',
+      layout: ''
     };
     let loadedFonts = new Set();
     // Populate font selectors and theme dropdown
@@ -518,7 +643,8 @@
         subtitleScale: parseFloat(params.get('subtitleScale') || legacyScale),
         fgColor: params.get('fgColor') || defaults.fgColor,
         bgColor: params.get('bgColor') || defaults.bgColor,
-        bgSearch: params.get('bgSearch') || defaults.bgSearch
+        bgSearch: params.get('bgSearch') || defaults.bgSearch,
+        layout: params.get('layout') || defaults.layout
       };
     }
     // Update URL hash
@@ -539,7 +665,7 @@
     function loadFont(fontName) {
       if (loadedFonts.has(fontName)) return;
       const link = document.createElement('link');
-      link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@400;700&display=swap`;
+      link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:${FONT_AXES[fontName] || 'wght@400;700'}&display=swap`;
       link.rel = 'stylesheet';
       document.head.appendChild(link);
       loadedFonts.add(fontName);
@@ -599,7 +725,8 @@
         subtitleScale,
         fgColor,
         bgColor,
-        bgSearch
+        bgSearch,
+        layout
       } = config;
       // Load fonts
       loadFont(titleFont);
@@ -625,8 +752,13 @@
       const plainSubtitle = elementToPlainText(subtitleElement);
       document.title = [plainTitle, plainSubtitle].filter(Boolean).join(' - ') || 'Slide Editor';
       updateFavicon(plainTitle, bgColor);
-      // Apply background
+      // Apply layout (e.g. Straive frame + logo). Pick the logo variant that contrasts with the background
       const container = document.getElementById('slide-container');
+      container.className = layout ? `layout-${layout}` : '';
+      container.style.setProperty('--fg', fgColor);
+      const darkBg = getFaviconTextColor(bgColor) === '#fff';
+      document.getElementById('brand-logo').src = `straive-logo-${darkBg ? 'white' : 'black'}.svg`;
+      // Apply background
       if (bgSearch && bgSearch.trim() !== '') {
         const imageUrl = await getBackgroundImageUrl(bgSearch);
         if (imageUrl) {
@@ -654,6 +786,7 @@
       document.getElementById('bg-color').value = config.bgColor;
       document.getElementById('bg-color-text').value = config.bgColor;
       document.getElementById('bg-search').value = config.bgSearch;
+      document.getElementById('layout-input').value = config.layout || '';
       updateScaleDisplay(config.titleScale, 'title-scale-display');
       updateScaleDisplay(config.subtitleScale, 'subtitle-scale-display');
     }
@@ -674,7 +807,8 @@
         subtitleScale: parseFloat(document.getElementById('subtitle-scale-slider').value),
         fgColor: document.getElementById('fg-color').value,
         bgColor: document.getElementById('bg-color').value,
-        bgSearch: document.getElementById('bg-search').value
+        bgSearch: document.getElementById('bg-search').value,
+        layout: document.getElementById('layout-input').value
       };
     }
     // Update live
@@ -712,7 +846,7 @@
       if (!theme) return;
       const config = getFormValues();
       const { label, ...styling } = theme;
-      Object.assign(config, styling);
+      Object.assign(config, { layout: '' }, styling);
       initForm(config);
       updateLive();
     });

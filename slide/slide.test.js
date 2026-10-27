@@ -94,3 +94,33 @@ describe("slide editor modal", () => {
     expect(modal?.classList.contains("show")).toBe(false);
   });
 });
+
+describe("slide straive layout", () => {
+  it("applies the Straive theme with frame, logo and persisted layout", () => {
+    const window = createWindow();
+    const { document } = window;
+    const container = document.getElementById("slide-container");
+    const themeSelect = /** @type {HTMLSelectElement | null} */ (document.getElementById("theme-select"));
+    if (!container || !themeSelect) throw new Error("slide markup missing");
+
+    document.getElementById("edit-icon")?.click();
+    themeSelect.value = "straive";
+    themeSelect.dispatchEvent(new window.Event("change", { bubbles: true }));
+
+    expect(container.className).toBe("layout-straive");
+    expect(new URLSearchParams(window.location.hash.slice(1)).get("layout")).toBe("straive");
+    expect(document.getElementById("brand-logo")?.getAttribute("src")).toBe("straive-logo-black.svg");
+    expect(document.getElementById("title")?.style.fontFamily).toContain("Fraunces");
+
+    themeSelect.value = "keynote";
+    themeSelect.dispatchEvent(new window.Event("change", { bubbles: true }));
+    expect(container.className).toBe("");
+    expect(new URLSearchParams(window.location.hash.slice(1)).get("layout")).toBeNull();
+  });
+
+  it("uses the white logo on dark backgrounds", () => {
+    const window = createWindow("#?layout=straive&bgColor=%23121418&fgColor=%23ece8df");
+    expect(window.document.getElementById("slide-container")?.className).toBe("layout-straive");
+    expect(window.document.getElementById("brand-logo")?.getAttribute("src")).toBe("straive-logo-white.svg");
+  });
+});
