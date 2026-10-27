@@ -1,6 +1,13 @@
 {
   "tools": [
     {
+      "icon": "bi-bar-chart-fill",
+      "title": "Live Poll",
+      "description": "Run live audience polls: participants scan a QR code to vote from their phones, and the presenter reveals results and saves them to a TSV file.",
+      "url": "poll",
+      "created": "2026-10-27T00:00:00+00:00"
+    },
+    {
       "icon": "bi-disc",
       "title": "Music",
       "description": "Play your local music files and M3U playlists offline with ranked search, global media controls, continuous queue and listening history.",
