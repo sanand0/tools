@@ -3,7 +3,7 @@ import { Browser } from "happy-dom";
 import path from "node:path";
 import { LocalBus } from "./mqtt.js";
 import { presenterKey, verifier } from "./signing.js";
-import { pastQuestions, topics, PollHost, PollParticipant, ResultsFile, mergeTSV, parseTSV, isoLocal, fileName, clean, HEADER } from "./poll.js";
+import { parseSeedMarkdown, pastQuestions, topics, PollHost, PollParticipant, ResultsFile, mergeTSV, parseTSV, isoLocal, fileName, clean, HEADER } from "./poll.js";
 
 const until = async (fn, ms = 4000) => {
   const end = Date.now() + ms;
@@ -44,6 +44,48 @@ async function room(n = 0) {
   return { bus, key, t, host, net, join, people };
 }
 const choiceId = (host, label) => host.question.choices.find((c) => c.text === label).id;
+
+describe("Markdown room seeds", () => {
+  const markdown = "- Should we automate invoices?\n  - Yes\n  - No\n- Best first use case?\n  - Research\n  - Reporting\n  - Reviews";
+  it("parses questions and choices, preserving order and punctuation", () => {
+    expect(parseSeedMarkdown(markdown)).toEqual([
+      { text: "Should we automate invoices?", choices: ["Yes", "No"] },
+      { text: "Best first use case?", choices: ["Research", "Reporting", "Reviews"] },
+    ]);
+    expect(parseSeedMarkdown(" \n ")).toEqual([]);
+  });
+  it("reports malformed Markdown instead of silently losing options", () => {
+    for (const bad of ["  - Orphan", "- No choices", "- One\n  - Only", "## Heading", "- Q\n    - Too deep"]) {
+      expect(() => parseSeedMarkdown(bad)).toThrow();
+    }
+    expect(() => parseSeedMarkdown("- Q\n  - A\n  - B\n" + "  - C\n".repeat(11))).toThrow("maximum 12");
+    expect(() => parseSeedMarkdown("- " + "x".repeat(501) + "\n  - A\n  - B")).toThrow("exceeds 500");
+  });
+  it("uses the normal question model for prepared questions and preserves votes when revisiting", async () => {
+    const { host, people } = await room(2);
+    host.seed(parseSeedMarkdown(markdown));
+    const first = host.question.id, second = host.history[0].id;
+    expect(host.question.text).toBe("Should we automate invoices?");
+    expect(host.history[0].queued).toBe(true);
+    expect(host.question.choices.map((c) => c.text)).toEqual(["Yes", "No"]);
+    expect(host.next(second)).toBe(true);
+    expect(host.question.text).toBe("Best first use case?");
+    expect(host.question.queued).toBeUndefined();
+    expect(host.question.choices.map((c) => c.text)).toEqual(["Research", "Reporting", "Reviews"]);
+    await until(() => people.every((p) => p.poll.question.id === second));
+    people[0].poll.vote(host.question.choices[1].id);
+    await until(() => host.responses === 1);
+    expect(host.next(first)).toBe(true);
+    expect(host.question.id).toBe(first);
+    expect(host.next(second)).toBe(true);
+    expect(host.responses).toBe(1);
+    expect(host.counts()[host.question.choices[1].id]).toBe(1);
+    const copy = new PollHost({ send: () => {} });
+    expect(copy.restore(host.serialize())).toBe(true);
+    expect(copy.question.id).toBe(second);
+    expect(copy.responses).toBe(1);
+  });
+});
 
 describe("voting with many participants", () => {
   it("counts one current response per participant across 40 phones", async () => {
@@ -505,7 +547,7 @@ describe("page", () => {
       },
     });
   });
-  afterEach(async () => { for (const p of pages.splice(0)) await p.close(); setup = null; });
+  afterEach(async () => { await settle(); for (const p of pages.splice(0)) await p.close(); setup = null; });
   afterAll(() => browser.close());
 
   async function open(url, init) {
@@ -536,6 +578,48 @@ describe("page", () => {
   }
   const type = (window, el, value) => { el.value = value; el.dispatchEvent(new window.Event("input", { bubbles: true })); };
   const press = (window, target, key) => target.dispatchEvent(new window.KeyboardEvent("keydown", { key, bubbles: true }));
+
+  it("starts a prepared room, previews questions privately and makes any question live", async () => {
+    const seed = parseSeedMarkdown("- First prompt?\n  - Yes\n  - No\n- Second prompt?\n  - Alpha\n  - Beta\n- Third prompt?\n  - One\n  - Two");
+    const host = await presenter((window) => {
+      const room = new URL(window.location.href).searchParams.get("room");
+      window.localStorage.setItem(`poll:seed:${room}`, JSON.stringify(seed));
+    });
+    const { $, window } = host;
+    expect($("question").value).toBe("First prompt?");
+    expect([...$("choices").querySelectorAll("input")].map((x) => x.value)).toEqual(["Yes", "No"]);
+    expect($("history-label").textContent).toBe("Questions");
+    expect($("history-count").textContent).toBe("2");
+    expect(window.localStorage.getItem(`poll:seed:${host.key.room}`)).toBeNull();
+    const phone = await open(`https://test/poll/?room=${host.key.room}`);
+    const $p = (id) => phone.document.getElementById(id);
+    await until(() => $p("p-question").textContent === "First prompt?");
+    $("history-toggle").click();
+    expect([...$("history").children].map((b) => b.textContent)).toEqual([
+      "First prompt?current · 0 / 0", "Second prompt?ready", "Third prompt?ready",
+    ].map((text) => text.replace("0 / 0", "0 / 1")));
+    $("history").children[2].click();
+    expect($("question").value).toBe("Third prompt?");
+    expect($("viewing-source").textContent).toBe("Ready question");
+    expect($p("p-question").textContent).toBe("First prompt?");
+    $("show-past").click();
+    await until(() => $p("p-question").textContent === "Third prompt?");
+    expect(host.downloads).toHaveLength(0); // no votes yet; switching should not prompt for a file
+    $p("p-choices").children[1].click();
+    await until(() => $("tally").textContent === "1 / 1");
+    $("history-toggle").click();
+    const first = [...$("history").children].find((b) => b.textContent.includes("First prompt?"));
+    first.click();
+    $("show-past").click();
+    await until(() => $p("p-question").textContent === "First prompt?");
+    expect(host.downloads).toHaveLength(1); // the voted question was automatically saved
+    $("history-toggle").click();
+    const third = [...$("history").children].find((b) => b.textContent.includes("Third prompt?"));
+    third.click();
+    $("show-past").click();
+    await until(() => $p("p-question").textContent === "Third prompt?" && $("tally").textContent === "1 / 1");
+    await until(() => $p("p-mine").textContent === "Your vote: Two");
+  }, 30_000);
 
   it("keeps presenter controls and credentials away from participants", async () => {
     const host = await presenter();

@@ -2,7 +2,7 @@ import { bootstrapAlert } from "https://cdn.jsdelivr.net/npm/bootstrap-alert@1";
 import { downloadBlob } from "../common/download.js";
 import { MqttClient } from "./mqtt.js";
 import { presenterKey, verifier } from "./signing.js";
-import { ROOM, ID, PING_MS, topics, uid, pastQuestions, PollHost, PollParticipant, ResultsFile } from "./poll.js";
+import { ROOM, ID, PING_MS, topics, uid, parseSeedMarkdown, pastQuestions, PollHost, PollParticipant, ResultsFile } from "./poll.js";
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -52,9 +52,11 @@ function landing(message = "") {
   $("create").addEventListener("click", async () => {
     $("create").disabled = true;
     try {
+      const seed = parseSeedMarkdown($("seed").value);
       const key = await presenterKey();
       // Only this browser keeps the signing key. The audience link carries just the room code.
       if (!store.set(`poll:key:${key.room}`, key.jwk)) throw new Error("Browser storage is unavailable, so the presenter key cannot be kept.");
+      if (seed.length && !store.set(`poll:seed:${key.room}`, seed)) throw new Error("Unable to store the prepared questions.");
       location.search = `?room=${key.room}&present`;
     } catch (error) {
       $("create").disabled = false;
@@ -87,7 +89,15 @@ async function presenter(room) {
   const deliver = (to, data) => (signing = signing.then(async () => net.publish(to === "all" ? t.all : t.client(to), await key.sign(data))).catch(() => {}));
   const stateKey = `poll:host:${room}`;
   const host = new PollHost({ send: deliver, onChange });
-  try { const saved = localStorage.getItem(stateKey); if (saved) host.restore(saved); } catch { /* fresh room */ }
+  let restored = false;
+  try { const saved = localStorage.getItem(stateKey); if (saved) restored = host.restore(saved); } catch { /* fresh room */ }
+  if (!restored) {
+    const seed = store.get(`poll:seed:${room}`);
+    if (Array.isArray(seed) && seed.length) {
+      host.seed(seed);
+      if (store.set(stateKey, JSON.parse(host.serialize()))) localStorage.removeItem(`poll:seed:${room}`);
+    }
+  }
   const broadcast = throttle(() => host.broadcast(), 150);
   const persist = throttle(() => { try { localStorage.setItem(stateKey, host.serialize()); } catch { /* storage full: state stays in memory */ } }, 500);
   const net = connect({
@@ -158,13 +168,13 @@ async function presenter(room) {
     });
     $("add-choice").disabled = q.choices.length >= 12;
     $("add-choice").hidden = past;
-    $("tally").textContent = `${total} / ${past ? q.joined : host.joined}`;
+    $("tally").textContent = `${total} / ${past && !q.queued ? q.joined : host.joined}`;
     $("reveal").classList.toggle("active", revealed);
     $("reveal").querySelector("span").textContent = revealed ? "Hide results" : "Show results";
     $("voting-state").textContent = past ? "Voting closed" : q.open ? "" : "Voting paused while saving…";
     $("viewing").hidden = !past;
     $("show-past").hidden = !!q.tally; // a question read from a TSV has counts but no votes to continue
-    $("viewing-source").textContent = q.tally ? "Saved question from the TSV" : "Past question";
+    $("viewing-source").textContent = q.tally ? "Saved question from the TSV" : q.queued ? "Ready question" : "Past question";
     $("viewing-tally").textContent = `${host.responses} / ${host.joined}`;
     renderHistory();
     renderFile();
@@ -174,6 +184,7 @@ async function presenter(room) {
   function renderHistory() {
     $("history-toggle").hidden = !host.history.length;
     $("history-count").textContent = String(host.history.length);
+    $("history-label").textContent = host.history.some((q) => q.queued) ? "Questions" : "Past";
     $("history-toggle").classList.toggle("active", !$("history").hidden);
     $("history-toggle").setAttribute("aria-expanded", String(!$("history").hidden));
     if ($("history").hidden) return;
@@ -189,7 +200,8 @@ async function presenter(room) {
     const time = (ms) => new Date(ms).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     $("history").replaceChildren(
       item(host.question, `current · ${host.responses} / ${host.joined}`),
-      ...host.history.toReversed().map((q) => item(q, `${time(q.closedAt)} · ${host.responsesOf(q)} / ${q.joined}`)),
+      ...[...host.history.filter((q) => q.queued), ...host.history.filter((q) => !q.queued).toReversed()]
+        .map((q) => item(q, q.queued ? "ready" : `${time(q.closedAt)} · ${host.responsesOf(q)} / ${q.joined}`)),
     );
   }
   const showQuestion = (qid) => {
@@ -286,7 +298,7 @@ async function presenter(room) {
       showQuestion(null);
       if (!target) question.focus();
     };
-    if (!host.question.text.trim()) return done();
+    if (!host.question.text.trim() || (target && host.question.prepared && host.responses === 0)) return done();
     starting = true;
     $("new").disabled = true;
     const at = new Date();
