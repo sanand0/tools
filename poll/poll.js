@@ -22,6 +22,29 @@ const uid = (prefix = "", length = 12) =>
 const text = (value, max) => String(value ?? "").slice(0, max);
 const choice = (label) => ({ id: uid("c", 8), text: text(label, LIMITS.choice) });
 
+/** Parse a simple Markdown list: questions at column 1, choices indented by two spaces. */
+function parseSeedMarkdown(source) {
+  const questions = [];
+  for (const [i, line] of String(source).split(/\r?\n/).entries()) {
+    if (!line.trim()) continue;
+    const match = /^( *)(?:- )(.+?)\s*$/.exec(line);
+    if (!match || ![0, 2].includes(match[1].length)) throw new Error(`Line ${i + 1}: use "- Question" or "  - Option".`);
+    const value = match[2].trim();
+    const isChoice = match[1].length === 2;
+    const max = isChoice ? LIMITS.choice : LIMITS.question;
+    if (value.length > max) throw new Error(`Line ${i + 1}: text exceeds ${max} characters.`);
+    if (isChoice) {
+      const last = questions.at(-1);
+      if (!last) throw new Error(`Line ${i + 1}: option without a question.`);
+      if (last.choices.length >= LIMITS.choices) throw new Error(`Line ${i + 1}: maximum ${LIMITS.choices} options per question.`);
+      last.choices.push(value);
+    } else questions.push({ text: value, choices: [] });
+  }
+  for (const [i, q] of questions.entries())
+    if (q.choices.length < 2) throw new Error(`Question ${i + 1}: add at least two options.`);
+  return questions;
+}
+
 /** A fresh question: Yes / No choices, voting open, results hidden. */
 const blankQuestion = (question = "") => ({
   id: uid("q", 12),
@@ -49,6 +72,17 @@ class PollHost {
     this.question = blankQuestion();
     /** @type {any[]} past questions with their votes, oldest first. Never sent to participants. */ this.history = [];
     this.rev = 0;
+  }
+
+  /** Set up a new room with the first question live and the rest ready in the existing history list. */
+  seed(questions) {
+    if (!questions.length) return;
+    const make = ({ text, choices }) => ({ ...blankQuestion(text), choices: choices.map(choice), prepared: true });
+    this.question = make(questions[0]);
+    this.history = questions.slice(1).map((item) => ({
+      ...make(item), open: false, queued: true, joined: 0, closedAt: this.now(),
+    }));
+    this.rev = nextRev(this.rev);
   }
 
   get joined() { return Object.keys(this.participants).length; }
@@ -177,7 +211,7 @@ class PollHost {
       this.history.push({ ...cur, open: false, revealed: false, joined: this.joined, closedAt: this.now() });
     this.history = this.history.filter((q) => q.id !== qid);
     if (past) {
-      const { joined: _joined, closedAt: _closedAt, ...q } = past;
+      const { joined: _joined, closedAt: _closedAt, queued: _queued, ...q } = past;
       this.question = { ...q, open: true, revealed: false };
     } else this.question = blankQuestion();
     this.changed("question");
@@ -453,4 +487,4 @@ class ResultsFile {
   }
 }
 
-export { pastQuestions, ROOM, ID, LIMITS, ONLINE_MS, PING_MS, topics, uid, blankQuestion, PollHost, PollParticipant, HEADER, EXTRA, clean, isoLocal, fileName, parseTSV, mergeTSV, ResultsFile };
+export { parseSeedMarkdown, pastQuestions, ROOM, ID, LIMITS, ONLINE_MS, PING_MS, topics, uid, blankQuestion, PollHost, PollParticipant, HEADER, EXTRA, clean, isoLocal, fileName, parseTSV, mergeTSV, ResultsFile };

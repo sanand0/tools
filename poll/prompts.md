@@ -67,4 +67,4 @@ Do not allow "Save" to overwrite an existing file unless "Open TSV..." was used 
 
 The "Past" button should appear even when I "Open TSV..." a saved file
 
-<!-- claude resume ad8595c5-540e-476a-8017-be7ba8d614d8 -->
+<!-- claude --resume ad8595c5-540e-476a-8017-be7ba8d614d8 -->

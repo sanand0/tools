@@ -4,12 +4,28 @@ Run live audience polls: participants scan a QR code to vote from their phones, 
 
 ## Use
 
-1. Open the tool and click **Create a room**. The page becomes the presenter screen at `poll/?room=K7QPX2MD&present`.
+1. Open the tool, optionally paste a Markdown list of prepared questions, and click **Create a room**. The page becomes the presenter screen at `poll/?room=K7QPX2MD&present`.
 2. Project it. Participants scan the QR code (or open `poll/?room=K7QPX2MD`) and vote.
 3. Type the question. Edit, add or remove choices (Yes / No by default). Phones update as you type.
 4. Watch `responded / joined`. Press **R** (outside a text field) to show or hide the bar chart.
 5. **Save** writes the question on screen to the TSV. **New** saves the current question, then starts a blank one with results hidden.
-6. **Past** (shown once there is a previous question) lists earlier questions for the presenter only. Click one to show it with its results on the projector; phones keep showing the current question. **Show to participants** saves the current question and makes the past one live again, with its votes. **Back to current** returns. Opening or importing a TSV also adds its saved questions to **Past**, to view their results (they cannot be made live again, since individual votes are not saved).
+6. **Past** (or **Questions** when prepared questions remain) lists other questions for the presenter only. Click one to preview it on the projector; phones keep showing the current question. **Show to participants** switches to that question (saving the current question first if needed), keeping any existing votes. **Back to current** returns. Prepared questions with no votes can be skipped without creating a TSV. Opening or importing a TSV also adds its saved questions to the list, for viewing their results (they cannot be made live again, since individual votes are not saved).
+
+## Prepare questions
+
+On the room creation screen, optionally paste a list with unindented questions and choices indented by two spaces:
+
+```md
+- Should we automate invoices?
+  - Yes
+  - No
+- Where should we start?
+  - Research
+  - Reporting
+  - Reviews
+```
+
+The first question is live immediately. The remaining questions appear in **Questions** in their original order, marked **ready**. Preview and choose **Show to participants** to jump to any question. You can revisit a question without losing its votes. Blank seed text creates an ordinary empty room. A malformed list produces a line-numbered error before the room is created.
 
 ## Saving
 

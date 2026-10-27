@@ -9,7 +9,7 @@ Add a theme to slide/ called "Straive" that matches the theme at ~/r2/files/page
 
 Include the SVG logo at the bottom-right. Skip page numbers and demo links in the footer. Skip the kicker. Retain the design, look and feel, etc. Focus on the title and the body.
 
-<!-- claude resume a107284d-8179-4da0-b2a6-17c019a5465f -->
+<!-- claude --resume a107284d-8179-4da0-b2a6-17c019a5465f -->
 
 ## Show subtitle in window title, 07 Aug 2026
 

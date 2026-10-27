@@ -55,6 +55,9 @@
           <div class="card-body">
             <h2 class="h5">Present</h2>
             <p class="text-secondary">Creates a room whose presenter controls work only in this browser.</p>
+            <label for="seed" class="form-label">Questions (optional)</label>
+            <textarea id="seed" class="form-control font-monospace mb-2" rows="6" placeholder="- Your question&#10;  - Yes&#10;  - No&#10;- Another question&#10;  - Option A&#10;  - Option B"></textarea>
+            <p class="form-text mb-3">Paste a Markdown list to prepare questions before the room opens. You can jump between them later.</p>
             <button class="btn btn-primary btn-lg" id="create"><i class="bi bi-easel me-2"></i>Create a room</button>
           </div>
         </div>
@@ -78,7 +81,7 @@
           <button class="btn btn-primary" id="new" title="Save this question and start a new one"><i class="bi bi-plus-lg me-1"></i>New</button>
           <button class="btn btn-outline-primary" id="save" title="Save this question's results to a TSV file"><i class="bi bi-floppy me-1"></i>Save</button>
           <button class="btn btn-outline-secondary" id="reveal" title="Show or hide results (R)"><i class="bi bi-bar-chart me-1"></i><span>Show results</span> <kbd>R</kbd></button>
-          <button class="btn btn-outline-secondary" id="history-toggle" title="Past questions (only you see this)" aria-expanded="false" aria-controls="history" hidden><i class="bi bi-clock-history me-1"></i>Past <span class="badge text-bg-secondary" id="history-count">0</span></button>
+          <button class="btn btn-outline-secondary" id="history-toggle" title="Past questions (only you see this)" aria-expanded="false" aria-controls="history" hidden><i class="bi bi-clock-history me-1"></i><span id="history-label">Past</span> <span class="badge text-bg-secondary" id="history-count">0</span></button>
           <div class="vr mx-1"></div>
           <button class="btn btn-outline-secondary" id="pick-file" title="Update an existing TSV"><i class="bi bi-file-earmark-spreadsheet me-1"></i><span>Open TSV…</span></button>
           <input type="file" id="import-file" accept=".tsv,text/tab-separated-values" hidden />
