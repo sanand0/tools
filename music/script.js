@@ -947,7 +947,7 @@ async function startTrack(
   }
 }
 function findSimilarTracks(seed, options) {
-  const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
   const recent = new Set(
     state.history
       .slice(-200)
