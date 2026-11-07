@@ -29,6 +29,20 @@ class Runner {
     if (follow) url.searchParams.set('follow', '1');
     yield* this.stream(url, { signal });
   }
+  async *transcribe(file, { filename = '', prompt = '' } = {}, { signal } = {}) {
+    this.requireBackend();
+    const extension = /\.[^.]+$/.exec(file.name)?.[0]?.toLowerCase() || '';
+    const url = new URL('/transcribe', this.url).href;
+    yield* this.stream(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'X-Tailrun-Request': '1',
+        'X-Tailrun-Options': encodeURIComponent(JSON.stringify({filename, prompt, extension}))
+      },
+      body: file, signal
+    });
+  }
   async *run({ argv, cwd = '~', stdin, timeout = 600 }, { signal } = {}) {
     yield* this.stream(this.url, {
       method: 'POST', headers: {'Content-Type': 'application/json', 'X-Tailrun-Request': '1'},

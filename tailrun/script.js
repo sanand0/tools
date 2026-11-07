@@ -1,173 +1,189 @@
 import './ui.js';
-import { storedRunner } from './runner.js';
+import {storedRunner} from './runner.js';
 
 const $ = id => document.getElementById(id);
 const list = $('history'), panel = $('recentJobs');
 let runner = storedRunner();
 let selected = new URLSearchParams(location.search).get('id');
-let lastJobs = [];
 const activeLogs = new Map();
-
 $('server').value = runner.url;
-$('backendStatus').textContent = runner.url ? 'Private job data loads only when you open Recent jobs.' : 'Set your runner URL to use the private tools.';
+$('backendStatus').textContent = runner.url
+  ? 'Private job data loads only when you open Recent jobs.'
+  : 'Set your runner URL to use the private tools.';
 
-function element(tag, className = '', text = null) {
-  const el = document.createElement(tag);
-  if (className) el.className = className;
-  if (text !== null) el.textContent = text;
-  return el;
+function el(tag, cls = '', text = null) {
+  const node = document.createElement(tag);
+  if (cls) node.className = cls;
+  if (text !== null) node.textContent = text;
+  return node;
 }
 function showError(message) {
   $('error').textContent = message ? String(message) : '';
   $('error').classList.toggle('d-none', !message);
 }
-function prettyDate(value) { return value ? new Date(value).toLocaleString() : '—'; }
 function friendlyError(err) {
   return err instanceof TypeError && /fetch/i.test(err.message)
-    ? 'Cannot reach the private runner. Check Tailscale, the URL, and your access rights.'
+    ? 'Cannot reach the private runner. Check Tailscale, the URL, and access.'
     : (err?.message || String(err));
 }
+function shortDate(when) {
+  return when ? new Date(when).toLocaleString(undefined, {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+}
 function badge(status) {
-  const label = status || 'unknown';
-  const style = {done:'success',failed:'danger',running:'primary',queued:'warning',timeout:'danger',interrupted:'secondary'}[label] || 'secondary';
-  return element('span', `badge text-bg-${style}`, label);
+  const shade = {done:'success',failed:'danger',running:'primary',queued:'warning',timeout:'danger',interrupted:'secondary'}[status] || 'secondary';
+  return el('span', 'badge text-bg-' + shade, status || 'unknown');
 }
 function outputLinks(job) {
-  const files = element('div','job-files mt-2');
+  const files = el('div', 'job-files mt-2');
   if (!job.artifacts?.length) {
-    files.append(element('span','text-secondary small', ['running','queued'].includes(job.status) ? 'Files will appear when the job ends.' : 'No output files.'));
-    return files;
+    files.append(el('span','small text-secondary', ['queued','running'].includes(job.status)
+      ? 'Files will appear when this job finishes.' : 'No output files.'));
   }
-  for (const f of job.artifacts) {
-    const item = element('span');
-    const link = element('a', '', f.name);
-    link.href = runner.artifactUrl(job.id,f.name);
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.title = 'Open in a new tab';
-    const size = element('span','file-size ms-1',`(${(f.size/1024).toFixed(1)} KB)`);
-    const dl = element('a','small ms-2','Download');
-    dl.href = runner.artifactUrl(job.id,f.name,{download:true});
-    dl.title = `Download ${f.name}`;
-    item.append(link,size,dl);
+  for (const f of job.artifacts || []) {
+    const item = el('span');
+    const view = el('a','',f.name);
+    view.href = runner.artifactUrl(job.id, f.name);
+    view.target = '_blank';
+    view.rel = 'noopener noreferrer';
+    const size = el('span','file-size ms-1', '(' + (f.size / 1024).toFixed(1) + ' KB)');
+    const save = el('a','small ms-2','Download');
+    save.href = runner.artifactUrl(job.id, f.name, {download:true});
+    item.append(view,size,save);
     files.append(item);
   }
   return files;
 }
-function jobCard(job) {
-  const card = element('article',`card job-card ${job.id === selected ? 'selected' : ''}`);
-  card.id = `job-${job.id}`;
-  const body = element('div','card-body');
-  const title = element('div','d-flex flex-wrap align-items-center gap-2 mb-2');
-  const link = element('a','fw-semibold text-decoration-none',`Job ${job.id.slice(0,8)}`);
-  link.href = `?id=${encodeURIComponent(job.id)}`;
-  const time = element('span','job-time small text-secondary ms-md-auto',prettyDate(job.created));
-  title.append(link,badge(job.status),time);
-  if (job.exit_code !== null && job.exit_code !== undefined)
-    title.append(element('span','small text-secondary',`Exit ${job.exit_code}`));
-  const command = element('div','job-command');
-  command.append(element('code','',(job.argv || []).join(' ')));
-  const cwd = element('div','small text-secondary file-path mt-1',job.cwd || '');
-  const label = element('div','small fw-semibold mt-3','Outputs');
-  const outputs = outputLinks(job);
-  const details = element('details','mt-3');
-  const summary = element('summary','small text-primary','Show logs');
-  const pre = element('pre','job-log mt-2');
-  details.append(summary,pre);
-  details.addEventListener('toggle',()=> {
-    if (details.open) { select(job.id); loadLogs(job.id, pre, summary); }
-    else { activeLogs.get(job.id)?.abort(); activeLogs.delete(job.id); summary.textContent='Show logs'; }
-  });
-  link.addEventListener('click',e=>{e.preventDefault(); details.open=!details.open; if(details.open) details.scrollIntoView({block:'nearest',behavior:'smooth'});});
-  body.append(title,command,cwd,label,outputs,details);
-  card.append(body);
-  return card;
-}
 function select(id) {
   selected = id;
-  history.replaceState(null, '', `?id=${encodeURIComponent(id)}`);
-  for (const card of list.children) card.classList.toggle('selected',card.id===`job-${id}`);
+  history.replaceState(null,'', '?id=' + encodeURIComponent(id));
+  for (const row of list.querySelectorAll('.job-row')) {
+    row.classList.toggle('table-active',row.dataset.id === id);
+  }
 }
-async function loadLogs(id, pre, summary) {
-  if(activeLogs.has(id)) return;
-  const abort = new AbortController();
-  activeLogs.set(id,abort);
-  summary.textContent = 'Hide logs';
+async function loadLogs(job, pre, detail, statusCell) {
+  const controller = new AbortController();
+  activeLogs.get(job.id)?.abort();
+  activeLogs.set(job.id,controller);
   pre.textContent = '';
   try {
-    const job = await runner.info(id);
-    for await (const event of runner.logs(id,{follow:['running','queued'].includes(job.status),signal:abort.signal})) {
+    const info = await runner.info(job.id);
+    for await (const event of runner.logs(job.id,{
+      follow:['queued','running'].includes(info.status),
+      signal:controller.signal
+    })) {
       if(['stdout','stderr','notice'].includes(event.type)) {
         pre.textContent += event.data || '';
         pre.scrollTop = pre.scrollHeight;
-      } else if(event.type==='exit') {
-        // Refresh the card after the process exits, including its output links.
-        const updated = await runner.info(id);
-        const previous = lastJobs.findIndex(x=>x.id===id);
-        if(previous!==-1) lastJobs[previous]=updated;
-        const card=pre.closest('.job-card');
-        if(card) {
-          card.querySelector('.job-files')?.replaceWith(outputLinks(updated));
-          card.querySelector('.badge')?.replaceWith(badge(updated.status));
-        }
+      }
+      if(event.type === 'exit') {
+        const updated = await runner.info(job.id);
+        detail.querySelector('.job-files')?.replaceWith(outputLinks(updated));
+        statusCell.replaceChildren(badge(updated.status));
       }
     }
   } catch(err) {
-    if (err.name !== 'AbortError') pre.textContent += `\nCould not load logs: ${friendlyError(err)}\n`;
-  } finally { activeLogs.delete(id); }
+    if(err.name !== 'AbortError') pre.textContent += '\n' + friendlyError(err);
+  } finally {
+    if(activeLogs.get(job.id) === controller) activeLogs.delete(job.id);
+  }
 }
-function render(jobs) {
-  for(const controller of activeLogs.values()) controller.abort();
-  activeLogs.clear();
-  lastJobs=jobs;
-  const fragment=document.createDocumentFragment();
-  for(const job of jobs) fragment.append(jobCard(job));
-  list.replaceChildren(fragment);
-  $('count').textContent = jobs.length ? `(${jobs.length})` : '';
-  if (!jobs.length) list.append(element('p','text-secondary','No jobs yet.'));
+function makeRows(job) {
+  const row = el('tr','job-row');
+  row.dataset.id = job.id;
+  if (job.id === selected) row.classList.add('table-active');
+  const date = el('td','small text-secondary job-time', shortDate(job.created));
+  const status = el('td','job-status'); status.append(badge(job.status));
+  const cell = el('td','job-command-cell');
+  const button = el('button','btn btn-link p-0 text-start text-decoration-none job-command-button',(job.argv || []).join(' '));
+  button.type = 'button';
+  button.title = (job.argv || []).join(' ');
+  button.setAttribute('aria-expanded','false');
+  button.setAttribute('aria-label','View output for job ' + job.id);
+  cell.append(button);
+  row.append(date,status,cell);
+
+  const extra = el('tr','job-extra');
+  extra.hidden = true;
+  const content = el('td');
+  content.colSpan = 3;
+  const code = el('div','job-command');
+  code.append(el('code','',(job.argv || []).join(' ')));
+  const cwd = el('div','small text-secondary file-path',job.cwd || '');
+  const heading = el('div','small fw-semibold mt-2','Outputs');
+  const files = outputLinks(job);
+  const logsHeading = el('div','small fw-semibold mt-3 mb-1','Logs');
+  const pre = el('pre','job-log');
+  content.append(code,cwd,heading,files,logsHeading,pre);
+  extra.append(content);
+  const toggle = () => {
+    extra.hidden = !extra.hidden;
+    button.setAttribute('aria-expanded',String(!extra.hidden));
+    if (!extra.hidden) {
+      select(job.id);
+      loadLogs(job,pre,content,status);
+    } else {
+      activeLogs.get(job.id)?.abort();
+      activeLogs.delete(job.id);
+    }
+  };
+  button.addEventListener('click', toggle);
+  if(job.id === selected) {
+    extra.hidden = false;
+    button.setAttribute('aria-expanded','true');
+    loadLogs(job,pre,content,status);
+  }
+  return [row,extra];
 }
 async function refresh() {
   if(!panel.open) return;
   if(!runner.url) {
-    $('historyStatus').textContent='Set a backend URL above, then try again.';
+    $('historyStatus').textContent = 'Set a backend URL above, then try again.';
     return;
   }
-  $('historyStatus').textContent='Loading private jobs…';
+  $('historyStatus').textContent = 'Loading private jobs…';
   try {
-    const jobs=await runner.history();
-    if(selected && !jobs.some(job=>job.id===selected)) jobs.unshift(await runner.info(selected));
-    render(jobs);
-    $('historyStatus').textContent='';
-    showError('');
-    if (selected) {
-      const card=document.getElementById(`job-${selected}`);
-      const details=card?.querySelector('details');
-      if(details) {details.open=true; card.scrollIntoView({block:'nearest'});}
+    const jobs = await runner.history();
+    if(selected && !jobs.some(job => job.id === selected)) jobs.unshift(await runner.info(selected));
+    for(const controller of activeLogs.values()) controller.abort();
+    activeLogs.clear();
+    const fragment = document.createDocumentFragment();
+    for(const job of jobs) fragment.append(...makeRows(job));
+    list.replaceChildren(fragment);
+    $('count').textContent = jobs.length ? '(' + jobs.length + ')' : '';
+    if(!jobs.length) {
+      const tr=el('tr'); const td=el('td','text-secondary','No jobs yet.');
+      td.colSpan=3; tr.append(td); list.append(tr);
     }
+    $('historyStatus').textContent = '';
+    showError('');
+    if(selected) document.querySelector('.job-row.table-active')?.scrollIntoView({block:'nearest'});
   } catch(err) {
-    $('historyStatus').textContent='';
+    $('historyStatus').textContent = '';
     showError(friendlyError(err));
   }
 }
-panel.addEventListener('toggle',()=>{ if(panel.open) refresh(); else { for(const c of activeLogs.values()) c.abort(); activeLogs.clear(); }});
-$('refresh').addEventListener('click',refresh);
+panel.addEventListener('toggle',()=>{
+  if(panel.open) refresh();
+  else {for(const c of activeLogs.values()) c.abort(); activeLogs.clear();}
+});
+$('refresh').addEventListener('click', refresh);
 $('config').addEventListener('submit', e => {
   e.preventDefault();
   try {
-    const raw=$('server').value.trim();
+    const raw = $('server').value.trim();
     if(raw) {
-      const url=new URL(raw);
+      const url = new URL(raw);
       if(!['https:','http:'].includes(url.protocol) || url.username || url.password || url.pathname !== '/run')
         throw new Error('Enter a full http(s) URL ending in /run.');
-      if(url.protocol==='http:' && !['localhost','127.0.0.1','[::1]'].includes(url.hostname))
+      if(url.protocol === 'http:' && !['localhost','127.0.0.1','[::1]'].includes(url.hostname))
         throw new Error('Use HTTPS for a remote runner.');
       localStorage.setItem('tailrun-url',url.href);
     } else localStorage.removeItem('tailrun-url');
-    runner=storedRunner(); selected=null;
-    history.replaceState(null,'',location.pathname);
-    $('backendStatus').textContent=runner.url?'Saved in this browser.':'No backend selected.';
+    runner = storedRunner(); selected = null;
+    history.replaceState(null,'', location.pathname);
+    $('backendStatus').textContent = runner.url ? 'Saved in this browser.' : 'No backend selected.';
     showError('');
     if(panel.open) refresh();
-  } catch(err) { showError(err.message); }
+  } catch(err) {showError(err.message);}
 });
-if(selected) panel.open=true;
+if(selected) panel.open = true;

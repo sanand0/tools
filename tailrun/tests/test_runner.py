@@ -78,6 +78,32 @@ class RunnerTests(unittest.TestCase):
         with self.request() as r: history=json.load(r)['jobs']
         self.assertIn(job_id,[j['id'] for j in history])
 
+    def test_transcribe_upload_and_validation(self):
+        from urllib.parse import quote
+        options = quote(json.dumps({'filename':'', 'extension':'.mp3','prompt':''}), safe='')
+        url = self.url.replace('/run','/transcribe')
+        headers = {'Content-Type':'application/octet-stream',
+                   'X-Tailrun-Request':'1','X-Tailrun-Options':options}
+        with self.request(url, data=b'not an audio file', headers=headers) as r:
+            events = [json.loads(line) for line in r.read().splitlines()]
+        self.assertEqual(events[0]['type'], 'start')
+        self.assertEqual(events[-1]['type'], 'exit')
+        job_id = events[0]['id']
+        with self.request(self.url+'?id='+job_id+'&meta=1') as r:
+            meta = json.load(r)
+        self.assertEqual(meta['task'],'transcribe')
+        self.assertRegex(meta['output_name'],r'^\d{4}-\d{2}-\d{2} \d{2}-\d{2}-\d{2}$')
+        self.assertEqual((Path(self.tmp.name)/job_id/'work'/'upload.mp3').read_bytes(),b'not an audio file')
+        bad = dict(headers)
+        bad['X-Tailrun-Options'] = quote(json.dumps({'filename':'../escape','extension':'.mp3'}), safe='')
+        with self.assertRaises(urllib.error.HTTPError) as ex:
+            self.request(url, data=b'bad', headers=bad)
+        self.assertEqual(ex.exception.code,400)
+        bad['X-Tailrun-Options'] = quote(json.dumps({'filename':'safe','extension':'.exe'}), safe='')
+        with self.assertRaises(urllib.error.HTTPError) as ex:
+            self.request(url, data=b'bad', headers=bad)
+        self.assertEqual(ex.exception.code,400)
+
     def test_limit(self):
         store=Path(self.tmp.name)
         for i in range(110):

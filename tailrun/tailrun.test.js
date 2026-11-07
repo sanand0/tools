@@ -27,14 +27,14 @@ describe('Tailrun static frontend', () => {
     expect(document.getElementById('history').children.length).toBe(0);
     const tools = document.getElementById('tools');
     const cards = [...tools.querySelectorAll('a.tool-card')];
-    expect(cards).toHaveLength(2);
-    expect(cards.map(card => card.getAttribute('href'))).toEqual(['youtube/', 'editor/']);
-    expect(cards.map(card => card.querySelector('h3').textContent)).toEqual(['Download YouTube audio', 'Edit text files']);
+    expect(cards).toHaveLength(3);
+    expect(cards.map(card => card.getAttribute('href'))).toEqual(['youtube/', 'editor/', 'transcribe/']);
+    expect(cards.map(card => card.querySelector('h3').textContent)).toEqual(['Download YouTube audio', 'Edit text files', 'Transcribe audio']);
     expect(tools.classList.contains('mb-4')).toBe(true);
     expect(document.getElementById('config').compareDocumentPosition(tools) & 4).toBe(4);
     expect(tools.compareDocumentPosition(document.getElementById('recentJobs')) & 4).toBe(4);
   });
-  it('renders one full-width card per job, with outputs below the command and inline links', async () => {
+  it('renders concise single-line jobs and inline output links when opened', async () => {
     const { document, window } = await loadFrom(import.meta.dirname);
     const requests = [];
     window.fetch = vi.fn(async url => {
@@ -48,12 +48,17 @@ describe('Tailrun static frontend', () => {
     const panel = document.getElementById('recentJobs');
     panel.open=true;
     panel.dispatchEvent(new window.Event('toggle'));
-    await until(()=>expect(document.querySelectorAll('.job-card').length).toBe(1));
+    await until(()=>expect(document.querySelectorAll('tr.job-row').length).toBe(1));
     expect(requests.some(url => url.endsWith('/run'))).toBe(true);
-    const card = document.querySelector('.job-card');
-    expect(card.classList.contains('card')).toBe(true);
-    const command = card.querySelector('.job-command');
-    const outputs = card.querySelector('.job-files');
+    expect(document.querySelectorAll('.job-card')).toHaveLength(0);
+    const row = document.querySelector('tr.job-row');
+    expect(row.children).toHaveLength(3);
+    expect(row.querySelector('.job-command-button').textContent).toContain('download.py');
+    const extra = row.nextElementSibling;
+    expect(extra.classList.contains('job-extra')).toBe(true);
+    expect(extra.hidden).toBe(true);
+    const command = extra.querySelector('.job-command');
+    const outputs = extra.querySelector('.job-files');
     expect(command.compareDocumentPosition(outputs) & 4).toBe(4);
     const open = outputs.querySelector('a');
     expect(open.getAttribute('target')).toBe('_blank');
@@ -61,8 +66,8 @@ describe('Tailrun static frontend', () => {
     expect(open.href).not.toContain('download=1');
     expect(outputs.querySelector('a[href*="download=1"]')).not.toBeNull();
   });
-  it('uses the same tool styling on the editor and YouTube pages', async () => {
-    for (const page of ['youtube','editor']) {
+  it('uses the same tool styling on editor, YouTube and transcribe', async () => {
+    for (const page of ['youtube','editor','transcribe']) {
       const { document } = await loadFrom(import.meta.dirname, `${page}/index.html`);
       expect(document.querySelector('.navbar-brand').textContent).toContain('Tailrun');
       expect(document.querySelector('link[href="../style.css"]')).not.toBeNull();

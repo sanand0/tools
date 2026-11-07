@@ -10,6 +10,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from youtube.download import normalize
+from transcribe.workflow import opus_command, call_command
 
 class ToolTests(unittest.TestCase):
     def test_youtube_ids(self):
@@ -17,6 +18,22 @@ class ToolTests(unittest.TestCase):
         self.assertEqual(normalize('https://youtu.be/jNQXAC9IVRw?t=7'), 'https://www.youtube.com/watch?v=jNQXAC9IVRw')
         self.assertEqual(normalize('https://www.youtube.com/shorts/jNQXAC9IVRw'), 'https://www.youtube.com/watch?v=jNQXAC9IVRw')
         with self.assertRaises(ValueError): normalize('https://evil.example/jNQXAC9IVRw')
+
+    def test_transcribe_commands_reuse_existing_settings(self):
+        source = Path("input.mp4")
+        result = Path("output.opus")
+        args = opus_command(source, result)
+        self.assertEqual(args[0], "ffmpeg")
+        self.assertEqual(args[args.index("-b:a") + 1], "12k")
+        self.assertEqual(args[args.index("-ac") + 1], "1")
+        self.assertEqual(args[args.index("-application") + 1], "voip")
+        self.assertEqual(args[args.index("-vbr") + 1], "on")
+        self.assertEqual(args[args.index("-compression_level") + 1], "10")
+        cmd = call_command(result, Path("out"), "")
+        self.assertIn("--out", cmd)
+        self.assertNotIn("--prompt", cmd)
+        custom = call_command(result, Path("out"), "Transcribe the speakers")
+        self.assertEqual(custom[-2:], ["--prompt", "Transcribe the speakers"])
 
     def test_editor_preserves_crlf_and_conflicts(self):
         program = ROOT / 'editor' / 'fs.py'

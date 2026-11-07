@@ -5,6 +5,18 @@ a { text-underline-offset: .15em; }
 .tool-card { border-radius: var(--tailrun-radius); transition: border-color .15s, box-shadow .15s; }
 .tool-card:hover, .tool-card:focus-visible { border-color: var(--bs-primary); box-shadow: 0 0 0 1px var(--bs-primary); }
 @media (prefers-reduced-motion: reduce) { .tool-card { transition: none; } }
+.job-table { width: 100%; table-layout: fixed; }
+.job-table th:nth-child(1), .job-table td:nth-child(1) { width: 10rem; }
+.job-table th:nth-child(2), .job-table td:nth-child(2) { width: 7rem; }
+.job-row td { padding-block: .4rem; }
+.job-command-cell { overflow: hidden; }
+.job-command-button { display: block; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .875rem; }
+.job-extra:not([hidden]) td { background: var(--bs-tertiary-bg); padding: 1rem; }
+@media(max-width: 600px) {
+  .job-table th:nth-child(1), .job-table td:nth-child(1) { width: 6.8rem; }
+  .job-table th:nth-child(2), .job-table td:nth-child(2) { width: 5rem; }
+  .job-table .badge { font-size: .65rem; }
+}
 .job-card { border-radius: var(--tailrun-radius); min-width: 0; }
 .job-card.selected { border-color: var(--bs-primary); box-shadow: 0 0 0 1px var(--bs-primary); }
 .job-command { display: block; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }

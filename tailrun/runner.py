@@ -5,7 +5,9 @@ import datetime as dt
 import json
 import mimetypes
 import os
+import re
 from pathlib import Path
+import sys
 import secrets
 import shutil
 import signal
@@ -13,7 +15,7 @@ import subprocess
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import parse_qs, urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
 
 BASE = Path(__file__).resolve().parent
 STORE = Path(os.environ.get('TAILRUN_STORE', str(Path.home() / '.cache' / 'tailrun' / 'jobs')))
@@ -25,6 +27,8 @@ DEV = os.environ.get('TAILRUN_DEV') == '1'  # Only for loopback tests; never in 
 MAX_ACTIVE = 2
 MAX_LOG_BYTES = 4 * 1024 * 1024
 MAX_STDIN = 1024 * 1024
+MAX_UPLOAD = 1024 * 1024 * 1024
+UPLOAD_EXTS = {'.mp3','.m4a','.aac','.mp4','.mkv','.mov','.webm','.wav','.flac','.opus','.ogg','.oga','.3gp','.wma'}
 MAX_ARTIFACT = 500 * 1024 * 1024
 MAX_JOBS = 100
 ACTIVE = threading.BoundedSemaphore(MAX_ACTIVE)
@@ -231,7 +235,7 @@ class Handler(BaseHTTPRequestHandler):
         if origin and origin in ORIGINS:
             self.send_header('Access-Control-Allow-Origin', origin)
             self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-Tailrun-Request')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, X-Tailrun-Request, X-Tailrun-Options')
             self.send_header('Vary', 'Origin')
         self.send_header('Content-Length', '0')
         self.end_headers()
@@ -295,8 +299,72 @@ class Handler(BaseHTTPRequestHandler):
             self.wfile.write(b'0\r\n\r\n'); self.wfile.flush()
         except (BrokenPipeError, ConnectionResetError): pass
 
+    def upload_transcribe(self):
+        """Stream a file into a job and run the existing call workflow."""
+        if (self.headers.get('Content-Type', '').split(';')[0] != 'application/octet-stream'
+                or self.headers.get('X-Tailrun-Request') != '1'):
+            return self.error(415, 'Requires application/octet-stream and X-Tailrun-Request: 1')
+        try:
+            size = int(self.headers.get('Content-Length', '0'))
+            if not 0 < size <= MAX_UPLOAD:
+                raise ValueError('File must be between 1 byte and 1 GB')
+            encoded = self.headers.get('X-Tailrun-Options', '')
+            if len(encoded) > 12000:
+                raise ValueError('Options too long')
+            options = json.loads(unquote(encoded))
+            if not isinstance(options, dict):
+                raise ValueError('Options must be a JSON object')
+            extension = options.get('extension', '')
+            if not isinstance(extension, str) or extension.lower() not in UPLOAD_EXTS:
+                raise ValueError('Unsupported audio/video extension')
+            prompt = options.get('prompt', '')
+            if not isinstance(prompt, str) or len(prompt) > 4000:
+                raise ValueError('Prompt must be 4000 characters or less')
+            stem = options.get('filename', '')
+            if not isinstance(stem, str):
+                raise ValueError('Invalid filename')
+            stem = stem.strip() or dt.datetime.now().strftime('%Y-%m-%d %H-%M-%S')
+            if not (1 <= len(stem) <= 100 and stem not in ('.', '..')
+                    and stem == stem.strip('. ')
+                    and not re.search(r'[<>:"/\\|?*\x00-\x1f]', stem)
+                    and not stem.lower().endswith(('.opus', '.md'))):
+                raise ValueError('Filename must be a plain name without a path or extension')
+            if sum(j.get('status') in ('queued', 'running') for j in latest()) >= 10:
+                return self.error(429, 'Too many queued jobs')
+        except (ValueError, TypeError, json.JSONDecodeError) as ex:
+            return self.error(400, str(ex))
+        job_id = secrets.token_hex(12)
+        folder = location(job_id)
+        source = folder / 'work' / ('upload' + extension.lower())
+        try:
+            source.parent.mkdir(parents=True)
+            with source.open('wb') as dest:
+                remaining = size
+                while remaining:
+                    chunk = self.rfile.read(min(1024 * 1024, remaining))
+                    if not chunk:
+                        raise ConnectionError('Upload stopped before the file was complete')
+                    dest.write(chunk)
+                    remaining -= len(chunk)
+        except (OSError, ConnectionError):
+            shutil.rmtree(folder, ignore_errors=True)
+            return self.error(400, 'Upload did not finish')
+        (folder / 'events.ndjson').touch()
+        argv = [sys.executable, '-u', str(BASE / 'transcribe' / 'workflow.py'),
+                str(source), stem, '--prompt', prompt]
+        meta = {'id': job_id, 'argv': argv, 'cwd': str(BASE), 'created': now(),
+                'started': None, 'finished': None, 'duration': None, 'status': 'queued',
+                'exit_code': None, 'artifacts': [], 'task': 'transcribe',
+                'output_name': stem, 'upload_bytes': size}
+        write_json(folder / 'meta.json', meta)
+        threading.Thread(target=execute, args=(job_id, argv, str(BASE), None, 3600),
+                         daemon=True).start()
+        return self.stream(events(job_id, follow=True))
+
     def do_POST(self):
         if not self.authorized(): return
+        if urlsplit(self.path).path == '/transcribe':
+            return self.upload_transcribe()
         if urlsplit(self.path).path != '/run': return self.error(404, 'Not found')
         if self.headers.get('Content-Type', '').split(';')[0] != 'application/json' or self.headers.get('X-Tailrun-Request') != '1':
             return self.error(415, 'Requires application/json and X-Tailrun-Request: 1')
