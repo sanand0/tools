@@ -32,7 +32,9 @@ class Runner {
   async *transcribe(file, { filename = '', prompt = '' } = {}, { signal } = {}) {
     this.requireBackend();
     const extension = /\.[^.]+$/.exec(file.name)?.[0]?.toLowerCase() || '';
-    const url = new URL('/transcribe', this.url).href;
+    const api = new URL(this.url);
+    api.pathname = api.pathname === '/tailrun/run' ? '/tailrun/upload' : '/transcribe';
+    const url = api.href;
     yield* this.stream(url, {
       method: 'POST',
       headers: {
@@ -78,6 +80,6 @@ class Runner {
 export {Runner};
 export function storedRunner() {
   const privateHost = location.hostname.endsWith('.ts.net') || ['localhost','127.0.0.1'].includes(location.hostname);
-  const url = localStorage.getItem('tailrun-url') || (privateHost ? new URL('/run', location.origin).href : '');
+  const url = localStorage.getItem('tailrun-url') || (privateHost ? new URL('/tailrun/run', location.origin).href : '');
   return new Runner({ url });
 }

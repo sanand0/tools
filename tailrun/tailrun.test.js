@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { loadFrom } from '../common/testutils.js';
+import { Runner } from './runner.js';
 
 async function until(assertion) {
   let last;
@@ -19,6 +20,26 @@ const job = {
   artifacts: [{name:'audio.mp3',size:12345},{name:'captions.srt',size:211}],
 };
 describe('Tailrun static frontend', () => {
+  it('maps uploads under /tailrun/upload, preserving compatibility with legacy /run', async () => {
+    const seen = [];
+    const original = globalThis.fetch;
+    globalThis.fetch = async (url, init) => {
+      seen.push(String(url));
+      return {ok:true, body:new ReadableStream({start(c) {
+        c.enqueue(new TextEncoder().encode('{"type":"exit","status":"done"}\n')); c.close();
+      }})};
+    };
+    try {
+      for (const path of ['https://host.ts.net/tailrun/run','https://host.ts.net:8443/run']) {
+        const runner = new Runner({url:path});
+        for await(const event of runner.transcribe(new File(['hello'],'example.wav'))) {
+          expect(event.status).toBe('done');
+        }
+      }
+    } finally { globalThis.fetch = original; }
+    expect(seen).toEqual(['https://host.ts.net/tailrun/upload','https://host.ts.net:8443/transcribe']);
+  });
+
   it('shows an explanation and backend before private, collapsed history', async () => {
     const { document } = await loadFrom(import.meta.dirname);
     expect(document.querySelector('header').textContent).toContain('Run commands from your browser');

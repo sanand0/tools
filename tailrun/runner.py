@@ -268,19 +268,6 @@ class Handler(BaseHTTPRequestHandler):
                 return
             if q.get('meta'): return self.result(job)
             return self.stream(events(job_id, follow=q.get('follow', ['0'])[0] == '1'))
-        if url.path == '/tailrun':
-            self.send_response(308); self.send_header('Location', '/tailrun/'); self.send_header('Content-Length', '0'); self.end_headers(); return
-        if url.path.startswith('/tailrun/'):
-            relative = url.path[len('/tailrun/'):]
-            if not relative or relative.endswith('/'):
-                relative += 'index.html'
-            candidate = (BASE / relative).resolve()
-            if BASE.resolve() not in candidate.parents or not candidate.is_file() or candidate.is_symlink() or candidate.suffix.lower() not in ('.html', '.js', '.css', '.svg', '.json', '.webmanifest'):
-                return self.error(404, 'Not found')
-            kind = mimetypes.guess_type(candidate.name)[0] or 'application/octet-stream'
-            self.headers_base(200, kind, candidate.stat().st_size)
-            with candidate.open('rb') as fh: shutil.copyfileobj(fh, self.wfile)
-            return
         return self.error(404, 'Not found')
 
     def stream(self, iterator):

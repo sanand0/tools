@@ -45,11 +45,10 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(cm.exception.code,403)
         with self.request(headers={'Origin':'https://tools.s-anand.net'}) as r:
             self.assertEqual(r.headers['Access-Control-Allow-Origin'],'https://tools.s-anand.net')
-        with self.request('http://127.0.0.1:17899/tailrun/') as r:
-            page=r.read()
-            self.assertIn(b'Tailrun',page)
-            self.assertIn(b'<details id="recentJobs"',page)
-            self.assertNotIn(b'<details id="recentJobs" open',page)
+        # Tailscale Serve, not runner.py, now serves the static pages.
+        with self.assertRaises(urllib.error.HTTPError) as cm:
+            self.request('http://127.0.0.1:17899/tailrun/')
+        self.assertEqual(cm.exception.code,404)
 
     def test_run_and_artifacts(self):
         snippet = "import os,sys;print('hello',flush=True);print('oops',file=sys.stderr,flush=True);open(os.environ['TAILRUN_JOB_DIR']+'/test.txt','w').write('done');open(os.environ['TAILRUN_JOB_DIR']+'/test.html','w').write('<script>alert(1)</script>')"
