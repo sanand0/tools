@@ -2,3 +2,5 @@
 node_modules/
 vendor/
 test-results/
+__pycache__/
+*.pyc
