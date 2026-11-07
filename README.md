@@ -44,6 +44,7 @@ A collection of single page web apps, mostly LLM generated. Hosted at [tools.s-a
 - **[Straive Intelligence](./straiveintelligence/)**: Bookmarklet to convert ChatGPT into a Straive-style user interface.
 - **[Straive Codex](./straivecodex/)**: Bookmarklet to convert Codex into a Straive-style user interface.
 - **[Join CSV Tables](./joincsv/)**: Join multiple tables on the first column.
+- **[Comparator](./comparator/)**: Highlight differences between ground truth and system output using LLM.
 - **[Google Suggest Explorer](./googlesuggest/)**: Explore Google Search suggestions from different countries and get AI-powered humorous explanations.
 - **[Unicode Characters](./unicode/)**: Find non-ASCII Unicode characters in the clipboard.
 - **[Hacker News Extractor](./hackernewsmd/)**: Extract Hacker News articles to Markdown format for NotebookLM.
