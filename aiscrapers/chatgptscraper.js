@@ -840,12 +840,24 @@
         ?.getAttribute("data-chatgpt-search-message-ids")
         ?.trim()
         .split(/\s+/);
+      // A Work activity can outlive an interrupted run without a message ID.
+      // Scope its local identity to its real prompt and position in that turn.
+      const activity = node.closest('[data-talvt-turn-state="in_progress"]');
+      const prompts = turn?.querySelectorAll('[data-user-message-bubble="true"]') || [];
+      const promptId = prompts.length === 1 && prompts[0]
+        .closest('[data-chatgpt-search-message-ids]')
+        ?.getAttribute('data-chatgpt-search-message-ids')?.trim();
+      const activityNodes = activity && turn && [...turn.querySelectorAll('[data-talvt-turn-state="in_progress"] [data-markdown-text-style="assistant-message"][data-markdown-text-tone="primary"]')]
+        .filter(n => !n.closest('[data-message-id], [data-chatgpt-selection-message-id], [data-chatgpt-search-message-ids]'));
+      const localId = activityNodes && activityNodes.includes(node) && /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(promptId)
+        ? `local-activity:${promptId}:${activityNodes.indexOf(node)}` : null;
       const id =
         node.getAttribute("data-message-id") ||
         node
           .closest("[data-chatgpt-selection-message-id]")
           ?.getAttribute("data-chatgpt-selection-message-id") ||
         messageIds?.[0] ||
+        localId ||
         node
           .closest("[data-content-search-unit-key]")
           ?.getAttribute("data-content-search-unit-key") ||
@@ -861,6 +873,7 @@
       return [
         {
           id,
+          ...(localId === id && { idSource: "local-activity" }),
           role,
           content,
           ...(parts.length && { parts }),
@@ -871,8 +884,9 @@
     });
   }
 
-  const publicMessage = ({ id, role, content, timestamp, parts }) => ({
+  const publicMessage = ({ id, idSource, role, content, timestamp, parts }) => ({
     id,
+    ...(idSource && { idSource }),
     role,
     content,
     ...(parts && { parts }),

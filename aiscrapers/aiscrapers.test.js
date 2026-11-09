@@ -615,6 +615,22 @@ describe("chatgptscraper conversation extraction", () => {
     stop.mockRestore();
   });
 
+  it("identifies interrupted agent text by its stable prompt and turn-local position", async () => {
+    const { window, document } = await loadFrom(import.meta.dirname, "__fixtures__/chatgpt-basic.html");
+    const prompt = "11111111-1111-4111-8111-111111111111";
+    document.querySelector("main").innerHTML = `<div data-content-search-turn-key="fallback-turn-9">
+      <div data-chatgpt-search-message-ids="${prompt}"><div data-user-message-bubble="true">Question</div></div>
+      <div data-talvt-turn-state="in_progress"><div data-markdown-text-style="assistant-message" data-markdown-text-tone="primary">Interrupted progress</div><div data-markdown-text-style="assistant-message" data-markdown-text-tone="primary">Second update</div></div>
+    </div>`;
+    const first = window.chatgptscraper.extractMessages(document);
+    expect(first[1]).toMatchObject({ id: `local-activity:${prompt}:0`, idSource: "local-activity", role: "assistant", content: "Interrupted progress" });
+    expect(first[2]).toMatchObject({ id: `local-activity:${prompt}:1`, idSource: "local-activity", content: "Second update" });
+    document.querySelector('[data-content-search-turn-key]').setAttribute('data-content-search-turn-key', 'fallback-turn-2');
+    expect(window.chatgptscraper.extractMessages(document)[1]).toEqual(first[1]);
+    document.querySelector('[data-chatgpt-search-message-ids]').removeAttribute('data-chatgpt-search-message-ids');
+    expect(window.chatgptscraper.extractMessages(document)[1].id).not.toMatch(/^local-activity:/);
+  });
+
   it("does not click or capture reasoning controls", async () => {
     const { window, document } = await loadFrom(
       import.meta.dirname,
