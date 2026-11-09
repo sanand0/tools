@@ -36,10 +36,6 @@
     );
   }
 
-  function isMeetItem(node) {
-    return node.nodeType === 1 && (node.matches?.(meetSelectors.item) || !!node.querySelector?.(AVATAR_SEL));
-  }
-
   function getMeetItems(doc = root.document) {
     const region = getMeetRegion(doc);
     if (!region) return [];
@@ -110,10 +106,6 @@
     return id.replace(/[^a-zA-Z0-9_-]+/g, "_").replace(/^_+|_+$/g, "");
   }
 
-  function isTeamsItem(node) {
-    return node.nodeType === 1 && node.matches?.('[role="log"]');
-  }
-
   function readTeamsTurn(item) {
     const speaker = normalize(item.querySelector('[data-tid="author"]')?.textContent || "");
     const text = normalize(item.querySelector('[data-tid="closed-caption-text"]')?.textContent || "");
@@ -142,11 +134,8 @@
       emptyMessage: "No Google Meet captions found.",
       copiedMessage: "Google Meet captions copied to clipboard as Markdown.",
       getItems: getMeetItems,
-      isItem: isMeetItem,
       readTurn: readMeetTurn,
       getMeta: getMeetMeta,
-      rootForObserver: (doc) => getMeetRegion(doc),
-      itemSelector: meetSelectors.item,
     },
     teams: {
       id: "teams",
@@ -156,21 +145,86 @@
       emptyMessage: "No Microsoft Teams captions found.",
       copiedMessage: "Microsoft Teams captions copied to clipboard as Markdown.",
       getItems: getTeamsItems,
-      isItem: isTeamsItem,
       readTurn: readTeamsTurn,
       getMeta: getTeamsMeta,
-      rootForObserver: (doc) => doc.body,
-      itemSelector: '[role="log"]',
     },
   };
 
-  function closestItem(node, provider) {
-    let el = node.nodeType === 3 ? node.parentElement : node;
-    while (el) {
-      if (provider.isItem(el)) return el;
-      el = el.parentElement;
-    }
-    return null;
+  // Re-read controls on every attempt: meeting apps replace menus and caption panels.
+  function maintainCaptions(doc, win, provider) {
+    const key = `${provider.stateKey}Controls`;
+    const enabledKey = `${provider.stateKey}CaptionsSeen`;
+    if (root[key]) return;
+    const control = { timer: null, lastClick: -Infinity };
+    root[key] = control;
+    const tick = () => {
+      if (!doc.getElementById(ids(provider).panel) && !getStreamState(provider)?.running) {
+        win.clearInterval(control.timer);
+        root[key] = null;
+        return;
+      }
+      const elements = [...doc.querySelectorAll('button, [role="button"], [role^="menuitem"], [role="switch"]')].filter(
+        (el) =>
+          !el.closest('[id^="meetcaptions-"]') &&
+          !el.disabled &&
+          el.getAttribute("aria-disabled") !== "true" &&
+          !el.closest('[hidden], [aria-hidden="true"]') &&
+          win.getComputedStyle(el).display !== "none" &&
+          win.getComputedStyle(el).visibility !== "hidden",
+      );
+      const label = (el) => normalize(el.getAttribute("aria-label") || el.textContent);
+      const find = (pattern) => elements.find((el) => pattern.test(label(el)));
+      const on =
+        provider.id === "google-meet"
+          ? find(/^(turn off|disable|hide) (live )?captions/i) ||
+            elements.find((el) => /captions/i.test(label(el)) && el.getAttribute("aria-pressed") === "true") ||
+            getMeetRegion(doc)
+          : doc.querySelector('[data-tid="closed-caption-renderer-wrapper"], [aria-label="Live Captions"]') ||
+            find(/^(hide|turn off|disable) (live )?captions/i) ||
+            getTeamsItems(doc).some((el) => readTeamsTurn(el));
+      const status = doc.getElementById(`${ids(provider).panel}-captions`);
+      if (on) root[enabledKey] = true;
+      const disabled = !on && root[enabledKey];
+      const message = on ? "Captions enabled" : disabled
+        ? "Captions disabled — not capturing speech. Re-enable captions to resume."
+        : "Waiting for captions — retrying. You can also enable them manually.";
+      if (status && status.textContent !== message) status.textContent = message;
+      const panel = doc.getElementById(ids(provider).panel);
+      if (panel) {
+        panel.style.background = disabled ? "#805719" : "#1e1e2e";
+        panel.style.borderColor = disabled ? "#d9a441" : "#313244";
+        panel.style.color = disabled ? "#fff4dc" : "#cdd6f4";
+        panel.dataset.captionsDisabled = String(Boolean(disabled));
+        updatePanel(doc, provider);
+      }
+      // Once captions have been enabled, respect intentional off-the-record pauses.
+      if (on || root[enabledKey] || Date.now() - control.lastClick < 3000) return;
+      let action = find(/^(turn on|enable|show) (live )?(closed )?captions/i);
+      if (!action && provider.id === "google-meet") {
+        action = find(/^captions( and translation)?$/i);
+      } else if (!action && provider.id === "teams") {
+        action =
+          elements.find((el) => el.id === "LanguageSpeechMenuControl-id") ||
+          find(/^language and speech$/i) ||
+          elements.find(
+            (el) =>
+              el.id === "callingButtons-showMoreBtn" || el.getAttribute("data-tid") === "callingButtons-showMoreBtn",
+          ) ||
+          find(/^more( actions)?$/i);
+      }
+      // Never toggle an already expanded menu shut while waiting for its contents.
+      if (
+        action &&
+        action.getAttribute("aria-expanded") !== "true" &&
+        action.getAttribute("aria-checked") !== "true" &&
+        action.getAttribute("aria-pressed") !== "true"
+      ) {
+        control.lastClick = Date.now();
+        action.click();
+      }
+    };
+    control.timer = win.setInterval(tick, 1000);
+    tick();
   }
 
   function rawTurns(doc = root.document, provider = providers.googleMeet) {
@@ -240,7 +294,12 @@
     if (state.seenItems.has(el)) return;
     const turn = state.provider.readTurn(el);
     if (!turn) return;
-    state.seenItems.set(el, { ...turn, firstSeenAt: Date.now(), stalePollCount: 0, finalized: false });
+    state.seenItems.set(el, {
+      ...turn,
+      firstSeenAt: Date.now(),
+      stalePollCount: 0,
+      finalized: false,
+    });
   }
 
   function refreshItem(el, state) {
@@ -257,7 +316,13 @@
     }
   }
 
-  async function writeItem(entry, state) {
+  function writeItem(entry, state) {
+    // Mutation callbacks, polls and Stop share one stream; seek/write/truncate must stay atomic.
+    state.writeQueue = state.writeQueue.then(() => persistItem(entry, state));
+    return state.writeQueue;
+  }
+
+  async function persistItem(entry, state) {
     if (entry.finalized) return;
     const elapsed = formatDuration(entry.firstSeenAt - state.startedAt);
     const content = `\n## ${entry.speaker} [${elapsed}]\n\n${entry.text}\n`;
@@ -328,45 +393,41 @@
       observer: null,
       stabilityTimer: null,
       savedCount: 0,
+      writeQueue: Promise.resolve(),
     };
     root[provider.stateKey] = state;
 
-    const observerRoot = provider.rootForObserver(doc);
-    if (observerRoot) {
+    const scan = (poll = false) => {
       provider.getItems(doc).forEach((el) => trackItem(el, state));
-      state.observer = new MutationObserver((mutations) => {
-        for (const mut of mutations) {
-          for (const node of mut.addedNodes) {
-            if (node.nodeType !== 1) continue;
-            if (provider.isItem(node)) trackItem(node, state);
-            else node.querySelectorAll?.(provider.itemSelector)?.forEach((n) => trackItem(n, state));
-          }
-          for (const node of mut.removedNodes) {
-            if (node.nodeType !== 1) continue;
-            const els = provider.isItem(node) ? [node] : [...(node.querySelectorAll?.(provider.itemSelector) ?? [])];
-            for (const el of els) {
-              const entry = state.seenItems.get(el);
-              if (entry) writeItem(entry, state).then(() => updatePanel(doc, provider));
-            }
-          }
-          const el = closestItem(mut.target, provider);
-          if (el) refreshItem(el, state);
-        }
-      });
-      state.observer.observe(observerRoot, { childList: true, subtree: true, characterData: true });
-    }
-
-    state.stabilityTimer = setInterval(async () => {
       for (const [el, entry] of state.seenItems) {
-        if (!entry.finalized) {
+        if (!el.isConnected) {
+          // Preserve the final text even when the whole captions region disappears.
           refreshItem(el, state);
-          if (entry.stalePollCount >= STABILITY_POLLS) await writeItem(entry, state);
+          writeItem(entry, state).then(() => {
+            if (!el.isConnected) state.seenItems.delete(el);
+          });
+        } else if (poll || entry.text !== provider.readTurn(el)?.text) {
+          refreshItem(el, state);
+          if (entry.stalePollCount >= STABILITY_POLLS) writeItem(entry, state);
         }
       }
+    };
+    scan();
+    state.observer = new win.MutationObserver(() => scan());
+    state.observer.observe(doc.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+    state.stabilityTimer = win.setInterval(() => {
+      scan(true);
       updatePanel(doc, provider);
     }, 1000);
+    maintainCaptions(doc, win, provider);
 
-    win.addEventListener("pagehide", () => stopStreaming(doc, win, provider), { once: true });
+    win.addEventListener("pagehide", () => stopStreaming(doc, win, provider), {
+      once: true,
+    });
     updatePanel(doc, provider);
   }
 
@@ -374,9 +435,14 @@
     const state = getStreamState(provider);
     if (!state?.running) return;
     state.running = false;
-    clearInterval(state.stabilityTimer);
+    win.clearInterval(state.stabilityTimer);
     state.observer?.disconnect();
-    for (const [, entry] of state.seenItems) await writeItem(entry, state);
+    provider.getItems(doc).forEach((el) => trackItem(el, state));
+    for (const [el, entry] of state.seenItems) {
+      refreshItem(el, state);
+      await writeItem(entry, state);
+    }
+    await state.writeQueue;
     const meta = provider.getMeta(doc, win);
     const elapsed = formatDuration(Date.now() - state.startedAt);
     try {
@@ -406,14 +472,15 @@
     const btn = doc.getElementById(panelIds.record);
     if (!statusEl || !btn) return;
     const state = getStreamState(provider);
+    const disabled = doc.getElementById(panelIds.panel)?.dataset.captionsDisabled === "true";
     if (state?.running) {
       statusEl.textContent = `Recording... (${state.savedCount} turns saved; file saved on Stop)`;
-      statusEl.style.color = "#f38ba8";
+      statusEl.style.color = disabled ? "#fff4dc" : "#f38ba8";
       btn.textContent = "Stop Recording";
       btn.style.background = "#f38ba8";
     } else {
       statusEl.textContent = "Ready";
-      statusEl.style.color = "#a6e3a1";
+      statusEl.style.color = disabled ? "#fff4dc" : "#a6e3a1";
       btn.textContent = "Start Recording";
       btn.style.background = "#a6e3a1";
     }
@@ -464,7 +531,7 @@
       {
         background: "none",
         border: "none",
-        color: "#cdd6f4",
+        color: "inherit",
         cursor: "pointer",
         fontSize: "18px",
         padding: "0",
@@ -478,7 +545,11 @@
     const status = makeEl("div", { marginBottom: "10px", color: "#a6e3a1", fontSize: "12px" }, "Ready");
     status.id = panelIds.status;
 
-    const btnRow = makeEl("div", { display: "flex", gap: "6px", flexWrap: "wrap" });
+    const btnRow = makeEl("div", {
+      display: "flex",
+      gap: "6px",
+      flexWrap: "wrap",
+    });
     const recordBtn = makeEl(
       "button",
       {
@@ -511,13 +582,25 @@
     copyBtn.id = panelIds.copy;
     btnRow.append(recordBtn, copyBtn);
 
-    panel.append(header, status, btnRow);
+    const captionStatus = makeEl("div", {
+      marginBottom: "8px",
+      fontSize: "12px",
+      maxWidth: "280px",
+    });
+    captionStatus.id = `${panelIds.panel}-captions`;
+    captionStatus.setAttribute("role", "status");
+    panel.append(header, status, captionStatus, btnRow);
     doc.body.appendChild(panel);
     let drag = null;
     header.addEventListener("pointerdown", (event) => {
       if (event.target.closest("button")) return;
       const rect = panel.getBoundingClientRect();
-      drag = { x: event.clientX, y: event.clientY, left: rect.left, top: rect.top };
+      drag = {
+        x: event.clientX,
+        y: event.clientY,
+        left: rect.left,
+        top: rect.top,
+      };
       header.style.cursor = "grabbing";
       event.preventDefault();
     });
@@ -559,7 +642,10 @@
       startStreaming: (doc = root.document, win = root) => startStreaming(doc, win, provider),
       stopStreaming: (doc = root.document, win = root) => stopStreaming(doc, win, provider),
       showPanel: (doc = root.document, win = root, nav = root.navigator) => showPanel(doc, win, nav, provider),
-      scrape: (doc = root.document, win = root, nav = root.navigator) => showPanel(doc, win, nav, provider),
+      scrape: (doc = root.document, win = root, nav = root.navigator) => {
+        showPanel(doc, win, nav, provider);
+        maintainCaptions(doc, win, provider);
+      },
     };
   }
 

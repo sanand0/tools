@@ -527,3 +527,141 @@ describe("Teams captions", () => {
     expect(document.getElementById("meetcaptions-teams-record")?.textContent?.trim()).toMatch(/Start Recording/);
   });
 });
+
+describe.each([
+  ["googleMeet", "__meetcaptionsGoogleMeetState", "google-meet", fixtureSource],
+  ["teams", "__meetcaptionsTeamsState", "teams", teamsFixtureSource],
+])("%s caption recovery", (provider, stateKey, id, source) => {
+  let page, window, document, api;
+
+  beforeAll(() => vi.useFakeTimers());
+  afterAll(() => vi.useRealTimers());
+  beforeEach(() => {
+    page = browser.newPage();
+    ({ window, document } = page.mainFrame);
+    window.setInterval = setInterval;
+    window.clearInterval = clearInterval;
+    window.Date = Date;
+    window.eval(scriptSource);
+    api = window.meetcaptions[provider];
+  });
+  afterEach(async () => {
+    if (window[stateKey]?.running) await api.stopStreaming(document, window);
+    window.clearInterval(window[`${stateKey}Controls`]?.timer);
+    page.close();
+  });
+
+  const addControl = (label, onclick) => {
+    const button = document.createElement("button");
+    button.setAttribute("aria-label", label);
+    button.onclick = onclick;
+    document.body.append(button);
+    return button;
+  };
+  const restoreCaptions = () => {
+    const holder = document.createElement("section");
+    holder.insertAdjacentHTML("beforeend", source);
+    document.body.append(holder);
+    return holder;
+  };
+
+  it("waits for late controls and nested menus, without disabling enabled captions", async () => {
+    api.scrape(document, window, window.navigator);
+    await vi.advanceTimersByTimeAsync(6000);
+    const opened = vi.fn(() => {
+      menu.setAttribute("aria-expanded", "true");
+    });
+    const menu = addControl(provider === "teams" ? "More actions" : "Captions and translation", opened);
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(opened).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(opened).toHaveBeenCalledTimes(1);
+    const enabled = vi.fn(() => {
+      action.remove();
+      restoreCaptions();
+    });
+    const action = addControl("Turn on live captions", enabled);
+    // Re-running the full bookmarklet must reuse the existing maintenance timer.
+    const timer = window[`${stateKey}Controls`].timer;
+    window.eval(scriptSource);
+    window.meetcaptions[provider].scrape(document, window, window.navigator);
+    expect(window[`${stateKey}Controls`].timer).toBe(timer);
+    await vi.advanceTimersByTimeAsync(6000);
+    expect(enabled).toHaveBeenCalledTimes(1);
+    const disable = vi.fn();
+    addControl("Turn off live captions", disable);
+    await vi.advanceTimersByTimeAsync(6000);
+    expect(disable).not.toHaveBeenCalled();
+    expect(document.getElementById(`meetcaptions-${id}-panel-captions`).textContent).toBe("Captions enabled");
+  });
+
+  it("retries initial enabling but respects later disables and tints the dialog when captions are disabled", async () => {
+    let region;
+    const enabled = vi.fn(() => {
+      if (enabled.mock.calls.length >= 3) {
+        region = restoreCaptions();
+        action.remove();
+      }
+    });
+    const action = addControl("Show live captions", enabled);
+    api.scrape(document, window, window.navigator);
+    await vi.advanceTimersByTimeAsync(8000);
+    expect(enabled).toHaveBeenCalledTimes(3);
+    region.remove();
+    document.body.append(action);
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(enabled).toHaveBeenCalledTimes(3);
+    const panel = document.getElementById(`meetcaptions-${id}-panel`);
+    expect(document.getElementById(`meetcaptions-${id}-panel-captions`).textContent).toContain("Captions disabled");
+    expect(panel.style.background).toBe("#805719");
+    expect(panel.style.color).toBe("#fff4dc");
+    expect(document.getElementById(`meetcaptions-${id}-status`).style.color).toBe("#fff4dc");
+    expect(panel.style.borderColor).toBe("#d9a441");
+    expect(document.getElementById(`meetcaptions-${id}-panel-warning`)).toBeNull();
+    // Re-injecting the bookmarklet must also respect this intentional pause.
+    window.eval(scriptSource);
+    window.meetcaptions[provider].scrape(document, window, window.navigator);
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(enabled).toHaveBeenCalledTimes(3);
+    restoreCaptions();
+    action.remove();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(panel.style.background).toBe("#1e1e2e");
+    expect(panel.style.borderColor).toBe("#313244");
+    expect(document.getElementById(`meetcaptions-${id}-panel-captions`).textContent).toBe("Captions enabled");
+  });
+
+  it("stops maintaining captions when the panel is closed without a recording", async () => {
+    api.scrape(document, window, window.navigator);
+    document.getElementById(`meetcaptions-${id}-close`).click();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(window[`${stateKey}Controls`]).toBeNull();
+  });
+
+  it("keeps one recording through absent, removed and replaced caption regions", async () => {
+    const writable = makeWritable();
+    window.showSaveFilePicker = makeFilePicker(writable);
+    await api.startStreaming(document, window);
+    const state = window[stateKey];
+    const first = restoreCaptions();
+    await vi.advanceTimersByTimeAsync(1000);
+    // Remove a whole ancestor before captions are stable; pending turns must survive.
+    first.remove();
+    await vi.advanceTimersByTimeAsync(1000);
+    expect(writable.written).toContain("Kickoff is at 10 AM.");
+    expect(writable.close).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(document.getElementById(`meetcaptions-${id}-panel-warning`)).toBeNull();
+    const second = restoreCaptions();
+    const texts = second.querySelectorAll(provider === "teams" ? '[data-tid="closed-caption-text"]' : ".ygicle");
+    texts[0].textContent = "After captions were re-enabled.";
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(window[stateKey]).toBe(state);
+    expect(window.showSaveFilePicker).toHaveBeenCalledTimes(1);
+    await api.stopStreaming(document, window);
+    expect(writable.written).toContain("After captions were re-enabled.");
+    expect(writable.written).toContain("Kickoff is at 10 AM.");
+    expect(writable.written.match(/## /g).length).toBe(provider === "teams" ? 6 : 8);
+    expect(writable.close).toHaveBeenCalledTimes(1);
+  });
+});

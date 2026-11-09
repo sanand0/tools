@@ -1,15 +1,21 @@
 # Meeting Captions
 
-Bookmarklets to record Google Meet or Teams captions as Markdown and upload MP4 video backgrounds to Google Meet.
+Bookmarklets to enable and record Google Meet or Teams captions as Markdown and upload MP4 video backgrounds to Google Meet.
 
 ## Usage
 
 1. Visit the tool page and drag the matching captions button to your bookmarks bar.
-2. Join a Google Meet or Microsoft Teams meeting and enable captions.
-3. Click the bookmarklet - a floating control panel appears in the top-right corner.
+2. Join a Google Meet or Microsoft Teams meeting.
+3. Click the bookmarklet - a floating control panel appears in the top-right corner and captions are enabled automatically.
 4. **Copy** copies a snapshot of the currently visible captions to the clipboard as Markdown.
 5. **Start Recording** opens a save-file dialog, then continuously writes captions to a local `.md` file as speakers talk.
 6. **Stop Recording** flushes any pending text and closes the file. The `.md` file is only finalized on Stop; Chrome writes to a `.crswap` swap file during recording.
+
+The bookmarklet retries delayed controls and menus until captions are first enabled. After that, turning captions off is respected as an intentional pause: the captions dialog changes to a strong amber background with contrasting cream text and says **Captions disabled — not capturing speech**. Re-enable captions manually to resume capture in the same recording. If the meeting UI is unrecognized, the panel asks you to enable captions manually and keeps retrying. Control labels currently support English meeting UIs.
+
+Turning captions off and back on keeps the same recording, file and start time. Pending text is preserved and capture resumes when the captions return, even if the app replaces the entire captions region. Speech while captions are off cannot be recovered.
+
+After an update, replace your saved captions bookmarklets from the tool page to get the new code.
 
 ## MP4 backgrounds
 
@@ -49,4 +55,4 @@ Each bookmarklet injects JavaScript into the meeting page. No external requests 
 
 Google Meet captions are read from the captions region with structural fallbacks for Meet's obfuscated class names. Microsoft Teams captions are read from visible `role="log"` entries, using `data-tid="author"` for the speaker and `data-tid="closed-caption-text"` for the caption text.
 
-Both providers use a `MutationObserver` plus a 1-second polling interval. When a caption remains unchanged for 4 polls, it is written to the file. If the meeting app later corrects the same caption element, the bookmarklet overwrites the last file entry in place using `FileSystemWritableFileStream.seek()` and `truncate()`.
+Both providers observe the meeting document with a `MutationObserver` plus a 1-second polling interval to discover late or replaced caption regions. File writes are serialized to preserve turn order during removals and Stop. When a caption remains unchanged for 4 polls, it is written to the file. If the meeting app later corrects the same caption element, the bookmarklet overwrites the last file entry in place using `FileSystemWritableFileStream.seek()` and `truncate()`.

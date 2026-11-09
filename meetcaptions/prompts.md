@@ -1,5 +1,32 @@
 # Prompts
 
+## Enable captions first, 09 Nov 2026
+
+<!--
+cd ~/code/tools
+codex --model gpt-6.1-sol --config model_reasoning_effort=medium
+-->
+
+Update meetcaptions/ so that I click on the bookmarklet, if captions are not are not already enabled, Then Enable them first.
+Make this robust So that If there's a delay Or if the UI changes a bit later on, etc. it will Later on, etcetera, it will still work.
+Secondly, sometimes I accidentally Disable the captions and re-enable them. Make sure that the recordings are not disrupted because of this.
+I have Teams and Meet meetings open in my browser (CDP, localhost:9222) without captions enabled. You may use those to test. (You might need to simulate some speech into the microphone yourself.)
+Use devtools skill, prefer background operations rather than disrupting focus.
+
+---
+
+I want to automatically re-enable captions Enable captions if I turn them Off. I might want to go off the record. Just show clearly that captions are disabled, and make sure it's prominent.
+
+---
+
+That warning is TOO prominent. Maybe just change the background color of the dialog "Google Meet Captions" or "Microsoft Teams Captions" - and not have it such a glaring red.
+
+---
+
+Let the background be a more prominent one. It's too subtle now. Make sure the colors still contrast.
+
+<!-- codex resume 01a1beb3-89f6-7210-a5de-61103d33c308 -->
+
 ## Meet MP4 Backgrounds, 16 Oct 2026
 
 <!-- https://chatgpt.com/c/6ad0d37c-9db8-83ec-abe9-d8b5180b0403 -->
