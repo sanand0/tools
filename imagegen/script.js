@@ -195,7 +195,7 @@ async function makeRequest(prompt, opts) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({ model: "gpt-image-1-mini", prompt, n: 1, ...opts }),
+    body: JSON.stringify({ model: "gpt-image-2.6-sunburst", prompt, n: 1, ...opts }),
   });
 }
 
