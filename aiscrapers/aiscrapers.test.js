@@ -155,19 +155,21 @@ describe("claudescraper conversation extraction", () => {
   });
 
   it("copies Claude JSON and prompts in the ChatGPT scraper format", async () => {
+    const firstId = "00000000-0000-4000-a000-000000000001";
+    const secondId = "00000000-0000-4000-a000-000000000002";
     const createPage = async () => {
       const loaded = await loadFrom(import.meta.dirname, "__fixtures__/claude-basic.html");
       loaded.document.body.innerHTML = `
         <header><button data-testid="chat-title-button">Virtualized Claude</button></header>
         <main>
           <div data-testid="transcript-row" data-index="0" data-perf-row="human">
-            <div data-testid="user-message"><p>First question.</p></div>
+            <div id="_r_7r_${firstId}" data-testid="user-message"><p>First question.</p></div>
           </div>
           <div data-testid="transcript-row" data-index="1" data-perf-row="assistant">
             <div data-testid="assistant-message" data-is-streaming="false"><div class="font-claude-response"><p>First answer.</p></div></div>
           </div>
           <div data-testid="transcript-row" data-index="2" data-perf-row="human">
-            <div data-testid="user-message"><p>Second question.</p></div>
+            <div id="_r_7r_${secondId}" data-testid="user-message"><p>Second question.</p></div>
           </div>
         </main>`;
       loaded.window.alert = vi.fn();
@@ -197,6 +199,16 @@ describe("claudescraper conversation extraction", () => {
     expect(jsonPage.document.getElementById("claudescraper-copy-controls")).toBeNull();
 
     const promptsPage = await createPage();
+    promptsPage.window.history.replaceState(null, "", "/chat/test-conversation");
+    promptsPage.document.cookie = "lastActiveOrg=test-org; path=/";
+    promptsPage.window.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ chat_messages: [
+        { sender: "human", uuid: secondId, created_at: "2026-11-18T03:21:43.118000Z" },
+        { sender: "assistant", uuid: "answer", created_at: "2026-11-13T08:24:00.000000Z" },
+        { sender: "human", uuid: firstId, created_at: "2026-11-13T08:23:30.864000Z" },
+      ] }),
+    });
     const promptWriteText = vi.fn().mockResolvedValue(undefined);
     promptsPage.window.claudescraper.scrape(
       promptsPage.document,
@@ -207,17 +219,57 @@ describe("claudescraper conversation extraction", () => {
       vi.fn(),
     );
     promptsPage.document.getElementById("claudescraper-copy-prompts-btn").click();
-    await Promise.resolve();
-    await Promise.resolve();
-    expect(promptWriteText.mock.calls[0][0]).toContain("<!-- Virtualized Claude: ");
-    expect(promptWriteText.mock.calls[0][0]).toContain("First question.\n\n---\n\nSecond question.");
-    expect(promptWriteText.mock.calls[0][0]).not.toContain("First answer.");
+    await vi.waitFor(() => expect(promptWriteText).toHaveBeenCalledWith(
+      `<!-- Virtualized Claude: ${promptsPage.window.location.href} (Fri 13 Nov 2026, 4:23 PM SGT) -->\n\n` +
+        "First question.\n\n--- <!-- Wed 18 Nov 2026, 11:21 AM SGT -->\n\nSecond question.\n",
+    ));
+    expect(promptsPage.window.fetch).toHaveBeenCalledWith(
+      "/api/organizations/test-org/chat_conversations/test-conversation",
+      { credentials: "same-origin" },
+    );
+    promptsPage.window.fetch.mockResolvedValueOnce({ ok: false, status: 503 });
+    promptsPage.document.getElementById("claudescraper-copy-prompts-btn").click();
+    await vi.waitFor(() => expect(promptWriteText).toHaveBeenLastCalledWith(
+      `<!-- Virtualized Claude: ${promptsPage.window.location.href} -->\n\n` +
+        "First question.\n\n---\n\nSecond question.\n",
+    ));
   });
 });
 
 describe("chatgptscraper conversation extraction", () => {
   const flattenParts = (parts) =>
     parts.flatMap((part) => [part, ...flattenParts(part.children || [])]);
+
+  it("copies plugin mentions inline with just their names", async () => {
+    const { window, document } = await loadFrom(import.meta.dirname, "__fixtures__/chatgpt-basic.html");
+    const path = "/plugins/plugin_asdk_app_example";
+    const prompt = document.querySelector('[data-message-author-role="user"]');
+    prompt.replaceChildren();
+    prompt.insertAdjacentHTML("beforeend", `
+      <p>Use <a href="${path}">LocalMCP2</a> or <a href="${path}"><img src="icon.png" alt="Image">Remote Desktop Commander</a>.</p>
+      <p>Try <a href="${path}?plugin_detail_origin=inline_selection_pill">LocalMCP</a> or <a href="/plugins/chrome@openai-bundled"><span data-prompt-link-href="plugin://chrome@openai-bundled" data-prompt-link-label="@Chrome">Chrome</span></a>.</p>
+      <p>Then try <a href="plugin://chrome@openai-bundled">@Chrome</a> or <a href="app://asdk_app_example">$LocalMCP2</a>.<a href="${path}" hidden>Hidden plugin</a></p>
+      <p>Older prompt: [LocalMCP](${path}?plugin_detail_origin=inline_selection_pill), [@Chrome](plugin://chrome@openai-bundled), and [$LocalMCP2](app://asdk_app_example).</p>
+      <p>Code: <code>[LocalMCP](${path})</code>.</p>
+      <p>See <a href="https://chatgpt.com${path}?q=Food">the plugin page</a>.</p>
+    `);
+    const before = prompt.innerHTML;
+    const scraper = window.chatgptscraper;
+    const messages = scraper.extractMessages(document);
+    const expected = [
+      "Use @LocalMCP2 or @Remote Desktop Commander.",
+      "Try @LocalMCP or @Chrome.",
+      "Then try @Chrome or @LocalMCP2.",
+      "Older prompt: @LocalMCP, @Chrome, and @LocalMCP2.",
+      `Code: \`[LocalMCP](${path})\`.`,
+      `See [the plugin page](https://chatgpt.com${path}?q=Food).`,
+    ].join("\n\n");
+
+    expect(messages[0].content).toBe(expected);
+    expect(scraper.messagesToPrompts(messages)).toContain(expected);
+    expect(scraper.extractConversation(document)).toContain(expected);
+    expect(prompt.innerHTML).toBe(before);
+  });
 
   it("exports rich response components as readable Markdown and ordered semantic JSON", async () => {
     const { window, document } = await loadFrom(
@@ -759,10 +811,18 @@ describe("chatgptscraper conversation extraction", () => {
       import.meta.dirname,
       "__fixtures__/chatgpt-basic.html",
     );
+    document.querySelector('[data-testid="conversation-turn-1"]').insertAdjacentHTML(
+      "afterbegin",
+      '<time datetime="2026-11-13T08:23:30.864Z"></time>',
+    );
     document.querySelector("main").insertAdjacentHTML(
       "beforeend",
       `<section data-testid="conversation-turn-3">
+        <time datetime="2026-11-18T03:21:43.118Z"></time>
         <div data-message-id="message-3" data-message-author-role="user"><p>Follow-up question.</p></div>
+      </section>
+      <section data-testid="conversation-turn-4">
+        <div data-message-id="message-4" data-message-author-role="user"><p>Undated prompt.</p></div>
       </section>`,
     );
     const writeText = vi.fn().mockResolvedValue(undefined);
@@ -777,14 +837,22 @@ describe("chatgptscraper conversation extraction", () => {
     );
 
     const button = document.getElementById("chatgptscraper-copy-prompts-btn");
-    expect(button.textContent).toBe("Copy 2 prompts");
+    expect(button.textContent).toBe("Copy 3 prompts");
     button.click();
     await Promise.resolve();
     await Promise.resolve();
 
     expect(writeText).toHaveBeenCalledWith(
-      `<!-- ChatGPT Fixture: ${window.location.href} (${state.metadata.date}) -->\n\n` +
-        `${state.messages[0].content}\n\n---\n\nFollow-up question.\n`,
+      `<!-- ChatGPT Fixture: ${window.location.href} (Fri 13 Nov 2026, 4:23 PM SGT) -->\n\n` +
+        `${state.messages[0].content}\n\n--- <!-- Wed 18 Nov 2026, 11:21 AM SGT -->\n\nFollow-up question.\n\n---\n\nUndated prompt.\n`,
+    );
+    expect(window.chatgptscraper.messagesToPrompts(state.messages.slice(-1), state.metadata)).toBe(
+      `<!-- ChatGPT Fixture: ${window.location.href} -->\n\nUndated prompt.\n`,
+    );
+    const [followUp, undated] = state.messages.slice(-2);
+    expect(window.chatgptscraper.messagesToPrompts([undated, followUp], state.metadata)).toBe(
+      `<!-- ChatGPT Fixture: ${window.location.href} -->\n\n` +
+        "Undated prompt.\n\n--- <!-- Wed 18 Nov 2026, 11:21 AM SGT -->\n\nFollow-up question.\n",
     );
     expect(writeText.mock.calls[0][0]).not.toContain("I will answer directly.");
     expect(writeText.mock.calls[0][0]).not.toContain("# User");

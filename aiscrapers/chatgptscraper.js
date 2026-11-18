@@ -649,6 +649,32 @@
     return cached?.label === label ? cached : {};
   }
 
+  function normalizePluginMentions(prompt) {
+    const pluginName = (label) => cleanText(label).replace(/^[@$]\s*/, "");
+    // ChatGPT renders both app:// and plugin:// mentions as inline /plugins/ links.
+    prompt
+      .querySelectorAll('a[href^="/plugins/"], a[href^="plugin://"], a[href^="app://asdk_app_"], a[href^="app://connector_"]')
+      .forEach((link) => {
+        if (isHidden(link) || link.dataset.markdownCopy === "exclude") return;
+        const name = pluginName(link.textContent);
+        if (name) link.replaceWith(`@${name}`);
+      });
+
+    // Older prompts can display the original Markdown as plain text.
+    const markdown = /(?<![\\!])\[([^[\]\r\n]+)\]\((?:\/plugins\/(?:plugin_[\w-]+|[\w.-]+@[\w.-]+)(?:[?#][^\s)]*)?|plugin:\/\/[^\s)]+|app:\/\/(?:asdk_app|connector)_[\w-]+)\)/g;
+    const walker = prompt.ownerDocument.createTreeWalker(prompt, root.NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      const text = node.textContent;
+      if (!text?.includes("](") || node.parentElement?.closest('a, code, pre, [data-markdown-copy="code-block"]'))
+        continue;
+      node.textContent = text.replace(markdown, (match, label) => {
+        const name = pluginName(label);
+        return name ? `@${name}` : match;
+      });
+    }
+  }
+
   function cloneForExtraction(message, role) {
     const content =
       role === "assistant"
@@ -784,6 +810,7 @@
         "nav, menu, form, textarea, label, input, svg, .sr-only, [aria-hidden='true']",
       )
       .forEach((node) => node.remove());
+    if (role === "user") normalizePluginMentions(clone);
     clone.querySelectorAll("*").forEach((node) => {
       if (
         /^(?:Looked for available tools)?(?:Called tool)+$/i.test(
@@ -913,10 +940,29 @@
     messages,
     metadata = conversationMetadata(root.document),
   ) {
-    const prompts = messages
-      .filter(({ role }) => role === "user")
-      .map(({ content }) => content);
-    return `<!-- ${metadata.title}: ${metadata.source} (${metadata.date}) -->\n\n${prompts.join("\n\n---\n\n")}\n`;
+    const formatter = new Intl.DateTimeFormat("en-SG", {
+      timeZone: "Asia/Singapore",
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZoneName: "short",
+    });
+    const prompts = messages.filter(({ role }) => role === "user").map(({ content, timestamp }) => {
+      const time = Date.parse(timestamp);
+      const date = Number.isFinite(time)
+        ? formatter.format(time).replace(",", "").replace(/\b[ap]m\b/gi, (period) => period.toUpperCase())
+        : "";
+      return { content, date };
+    });
+    const firstDate = prompts[0]?.date;
+    const body = prompts.map(({ content, date }, index) =>
+      index ? `---${date ? ` <!-- ${date} -->` : ""}\n\n${content}` : content,
+    ).join("\n\n");
+    return `<!-- ${metadata.title}: ${metadata.source}${firstDate ? ` (${firstDate})` : ""} -->\n\n${body}\n`;
   }
 
   const extractConversation = (doc = root.document) =>

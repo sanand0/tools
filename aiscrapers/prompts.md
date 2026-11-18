@@ -1,5 +1,40 @@
 # Prompts
 
+## ChatGPT Plugins and timestamps, 18 Nov 2026
+
+<!--
+cd ~/code/tools
+codex --model gpt-6.2-sol --config model_reasoning_effort=medium
+-->
+
+Modify aiscrapers/chatgptscraper.js to handle plugins. For example, the user promptsI get strings like:
+
+[LocalMCP2](/plugins/plugin_asdk_app_6ab0b6c561508191882e58b23665db3e) in https://chatgpt.com/c/6af6c887-2770-83ec-943c-04b92c35bb34
+[![Image](https://files.openai.com/content?id=file_00000000fb9881f99f77ad57947232ae&cdn=1&cp=pi&ma=31190400&ts=0&p=pi&cid=8&sig=b9da986568361f3300fc047ef19ef27b2e275443189ff9886f609f394642bbde&v=0)Remote Desktop Commander](/plugins/plugin_asdk_app_6a057d268ebc81919918d37eec718425) in https://chatgpt.com/c/6afd209d-920c-83ec-9abf-0bf0c902b2a5
+
+For plugins, I prefer just @{plugin name}, e.g. @LocalMCP2 and @Remote Desktop Commander - that makes it easy to read as well as copy-paste in the future.
+
+There may be other such plugin methods - see ~/Documents/chatgpt/conversation*.json. Handle these.
+
+---
+
+When adding the date to the first line, i.e. the comment, can you use the date when the first prompt was run, not the date when the script was run?
+
+Also, alongside the `---` can you add a comment with the date and time of when the next prompt was run? For example:
+
+```
+<!-- TDS 2026-09 GA4 Suggest ROE Question: https://chatgpt.com/c/6af6c887-2770-83ec-943c-04b92c35bb34 (Fri 13 Nov 2026, 4:23 pm SGT) -->
+
+Update ~/code/exam/ on @LocalMCP2 to add a question at the end of 2026-09-ga4 that says the following.
+
+--- <!-- Wed 18 Nov 2026, 11:21 AM SGT -->
+...
+```
+
+This is applicable to the Claude as well as ChatGPT scrapers.
+
+<!-- codex resume 01a1ed13-3616-72c2-bed2-c075e8b5ed75 -->
+
 ## ChatGPT UI features, 08 Oct 2026
 
 <!--

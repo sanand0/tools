@@ -346,24 +346,68 @@
     return row.dataset.index ?? row.querySelector('[role="article"]')?.getAttribute("aria-posinset") ?? `row-${index}`;
   }
 
-  function extractMessages(doc = root.document, rows = null) {
+  function extractMessages(doc = root.document, rows = null, timestamps = null) {
     return getTurns(doc, rows).flatMap((turn, index) => {
       const content = turn.role === "Claude" ? extractResponse(turn.node) : parseChildren(turn.node).trim();
       if (!content) return [];
       const row = turn.node.closest('[data-testid="transcript-row"]');
+      const uuid = timestamps && turn.node.id.match(/[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}$/i)?.[0];
+      const timestamp = uuid && timestamps.get(uuid);
       return [
         {
           id: String(transcriptRowId(row || turn.node, index)),
           role: turn.role === "User" ? "user" : "assistant",
           content,
+          ...(timestamp && { timestamp }),
         },
       ];
     });
   }
 
+  async function fetchPromptTimestamps(doc) {
+    const chat = doc.location?.pathname.match(/^\/chat\/([^/]+)\/?$/)?.[1];
+    const org = doc.cookie.match(/(?:^|;\s*)lastActiveOrg=([^;]+)/)?.[1];
+    if (!chat || !org) return null;
+    try {
+      const response = await doc.defaultView.fetch(
+        `/api/organizations/${encodeURIComponent(org)}/chat_conversations/${encodeURIComponent(chat)}`,
+        { credentials: "same-origin" },
+      );
+      if (!response.ok) return null;
+      const { chat_messages } = await response.json();
+      return new Map((chat_messages || [])
+        .filter(({ sender, uuid, created_at }) => sender === "human" && uuid && created_at)
+        .map(({ uuid, created_at }) => [uuid, created_at]));
+    } catch {
+      // Prompt export remains available if Claude cannot supply timestamps.
+      return null;
+    }
+  }
+
   function messagesToPrompts(messages, metadata) {
-    const prompts = messages.filter(({ role }) => role === "user").map(({ content }) => content);
-    return `<!-- ${metadata.title}: ${metadata.source} (${metadata.date}) -->\n\n${prompts.join("\n\n---\n\n")}\n`;
+    const formatter = new Intl.DateTimeFormat("en-SG", {
+      timeZone: "Asia/Singapore",
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZoneName: "short",
+    });
+    const prompts = messages.filter(({ role }) => role === "user").map(({ content, timestamp }) => {
+      const time = Date.parse(timestamp);
+      const date = Number.isFinite(time)
+        ? formatter.format(time).replace(",", "").replace(/\b[ap]m\b/gi, (period) => period.toUpperCase())
+        : "";
+      return { content, date };
+    });
+    const firstDate = prompts[0]?.date;
+    const body = prompts.map(({ content, date }, index) =>
+      index ? `---${date ? ` <!-- ${date} -->` : ""}\n\n${content}` : content,
+    ).join("\n\n");
+    return `<!-- ${metadata.title}: ${metadata.source}${firstDate ? ` (${firstDate})` : ""} -->\n\n${body}\n`;
   }
 
   function createScraperState(doc = root.document) {
@@ -487,9 +531,10 @@
       state.captureTimer = null;
       state.active = false;
     };
-    const controls = mountCopyControls(doc, async (format, button) => {
+    const controls = mountCopyControls(doc, async (format) => {
+      const timestamps = format === "prompts" ? await fetchPromptTimestamps(doc) : null;
       captureRows(doc, state);
-      state.messages = extractMessages(doc, state.rows.length ? state.rows : null);
+      state.messages = extractMessages(doc, state.rows.length ? state.rows : null, timestamps);
       const payload =
         format === "markdown"
           ? extractConversation(doc, state.rows.length ? state.rows : null)

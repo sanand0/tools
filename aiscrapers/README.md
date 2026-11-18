@@ -1,11 +1,12 @@
 # AI Conversation Scrapers
 
-Copy AI conversations, rich ChatGPT responses, or sidebar chat links as Markdown and JSON with bookmarklets.
+Copy AI conversations, rich ChatGPT responses, or sidebar chat links as Markdown and JSON with bookmarklets. ChatGPT and Claude prompt exports include timestamps when available. ChatGPT plugin mentions appear as @Plugin Name.
 
 ## Bookmarklets
 
 - **Gemini Scraper**, **Claude Scraper**, and **ChatGPT Scraper** export the current conversation.
 - **ChatGPT Chats** collects the title and URL of every rendered chat in the ChatGPT sidebar. Leave its copy controls open while scrolling to retain chats as ChatGPT reveals them, then copy either a Markdown list or a JSON array of `{ "title", "url" }` objects.
+- **Copy prompts** shows the first copied prompt's timestamp in the header and each later prompt's timestamp on its preceding separator, in Singapore time when available.
 - Copy controls stay open so you can choose another format; the chosen button shows **Copied** for three seconds. Close the toolbar with **×** when finished.
 
 Drag a bookmarklet from the landing page to the bookmarks bar, open the matching AI site, and run it there.
